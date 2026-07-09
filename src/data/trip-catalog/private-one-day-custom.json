@@ -1,0 +1,46 @@
+{
+  "categoryCode": "PRIVATE-CUSTOM-1DAY",
+  "titleTH": "Trip2Talk Private One Day Trip (6 Routes Selection)",
+  "tagline": "เปิดจองแล้ววันนี้! ทริปเที่ยวซิดนีย์พร้อม 'ช่างภาพส่วนตัว' หนึ่งเดียวที่ไม่เหมือนใคร! เราจัดทริป Private กลุ่มเล็ก (4 ท่าน/ทริป) ที่รวมทั้งคนขับ ไกด์ และช่างภาพมืออาชีพไว้ในคนเดียว พร้อมพาคุณไปลุย 6 เส้นทาง Unseen ที่คัดมาแล้วว่าแสงสวยที่สุด!",
+  "bookingNote": "เป็นทริปแบบ inquire-then-quote ไม่ใช่ตารางเดินทางตายตัวแบบมีที่นั่งจำกัด — ทุกทริปเริ่มต้น 08:30 น. จนถึงพระอาทิตย์ตก (Sunset) 1 วันเต็มต่อ 1 เส้นทาง",
+  "maxMembersText": "4 ท่าน/ทริป",
+  "bookingFlow": "capture_lead_then_manual_quote",
+  "routes": [
+    {
+      "routeNumber": 1,
+      "title": "สายหวาน & วินเทจ (Blue Mountains)",
+      "description": "ทุ่งลาเวนเดอร์, รถไฟ Zig Zag และพระอาทิตย์ตกที่ Lincoln's Rock"
+    },
+    {
+      "routeNumber": 2,
+      "title": "สายดอกไม้ & ทะเลทราย (Anna Bay)",
+      "description": "ทุ่งลาเวนเดอร์ Hunter Valley, เล่น Sandboarding และแสงเย็นที่ Long Jetty"
+    },
+    {
+      "routeNumber": 3,
+      "title": "สายธรรมชาติ Unseen (Oberon)",
+      "description": "ชมวิว Shooter's Hill แบบพาโนรามา พร้อมถ่ายโดรนสุดอลังการ"
+    },
+    {
+      "routeNumber": 4,
+      "title": "สายลุย & เหมืองเก่า (Anna Bay)",
+      "description": "ตะลุยเหมืองมรดกโลก Catherine Hill Bay และขี่อูฐกลางทะเลทราย"
+    },
+    {
+      "routeNumber": 5,
+      "title": "สายใบไม้เปลี่ยนสี (Seasonal)",
+      "description": "ตามล่าสีสันฤดูใบไม้ร่วงที่ Mount Wilson และ Lithgow (เฉพาะช่วงเดือนเมษายน)"
+    },
+    {
+      "routeNumber": 6,
+      "title": "สายสั่งลาซิดนีย์ (Kiama)",
+      "description": "ชมอุโมงค์หนอนเรืองแสงในตำนาน สะพาน Sea Cliff และล่าทางช้างเผือกยามค่ำคืนในฤดูหนาว"
+    }
+  ],
+  "hashtags": [
+    "#trip2talk",
+    "#wedrive",
+    "#weGuide",
+    "#weShoot"
+  ]
+}

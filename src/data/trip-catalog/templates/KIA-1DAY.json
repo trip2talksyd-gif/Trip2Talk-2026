@@ -1,0 +1,67 @@
+{
+  "tripCode": "KIA-1DAY",
+  "category": "one-day",
+  "departureType": "seasonal_on_request",
+  "nameTH": "ทริปถ่ายภาพวันเดียว ซิดนีย์ - คิอามา (Sydney - Kiama One Day Photo Trip)",
+  "tagline": "เที่ยวตามรอยสายลมและแสงแดด ไปกับทริปถ่ายภาพสุดประทับใจใกล้ซิดนีย์สำหรับคนรักการถ่ายภาพ ไม่ต้องขับรถเอง ไม่ต้องกังวลเรื่องหามุมกล้อง มีรูปโปรไฟล์สวยปังกลับบ้านแน่นอน!",
+  "seasonalWindowText": "ฤดูหนาว / Winter SEASON only",
+  "travelTime": "8:00 AM - 7:00 PM",
+  "maxMembersText": "4 ท่าน ต่อทริป (เน้น Private ส่วนตัวกลุ่มเล็ก)",
+  "maxSeatsBookable": 4,
+  "knownDepartures": [],
+  "highlights": [
+    {
+      "title": "Helensburgh Old Station",
+      "description": "สถานีรถไฟเก่าร้างที่ถูกโอบล้อมด้วยธรรมชาติใบไม้เขียว บรรยากาศลึกลับ น่าค้นหา เหมาะกับภาพพอร์ตเทรตแนววินเทจ"
+    },
+    {
+      "title": "Stanwell Tops Lookout & Seacliff Bridge",
+      "description": "จุดชมวิวมุมสูงมองเห็นวิวทะเลมหาสมุทรพาโนรามาสุดลูกหูลูกตา ถ่ายเส้นนำสายตาคู่กับสะพานโค้งเลียบหน้าผา Seacliff Bridge"
+    },
+    {
+      "title": "Bombo Headland Quarry",
+      "description": "กลุ่มเสาหินแท่งเหลี่ยมสไตล์ธรณีวิทยาโบราณริมมหาสมุทร คลื่นทะเลซัดสาดรุนแรง รอเก็บแสงเย็นทไวไลท์ มิติภาพสวยงามอลังการ"
+    }
+  ],
+  "itinerary": [
+    {
+      "time": "08:00 AM",
+      "text": "รถตู้/SUV ทีมงานรับสมาชิกที่จุดนัดพบ ณ Sydney Thai Town มุ่งหน้าลงใต้"
+    },
+    {
+      "time": "ช่วงเช้า-สาย",
+      "text": "เช็คอินถ่ายภาพสไตล์ลึกลับที่สถานีรถไฟร้าง Helensburgh Old Station จากนั้นขึ้นไปเก็บวิวมหาสมุทรและสะพานโค้งที่ Stanwell Tops Lookout และเดินถ่ายรูปบนสะพาน Seacliff Bridge"
+    },
+    {
+      "time": "ช่วงบ่าย-เย็น",
+      "text": "เดินทางสู่เสาหินโบราณ Bombo Headland Quarry พาลูกทริปหามุมเท่ๆ ถ่ายแลนด์สเคปและแฟชั่นพอร์ตเทรต รอเก็บแสงสุดท้ายยามอาทิตย์อัสดง"
+    },
+    {
+      "time": "07:00 PM",
+      "text": "เดินทางกลับและส่งสมาชิกทุกท่านกลับสู่ Sydney Thai Town โดยสวัสดิภาพพร้อมภาพถ่ายสวยๆ"
+    }
+  ],
+  "pricing": {
+    "standard": {
+      "amountAUD": 250,
+      "note": "รอบปกติ (นอกเทศกาล) / ท่าน"
+    },
+    "peakSeason": {
+      "amountAUD": 290,
+      "note": "รอบพิเศษ Peak Season (27 ธ.ค. - 5 ม.ค.), GST-Inclusive / ท่าน"
+    }
+  },
+  "inclusions": [
+    "บริการรับ-ส่ง Sydney Thai Town",
+    "รถพร้อมคนขับและน้ำมันตลอดวัน",
+    "ช่างภาพมืออาชีพคอยกดชัตเตอร์และแนะมุมกล้องตลอดการเดินทาง",
+    "น้ำดื่มบริการตลอดทริป"
+  ],
+  "exclusions": [
+    "ค่าอาหารและเครื่องดื่มทุกมื้อ",
+    "ประกันการเดินทางส่วนบุคคล"
+  ],
+  "accommodationPolicy": null,
+  "promoImageRef": null,
+  "active": true
+}

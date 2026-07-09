@@ -1,0 +1,75 @@
+{
+  "tripCode": "TAS-LH-4D3N",
+  "category": "multi-day",
+  "departureType": "fixed_group",
+  "nameTH": "ทริปพร้อมช่างภาพ สัมผัสประวัติศาสตร์ ศิลปะ และตามล่าแสงใต้ (Tasmania Summer: Launceston - Hobart)",
+  "tagline": "Tasmania Summer: ครั้งหนึ่งที่ 'เลนส์' จะเปลี่ยนโลกของคุณ มกราคม-มีนาคมนี้คือช่วงที่แสงสวยที่สุดของปีในแทสเมเนีย ไม่ต้องสุ่มดวงล่าแสงออโรร่าเพราะเราคำนวณและเช็คพยากรณ์แบบเรียลไทม์!",
+  "durationDays": 4,
+  "maxMembersText": "Private Photo Trip 4-6 คน ต่อทริป",
+  "maxSeatsBookable": 6,
+  "knownDepartures": [
+    {
+      "startDate": "2026-03-18",
+      "endDate": "2026-03-21",
+      "maxSeats": 6,
+      "seatsBooked": 0,
+      "rateType": "standard"
+    }
+  ],
+  "highlights": [
+    {
+      "title": "Bridestowe Lavender Estate & Richmond Bridge",
+      "description": "ดักแสงสายถ่ายภาพทุ่งลาเวนเดอร์สีม่วงตัดกับผืนดินสีแดง และถ่ายภาพสะพานหินเก่าแก่ที่สุดด้วยเทคนิคเส้นนำสายตา (Leading Lines)"
+    },
+    {
+      "title": "Cradle Mountain",
+      "description": "จุดเช็คอินระดับโลก เฝ้ารอจังหวะ Reflection ผิวน้ำนิ่งสงบดั่งกระจกสะท้อนยอดเขาอันเป็นเอกลักษณ์ และถ่ายภาพสัตว์ป่า ใช้ล่าแสงใต้คืนที่สอง (Aurora Mission Night 2)"
+    },
+    {
+      "title": "MONA, Cascade Brewery & Mt. Wellington",
+      "description": "เล่นแสงเงา (Chiaroscuro) ที่พิพิธภัณฑ์ใต้ดิน ถ่ายสถาปัตยกรรมโรงเบียร์เก่าแก่ Cascade และชมแสงเย็น Golden Hour และล่าแสงใต้คืนสุดท้ายบนยอดเขาสูงสุดเมืองโฮบาร์ต"
+    }
+  ],
+  "itinerary": [
+    {
+      "day": 1,
+      "text": "ลุยทุ่งลาเวนเดอร์ Bridestowe Lavender ถ่ายพอร์ตเทรต -> บ่ายแวะถ่ายรูปสะพานหิน Richmond Bridge -> ค่ำทำภารกิจล่าแสงใต้ (Aurora Hunt) จุดที่มืดสนิทพร้อมสอนตั้งค่ากล้อง"
+    },
+    {
+      "day": 2,
+      "text": "ลุยอุทยาน Cradle Mountain เต็มวัน รอเก็บรูป Reflection ยอดเขาสะท้อนผิวน้ำ -> บ่ายถ่ายรูปป่าโบราณและสัตว์ป่าท้องถิ่น -> ค่ำลุ้นล่าแสงใต้ต่อเนื่องรอบสอง (Aurora Mission Night 2)"
+    },
+    {
+      "day": 3,
+      "text": "เช้าเข้าชมงานศิลปะล้ำยุคพิพิธภัณฑ์ใต้ดิน MONA -> บ่ายเดินถ่ายรูปแนว Street ตลาด Hobart Market และตึกเก่าโรงเบียร์ Cascade Brewery -> เย็นขึ้นยอดเขา Mt. Wellington เก็บแสงเย็น Golden Hour และทำภารกิจล่าแสงใต้ส่งท้าย พักในเมืองโฮบาร์ต"
+    },
+    {
+      "day": 4,
+      "text": "Last Capture เก็บภาพบรรยากาศยามเช้าอันเงียบสงบยามเช้าเมืองโฮบาร์ต เดินเล่นย่าน Waterfront ก่อนเตรียมตัวเดินทางสู่สนามบิน บินกลับสู่ซิดนีย์โดยสวัสดิภาพ"
+    }
+  ],
+  "pricing": {
+    "standard": {
+      "amountAUD": 1650,
+      "note": "ลูกค้า 4 – 6 ท่าน / ท่าน"
+    },
+    "private": {
+      "amountAUD": 1850,
+      "note": "ลูกค้า 2 – 3 ท่าน (Guaranteed Rate) / ท่าน, เริ่มต้น"
+    }
+  },
+  "inclusions": [
+    "รถพร้อมคนขับและค่าน้ำมันตลอดเส้นทาง Launceston-Hobart",
+    "ช่างภาพมืออาชีพคอยเป็น Mentor แนะนำมุมกล้อง",
+    "น้ำดื่มตลอดทริป",
+    "ค่าเข้าสถานที่ทั้งหมด (รวมตั๋วทุ่งลาเวนเดอร์ และตั๋ว MONA)"
+  ],
+  "exclusions": [
+    "ตั๋วเครื่องบินไป-กลับ",
+    "อาหารทุกมื้อ",
+    "ประกันการเดินทาง"
+  ],
+  "accommodationPolicy": "พักร่วมกันในห้องพักแบบ Dormitory (ห้องรวม) แนว Hostel/Motel สะอาดปลอดภัย อัปเกรดเป็นห้องเดี่ยวจ่ายส่วนต่างเพิ่ม $250-$550 AUD ต่อคืน (กรุณาแจ้งความประสงค์ก่อนออกทริป)",
+  "promoImageRef": null,
+  "active": true
+}

@@ -1,0 +1,69 @@
+{
+  "tripCode": "NZ-6D5N",
+  "category": "multi-day",
+  "departureType": "fixed_group",
+  "nameTH": "ทริปถ่ายภาพนิวซีแลนด์เกาะใต้ 6 วัน (New Zealand South Island Photo Road Trip)",
+  "tagline": "เคยไหมที่อยากไปเที่ยวนิวซีแลนด์แต่ก็ลังเลว่าจะไปช่วงไหนดี? นิวซีแลนด์เกาะใต้มีเสน่ห์ที่แตกต่างกันในทุกฤดูกาล ไม่ว่าคุณจะชอบแสงแบบไหน เราก็มีทริปที่ตอบโจทย์! Destination Photo Pack โดยช่างภาพมืออาชีพประสบการณ์กว่า 10 ปี",
+  "durationDays": 6,
+  "maxMembersText": "รับจำกัดเพียง 5 ท่าน ต่อทริปเท่านั้น! (Private กลุ่มเล็ก 4-6 คน)",
+  "maxSeatsBookable": 5,
+  "knownDepartures": [
+    {
+      "startDate": "2026-04-12",
+      "endDate": "2026-04-17",
+      "maxSeats": 5,
+      "seatsBooked": 0,
+      "rateType": "standard",
+      "note": "อยู่ในช่วงฤดู Autumn"
+    }
+  ],
+  "seasonalItineraries": [
+    {
+      "season": "Spring",
+      "monthsTH": "ก.ย. - พ.ย.",
+      "description": "ดอกลูพิน (Lupins) ผลิบานสดใส แสงนุ่มละมุนเหมาะกับ Portrait & Macro",
+      "route": "Nugget Point Lighthouse, Queenstown, Moeraki, Mt. Cook, Lake Tekapo, Wanaka, Lindis Pass, Lake Pukaki, Mt. John Observatory, Frenchman Creek Station, Peter's Lookout, Milford Sound"
+    },
+    {
+      "season": "Summer",
+      "monthsTH": "ธ.ค. - ก.พ.",
+      "description": "ฟ้าโปร่ง ทะเลสาบสีฟ้าเทอร์ควอยซ์สวยที่สุด คมชัดจัดเต็มเหมาะกับ Landscape",
+      "route": "Queenstown, Wanaka, Lindis Pass, Fox Glacier, Aoraki/Mount Cook, Lake Pukaki, Peter's Lookout, Church of the Good Shepherd/Lake Tekapo, Milford Sound"
+    },
+    {
+      "season": "Autumn",
+      "monthsTH": "มี.ค. - พ.ค.",
+      "description": "โรแมนติกที่สุด ใบไม้เปลี่ยนสีส้ม แดง เหลืองทอง แสงโทนอุ่นมีเรื่องราว",
+      "route": "Queenstown, Arrowtown, Wanaka, Lindis Pass, Fox Glacier, Aoraki/Mount Cook, Lake Pukaki, Peter's Lookout, Church of the Good Shepherd/Lake Tekapo, Milford Sound"
+    },
+    {
+      "season": "Winter",
+      "monthsTH": "มิ.ย. - ส.ค.",
+      "description": "หิมะขาวโพลนปกคลุมยอดเขา เงียบสงบ งดงามราวภาพวาด ท้าทายสายกล้อง",
+      "route": "Queenstown, Te Anau, Milford Sound, Lindis Pass, Aoraki/Mount Cook, Lake Pukaki, Peter's Lookout, Church of the Good Shepherd/Lake Tekapo, Mt. John Observatory, Frenchman Creek Station, Milford Sound"
+    }
+  ],
+  "pricing": {
+    "standard": {
+      "amountAUD": 2300,
+      "note": "ราคาแพ็กเกจทริป / ท่าน"
+    }
+  },
+  "inclusions": [
+    "รถเดินทางพร้อมคนขับและค่าน้ำมันตลอดเส้นทาง",
+    "ช่างภาพประจำทริปนำทางมุม Unseen ลับเฉพาะ",
+    "น้ำดื่มตลอดการเดินทาง",
+    "ค่าเข้าสถานที่และอุทยานตามโปรแกรม",
+    "บริการฟรีช่วยจองตั๋วเครื่องบิน"
+  ],
+  "exclusions": [
+    "ตั๋วเครื่องบินไป-กลับ",
+    "ค่าอาหารทุกมื้อ (ทานอิสระ)",
+    "ประกันการเดินทาง",
+    "ค่าล่องเรือ Milford Sound (ประมาณ $120-$130 AUD)",
+    "ค่าขึ้นกระเช้า Skyline Queenstown"
+  ],
+  "accommodationPolicy": "พักผ่อนร่วมกันในห้องพักแบบ Dormitory (ห้องรวม) แนว Backpackers/Motels ที่สะอาด ปลอดภัย อัปเกรดเป็นห้องส่วนตัวจ่ายเพิ่มส่วนต่าง $150-$350 AUD ต่อคืน (กรุณาแจ้งล่วงหน้า)",
+  "promoImageRef": null,
+  "active": true
+}
