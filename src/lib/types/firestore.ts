@@ -45,6 +45,7 @@ export interface TripDeparture {
   maxSeats: number;
   seatsBooked: number;
   status: DepartureStatus;
+  assignedTripLeaderId?: string | null;
 }
 
 export type PaymentMethod = "stripe" | "bank_slip";
@@ -73,6 +74,9 @@ export interface Booking {
   waiverAcceptedIp: string | null;
   complianceDocsUploaded: boolean;
   docsDeletedAt: string | null;
+  subPackage?: string | null;
+  totalPriceAud?: number | null;
+  confirmationPdfPath?: string | null;
   createdAt: string;
 }
 

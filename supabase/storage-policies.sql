@@ -65,3 +65,13 @@ create policy "Deny anon expense receipts"
   using (bucket_id = 'expense-receipts' and false);
 
 -- Note: V5 `receipts` bucket left untouched — new uploads go to expense-receipts.
+
+-- ─── booking-confirmations (PRIVATE — PDF with customer PII) ─────────────────
+insert into storage.buckets (id, name, public)
+values ('booking-confirmations', 'booking-confirmations', false)
+on conflict (id) do update set public = false;
+
+drop policy if exists "Deny anon booking confirmations" on storage.objects;
+create policy "Deny anon booking confirmations"
+  on storage.objects to anon, authenticated
+  using (bucket_id = 'booking-confirmations' and false);

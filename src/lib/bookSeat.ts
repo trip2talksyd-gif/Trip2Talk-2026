@@ -173,3 +173,17 @@ export async function adjustDepartureSeats(
 
 /** @deprecated Use adjustDepartureSeats */
 export const adjustTripSeats = adjustDepartureSeats;
+
+/**
+ * Release seats when a booking is cancelled, expired, or payment failed.
+ * Uses the same transaction guard as seat creation.
+ */
+export async function releaseBookingSeats(
+  db: Firestore,
+  params: { departureId: string; seatsToRelease: number },
+): Promise<number> {
+  return adjustDepartureSeats(db, {
+    departureId: params.departureId,
+    delta: -params.seatsToRelease,
+  });
+}

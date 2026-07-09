@@ -40,6 +40,8 @@ export const STORAGE_BUCKETS = {
   passportDocuments: "passport-documents",
   /** Private — expense receipt photos (extends V5 `receipts` pattern) */
   expenseReceipts: "expense-receipts",
+  /** Private — booking confirmation PDFs (customer PII) */
+  bookingConfirmations: "booking-confirmations",
 } as const;
 
 export type StorageBucket =
@@ -49,6 +51,7 @@ const PRIVATE_BUCKETS = new Set<StorageBucket>([
   STORAGE_BUCKETS.passportDocuments,
   STORAGE_BUCKETS.paymentSlips,
   STORAGE_BUCKETS.expenseReceipts,
+  STORAGE_BUCKETS.bookingConfirmations,
 ]);
 
 export function isPrivateBucket(bucket: StorageBucket): boolean {

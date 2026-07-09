@@ -7,9 +7,10 @@ export interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
+  attachment?: { filename: string; content: string };
 }
 
-export async function sendOwnerAlertEmail(
+async function sendEmail(
   params: SendEmailParams,
 ): Promise<{ sent: boolean; reason?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
@@ -20,26 +21,43 @@ export async function sendOwnerAlertEmail(
     return { sent: false, reason: "RESEND_API_KEY not configured" };
   }
 
+  const body: Record<string, unknown> = {
+    from,
+    to: params.to,
+    subject: params.subject,
+    html: params.html,
+  };
+  if (params.attachment) {
+    body.attachments = [params.attachment];
+  }
+
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      from,
-      to: params.to,
-      subject: params.subject,
-      html: params.html,
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Resend API error ${res.status}: ${body}`);
+    const text = await res.text();
+    throw new Error(`Resend API error ${res.status}: ${text}`);
   }
 
   return { sent: true };
+}
+
+export async function sendOwnerAlertEmail(
+  params: SendEmailParams,
+): Promise<{ sent: boolean; reason?: string }> {
+  return sendEmail(params);
+}
+
+export async function sendCustomerEmail(
+  params: SendEmailParams,
+): Promise<{ sent: boolean; reason?: string }> {
+  return sendEmail(params);
 }
 
 export function getOwnerAlertEmail(): string {

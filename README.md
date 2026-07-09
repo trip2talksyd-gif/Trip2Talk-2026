@@ -11,7 +11,7 @@ Two services, two jobs — do not mix them up:
 | Service | Job | What lives here |
 |---------|-----|-----------------|
 | **Firebase Firestore** | Structured, queryable text data | `tripTemplates`, `tripDepartures`, `bookings`, staff, expenses |
-| **Supabase Storage** | Files only | `trip-photos`, `payment-slips`, `passport-documents`, `expense-receipts` |
+| **Supabase Storage** | Files only | `trip-photos`, `payment-slips`, `passport-documents`, `expense-receipts`, `booking-confirmations` |
 
 **Assumption (confirm with Saen):** Reuse the existing V5 Supabase project (`xwdtjwzjkqunewxjpimm`) for Storage buckets only. Its Postgres tables are retired — Phase 0 migration reads them one last time, then all writes go to Firestore.
 
@@ -42,7 +42,7 @@ npm run dev
 |---------|---------|
 | `npm run dev` | Local dev server |
 | `npm run build` | Production build |
-| `npm run test` | Seat-lock + catalog tests (12 tests) |
+| `npm run test` | Seat-lock, auth, PDF, pricing, catalog tests |
 | `npm run build:seed-data` | Build `seed-data/trip2talk-v6-trip-data.json` |
 | `npm run seed:trips` | Write `tripTemplates` + `tripDepartures` to Firestore |
 | `npm run migrate:supabase` | Phase 0: V5 Postgres → Firestore (one-time) |
@@ -97,9 +97,18 @@ Existing files in `payment-slips` bucket are **left in place** — migration car
 
 `CRON_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `OWNER_ALERT_EMAIL`
 
-### Stripe (next phase)
+### Stripe (TEST mode — use test keys only)
 
-`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+| Variable | Purpose |
+|----------|---------|
+| `STRIPE_SECRET_KEY` | Server — PaymentIntent + webhook |
+| `STRIPE_WEBHOOK_SECRET` | Verify `/api/stripe/webhook` |
+| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Client Payment Element |
+| `NEXT_PUBLIC_APP_URL` | Return URLs + email links |
+
+### Bank transfer display at checkout
+
+`NEXT_PUBLIC_BANK_ACCOUNT_NAME`, `NEXT_PUBLIC_BANK_BSB`, `NEXT_PUBLIC_BANK_ACCOUNT_NUMBER`, `NEXT_PUBLIC_PROMPTPAY_ID`
 
 ### Confirm later
 
@@ -120,7 +129,7 @@ Avoids Vercel's ~4.5MB request body limit:
 | Firestore `tripTemplates` / `tripDepartures` | Client **read-only** |
 | Firestore everything else | Client **deny** |
 | `trip-photos` | Public read, service-role write |
-| `payment-slips`, `passport-documents`, `expense-receipts` | Service-role only, 5-min signed URLs for admin |
+| `payment-slips`, `passport-documents`, `expense-receipts`, `booking-confirmations` | Service-role only, 5-min signed URLs |
 
 Deploy Firestore rules: `firebase deploy --only firestore:rules`
 
@@ -129,13 +138,47 @@ Deploy Firestore rules: `firebase deploy --only firestore:rules`
 1. **TAS-3D2N** — seeded departure 16–21 Mar spans 6 days but trip is 3D2N
 2. **BER-3D2N** — no confirmed max seats in source data
 
+## Routes (Phase 2–4)
+
+| Path | Purpose |
+|------|---------|
+| `/trips` | Public catalog |
+| `/trips/[tripCode]` | Trip detail + checkout |
+| `/trips/private` | Private 1-day inquiry (6 routes) |
+| `/booking/[id]/upload-documents` | Post-payment compliance upload |
+| `/admin/login` | PIN auth |
+| `/admin` | Role-aware dashboard (owner / cashier / trip leader) |
+
+### API highlights
+
+- `POST /api/bookings/create-card-intent` — seat lock + Stripe PaymentIntent
+- `POST /api/bookings/create-slip-booking` — seat lock + signed slip upload
+- `POST /api/stripe/webhook` — payment confirmed → PDF + email
+- `POST /api/storage/signed-upload` + `confirm-upload` — all file flows
+- `POST /api/admin/*` — protected by PIN session middleware
+
 ## Vercel Cron
+
+**Live now** (`vercel.json`):
 
 | Schedule | Route |
 |----------|-------|
-| Daily 03:00 UTC | `/api/cron/delete-compliance-docs` |
-| Hourly | `/api/cron/expire-pending-slips` |
+| Hourly | `/api/cron/expire-pending-slips` (48h bank slip expiry) |
+| Every 15 min | `/api/cron/expire-pending-cards` (30min card expiry) |
 | Daily 04:00 UTC | `/api/cron/document-expiry-alerts` |
+
+**Built + tested but NOT scheduled** — enable only after manual dry run:
+
+```json
+// Add to vercel.json crons[] after Saen reviews dry run:
+// "Enable only after Saen reviews a manual dry run — this permanently deletes customer ID documents."
+{
+  "path": "/api/cron/delete-compliance-docs",
+  "schedule": "0 3 * * *"
+}
+```
+
+Dry run locally: `curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/delete-compliance-docs`
 
 ## Repo
 
