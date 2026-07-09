@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Instrument_Serif, Noto_Sans_Thai, Noto_Serif_Thai } from "next/font/google";
 import localFont from "next/font/local";
 
-import { Footer } from "@/components/layout/Footer";
 import { SITE_URL } from "@/config/company";
 
 import "./globals.css";
@@ -71,7 +70,6 @@ export default function RootLayout({
         style={{ fontFamily: "var(--font-inter), var(--font-noto-sans-thai), system-ui, sans-serif" }}
       >
         {children}
-        <Footer />
       </body>
     </html>
   );

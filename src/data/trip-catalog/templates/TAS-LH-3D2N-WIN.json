@@ -1,0 +1,95 @@
+{
+  "tripCode": "TAS-LH-3D2N-WIN",
+  "category": "multi-day",
+  "departureType": "fixed_group",
+  "nameTH": "ทริปถ่ายภาพ Tasmania 3 วัน 2 คืน (Launceston ➔ Hobart) — ตามล่าแสงใต้ หน้าหนาว",
+  "tagline": "ตามล่าแสงใต้ สัมผัสธรรมชาติหน้าหนาว พร้อมผลงานระดับ Gallery ออกเดินทางแบบ Private Group ลุยถ่ายภาพแบบจัดเต็มกับช่างภาพมืออาชีพประสบการณ์กว่า 10 ปี บินลงเหนือแล้วล่องใต้ เที่ยวครบไม่เหนื่อยเดินทาง!",
+  "durationDays": 3,
+  "maxMembersText": "Private Group (จำนวนที่นั่งสูงสุดไม่ได้ระบุในเอกสารต้นทาง)",
+  "maxSeatsBookable": null,
+  "maxSeatsFlag": "⚠️ ไม่มีจำนวนที่นั่งสูงสุดระบุชัดเจนในเอกสารต้นทาง — ยืนยันจำนวนที่นั่งสูงสุดกับพี่แสนก่อนเปิดจองจริง (เช่นเดียวกับ BER-3D2N)",
+  "seasonNote": "หน้าหนาว ฟ้ามืดสนิท โอกาสเห็นแสงใต้ (Aurora Australis) สูง",
+  "knownDepartures": [
+    {
+      "startDate": "2026-08-11",
+      "endDate": "2026-08-13",
+      "maxSeats": null,
+      "seatsBooked": 0,
+      "rateType": "standard",
+      "note": "ยืนยัน maxSeats ก่อนเปิดจอง"
+    }
+  ],
+  "flightInfo": {
+    "airline": "Jetstar Airways",
+    "outbound": {
+      "date": "2026-08-11",
+      "from": "Sydney (SYD)",
+      "departTime": "07:25 AM",
+      "to": "Launceston (LST)",
+      "arriveTime": "09:10 AM"
+    },
+    "return": {
+      "date": "2026-08-13",
+      "from": "Hobart (HBA)",
+      "departTime": "07:30 PM",
+      "to": "Sydney (SYD)",
+      "arriveTime": "09:20 PM"
+    },
+    "estimatedFareAUD": 158,
+    "note": "ราคาตั๋วเครื่องบินไป-กลับเริ่มต้นประมาณ $158 AUD/ท่าน ทางทีมงานมีบริการกดจองตั๋วให้ฟรี เพื่อความสะดวกและได้ไฟลท์พร้อมกันทั้งกรุ๊ป"
+  },
+  "highlights": [
+    {
+      "title": "Cradle Mountain & Dove Lake",
+      "description": "นั่ง Shuttle Bus ประจำอุทยานเข้าชมความอลังการของ Cradle Mountain แวะถ่ายภาพป่าโบราณและสัตว์ป่าท้องถิ่น พร้อมจัดองค์ประกอบถ่ายรูปที่ Dove Lake ท่ามกลางลมหนาว"
+    },
+    {
+      "title": "Bruny Island",
+      "description": "นั่งเฟอร์รี่ลุยเกาะ Bruny Island เต็มวัน เช็คอินถ่ายรูปแนวแลนด์สเคปที่ The Neck และแวะฟาร์มหอยนางรม/ชีสสด"
+    },
+    {
+      "title": "Mount Wellington — ล่าแสงใต้",
+      "description": "ขึ้นยอดเขาสูงสุดเมืองฮอบาร์ต ชมพระอาทิตย์ตกลับขอบฟ้า และลุ้นล่าแสงใต้เต้นระบำในจุดที่มืดและเงียบสงบที่สุด"
+    },
+    {
+      "title": "Tasman Peninsula & Port Arthur",
+      "description": "ย้อนรอยประวัติศาสตร์โบราณสถานนักโทษที่ Port Arthur Historic Site แวะจุดชมวิวชายฝั่งธรรมชาติและแนวหินแปลกตา (Tessellated Pavement, Tasman Arch, Devil's Kitchen)"
+    }
+  ],
+  "itinerary": [
+    {
+      "day": 1,
+      "text": "ช่วงเช้า: บินตรงจาก SYD ลงที่สนามบิน Launceston รับรถ Private SUV แล้วออกเดินทางแบบ Road Trip มุ่งหน้าสู่ Cradle Mountain -> ช่วงบ่าย: นั่ง Shuttle Bus เข้าชม Cradle Mountain ถ่ายภาพป่าโบราณ สัตว์ป่า และ Dove Lake -> ช่วงเย็น-ค่ำ: ขับรถล่องใต้เช็กอินที่ Hobart ทานมื้อค่ำ แล้วออกลุยล่าแสงใต้คืนแรกหากสภาพอากาศเป็นใจ พัก Rydges Hobart (ค้าง 2 คืน)"
+    },
+    {
+      "day": 2,
+      "text": "ช่วงกลางวัน: นั่งเฟอร์รี่ลุยเกาะ Bruny Island เต็มวัน เช็คอินถ่ายรูปที่ The Neck และแวะฟาร์มหอยนางรม/ชีสสด -> ช่วงเย็น-ค่ำ: นั่งเรือกลับฝั่ง Hobart ทานอาหารทะเลที่ Waterfront จากนั้นขึ้น Mt. Wellington ชมพระอาทิตย์ตกและลุ้นล่าแสงใต้ พัก Rydges Hobart"
+    },
+    {
+      "day": 3,
+      "text": "ช่วงเช้า-บ่าย: นั่งรถ Private SUV มุ่งสู่ Port Arthur Historic Site และจุดชมวิว Tasman Peninsula (Tessellated Pavement, Tasman Arch, Devil's Kitchen) -> 17:30 น. ถึงสนามบิน Hobart (HBA) เตรียมบินกลับ Sydney (ไฟลท์ 19:30 น.)"
+    }
+  ],
+  "pricing": {
+    "standard": {
+      "amountAUD": 1550,
+      "note": "ราคาแพ็กเกจ / ท่าน (มีบริการฟรีช่วยประสานงานจองตั๋วเครื่องบิน)"
+    }
+  },
+  "inclusions": [
+    "รถ Private SUV พร้อมคนขับและน้ำมันตลอดทริป",
+    "ช่างภาพมืออาชีพคอยดูแลมุม",
+    "ค่าเข้าอุทยานและสถานที่ตามแพลน",
+    "ค่าน้ำดื่ม",
+    "บริการฟรีช่วยประสานงานจองตั๋วเครื่องบิน"
+  ],
+  "exclusions": [
+    "ตั๋วเครื่องบินไป-กลับ",
+    "อาหารทุกมื้อ",
+    "ประกันการเดินทาง"
+  ],
+  "accommodationPolicy": "พักโรงแรม Rydges Hobart 2 คืน (ไม่ใช่ dorm/ห้องรวมแบบทริปอื่น — เป็นโรงแรมมาตรฐาน) — ยืนยัน single/twin/แชร์ห้องกับพี่แสนก่อนเปิดจอง",
+  "additionalNote": "หมายเหตุเรื่องแสงใต้: แสงใต้เป็นปรากฏการณ์ธรรมชาติ ตัวเลขพยากรณ์เป็นเพียงสถิติ ปัจจัยสำคัญคือ 'ฟ้าเปิดและมืดสนิท' หากสภาพอากาศเป็นใจ ทุกคืนทีมงานออกลุยล่าแสงใต้แน่นอน — ไม่การันตีเห็นแสงใต้จริง (ปรากฏการณ์ธรรมชาติ)",
+  "promoImageRef": null,
+  "active": true
+}

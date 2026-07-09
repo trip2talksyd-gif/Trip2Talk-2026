@@ -63,6 +63,8 @@ export interface TripTemplate {
   additionalNote?: string;
   safetyNotes?: string[];
   hashtags?: string[];
+  seasonNote?: string;
+  flightInfo?: Record<string, unknown>;
   promoImageRef?: string | null;
   active: boolean;
 }

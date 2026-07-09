@@ -14,13 +14,13 @@ describe("trip seed data parsing", () => {
   const catalog = loadSeedData();
   const parsed = parseTripSeedData(catalog.tripTemplates);
 
-  it("loads 13 trip templates from seed-data JSON", () => {
-    expect(catalog.tripTemplates).toHaveLength(13);
-    expect(parsed.templates).toHaveLength(13);
+  it("loads 14 trip templates from seed-data JSON", () => {
+    expect(catalog.tripTemplates).toHaveLength(14);
+    expect(parsed.templates).toHaveLength(14);
   });
 
   it("seeds only departures with confirmed startDate", () => {
-    expect(parsed.departures).toHaveLength(8);
+    expect(parsed.departures).toHaveLength(9);
     expect(parsed.departures.every((d) => d.startDate !== null)).toBe(true);
   });
 
@@ -54,5 +54,16 @@ describe("trip seed data parsing", () => {
   it("flags BER-3D2N max seats confirmation", () => {
     const berFlags = parsed.flags.filter((f) => f.tripCode === "BER-3D2N");
     expect(berFlags.length).toBeGreaterThan(0);
+  });
+
+  it("flags TAS-LH-3D2N-WIN max seats confirmation", () => {
+    const winFlags = parsed.flags.filter((f) => f.tripCode === "TAS-LH-3D2N-WIN");
+    expect(winFlags.length).toBeGreaterThan(0);
+  });
+
+  it("seeds TAS-LH-3D2N-WIN winter departure", () => {
+    const win = parsed.departures.filter((d) => d.tripCode === "TAS-LH-3D2N-WIN");
+    expect(win).toHaveLength(1);
+    expect(win[0]!.startDate).toBe("2026-08-11");
   });
 });

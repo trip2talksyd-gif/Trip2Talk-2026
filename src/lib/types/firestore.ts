@@ -30,6 +30,10 @@ export interface TripTemplate {
   maxMembersText?: string | null;
   maxSeatsBookable: number | null;
   maxSeatsFlag?: string | null;
+  additionalNote?: string | null;
+  hashtags?: string[] | null;
+  seasonNote?: string | null;
+  flightInfo?: Record<string, unknown> | null;
   promoImageRef: string | null;
   galleryUrl: string;
   active: boolean;
