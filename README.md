@@ -159,22 +159,22 @@ Deploy Firestore rules: `firebase deploy --only firestore:rules`
 
 ## Vercel Cron
 
-**Live now** (`vercel.json`):
+**Live now** (`vercel.ts`) — once daily on Hobby (Vercel Pro required for sub-daily schedules):
 
-| Schedule | Route |
-|----------|-------|
-| Hourly | `/api/cron/expire-pending-slips` (48h bank slip expiry) |
-| Every 15 min | `/api/cron/expire-pending-cards` (30min card expiry) |
-| Daily 04:00 UTC | `/api/cron/document-expiry-alerts` |
+| Schedule (UTC) | Route | Original intent (restore on Pro) |
+|----------------|-------|----------------------------------|
+| Daily 03:00 | `/api/cron/expire-pending-slips` (48h bank slip expiry) | Hourly (`0 * * * *`) |
+| Daily 03:03 | `/api/cron/expire-pending-cards` (30min card expiry) | Every 15 min (`*/15 * * * *`) |
+| Daily 03:06 | `/api/cron/document-expiry-alerts` | Daily 04:00 (`0 4 * * *`) |
 
 **Built + tested but NOT scheduled** — enable only after manual dry run:
 
-```json
-// Add to vercel.json crons[] after Saen reviews dry run:
-// "Enable only after Saen reviews a manual dry run — this permanently deletes customer ID documents."
+```typescript
+// Add to vercel.ts config.crons[] after Saen reviews dry run:
+// Enable only after Saen reviews a manual dry run — this permanently deletes customer ID documents.
 {
-  "path": "/api/cron/delete-compliance-docs",
-  "schedule": "0 3 * * *"
+  path: "/api/cron/delete-compliance-docs",
+  schedule: "9 3 * * *", // stagger after live crons (03:00–03:06)
 }
 ```
 
