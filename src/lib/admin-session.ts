@@ -1,4 +1,4 @@
-import { createHmac, randomBytes, timingSafeEqual } from "crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "crypto";
 
 export type AdminRole = "trip_leader" | "cashier" | "owner";
 
@@ -91,5 +91,5 @@ export function roleAllows(
 }
 
 export function generateBookingId(): string {
-  return randomBytes(16).toString("hex");
+  return randomUUID();
 }

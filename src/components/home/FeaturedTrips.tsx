@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { TripCard } from "@/components/trips/TripCard";
-import type { TripDeparture, TripTemplate } from "@/lib/types/firestore";
+import type { TripDeparture, TripTemplate } from "@/lib/types/database";
 
 interface FeaturedTripsProps {
   trips: Array<{

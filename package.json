@@ -9,7 +9,6 @@
     "lint": "next lint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "migrate:supabase": "tsx scripts/migrate-from-supabase.ts",
     "seed:trips": "tsx scripts/seed-trips.ts",
     "seed:reviews": "tsx scripts/seed-reviews.ts",
     "build:seed-data": "tsx scripts/build-seed-data.ts"
@@ -20,8 +19,6 @@
     "@stripe/stripe-js": "^9.9.0",
     "@supabase/supabase-js": "^2.110.1",
     "clsx": "^2.1.1",
-    "firebase": "^12.15.0",
-    "firebase-admin": "^14.1.0",
     "framer-motion": "^12.42.2",
     "next": "14.2.35",
     "pdf-lib": "^1.17.1",

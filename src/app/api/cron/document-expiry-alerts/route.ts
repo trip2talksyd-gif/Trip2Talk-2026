@@ -1,44 +1,44 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { verifyCronSecret } from "@/lib/cron-auth";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { mapCompanyDocument } from "@/lib/db/mappers";
 import { getOwnerAlertEmail, sendOwnerAlertEmail } from "@/lib/resend";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 const ALERT_WINDOW_DAYS = 30;
 
-/**
- * Daily cron: email Owner when company_documents expire within 30 days.
- * Dedupes: skips docs already alerted today (lastAlertSentAt).
- */
 export async function GET(request: NextRequest) {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
-  const db = getAdminDb();
+  const supabase = getSupabaseAdmin();
   const today = new Date().toISOString().slice(0, 10);
   const horizon = new Date();
   horizon.setDate(horizon.getDate() + ALERT_WINDOW_DAYS);
   const horizonIso = horizon.toISOString().slice(0, 10);
 
-  const docsSnap = await db
-    .collection("company_documents")
-    .where("active", "==", true)
-    .get();
+  const { data, error } = await supabase
+    .from("company_documents")
+    .select("*")
+    .eq("active", true);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
   const expiring: Array<{ id: string; label: string; expiryDate: string }> = [];
 
-  for (const doc of docsSnap.docs) {
-    const data = doc.data();
-    const expiryDate = data.expiryDate as string;
-    if (expiryDate > horizonIso) continue;
+  for (const row of data ?? []) {
+    const doc = mapCompanyDocument(row);
+    if (doc.expiryDate > horizonIso) continue;
 
-    const lastAlert = data.lastAlertSentAt as string | null | undefined;
+    const lastAlert = doc.lastAlertSentAt;
     if (lastAlert?.slice(0, 10) === today) continue;
 
     expiring.push({
       id: doc.id,
-      label: data.documentLabel as string,
-      expiryDate,
+      label: doc.documentLabel,
+      expiryDate: doc.expiryDate,
     });
   }
 
@@ -50,9 +50,10 @@ export async function GET(request: NextRequest) {
     });
 
     for (const item of expiring) {
-      await db.collection("company_documents").doc(item.id).update({
-        lastAlertSentAt: new Date().toISOString(),
-      });
+      await supabase
+        .from("company_documents")
+        .update({ last_alert_sent_at: new Date().toISOString() })
+        .eq("id", item.id);
     }
   }
 

@@ -1,6 +1,6 @@
-import type { Firestore } from "firebase-admin/firestore";
-
-import type { TripDeparture } from "@/lib/types/firestore";
+import { mapExpense } from "@/lib/db/mappers";
+import { getDepartureById } from "@/lib/db/queries";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export interface SettlementLine {
   label: string;
@@ -19,45 +19,44 @@ export interface SettlementResult {
 
 const DEFAULT_COMMISSION_RATE = 0.15;
 
-/**
- * Calculate settlement for a completed departure — gross bookings minus expenses & commission.
- */
 export async function calculateSettlement(
-  db: Firestore,
   departureId: string,
   commissionRatePct = DEFAULT_COMMISSION_RATE * 100,
 ): Promise<SettlementResult> {
-  const depSnap = await db.collection("tripDepartures").doc(departureId).get();
-  if (!depSnap.exists) throw new Error("Departure not found");
-  const departure = depSnap.data() as TripDeparture;
+  const departure = await getDepartureById(departureId);
+  if (!departure) throw new Error("Departure not found");
 
-  const bookingsSnap = await db
-    .collection("bookings")
-    .where("departureId", "==", departureId)
-    .where("paymentStatus", "==", "paid")
-    .get();
+  const supabase = getSupabaseAdmin();
+
+  const { data: bookings, error: bErr } = await supabase
+    .from("bookings")
+    .select("total_price_aud")
+    .eq("departure_id", departureId)
+    .eq("payment_status", "paid");
+
+  if (bErr) throw new Error(bErr.message);
 
   let grossRevenueAud = 0;
-  for (const doc of bookingsSnap.docs) {
-    const b = doc.data();
-    grossRevenueAud += Number(b.totalPriceAud ?? 0);
+  for (const b of bookings ?? []) {
+    grossRevenueAud += Number(b.total_price_aud ?? 0);
   }
 
-  const expensesSnap = await db
-    .collection("expenses")
-    .where("tripCode", "==", departure.tripCode)
-    .get();
+  const { data: expenseRows, error: eErr } = await supabase
+    .from("expenses")
+    .select("*")
+    .eq("trip_code", departure.tripCode);
+
+  if (eErr) throw new Error(eErr.message);
 
   let totalExpensesAud = 0;
-  for (const doc of expensesSnap.docs) {
-    const e = doc.data();
-    const expenseDate = String(e.date ?? "");
+  for (const row of expenseRows ?? []) {
+    const e = mapExpense(row);
     if (
       departure.startDate &&
-      expenseDate >= departure.startDate &&
-      (!departure.endDate || expenseDate <= departure.endDate)
+      e.date >= departure.startDate &&
+      (!departure.endDate || e.date <= departure.endDate)
     ) {
-      totalExpensesAud += Number(e.amountAud ?? 0);
+      totalExpensesAud += e.amountAud;
     }
   }
 

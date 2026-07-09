@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getAdminSessionFromRequest } from "@/lib/api-admin";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { getBookingById } from "@/lib/db/queries";
 import {
   STORAGE_BUCKETS,
   type StorageBucket,
@@ -60,13 +60,14 @@ export async function POST(request: NextRequest) {
       bucket === STORAGE_BUCKETS.passportDocuments) &&
     bookingId
   ) {
-    const db = getAdminDb();
-    const bookingSnap = await db.collection("bookings").doc(bookingId).get();
-    if (!bookingSnap.exists) {
+    const booking = await getBookingById(bookingId);
+    if (!booking) {
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
-    const booking = bookingSnap.data()!;
-    if (bucket === STORAGE_BUCKETS.passportDocuments && booking.paymentStatus !== "paid") {
+    if (
+      bucket === STORAGE_BUCKETS.passportDocuments &&
+      booking.paymentStatus !== "paid"
+    ) {
       return NextResponse.json({ error: "Payment required first" }, { status: 403 });
     }
   }

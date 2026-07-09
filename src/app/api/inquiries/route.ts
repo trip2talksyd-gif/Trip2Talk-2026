@@ -1,33 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAdminDb } from "@/lib/firebase-admin";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const {
-    customerName,
-    phone,
-    email,
-    preferredRoute,
-    preferredDateRange,
-    notes,
-  } = body;
+  const { customerName, phone, email, preferredRoute, preferredDateRange, notes } =
+    body as {
+      customerName?: string;
+      phone?: string;
+      email?: string;
+      preferredRoute?: number;
+      preferredDateRange?: string;
+      notes?: string;
+    };
 
-  if (!customerName || !phone || !email) {
+  if (!customerName || !phone || !email || !preferredRoute) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const db = getAdminDb();
-  const ref = await db.collection("booking_inquiries").add({
-    customerName,
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from("booking_inquiries").insert({
+    customer_name: customerName,
     phone,
     email,
-    preferredRoute: Number(preferredRoute ?? 0),
-    preferredDateRange: preferredDateRange ?? "",
+    preferred_route: preferredRoute,
+    preferred_date_range: preferredDateRange ?? "",
     notes: notes ?? null,
     status: "new",
-    createdAt: new Date().toISOString(),
   });
 
-  return NextResponse.json({ ok: true, inquiryId: ref.id });
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
 }

@@ -1,47 +1,39 @@
-import type { Firestore } from "firebase-admin/firestore";
-
 import { generateBookingPdf } from "@/lib/generateBookingPdf";
-import { getAdminDb } from "@/lib/firebase-admin";
-import { sendCustomerEmail } from "@/lib/resend";
 import {
-  STORAGE_BUCKETS,
-  getSupabaseStorageAdmin,
-} from "@/lib/supabase-storage";
-import type { Booking, TripDeparture, TripTemplate } from "@/lib/types/firestore";
+  getBookingById,
+  getDepartureById,
+  getTripTemplateByCode,
+  updateBooking,
+} from "@/lib/db/queries";
+import { sendCustomerEmail } from "@/lib/resend";
+import { getSupabaseAdmin } from "@/lib/supabase";
+import { STORAGE_BUCKETS } from "@/lib/supabase-storage";
 
 export async function fulfillPaidBooking(
   bookingId: string,
-  db: Firestore = getAdminDb(),
 ): Promise<{ pdfPath: string | null }> {
-  const bookingRef = db.collection("bookings").doc(bookingId);
-  const bookingSnap = await bookingRef.get();
-  if (!bookingSnap.exists) {
+  const booking = await getBookingById(bookingId);
+  if (!booking) {
     throw new Error(`Booking ${bookingId} not found`);
   }
 
-  const booking = { id: bookingSnap.id, ...bookingSnap.data() } as Booking & {
-    id: string;
-  };
-
-  const templateSnap = await db
-    .collection("tripTemplates")
-    .doc(booking.tripCode)
-    .get();
-  const template = templateSnap.data() as TripTemplate;
-
-  let departure: TripDeparture | null = null;
-  if (booking.departureId) {
-    const depSnap = await db
-      .collection("tripDepartures")
-      .doc(booking.departureId)
-      .get();
-    if (depSnap.exists) departure = depSnap.data() as TripDeparture;
+  const template = await getTripTemplateByCode(booking.tripCode);
+  if (!template) {
+    throw new Error(`Trip template ${booking.tripCode} not found`);
   }
 
-  const pdfBytes = await generateBookingPdf({ booking, template, departure });
+  const departure = booking.departureId
+    ? await getDepartureById(booking.departureId)
+    : null;
+
+  const pdfBytes = await generateBookingPdf({
+    booking,
+    template,
+    departure,
+  });
   const pdfPath = `${bookingId}/confirmation.pdf`;
 
-  const supabase = getSupabaseStorageAdmin();
+  const supabase = getSupabaseAdmin();
   const { error: uploadError } = await supabase.storage
     .from(STORAGE_BUCKETS.bookingConfirmations)
     .upload(pdfPath, pdfBytes, {
@@ -52,7 +44,7 @@ export async function fulfillPaidBooking(
   if (uploadError) {
     console.error("[fulfillPaidBooking] PDF upload failed:", uploadError.message);
   } else {
-    await bookingRef.update({ confirmationPdfPath: pdfPath });
+    await updateBooking(bookingId, { confirmation_pdf_path: pdfPath });
   }
 
   const { data: signed } = await supabase.storage

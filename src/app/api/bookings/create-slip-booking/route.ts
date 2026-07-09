@@ -6,12 +6,11 @@ import {
   SeatLockError,
   createBookingWithSeatLock,
 } from "@/lib/bookSeat";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { getDepartureById, getTripTemplateByCode } from "@/lib/db/queries";
 import {
   STORAGE_BUCKETS,
   createSignedUploadUrl,
 } from "@/lib/supabase-storage";
-import type { TripTemplate } from "@/lib/types/firestore";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -44,17 +43,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const db = getAdminDb();
-  const depSnap = await db.collection("tripDepartures").doc(departureId).get();
-  if (!depSnap.exists) {
+  const departure = await getDepartureById(departureId);
+  if (!departure) {
     return NextResponse.json({ error: "Departure not found" }, { status: 404 });
   }
-  const departure = depSnap.data()!;
-  const templateSnap = await db
-    .collection("tripTemplates")
-    .doc(departure.tripCode as string)
-    .get();
-  const template = templateSnap.data() as TripTemplate;
+  const template = await getTripTemplateByCode(departure.tripCode);
+  if (!template) {
+    return NextResponse.json({ error: "Trip not found" }, { status: 404 });
+  }
+
   const totalPriceAud = getTotalPriceAud(template, seats, subPackage);
   const bookingId = generateBookingId();
   const now = new Date().toISOString();
@@ -63,12 +60,12 @@ export async function POST(request: NextRequest) {
   const slipPath = `${bookingId}/slip.jpg`;
 
   try {
-    await createBookingWithSeatLock(db, {
+    await createBookingWithSeatLock({
       departureId,
       bookingId,
       seatsRequested: seats,
       bookingData: {
-        tripCode: departure.tripCode as string,
+        tripCode: departure.tripCode,
         departureId,
         customerName,
         phone,

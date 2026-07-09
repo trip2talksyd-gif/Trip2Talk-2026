@@ -2,8 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 
 import { releaseBookingSeats } from "@/lib/bookSeat";
+import { mapBooking } from "@/lib/db/mappers";
 import { fulfillPaidBooking } from "@/lib/fulfill-booking";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { updateBooking } from "@/lib/db/queries";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import { getStripe } from "@/lib/stripe";
 
 export async function POST(request: NextRequest) {
@@ -27,22 +29,22 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: message }, { status: 400 });
   }
 
-  const db = getAdminDb();
+  const supabase = getSupabaseAdmin();
 
   if (event.type === "payment_intent.succeeded") {
     const pi = event.data.object as Stripe.PaymentIntent;
-    const snap = await db
-      .collection("bookings")
-      .where("stripePaymentIntentId", "==", pi.id)
+    const { data } = await supabase
+      .from("bookings")
+      .select("*")
+      .eq("stripe_payment_intent_id", pi.id)
       .limit(1)
-      .get();
+      .maybeSingle();
 
-    if (!snap.empty) {
-      const bookingRef = snap.docs[0].ref;
-      const booking = snap.docs[0].data();
+    if (data) {
+      const booking = mapBooking(data);
       if (booking.paymentStatus !== "paid") {
-        await bookingRef.update({ paymentStatus: "paid", paidAt: new Date().toISOString() });
-        await fulfillPaidBooking(bookingRef.id, db);
+        await updateBooking(booking.id, { payment_status: "paid" });
+        await fulfillPaidBooking(booking.id);
       }
     }
   }
@@ -52,24 +54,21 @@ export async function POST(request: NextRequest) {
     event.type === "payment_intent.canceled"
   ) {
     const pi = event.data.object as Stripe.PaymentIntent;
-    const snap = await db
-      .collection("bookings")
-      .where("stripePaymentIntentId", "==", pi.id)
+    const { data } = await supabase
+      .from("bookings")
+      .select("*")
+      .eq("stripe_payment_intent_id", pi.id)
       .limit(1)
-      .get();
+      .maybeSingle();
 
-    if (!snap.empty) {
-      const bookingRef = snap.docs[0].ref;
-      const booking = snap.docs[0].data();
+    if (data) {
+      const booking = mapBooking(data);
       if (booking.paymentStatus === "pending") {
-        await releaseBookingSeats(db, {
-          departureId: booking.departureId as string,
-          seatsToRelease: Number(booking.seatsBooked ?? 1),
+        await releaseBookingSeats({
+          departureId: booking.departureId,
+          seatsToRelease: booking.seatsBooked,
         });
-        await bookingRef.update({
-          paymentStatus: "failed",
-          failedAt: new Date().toISOString(),
-        });
+        await updateBooking(booking.id, { payment_status: "failed" });
       }
     }
   }

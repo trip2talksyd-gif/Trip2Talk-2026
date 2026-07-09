@@ -4,7 +4,7 @@ import path from "path";
 import fontkit from "@pdf-lib/fontkit";
 import { PDFDocument, StandardFonts, rgb, type PDFFont } from "pdf-lib";
 
-import type { Booking, TripDeparture, TripTemplate } from "@/lib/types/firestore";
+import type { Booking, TripDeparture, TripTemplate } from "@/lib/types/database";
 import { formatThaiDate } from "@/lib/booking-pricing";
 
 export interface BookingPdfInput {

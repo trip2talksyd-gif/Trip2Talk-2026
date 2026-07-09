@@ -1,30 +1,44 @@
-import { getAdminDb } from "@/lib/firebase-admin";
-import type { Review, ReviewDoc } from "@/types/review";
+import { mapReview, mapTripTemplate } from "@/lib/db/mappers";
+import { getSupabaseAdmin } from "@/lib/supabase";
+import type { ReviewDoc } from "@/types/review";
 
-export async function fetchApprovedReviews(limit?: number): Promise<ReviewDoc[]> {
-  const db = getAdminDb();
-  let query = db
-    .collection("reviews")
-    .where("approved", "==", true)
-    .orderBy("createdAt", "desc") as FirebaseFirestore.Query;
+export async function fetchApprovedReviews(limit = 20): Promise<ReviewDoc[]> {
+  const supabase = getSupabaseAdmin();
 
-  if (limit) query = query.limit(limit);
+  const { data: reviews, error } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("approved", true)
+    .order("created_at", { ascending: false })
+    .limit(limit);
 
-  const snap = await query.get();
-  const tripNames = new Map<string, string>();
+  if (error) throw new Error(error.message);
 
-  const reviews: ReviewDoc[] = [];
-  for (const doc of snap.docs) {
-    const data = doc.data() as Review;
-    let tripNameTH: string | null = null;
-    if (data.tripCode) {
-      if (!tripNames.has(data.tripCode)) {
-        const t = await db.collection("tripTemplates").doc(data.tripCode).get();
-        tripNames.set(data.tripCode, t.exists ? (t.data()?.nameTH as string) : data.tripCode);
-      }
-      tripNameTH = tripNames.get(data.tripCode) ?? null;
+  const docs = (reviews ?? []).map(mapReview);
+  const tripCodes = Array.from(
+    new Set(docs.map((r) => r.tripCode).filter(Boolean) as string[]),
+  );
+
+  const nameByCode = new Map<string, string>();
+  if (tripCodes.length > 0) {
+    const { data: templates } = await supabase
+      .from("trip_templates")
+      .select("trip_code, name_th")
+      .in("trip_code", tripCodes);
+
+    for (const t of templates ?? []) {
+      nameByCode.set(t.trip_code, t.name_th);
     }
-    reviews.push({ id: doc.id, ...data, tripNameTH });
   }
-  return reviews;
+
+  return docs.map((r) => ({
+    ...r,
+    tripNameTH: r.tripCode ? nameByCode.get(r.tripCode) ?? null : null,
+  }));
 }
+
+export async function fetchAllApprovedReviewsForPage(): Promise<ReviewDoc[]> {
+  return fetchApprovedReviews(100);
+}
+
+export { mapTripTemplate };

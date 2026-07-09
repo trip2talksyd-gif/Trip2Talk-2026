@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { requireAdminRole } from "@/lib/api-admin";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { getBookingById } from "@/lib/db/queries";
 import {
   STORAGE_BUCKETS,
   createSignedDownloadUrl,
@@ -24,16 +24,14 @@ export async function GET(request: NextRequest) {
       ? STORAGE_BUCKETS.paymentSlips
       : STORAGE_BUCKETS.passportDocuments;
 
-  const db = getAdminDb();
-  const snap = await db.collection("bookings").doc(bookingId).get();
-  if (!snap.exists) {
+  const booking = await getBookingById(bookingId);
+  if (!booking) {
     return NextResponse.json({ error: "Booking not found" }, { status: 404 });
   }
 
-  const booking = snap.data()!;
   const path =
     type === "slip"
-      ? (booking.slipUrl as string) ?? `${bookingId}/slip.jpg`
+      ? booking.slipUrl ?? `${bookingId}/slip.jpg`
       : `${bookingId}/passport.jpg`;
 
   const url = await createSignedDownloadUrl(bucket, path);

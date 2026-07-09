@@ -5,7 +5,7 @@ import {
   generateBookingPdf,
   generateBookingPdfResult,
 } from "@/lib/generateBookingPdf";
-import type { Booking, TripDeparture, TripTemplate } from "@/lib/types/firestore";
+import type { Booking, TripDeparture, TripTemplate } from "@/lib/types/database";
 
 const baseTemplate: TripTemplate = {
   tripCode: "TEST-1DAY",

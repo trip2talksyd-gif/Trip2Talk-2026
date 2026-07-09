@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { generateBookingId } from "@/lib/admin-session";
 import { requireAdminRole } from "@/lib/api-admin";
 import { createBookingWithSeatLock } from "@/lib/bookSeat";
-import { generateBookingId } from "@/lib/admin-session";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { departureToRow } from "@/lib/db/mappers";
+import { getDepartureById } from "@/lib/db/queries";
+import { departureSeedId } from "@/lib/seed/parse-trip-data";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function POST(request: NextRequest) {
   const auth = requireAdminRole(request, "owner");
@@ -27,24 +30,32 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
-  const db = getAdminDb();
-  const departureId = `${tripCode}__${startDate}`;
-  const depRef = db.collection("tripDepartures").doc(departureId);
-  const depSnap = await depRef.get();
+  const departureId = departureSeedId(tripCode, startDate);
+  const existing = await getDepartureById(departureId);
 
-  if (!depSnap.exists) {
-    await depRef.set({
-      tripCode,
-      startDate,
-      endDate: endDate ?? null,
-      maxSeats: maxSeats ?? 12,
-      seatsBooked: 0,
-      status: "upcoming",
-    });
+  if (!existing) {
+    const supabase = getSupabaseAdmin();
+    const { error } = await supabase.from("trip_departures").upsert(
+      departureToRow(
+        {
+          tripCode,
+          startDate,
+          endDate: endDate ?? null,
+          maxSeats: maxSeats ?? 12,
+          seatsBooked: 0,
+          status: "upcoming",
+        },
+        departureId,
+      ),
+      { onConflict: "id" },
+    );
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
   }
 
   const bookingId = generateBookingId();
-  await createBookingWithSeatLock(db, {
+  await createBookingWithSeatLock({
     departureId,
     bookingId,
     seatsRequested: seats ?? 1,
@@ -69,7 +80,10 @@ export async function POST(request: NextRequest) {
   });
 
   if (inquiryId) {
-    await db.collection("booking_inquiries").doc(inquiryId).update({ status: "confirmed" });
+    await getSupabaseAdmin()
+      .from("booking_inquiries")
+      .update({ status: "confirmed" })
+      .eq("id", inquiryId);
   }
 
   return NextResponse.json({ ok: true, bookingId, departureId });

@@ -54,7 +54,7 @@ export function OwnerExtras() {
       <section>
         <h2 className="font-serif text-xl text-white">Company documents</h2>
         <p className="mt-2 text-sm text-white/60">
-          Manage insurance, rego, driver authority via API — UI list loads from Firestore.
+          Manage insurance, rego, driver authority via API — UI list loads from Supabase.
         </p>
         <CompanyDocsList />
       </section>

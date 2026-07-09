@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { verifyCronSecret } from "@/lib/cron-auth";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { mapBooking } from "@/lib/db/mappers";
+import { updateBooking } from "@/lib/db/queries";
 import { getOwnerAlertEmail, sendOwnerAlertEmail } from "@/lib/resend";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import {
   deleteStorageFolder,
   STORAGE_BUCKETS,
@@ -10,54 +12,47 @@ import {
 
 const RETENTION_DAYS = 7;
 
-/**
- * Daily cron: delete passport/ID docs 7+ days after departure endDate,
- * reset compliance flags, email Owner summary via Resend.
- */
 export async function GET(request: NextRequest) {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
-  const db = getAdminDb();
+  const supabase = getSupabaseAdmin();
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - RETENTION_DAYS);
   const cutoffIso = cutoff.toISOString().slice(0, 10);
 
-  const departuresSnap = await db.collection("tripDepartures").get();
+  const { data: departures } = await supabase.from("trip_departures").select("id, end_date");
   const expiredDepartureIds = new Set<string>();
 
-  for (const doc of departuresSnap.docs) {
-    const endDate = doc.data().endDate as string | null;
-    if (endDate && endDate <= cutoffIso) {
-      expiredDepartureIds.add(doc.id);
+  for (const dep of departures ?? []) {
+    if (dep.end_date && dep.end_date <= cutoffIso) {
+      expiredDepartureIds.add(dep.id);
     }
   }
 
-  const bookingsSnap = await db
-    .collection("bookings")
-    .where("complianceDocsUploaded", "==", true)
-    .get();
+  const { data: bookings } = await supabase
+    .from("bookings")
+    .select("*")
+    .eq("compliance_docs_uploaded", true);
 
   const deleted: string[] = [];
   const affectedBookings: string[] = [];
 
-  for (const bookingDoc of bookingsSnap.docs) {
-    const booking = bookingDoc.data();
-    const departureId = booking.departureId as string | undefined;
-    if (!departureId || !expiredDepartureIds.has(departureId)) continue;
+  for (const row of bookings ?? []) {
+    const booking = mapBooking(row);
+    if (!expiredDepartureIds.has(booking.departureId)) continue;
 
-    const folderPrefix = bookingDoc.id;
     const removed = await deleteStorageFolder(
       STORAGE_BUCKETS.passportDocuments,
-      folderPrefix,
+      booking.id,
     );
     deleted.push(...removed);
 
-    await bookingDoc.ref.update({
-      complianceDocsUploaded: false,
-      docsDeletedAt: new Date().toISOString(),
+    await updateBooking(booking.id, {
+      compliance_docs_uploaded: false,
+      docs_deleted_at: new Date().toISOString(),
     });
-    affectedBookings.push(bookingDoc.id);
+    affectedBookings.push(booking.id);
   }
 
   console.log(

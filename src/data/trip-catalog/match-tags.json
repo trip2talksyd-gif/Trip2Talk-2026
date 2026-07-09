@@ -1,0 +1,100 @@
+{
+  "MEL-4D3N": {
+    "themes": ["landscape", "milkyway", "architecture", "portrait-influencer"],
+    "bestMonths": [2, 3, 10, 11],
+    "groupFit": "private-small",
+    "pricePoint": "mid",
+    "pace": "multi-day-packed"
+  },
+  "ULU-4D3N": {
+    "themes": ["landscape", "milkyway", "wildlife"],
+    "bestMonths": [3, 4, 5, 9, 10],
+    "groupFit": "private-small",
+    "pricePoint": "mid",
+    "pace": "multi-day-packed"
+  },
+  "NZ-6D5N": {
+    "themes": ["landscape", "mountain", "wildlife", "flowers"],
+    "bestMonths": [3, 4, 5, 9, 10, 11, 12, 1, 2, 6, 7, 8],
+    "groupFit": "small-group",
+    "pricePoint": "premium",
+    "pace": "multi-day-packed"
+  },
+  "TAS-3D2N": {
+    "themes": ["aurora", "history", "architecture", "wildlife", "beach"],
+    "bestMonths": [3, 4, 5, 6, 7, 8],
+    "groupFit": "private-small",
+    "pricePoint": "mid",
+    "pace": "multi-day-relaxed"
+  },
+  "TAS-LH-4D3N": {
+    "themes": ["aurora", "flowers", "landscape", "mountain", "architecture"],
+    "bestMonths": [1, 2, 3, 12],
+    "groupFit": "private-small",
+    "pricePoint": "mid",
+    "pace": "multi-day-relaxed"
+  },
+  "KIA-1DAY": {
+    "themes": ["landscape", "beach", "architecture"],
+    "bestMonths": [6, 7, 8],
+    "groupFit": "private-small",
+    "pricePoint": "budget",
+    "pace": "one-day"
+  },
+  "CAN-2D1N": {
+    "themes": ["flowers", "landscape", "history"],
+    "bestMonths": [9, 10],
+    "groupFit": "private-small",
+    "pricePoint": "budget",
+    "pace": "multi-day-relaxed"
+  },
+  "SYD-1DAY": {
+    "themes": ["portrait-influencer", "beach", "landscape", "milkyway"],
+    "bestMonths": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "groupFit": "flexible",
+    "pricePoint": "mid",
+    "pace": "one-day"
+  },
+  "PSP-1DAY": {
+    "themes": ["beach", "landscape", "architecture"],
+    "bestMonths": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "groupFit": "private-small",
+    "pricePoint": "budget",
+    "pace": "one-day"
+  },
+  "SYD-MW-WIN": {
+    "themes": ["milkyway", "beach", "landscape"],
+    "bestMonths": [3, 4, 5, 6, 7, 8],
+    "groupFit": "private-small",
+    "pricePoint": "budget",
+    "pace": "one-day"
+  },
+  "LAV-ANB-1D": {
+    "themes": ["flowers", "beach", "portrait-influencer"],
+    "bestMonths": [12],
+    "groupFit": "private-small",
+    "pricePoint": "mid",
+    "pace": "one-day"
+  },
+  "TAS-SU-4D3N": {
+    "themes": ["landscape", "mountain", "aurora", "flowers", "beach"],
+    "bestMonths": [1, 2, 3, 12],
+    "groupFit": "small-group",
+    "pricePoint": "mid",
+    "pace": "multi-day-relaxed"
+  },
+  "BER-3D2N": {
+    "themes": ["landscape", "beach", "wildlife"],
+    "bestMonths": [1],
+    "groupFit": "flexible",
+    "pricePoint": "budget",
+    "pace": "multi-day-relaxed"
+  },
+  "TAS-LH-3D2N-WIN": {
+    "themes": ["aurora", "landscape", "mountain", "wildlife", "history"],
+    "bestMonths": [6, 7, 8],
+    "groupFit": "flexible",
+    "pricePoint": "mid",
+    "pace": "multi-day-relaxed"
+  }
+}

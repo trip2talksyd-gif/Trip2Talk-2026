@@ -2,8 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { DocumentUploadClient } from "@/components/booking/DocumentUploadClient";
-import { getAdminDb } from "@/lib/firebase-admin";
-import type { Booking } from "@/lib/types/firestore";
+import { getBookingById } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -12,11 +11,9 @@ export default async function UploadDocumentsPage({
 }: {
   params: { bookingId: string };
 }) {
-  const db = getAdminDb();
-  const snap = await db.collection("bookings").doc(params.bookingId).get();
-  if (!snap.exists) notFound();
+  const booking = await getBookingById(params.bookingId);
+  if (!booking) notFound();
 
-  const booking = snap.data() as Booking;
   if (booking.paymentStatus !== "paid") {
     redirect(`/trips/${booking.tripCode}`);
   }

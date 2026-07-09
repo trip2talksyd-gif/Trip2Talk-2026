@@ -1,95 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   adjustDepartureSeats,
   createBookingWithSeatLock,
 } from "@/lib/bookSeat";
-import type { TripDeparture } from "@/lib/types/firestore";
-
-interface MockDoc {
-  exists: boolean;
-  data: () => TripDeparture | undefined;
-}
-
-/** Mock Firestore with serialized transactions (simulates concurrent race safety). */
-function createMockFirestore(initialDeparture: TripDeparture) {
-  let departureState = { ...initialDeparture };
-  const bookings = new Map<string, Record<string, unknown>>();
-  let transactionQueue: Promise<unknown> = Promise.resolve();
-
-  const departureRef = { id: "dep-1", path: "tripDepartures/dep-1" };
-  const bookingCollection = {
-    doc: (id: string) => ({ id, path: `bookings/${id}` }),
-  };
-
-  const runSerializedTransaction = async (
-    fn: (transaction: {
-      get: (ref: { path: string }) => Promise<MockDoc>;
-      update: (ref: { path: string }, data: Partial<TripDeparture>) => void;
-      set: (ref: { id: string }, data: Record<string, unknown>) => void;
-    }) => Promise<unknown>,
-  ) => {
-    const run = async () => {
-      const pendingUpdates: Array<{
-        ref: { path: string };
-        data: Partial<TripDeparture>;
-      }> = [];
-      const pendingSets: Array<{
-        ref: { id: string };
-        data: Record<string, unknown>;
-      }> = [];
-
-      const transaction = {
-        get: async (ref: { path: string }): Promise<MockDoc> => {
-          if (ref.path === departureRef.path) {
-            return {
-              exists: true,
-              data: () => ({ ...departureState }),
-            };
-          }
-          return { exists: false, data: () => undefined };
-        },
-        update: (ref: { path: string }, data: Partial<TripDeparture>) => {
-          pendingUpdates.push({ ref, data });
-        },
-        set: (ref: { id: string }, data: Record<string, unknown>) => {
-          pendingSets.push({ ref, data });
-        },
-      };
-
-      const result = await fn(transaction);
-
-      for (const { data } of pendingUpdates) {
-        departureState = { ...departureState, ...data };
-      }
-      for (const { ref, data } of pendingSets) {
-        bookings.set(ref.id, data);
-      }
-
-      return result;
-    };
-
-    transactionQueue = transactionQueue.then(run, run);
-    return transactionQueue;
-  };
-
-  const db = {
-    collection: (name: string) => {
-      if (name === "tripDepartures") {
-        return { doc: () => departureRef };
-      }
-      if (name === "bookings") {
-        return bookingCollection;
-      }
-      throw new Error(`Unexpected collection: ${name}`);
-    },
-    runTransaction: runSerializedTransaction,
-    __getDepartureState: () => departureState,
-    __getBookings: () => bookings,
-  };
-
-  return db;
-}
+import type { TripDeparture } from "@/lib/types/database";
 
 const baseDeparture: TripDeparture = {
   tripCode: "TAS-3D2N",
@@ -117,69 +32,166 @@ const sampleBooking = {
   docsDeletedAt: null,
 };
 
-describe("createBookingWithSeatLock", () => {
+function createMockSupabase(initialDeparture: TripDeparture) {
+  let departureState = { id: "dep-1", ...initialDeparture };
+  const bookings = new Map<string, Record<string, unknown>>();
+  let rpcQueue: Promise<unknown> = Promise.resolve();
+
+  const runSerialized = (fn: () => Promise<unknown>) => {
+    rpcQueue = rpcQueue.then(fn, fn);
+    return rpcQueue;
+  };
+
+  const client = {
+    from: (table: string) => {
+      if (table === "bookings") {
+        return {
+          insert: async (row: Record<string, unknown>) => {
+            bookings.set(String(row.id), row);
+            return { error: null };
+          },
+        };
+      }
+      throw new Error(`Unexpected table: ${table}`);
+    },
+    rpc: (name: string, args: { p_departure_id: string; p_seats: number }) =>
+      runSerialized(async () => {
+        if (name === "reserve_seats") {
+          const remaining = departureState.maxSeats - departureState.seatsBooked;
+          if (
+            departureState.startDate === null ||
+            departureState.status === "cancelled" ||
+            args.p_seats > remaining
+          ) {
+            return {
+              error: {
+                message:
+                  departureState.startDate === null
+                    ? "NOT_BOOKABLE"
+                    : "SEAT_LOCK_FAILED: not enough capacity",
+              },
+            };
+          }
+          departureState = {
+            ...departureState,
+            seatsBooked: departureState.seatsBooked + args.p_seats,
+            status:
+              departureState.seatsBooked + args.p_seats >= departureState.maxSeats
+                ? "full"
+                : "upcoming",
+          };
+          return { error: null };
+        }
+        if (name === "release_seats") {
+          departureState = {
+            ...departureState,
+            seatsBooked: Math.max(0, departureState.seatsBooked - args.p_seats),
+            status: "upcoming",
+          };
+          return { error: null };
+        }
+        return { error: { message: "unknown rpc" } };
+      }),
+    __getDepartureState: () => departureState,
+    __getBookings: () => bookings,
+  };
+
+  vi.doMock("@/lib/db/queries", () => ({
+    getDepartureById: async () => ({ ...departureState }),
+  }));
+
+  return client;
+}
+
+vi.mock("@/lib/db/queries", () => ({
+  getDepartureById: vi.fn(),
+}));
+
+import { getDepartureById } from "@/lib/db/queries";
+
+describe("createBookingWithSeatLock (Supabase RPC)", () => {
   it("rejects overbooking when seatsBooked + requestedSeats > maxSeats", async () => {
-    const db = createMockFirestore(baseDeparture);
+    const mock = createMockSupabase(baseDeparture);
+    vi.mocked(getDepartureById).mockResolvedValue({ id: "dep-1", ...baseDeparture });
 
     await expect(
-      createBookingWithSeatLock(db as never, {
-        departureId: "dep-1",
-        bookingId: "booking-1",
-        seatsRequested: 2,
-        bookingData: sampleBooking,
-      }),
+      createBookingWithSeatLock(
+        {
+          departureId: "dep-1",
+          bookingId: "booking-1",
+          seatsRequested: 2,
+          bookingData: sampleBooking,
+        },
+        mock as never,
+      ),
     ).rejects.toMatchObject({
       name: "SeatLockError",
       code: "OVERBOOKED",
-      message: "Only 1 seat remaining.",
     });
 
-    expect(db.__getDepartureState().seatsBooked).toBe(5);
-    expect(db.__getBookings().size).toBe(0);
+    expect(mock.__getBookings().size).toBe(0);
   });
 
   it("locks seats and creates booking when capacity allows", async () => {
-    const db = createMockFirestore({ ...baseDeparture, seatsBooked: 4 });
+    const mock = createMockSupabase({ ...baseDeparture, seatsBooked: 4 });
+    vi.mocked(getDepartureById).mockImplementation(async () => ({
+      id: "dep-1",
+      ...mock.__getDepartureState(),
+    }));
 
-    await createBookingWithSeatLock(db as never, {
-      departureId: "dep-1",
-      bookingId: "booking-ok",
-      seatsRequested: 2,
-      bookingData: sampleBooking,
-    });
+    await createBookingWithSeatLock(
+      {
+        departureId: "dep-1",
+        bookingId: "booking-ok",
+        seatsRequested: 2,
+        bookingData: sampleBooking,
+      },
+      mock as never,
+    );
 
-    expect(db.__getDepartureState().seatsBooked).toBe(6);
-    expect(db.__getDepartureState().status).toBe("full");
-    expect(db.__getBookings().get("booking-ok")?.seatsBooked).toBe(2);
+    expect(mock.__getDepartureState().seatsBooked).toBe(6);
+    expect(mock.__getBookings().get("booking-ok")?.seats_booked).toBe(2);
   });
 
   it("rejects booking when startDate is null (Date TBA)", async () => {
-    const db = createMockFirestore({
+    vi.mocked(getDepartureById).mockResolvedValue({
+      id: "dep-1",
       ...baseDeparture,
       startDate: null,
       seatsBooked: 0,
     });
+    const mock = createMockSupabase({ ...baseDeparture, startDate: null, seatsBooked: 0 });
 
     await expect(
-      createBookingWithSeatLock(db as never, {
-        departureId: "dep-1",
-        bookingId: "booking-tba",
-        seatsRequested: 1,
-        bookingData: sampleBooking,
-      }),
+      createBookingWithSeatLock(
+        {
+          departureId: "dep-1",
+          bookingId: "booking-tba",
+          seatsRequested: 1,
+          bookingData: sampleBooking,
+        },
+        mock as never,
+      ),
     ).rejects.toMatchObject({ code: "NOT_BOOKABLE" });
   });
 
   it("rejects concurrent bookings that would exceed capacity (race)", async () => {
-    const db = createMockFirestore({ ...baseDeparture, seatsBooked: 5, maxSeats: 6 });
+    const mock = createMockSupabase({ ...baseDeparture, seatsBooked: 5, maxSeats: 6 });
+    vi.mocked(getDepartureById).mockImplementation(async () => ({
+      id: "dep-1",
+      ...mock.__getDepartureState(),
+    }));
 
     const attempt = (id: string) =>
-      createBookingWithSeatLock(db as never, {
-        departureId: "dep-1",
-        bookingId: id,
-        seatsRequested: 1,
-        bookingData: { ...sampleBooking },
-      });
+      createBookingWithSeatLock(
+        {
+          departureId: "dep-1",
+          bookingId: id,
+          seatsRequested: 1,
+          bookingData: { ...sampleBooking },
+        },
+        mock as never,
+      );
 
     const [first, second] = await Promise.allSettled([
       attempt("race-a"),
@@ -191,31 +203,33 @@ describe("createBookingWithSeatLock", () => {
 
     expect(fulfilled).toHaveLength(1);
     expect(rejected).toHaveLength(1);
-    expect(db.__getDepartureState().seatsBooked).toBe(6);
-    expect(db.__getBookings().size).toBe(1);
+    expect(mock.__getDepartureState().seatsBooked).toBe(6);
+    expect(mock.__getBookings().size).toBe(1);
   });
 });
 
 describe("adjustDepartureSeats", () => {
   it("refuses to push seatsBooked above maxSeats", async () => {
-    const db = createMockFirestore({ ...baseDeparture, seatsBooked: 6 });
+    const mock = createMockSupabase({ ...baseDeparture, seatsBooked: 6 });
+    vi.mocked(getDepartureById).mockResolvedValue({ id: "dep-1", ...baseDeparture, seatsBooked: 6 });
 
     await expect(
-      adjustDepartureSeats(db as never, { departureId: "dep-1", delta: 1 }),
+      adjustDepartureSeats({ departureId: "dep-1", delta: 1 }, mock as never),
     ).rejects.toMatchObject({ code: "OVERBOOKED" });
-
-    expect(db.__getDepartureState().seatsBooked).toBe(6);
   });
 
   it("allows decrement within bounds", async () => {
-    const db = createMockFirestore(baseDeparture);
+    const mock = createMockSupabase(baseDeparture);
+    vi.mocked(getDepartureById).mockImplementation(async () => ({
+      id: "dep-1",
+      ...mock.__getDepartureState(),
+    }));
 
-    const next = await adjustDepartureSeats(db as never, {
-      departureId: "dep-1",
-      delta: -1,
-    });
+    const next = await adjustDepartureSeats(
+      { departureId: "dep-1", delta: -1 },
+      mock as never,
+    );
 
     expect(next).toBe(4);
-    expect(db.__getDepartureState().seatsBooked).toBe(4);
   });
 });

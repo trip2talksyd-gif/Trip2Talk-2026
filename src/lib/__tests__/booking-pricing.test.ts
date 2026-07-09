@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { getUnitPriceAud, getTotalPriceAud } from "@/lib/booking-pricing";
-import type { TripTemplate } from "@/lib/types/firestore";
+import type { TripTemplate } from "@/lib/types/database";
 
 const baseTemplate: TripTemplate = {
   tripCode: "SYD-1DAY",

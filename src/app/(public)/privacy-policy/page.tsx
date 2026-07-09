@@ -46,7 +46,7 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-xl font-medium text-white">ที่เก็บข้อมูล</h2>
             <ul className="mt-3 list-disc space-y-2 pl-6">
               <li>
-                <strong>Firebase Firestore</strong> — ข้อมูลการจอง ทริป ข้อความติดต่อ
+                <strong>Supabase Postgres</strong> — ข้อมูลการจอง ทริป ข้อความติดต่อ
                 และข้อมูลดำเนินงาน
               </li>
               <li>

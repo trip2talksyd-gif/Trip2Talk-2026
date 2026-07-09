@@ -1,4 +1,4 @@
-import type { TripTemplate } from "@/lib/types/firestore";
+import type { TripTemplate } from "@/lib/types/database";
 
 export function getUnitPriceAud(
   template: TripTemplate,

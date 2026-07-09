@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getAdminDb } from "@/lib/firebase-admin";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import { getOwnerAlertEmail, sendOwnerAlertEmail } from "@/lib/resend";
 
 export async function POST(request: NextRequest) {
@@ -35,15 +35,18 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "อีเมลไม่ถูกต้อง" }, { status: 400 });
   }
 
-  const db = getAdminDb();
-  await db.collection("contact_messages").add({
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.from("contact_messages").insert({
     name,
     email,
     phone,
     message,
     status: "new",
-    createdAt: new Date().toISOString(),
   });
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
   await sendOwnerAlertEmail({
     to: getOwnerAlertEmail(),

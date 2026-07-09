@@ -1,22 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { requireAdminRole } from "@/lib/api-admin";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { mapBooking } from "@/lib/db/mappers";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function GET(request: NextRequest) {
   const auth = requireAdminRole(request, ["cashier", "owner", "trip_leader"]);
   if (auth instanceof NextResponse) return auth;
 
-  const db = getAdminDb();
   const { searchParams } = new URL(request.url);
   const tripCode = searchParams.get("tripCode");
   const status = searchParams.get("status");
 
-  let query = db.collection("bookings").orderBy("createdAt", "desc").limit(100) as FirebaseFirestore.Query;
-  if (tripCode) query = query.where("tripCode", "==", tripCode);
-  if (status) query = query.where("paymentStatus", "==", status);
+  let query = getSupabaseAdmin()
+    .from("bookings")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(100);
 
-  const snap = await query.get();
-  const bookings = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  if (tripCode) query = query.eq("trip_code", tripCode);
+  if (status) query = query.eq("payment_status", status);
+
+  const { data, error } = await query;
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const bookings = (data ?? []).map(mapBooking);
   return NextResponse.json({ bookings });
 }

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 import { CATEGORY_FILTERS, formatThaiDate, getUnitPriceAud } from "@/lib/booking-pricing";
-import type { TripDeparture, TripTemplate } from "@/lib/types/firestore";
+import type { TripDeparture, TripTemplate } from "@/lib/types/database";
 
 interface CatalogTrip {
   template: TripTemplate;
@@ -31,7 +31,15 @@ export function TripsCatalogClient({ trips }: { trips: CatalogTrip[] }) {
           ← หน้าแรก
         </Link>
         <h1 className="mt-4 font-serif text-4xl">ทริปทั้งหมด</h1>
-        <p className="mt-2 text-white/70">เลือกทริปถ่ายภาพทั่วออสเตรเลียกับ Trip2Talk</p>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <p className="text-white/70">เลือกทริปถ่ายภาพทั่วออสเตรเลียกับ Trip2Talk</p>
+          <Link
+            href="/trip-finder"
+            className="rounded-full border border-white/30 px-4 py-1.5 text-xs text-white/80 hover:border-white/50 hover:text-white"
+          >
+            หาทริปที่ใช่สำหรับคุณ →
+          </Link>
+        </div>
 
         <div className="mt-8 flex flex-wrap gap-2">
           <button

@@ -12,9 +12,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "departureId and delta required" }, { status: 400 });
   }
 
-  const { getAdminDb } = await import("@/lib/firebase-admin");
   try {
-    const newSeats = await adjustDepartureSeats(getAdminDb(), { departureId, delta });
+    const newSeats = await adjustDepartureSeats({ departureId, delta });
     return NextResponse.json({ ok: true, seatsBooked: newSeats });
   } catch (err) {
     if (err instanceof SeatLockError) {

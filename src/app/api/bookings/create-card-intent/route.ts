@@ -6,9 +6,12 @@ import {
   SeatLockError,
   createBookingWithSeatLock,
 } from "@/lib/bookSeat";
-import { getAdminDb } from "@/lib/firebase-admin";
+import {
+  getDepartureById,
+  getTripTemplateByCode,
+  updateBooking,
+} from "@/lib/db/queries";
 import { audToCents, getStripe } from "@/lib/stripe";
-import type { TripTemplate } from "@/lib/types/firestore";
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -49,17 +52,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const db = getAdminDb();
-  const depSnap = await db.collection("tripDepartures").doc(departureId).get();
-  if (!depSnap.exists) {
+  const departure = await getDepartureById(departureId);
+  if (!departure) {
     return NextResponse.json({ error: "Departure not found" }, { status: 404 });
   }
-  const departure = depSnap.data()!;
-  const templateSnap = await db
-    .collection("tripTemplates")
-    .doc(departure.tripCode as string)
-    .get();
-  const template = templateSnap.data() as TripTemplate;
+  const template = await getTripTemplateByCode(departure.tripCode);
+  if (!template) {
+    return NextResponse.json({ error: "Trip not found" }, { status: 404 });
+  }
+
   const totalPriceAud = getTotalPriceAud(template, seats, subPackage);
   const bookingId = generateBookingId();
   const now = new Date().toISOString();
@@ -67,12 +68,12 @@ export async function POST(request: NextRequest) {
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
 
   try {
-    await createBookingWithSeatLock(db, {
+    await createBookingWithSeatLock({
       departureId,
       bookingId,
       seatsRequested: seats,
       bookingData: {
-        tripCode: departure.tripCode as string,
+        tripCode: departure.tripCode,
         departureId,
         customerName,
         phone,
@@ -101,12 +102,12 @@ export async function POST(request: NextRequest) {
   const paymentIntent = await stripe.paymentIntents.create({
     amount: audToCents(totalPriceAud),
     currency: "aud",
-    metadata: { bookingId, departureId, tripCode: departure.tripCode as string },
+    metadata: { bookingId, departureId, tripCode: departure.tripCode },
     receipt_email: email,
   });
 
-  await db.collection("bookings").doc(bookingId).update({
-    stripePaymentIntentId: paymentIntent.id,
+  await updateBooking(bookingId, {
+    stripe_payment_intent_id: paymentIntent.id,
   });
 
   return NextResponse.json({

@@ -2,49 +2,39 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { adjustDepartureSeats } from "@/lib/bookSeat";
 import { verifyCronSecret } from "@/lib/cron-auth";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { mapBooking } from "@/lib/db/mappers";
+import { updateBooking } from "@/lib/db/queries";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 const EXPIRY_HOURS = 48;
 
-/**
- * Hourly cron: expire pending_verification bank-slip bookings after 48h,
- * release seats via transaction-guarded adjustDepartureSeats().
- */
 export async function GET(request: NextRequest) {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
-  const db = getAdminDb();
-  const cutoff = new Date(Date.now() - EXPIRY_HOURS * 60 * 60 * 1000);
+  const cutoff = new Date(Date.now() - EXPIRY_HOURS * 60 * 60 * 1000).toISOString();
+  const { data, error } = await getSupabaseAdmin()
+    .from("bookings")
+    .select("*")
+    .eq("payment_status", "pending_verification")
+    .lt("created_at", cutoff);
 
-  const bookingsSnap = await db
-    .collection("bookings")
-    .where("paymentStatus", "==", "pending_verification")
-    .get();
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
 
   const expired: string[] = [];
 
-  for (const bookingDoc of bookingsSnap.docs) {
-    const booking = bookingDoc.data();
-    const createdAt = new Date(booking.createdAt as string);
-    if (createdAt > cutoff) continue;
-
-    const seatsBooked = Number(booking.seatsBooked ?? 1);
-    const departureId = booking.departureId as string | undefined;
-
-    if (departureId) {
-      await adjustDepartureSeats(db, {
-        departureId,
-        delta: -seatsBooked,
+  for (const row of data ?? []) {
+    const booking = mapBooking(row);
+    if (booking.departureId) {
+      await adjustDepartureSeats({
+        departureId: booking.departureId,
+        delta: -booking.seatsBooked,
       });
     }
-
-    await bookingDoc.ref.update({
-      paymentStatus: "expired",
-      expiredAt: new Date().toISOString(),
-    });
-
-    expired.push(bookingDoc.id);
+    await updateBooking(booking.id, { payment_status: "expired" });
+    expired.push(booking.id);
   }
 
   console.log(

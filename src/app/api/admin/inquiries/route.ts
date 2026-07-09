@@ -1,16 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { requireAdminRole } from "@/lib/api-admin";
-import { getAdminDb } from "@/lib/firebase-admin";
+import { mapBookingInquiry } from "@/lib/db/mappers";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function GET(request: NextRequest) {
   const auth = requireAdminRole(request, "owner");
   if (auth instanceof NextResponse) return auth;
 
-  const db = getAdminDb();
-  const snap = await db.collection("booking_inquiries").orderBy("createdAt", "desc").limit(50).get();
+  const { data, error } = await getSupabaseAdmin()
+    .from("booking_inquiries")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
   return NextResponse.json({
-    inquiries: snap.docs.map((d) => ({ id: d.id, ...d.data() })),
+    inquiries: (data ?? []).map(mapBookingInquiry),
   });
 }
 
@@ -23,6 +32,14 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: "id and status required" }, { status: 400 });
   }
 
-  await getAdminDb().collection("booking_inquiries").doc(id).update({ status });
+  const { error } = await getSupabaseAdmin()
+    .from("booking_inquiries")
+    .update({ status })
+    .eq("id", id);
+
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
   return NextResponse.json({ ok: true });
 }

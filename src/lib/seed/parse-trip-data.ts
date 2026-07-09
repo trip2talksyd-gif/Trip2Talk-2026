@@ -1,9 +1,12 @@
+import { createHash } from "crypto";
+
 import type { TripTemplate as CatalogTemplate } from "@/lib/types/trip-catalog";
 import type {
+  MatchTags,
   TripDepartureSeedDoc,
   TripPricingNotes,
   TripTemplate,
-} from "@/lib/types/firestore";
+} from "@/lib/types/database";
 
 export interface DataQualityFlag {
   tripCode: string;
@@ -18,6 +21,7 @@ export interface SeedParseResult {
 }
 
 const DEFAULT_MAX_SEATS = 6;
+const DEPARTURE_UUID_NAMESPACE = "6ba7b811-9dad-11d1-80b4-00c04fd430c8";
 
 function mapPricing(pricing: CatalogTemplate["pricing"]): TripPricingNotes {
   const notes: TripPricingNotes = {};
@@ -27,8 +31,9 @@ function mapPricing(pricing: CatalogTemplate["pricing"]): TripPricingNotes {
   return notes;
 }
 
-export function catalogTemplateToFirestore(
+export function catalogTemplateToDatabase(
   raw: CatalogTemplate,
+  matchTags?: MatchTags | null,
 ): TripTemplate {
   return {
     tripCode: raw.tripCode,
@@ -62,15 +67,29 @@ export function catalogTemplateToFirestore(
     hashtags: raw.hashtags ?? null,
     seasonNote: raw.seasonNote ?? null,
     flightInfo: raw.flightInfo ?? null,
+    matchTags: matchTags ?? null,
     promoImageRef: raw.promoImageRef ?? null,
     galleryUrl: "",
     active: raw.active,
   };
 }
 
-export function departureDocId(tripCode: string, startDate: string): string {
-  return `${tripCode}__${startDate}`;
+/** @deprecated */
+export function departureSeedId(tripCode: string, startDate: string): string {
+  const key = `${tripCode}__${startDate}`;
+  const hash = createHash("sha1").update(`${DEPARTURE_UUID_NAMESPACE}:${key}`).digest("hex");
+  return [
+    hash.slice(0, 8),
+    hash.slice(8, 12),
+    "4" + hash.slice(13, 16),
+    ((parseInt(hash.slice(16, 18), 16) & 0x3f) | 0x80).toString(16).padStart(2, "0") +
+      hash.slice(18, 20),
+    hash.slice(20, 32),
+  ].join("-");
 }
+
+/** @deprecated */
+export const departureDocId = departureSeedId;
 
 function daySpanInclusive(start: string, end: string): number {
   const s = new Date(`${start}T00:00:00Z`).getTime();
@@ -143,7 +162,7 @@ export function expandDeparturesFromTemplate(
       DEFAULT_MAX_SEATS;
 
     return {
-      docId: departureDocId(raw.tripCode, startDate),
+      id: departureSeedId(raw.tripCode, startDate),
       tripCode: raw.tripCode,
       startDate,
       endDate: departure.endDate ?? null,
@@ -154,8 +173,13 @@ export function expandDeparturesFromTemplate(
   });
 }
 
-export function parseTripSeedData(rawTemplates: CatalogTemplate[]): SeedParseResult {
-  const templates = rawTemplates.map(catalogTemplateToFirestore);
+export function parseTripSeedData(
+  rawTemplates: CatalogTemplate[],
+  matchTagsByCode: Record<string, MatchTags> = {},
+): SeedParseResult {
+  const templates = rawTemplates.map((raw) =>
+    catalogTemplateToDatabase(raw, matchTagsByCode[raw.tripCode] ?? null),
+  );
   const departures = rawTemplates.flatMap(expandDeparturesFromTemplate);
   const flags = collectDataQualityFlags(rawTemplates);
 

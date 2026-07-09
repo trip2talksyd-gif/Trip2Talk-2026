@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { formatThaiDate, getUnitPriceAud } from "@/lib/booking-pricing";
-import type { TripDeparture, TripTemplate } from "@/lib/types/firestore";
+import type { TripDeparture, TripTemplate } from "@/lib/types/database";
 
 export interface TripCardProps {
   template: TripTemplate;

@@ -1,29 +1,30 @@
-# Trip2Talk V6 — Hybrid Backend (Firestore + Supabase Storage)
+# Trip2Talk V7 — Supabase-only backend
 
 Premium photography **trip** platform. Single-tenant. Repo: `trip2talk-v6-app`.
 
 **Brand language:** Trip / Trip Leader only — never Tour / Guide.
 
-## Hybrid architecture (v2)
+## Architecture (4 services)
 
-Two services, two jobs — do not mix them up:
-
-| Service | Job | What lives here |
-|---------|-----|-----------------|
-| **Firebase Firestore** | Structured, queryable text data | `tripTemplates`, `tripDepartures`, `bookings`, staff, expenses |
-| **Supabase Storage** | Files only | `trip-photos`, `payment-slips`, `passport-documents`, `expense-receipts`, `booking-confirmations` |
-
-**Assumption (confirm with Saen):** Reuse the existing V5 Supabase project (`xwdtjwzjkqunewxjpimm`) for Storage buckets only. Its Postgres tables are retired — Phase 0 migration reads them one last time, then all writes go to Firestore.
+| Service | Role |
+|---------|------|
+| **Vercel** | Hosting + Next.js API routes + cron |
+| **GitHub** | Source control (`Trip2Talk-2026`) |
+| **Supabase** (`xwdtjwzjkqunewxjpimm`) | Postgres (all structured data) + Storage (files) |
+| **Hostinger** | Domain DNS (outside this repo) |
 
 ```
 Browser → Next.js API Routes (Vercel)
-              ├─► Firestore Admin SDK  (text)
-              └─► Supabase service role (files — signed upload/view URLs)
+              └─► Supabase service role
+                    ├─ Postgres (trips, bookings, admin data)
+                    └─ Storage (signed upload/view URLs)
                         ↑
                  Stripe webhook (paymentStatus: paid)
 ```
 
-**Do NOT use:** Firebase Storage, Supabase Postgres (after migration), Supabase Auth, Supabase Realtime.
+**Do NOT use:** Firebase (removed in v7), Supabase Auth, Supabase Realtime from the browser for writes.
+
+Public reads use RLS policies (active trips, departures, approved reviews). All writes go through API routes with the service role key.
 
 Frontend CTA section (`src/components/cta/*`) is already built — do not modify unless asked.
 
@@ -32,7 +33,10 @@ Frontend CTA section (`src/components/cta/*`) is already built — do not modify
 ```bash
 npm install
 cp .env.local.example .env.local
+# Apply supabase/migrations/20260710100000_v7_schema.sql in Supabase SQL Editor
 npm run build:seed-data
+npm run seed:trips
+npm run seed:reviews
 npm run dev
 ```
 
@@ -42,47 +46,27 @@ npm run dev
 |---------|---------|
 | `npm run dev` | Local dev server |
 | `npm run build` | Production build |
-| `npm run test` | Seat-lock, auth, PDF, pricing, catalog tests |
+| `npm run test` | Seat-lock, match quiz, auth, PDF, pricing, catalog tests |
 | `npm run build:seed-data` | Build `seed-data/trip2talk-v6-trip-data.json` |
-| `npm run seed:trips` | Write `tripTemplates` + `tripDepartures` to Firestore |
-| `npm run migrate:supabase` | Phase 0: V5 Postgres → Firestore (one-time) |
+| `npm run seed:trips` | Upsert `trip_templates` + `trip_departures` in Postgres |
+| `npm run seed:reviews` | Insert approved reviews |
 
 ## Environment variables
 
 Copy `.env.local.example` → `.env.local`.
 
-### Firebase group (Firestore text data)
-
-From Firebase Console → Project settings → Service accounts → Generate private key.
-
-| Variable | Purpose |
-|----------|---------|
-| `FIREBASE_PROJECT_ID` | Firebase project ID |
-| `FIREBASE_CLIENT_EMAIL` | Service account email |
-| `FIREBASE_PRIVATE_KEY` | Service account private key |
-| `NEXT_PUBLIC_FIREBASE_*` | Client SDK (5 vars) for optional real-time catalog reads |
-
-### Supabase group (Storage only — same V5 project)
+### Supabase (Postgres + Storage)
 
 From Supabase Dashboard → Project settings → API.
 
 | Variable | Purpose |
 |----------|---------|
 | `SUPABASE_URL` | `https://xwdtjwzjkqunewxjpimm.supabase.co` |
-| `SUPABASE_SERVICE_ROLE_KEY` | **Server only** — uploads, signed URLs, deletes |
-| `NEXT_PUBLIC_SUPABASE_URL` | Public project URL (for `trip-photos` public URLs) |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key — RLS blocks all storage writes from browser |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Server only** — DB writes, uploads, signed URLs |
+| `NEXT_PUBLIC_SUPABASE_URL` | Public project URL (trip photo CDN) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key — RLS limits public reads |
 
-Then run `supabase/storage-policies.sql` in the SQL Editor.
-
-### Phase 0 migration (same V5 project, Postgres read-only)
-
-| Variable | Purpose |
-|----------|---------|
-| `OLD_SUPABASE_URL` | Same as `SUPABASE_URL` |
-| `OLD_SUPABASE_SERVICE_ROLE_KEY` | Same as `SUPABASE_SERVICE_ROLE_KEY` |
-
-Existing files in `payment-slips` bucket are **left in place** — migration carries the storage path into Firestore `slipUrl`.
+Apply `supabase/migrations/20260710100000_v7_schema.sql` and `supabase/storage-policies.sql` in the SQL Editor.
 
 ### Admin PINs
 
@@ -95,7 +79,7 @@ Existing files in `payment-slips` bucket are **left in place** — migration car
 
 ### Cron + email
 
-`CRON_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `OWNER_ALERT_EMAIL`
+`CRON_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `OWNER_ALERT_EMAIL`, `COMPANY_EMAIL`
 
 ### Stripe (TEST mode — use test keys only)
 
@@ -114,40 +98,60 @@ Existing files in `payment-slips` bucket are **left in place** — migration car
 
 `ENABLE_DRIVE_SYNC`, `GOOGLE_DRIVE_*`, `TWILIO_*` (SMS)
 
+## Vercel env vars to delete manually
+
+After a successful v7 deploy, remove these from the Vercel project dashboard (they are no longer read):
+
+- `FIREBASE_PROJECT_ID`
+- `FIREBASE_CLIENT_EMAIL`
+- `FIREBASE_PRIVATE_KEY`
+- `NEXT_PUBLIC_FIREBASE_API_KEY`
+- `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN`
+- `NEXT_PUBLIC_FIREBASE_PROJECT_ID`
+- `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`
+- `NEXT_PUBLIC_FIREBASE_APP_ID`
+- `OLD_SUPABASE_URL` (Phase 0 migration retired)
+- `OLD_SUPABASE_SERVICE_ROLE_KEY`
+
 ## Upload pattern (Supabase Storage)
 
 Avoids Vercel's ~4.5MB request body limit:
 
 1. Client → API route → `createSignedUploadUrl()` (service role) → returns token
 2. Client uploads **directly to Supabase** using the token
-3. Client → confirm API route → writes storage path to Firestore (never writes `paymentStatus` client-side)
+3. Client → confirm API route → writes storage path to Postgres (never writes `paymentStatus` client-side)
 
 ## Security
 
 | Resource | Policy |
 |----------|--------|
-| Firestore `tripTemplates` / `tripDepartures` | Client **read-only** |
-| Firestore everything else | Client **deny** |
+| `trip_templates` (active) | Public SELECT via RLS |
+| `trip_departures` | Public SELECT via RLS |
+| `reviews` (approved) | Public SELECT via RLS |
+| `bookings`, admin tables | Service role only |
 | `trip-photos` | Public read, service-role write |
-| `payment-slips`, `passport-documents`, `expense-receipts`, `booking-confirmations` | Service-role only, 5-min signed URLs |
+| `payment-slips`, `passport-documents`, etc. | Service-role only, signed URLs |
 
-Deploy Firestore rules: `firebase deploy --only firestore:rules`
+Seat locking uses Postgres RPCs `reserve_seats` / `release_seats` (row-level lock on update).
 
 ## Data quality flags (review before go-live)
 
 1. **TAS-3D2N** — seeded departure 16–21 Mar spans 6 days but trip is 3D2N
 2. **BER-3D2N** — no confirmed max seats in source data
+3. **TAS-LH-3D2N-WIN** — max seats confirmation pending
 
-## Routes (Phase 2–4)
+## Routes
 
 | Path | Purpose |
 |------|---------|
+| `/` | Homepage + comparison table + trip finder promo |
+| `/trip-finder` | Trip matcher quiz (no AI — pure tag scoring) |
 | `/trips` | Public catalog |
 | `/trips/[tripCode]` | Trip detail + checkout |
 | `/trips/private` | Private 1-day inquiry (6 routes) |
 | `/booking/[id]/upload-documents` | Post-payment compliance upload |
 | `/admin/login` | PIN auth |
-| `/admin` | Role-aware dashboard (owner / cashier / trip leader) |
+| `/admin` | Role-aware dashboard |
 
 ### API highlights
 
@@ -159,22 +163,21 @@ Deploy Firestore rules: `firebase deploy --only firestore:rules`
 
 ## Vercel Cron
 
-**Live now** (`vercel.ts`) — once daily on Hobby (Vercel Pro required for sub-daily schedules):
+**Live now** (`vercel.ts`) — once daily on Hobby:
 
-| Schedule (UTC) | Route | Original intent (restore on Pro) |
-|----------------|-------|----------------------------------|
-| Daily 03:00 | `/api/cron/expire-pending-slips` (48h bank slip expiry) | Hourly (`0 * * * *`) |
-| Daily 03:03 | `/api/cron/expire-pending-cards` (30min card expiry) | Every 15 min (`*/15 * * * *`) |
-| Daily 03:06 | `/api/cron/document-expiry-alerts` | Daily 04:00 (`0 4 * * *`) |
+| Schedule (UTC) | Route |
+|----------------|-------|
+| Daily 03:00 | `/api/cron/expire-pending-slips` |
+| Daily 03:03 | `/api/cron/expire-pending-cards` |
+| Daily 03:06 | `/api/cron/document-expiry-alerts` |
 
-**Built + tested but NOT scheduled** — enable only after manual dry run:
+**Built but NOT scheduled** — enable after manual dry run:
 
 ```typescript
-// Add to vercel.ts config.crons[] after Saen reviews dry run:
-// Enable only after Saen reviews a manual dry run — this permanently deletes customer ID documents.
+// Add to vercel.ts config.crons[] after review:
 {
   path: "/api/cron/delete-compliance-docs",
-  schedule: "9 3 * * *", // stagger after live crons (03:00–03:06)
+  schedule: "9 3 * * *",
 }
 ```
 
@@ -182,4 +185,4 @@ Dry run locally: `curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:
 
 ## Repo
 
-GitHub: `trip2talk-v6-app`
+GitHub: `trip2talksyd-gif/Trip2Talk-2026`
