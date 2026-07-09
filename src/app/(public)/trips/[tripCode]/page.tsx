@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { CheckoutWidget } from "@/components/trips/CheckoutWidget";
+import { FacebookContactButton } from "@/components/trips/FacebookContactButton";
 import { formatThaiDate, getUnitPriceAud } from "@/lib/booking-pricing";
 import { fetchTripByCode, tripImageUrl } from "@/lib/trips-server";
 
@@ -126,12 +127,34 @@ export default async function TripDetailPage({
               </div>
             )}
           </section>
+        ) : isSydOneDay && subPackages.length > 0 ? (
+          <section className="mt-10">
+            <h2 className="font-serif text-xl">สอบถาม / เลือกแพ็กเกจ</h2>
+            <p className="mt-2 text-sm text-white/70">
+              ทริปนี้เปิดจองตามคำขอ — เลือกแพ็กเกจแล้วแชทสอบถามทีมงานได้เลย
+            </p>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {subPackages.map((pkg) => (
+                <div key={pkg.id ?? pkg.name} className="rounded-xl border border-white/10 p-4">
+                  <p className="font-medium">{pkg.titleTH ?? pkg.name}</p>
+                  <p className="mt-1 text-sm text-white/70">{pkg.description}</p>
+                  <p className="mt-2 text-sm">
+                    AUD ${(pkg.priceAUD ?? getUnitPriceAud(template)).toLocaleString()}
+                  </p>
+                  <div className="mt-4">
+                    <FacebookContactButton className="w-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
         ) : (
           <section className="mt-10 rounded-2xl bg-white/5 p-6">
             <h2 className="font-serif text-xl">สอบถาม / เปิดจองตามคำขอ</h2>
             <p className="mt-2 text-sm text-white/70">
               ทริปนี้ยังไม่มีวันออกเดินทางที่ยืนยัน — กรุณาติดต่อ trip2talksyd@gmail.com
             </p>
+            <FacebookContactButton className="mt-4 w-full sm:w-auto" />
           </section>
         )}
       </div>

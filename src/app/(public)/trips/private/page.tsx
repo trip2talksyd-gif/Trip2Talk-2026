@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { FacebookContactButton } from "@/components/trips/FacebookContactButton";
+
 const ROUTES = [
   { n: 1, title: "สายหวาน & วินเทจ (Blue Mountains)" },
   { n: 2, title: "สายดอกไม้ & ทะเลทราย (Anna Bay)" },
@@ -114,12 +116,15 @@ export default function PrivateTripPage() {
               onChange={(e) => setNotes(e.target.value)}
             />
             {error && <p className="text-sm text-red-400">{error}</p>}
-            <button
-              type="submit"
-              className="w-full rounded-full bg-white/90 py-3 text-sm font-medium text-black"
-            >
-              ส่งคำขอ
-            </button>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <button
+                type="submit"
+                className="flex-1 rounded-full bg-white/90 py-3 text-sm font-medium text-black"
+              >
+                ส่งคำขอ
+              </button>
+              <FacebookContactButton className="flex-1" />
+            </div>
           </form>
         )}
       </div>

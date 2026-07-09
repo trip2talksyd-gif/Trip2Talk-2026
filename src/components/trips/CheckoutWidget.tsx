@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { StripeCheckout } from "@/components/trips/StripeCheckout";
+import { FacebookContactButton } from "@/components/trips/FacebookContactButton";
 
 interface CheckoutWidgetProps {
   departureId: string;
@@ -177,13 +178,16 @@ export function CheckoutWidget({
       {error && <p className="text-sm text-red-400">{error}</p>}
 
       {!slipUpload ? (
-        <button
-          type="button"
-          onClick={startCheckout}
-          className="w-full rounded-full bg-white/90 py-3 text-sm font-medium text-black"
-        >
-          ดำเนินการต่อ
-        </button>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="button"
+            onClick={startCheckout}
+            className="flex-1 rounded-full bg-white/90 py-3 text-sm font-medium text-black"
+          >
+            ดำเนินการต่อ
+          </button>
+          <FacebookContactButton className="flex-1" />
+        </div>
       ) : (
         <label className="block text-sm text-white/80">
           อัปโหลดสลิปการโอน
