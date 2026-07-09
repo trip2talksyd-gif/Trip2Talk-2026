@@ -1,0 +1,77 @@
+{
+  "tripCode": "TAS-3D2N",
+  "category": "multi-day",
+  "departureType": "fixed_group",
+  "nameTH": "ทริปพร้อมช่างภาพ สัมผัสประวัติศาสตร์ ศิลปะ และตามล่าแสงใต้เมือง Hobart (Tasmania Mini Aurora Hunt)",
+  "tagline": "ร่วมเดินทางไปกับทริปส่วนตัวสุด Exclusive ที่ออกแบบมาเพื่อกลุ่มเพื่อนและครอบครัว สัมผัสเสน่ห์ของเกาะแทสเมเนียในแบบพรีเมียม ตั้งแต่สถาปัตยกรรมหินทรายอันเป็นตำนาน ไปจนถึงความมหัศจรรย์ของแสงออโรร่าบนยอดเขาที่สูงที่สุดในฮอบาร์ต",
+  "durationDays": 3,
+  "maxMembersText": "Private Photo Trip 4-6 คน ต่อทริป (สูงสุดไม่เกิน 6 ท่าน)",
+  "maxSeatsBookable": 6,
+  "knownDepartures": [
+    {
+      "startDate": "2026-03-16",
+      "endDate": "2026-03-21",
+      "maxSeats": 6,
+      "seatsBooked": 0,
+      "rateType": "standard",
+      "flag": "⚠️ SOURCE DATA ISSUE: date range 16-21 Mar = 6 days but trip is labeled 3D2N. Confirm correct departure dates with Saen before this goes live for booking."
+    }
+  ],
+  "highlights": [
+    {
+      "title": "Mount Wellington (kunanyi)",
+      "description": "ยอดเขาสูงสุดเมืองฮอบาร์ต ชมพระอาทิตย์ตกลับขอบฟ้า และทำภารกิจ Aurora Hunting ลุ้นชมแสงใต้เต้นระบำในจุดที่มืดและเงียบสงบที่สุด (เตรียมเสื้อหนาวหนาๆ)"
+    },
+    {
+      "title": "Bruny Island",
+      "description": "นั่งเฟอร์รี่ข้ามเกาะ เช็คอินจุดชมวิว 360 องศาที่ The Neck ถ่ายภาพประภาคาร Bruny Island Lighthouse และทางเลือกชิมหอยนางรมสดชีสทำมือระดับรางวัล (Tasting Trail)"
+    },
+    {
+      "title": "MONA (Museum of Old and New Art)",
+      "description": "พิพิธภัณฑ์ศิลปะใต้ดินล้ำสมัยและชื่อเสียงที่สุดในซีกโลกใต้ ถ่ายภาพพอร์ตเทรตเล่นกับแสงและเงาแนวอาร์ตขั้นสุด ปิดท้ายเดินเล่นย่านท่าเรือประวัติศาสตร์ Hobart Waterfront"
+    }
+  ],
+  "itinerary": [
+    {
+      "day": 1,
+      "text": "นั่งรถ Private SUV มุ่งสู่ Port Arthur Historic Site ย้อนรอยประวัติศาสตร์โบราณสถานนักโทษ -> บ่ายเดิน Hobart Market ถ่ายภาพงานคราฟต์ -> เย็นขึ้นยอดเขา Mt. Wellington ชมพระอาทิตย์ตกและล่าแสงออโรร่า พัก Design Home Airbnb"
+    },
+    {
+      "day": 2,
+      "text": "นั่งเฟอร์รี่ลุยเกาะ Bruny Island เต็มวัน -> เช็คอินถ่ายรูปแนวแลนด์สเคปที่ The Neck และ Bruny Lighthouse -> แวะฟาร์มหอยนางรม/ชีสสด (Optional) -> ค่ำเดินทางกลับขึ้นเขา Wellington ลุ้นล่าแสงใต้อีกครั้ง พัก Design Home Airbnb"
+    },
+    {
+      "day": 3,
+      "text": "เช้าเข้าเสพงานศิลป์ระดับโลกที่พิพิธภัณฑ์ใต้ดิน MONA -> มื้อเที่ยงเดินเล่นถ่ายสตรีท Waterfront ท่าเรือประวัติศาสตร์ -> บ่ายเดินทางสู่สนามบิน บินกลับซิดนีย์โดยสวัสดิภาพ"
+    }
+  ],
+  "pricing": {
+    "standard": {
+      "amountAUD": 1350,
+      "note": "ลูกค้า 4 – 6 ท่าน / ท่าน"
+    },
+    "private": {
+      "amountAUD": 1625,
+      "amountRangeAUD": [
+        1600,
+        1650
+      ],
+      "note": "ลูกค้า 2 – 3 ท่าน (Guaranteed Rate) / ท่าน, เริ่มต้น"
+    }
+  },
+  "inclusions": [
+    "รถ Private SUV พร้อมคนขับและน้ำมันตลอดทริป",
+    "ช่างภาพมืออาชีพคอยดูแลมุม",
+    "ค่าน้ำดื่ม",
+    "ค่าเข้าอุทยานและสถานที่ตามแพลน",
+    "บริการฟรีช่วยประสานงานจองตั๋วเครื่องบิน"
+  ],
+  "exclusions": [
+    "ตั๋วเครื่องบินไป-กลับ",
+    "อาหารทุกมื้อ",
+    "ประกันการเดินทาง"
+  ],
+  "accommodationPolicy": "พักร่วมกันในห้องพักแบบรวม Dormitory/Design Airbnb เน้นสะอาดปลอดภัย อัปเกรดเป็นห้องพักส่วนตัวได้ จ่ายเพิ่มส่วนต่าง $350-$550 AUD ต่อคืน (กรุณาแจ้งล่วงหน้า)",
+  "promoImageRef": null,
+  "active": true
+}

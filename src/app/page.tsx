@@ -1,18 +1,25 @@
+import { CtaSection } from "@/components/cta/CtaSection";
+
 export default function Home() {
   return (
-    <main className="min-h-screen bg-stone-50 text-stone-900">
-      <div className="mx-auto flex max-w-3xl flex-col items-center justify-center px-6 py-24 text-center">
+    <main className="min-h-screen bg-white text-stone-900">
+      <section className="mx-auto max-w-5xl px-6 py-20 text-center">
         <p className="mb-3 text-sm font-medium uppercase tracking-widest text-emerald-800">
-          Trip2Talk V6
+          Trip2Talk
         </p>
-        <h1 className="mb-4 text-4xl font-semibold tracking-tight sm:text-5xl">
+        <h1
+          className="mb-4 text-4xl font-normal tracking-tight sm:text-5xl"
+          style={{ fontFamily: "var(--font-instrument-serif), serif" }}
+        >
           Photo trips across Australia
         </h1>
-        <p className="max-w-xl text-lg text-stone-600">
-          Firebase rebuild in progress. Trip catalog, booking, and admin
-          dashboards arrive in the next phases.
+        <p className="mx-auto max-w-xl text-lg text-stone-600">
+          Small groups, expert Trip Leaders, and professional photographers —
+          every highlight, every golden hour.
         </p>
-      </div>
+      </section>
+
+      <CtaSection />
     </main>
   );
 }

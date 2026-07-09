@@ -1,13 +1,11 @@
 import { config } from "dotenv";
+import { readFileSync } from "fs";
 import { resolve } from "path";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 
-import { tripCatalog } from "../src/data/load-catalog";
-import {
-  auditTemplateBrandLanguage,
-  expandCatalogToTripDocs,
-} from "../src/lib/trip-catalog/expand";
+import { parseTripSeedData } from "../src/lib/seed/parse-trip-data";
+import type { TripCatalog } from "../src/lib/types/trip-catalog";
 
 config({ path: resolve(process.cwd(), ".env.local") });
 
@@ -32,38 +30,45 @@ function initFirebase() {
 }
 
 async function main() {
-  const catalog = tripCatalog;
+  const seedPath = resolve(process.cwd(), "seed-data/trip2talk-v6-trip-data.json");
+  const catalog = JSON.parse(readFileSync(seedPath, "utf8")) as TripCatalog;
 
-  console.log("Trip2Talk V6 — seed trips from catalog\n");
+  console.log("Trip2Talk V6 — seed tripTemplates + tripDepartures\n");
+  console.log(`Source: ${seedPath}`);
   console.log(`Company: ${catalog.company.email} | ABN ${catalog.company.abn}\n`);
 
-  const brandAudits = catalog.tripTemplates.map((t) =>
-    auditTemplateBrandLanguage(t, catalog.company.brandRules.neverUse),
+  const { templates, departures, flags } = parseTripSeedData(
+    catalog.tripTemplates,
   );
-  const withViolations = brandAudits.filter((a) => a.violations.length > 0);
-  if (withViolations.length > 0) {
-    console.warn("Brand language warnings (review source copy):");
-    for (const audit of withViolations) {
-      console.warn(`  ${audit.tripCode}: contains ${audit.violations.join(", ")}`);
+
+  if (flags.length > 0) {
+    console.log("══════════════════════════════════════════");
+    console.log("DATA QUALITY FLAGS (review before go-live)");
+    console.log("══════════════════════════════════════════");
+    for (const flag of flags) {
+      console.log(`  [${flag.severity.toUpperCase()}] ${flag.tripCode}`);
+      console.log(`    ${flag.message}\n`);
     }
-    console.warn("");
   }
 
-  const tripDocs = expandCatalogToTripDocs(catalog.tripTemplates);
   console.log(
-    `Expanding ${catalog.tripTemplates.length} templates → ${tripDocs.length} trip doc(s)\n`,
+    `Templates: ${templates.length} | Departures: ${departures.length}\n`,
   );
 
   const db = initFirebase();
-  let written = 0;
 
-  for (const doc of tripDocs) {
-    const { docId, ...data } = doc;
-    await db.collection("trips").doc(docId).set(data, { merge: true });
-    written += 1;
-    const dateLabel = doc.fixedDate ?? "Date TBA";
+  for (const template of templates) {
+    await db.collection("tripTemplates").doc(template.tripCode).set(template, {
+      merge: true,
+    });
+    console.log(`  ✓ tripTemplates/${template.tripCode}`);
+  }
+
+  for (const departure of departures) {
+    const { docId, ...data } = departure;
+    await db.collection("tripDepartures").doc(docId).set(data, { merge: true });
     console.log(
-      `  ✓ ${docId} (${doc.tripCode}, ${dateLabel}, ${doc.maxSeats} seats)`,
+      `  ✓ tripDepartures/${docId} (${departure.startDate}, ${departure.maxSeats} seats)`,
     );
   }
 
@@ -81,9 +86,29 @@ async function main() {
       .collection("config")
       .doc("privateOneDayCustom")
       .set(catalog.privateOneDayCustom, { merge: true });
+    console.log("  ✓ config/privateOneDayCustom");
   }
 
-  console.log(`\nDone. ${written} trip document(s) written (idempotent).`);
+  const seasonalCount = templates.filter(
+    (t) =>
+      t.departureType === "seasonal_on_request" ||
+      t.departureType === "custom_private",
+  ).length;
+  const zeroDepartureTemplates = templates.filter(
+    (t) => !departures.some((d) => d.tripCode === t.tripCode),
+  );
+
+  console.log("\nSummary:");
+  console.log(`  tripTemplates written: ${templates.length}`);
+  console.log(`  tripDepartures written: ${departures.length}`);
+  console.log(
+    `  templates with zero departures (admin creates manually): ${zeroDepartureTemplates.length}`,
+  );
+  console.log(
+    `    → ${zeroDepartureTemplates.map((t) => t.tripCode).join(", ")}`,
+  );
+  console.log(`  seasonal/custom templates: ${seasonalCount}`);
+  console.log(`  data quality flags: ${flags.length}`);
 }
 
 main().catch((err) => {

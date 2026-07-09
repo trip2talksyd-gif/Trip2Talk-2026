@@ -11,17 +11,20 @@
     "test:watch": "vitest",
     "migrate:supabase": "tsx scripts/migrate-from-supabase.ts",
     "seed:trips": "tsx scripts/seed-trips.ts",
-    "build:catalog": "tsx scripts/build-catalog-json.ts"
+    "build:seed-data": "tsx scripts/build-seed-data.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.110.1",
+    "clsx": "^2.1.1",
     "firebase": "^12.15.0",
     "firebase-admin": "^14.1.0",
+    "framer-motion": "^12.42.2",
     "next": "14.2.35",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "tailwind-merge": "^3.6.0"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.110.1",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

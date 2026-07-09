@@ -1,6 +1,5 @@
 import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
-import { getStorage, type Storage } from "firebase-admin/storage";
 
 function getFirebaseAdminApp(): App {
   if (getApps().length > 0) {
@@ -23,14 +22,10 @@ function getFirebaseAdminApp(): App {
       clientEmail,
       privateKey,
     }),
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
   });
 }
 
+/** Firestore only — media files live in Supabase Storage (see lib/storage.ts). */
 export function getAdminDb(): Firestore {
   return getFirestore(getFirebaseAdminApp());
-}
-
-export function getAdminStorage(): Storage {
-  return getStorage(getFirebaseAdminApp());
 }

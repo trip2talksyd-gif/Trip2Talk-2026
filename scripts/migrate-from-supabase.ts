@@ -7,9 +7,16 @@ import { appendFileSync, writeFileSync } from "fs";
 
 config({ path: resolve(process.cwd(), ".env.local") });
 
+/**
+ * Phase 0 — one-time migration from V5 Supabase Postgres → Firestore.
+ * Storage files already in Supabase buckets (payment-slips, etc.) are NOT
+ * re-uploaded — existing paths are copied into Firestore slipUrl as-is.
+ */
+
 const ERROR_LOG = resolve(process.cwd(), "migration-errors.log");
 const MIGRATION_COLLECTIONS = [
-  "trips",
+  "tripTemplates",
+  "tripDepartures",
   "bookings",
   "staff_profiles",
   "staff_commission_ledger",
@@ -20,7 +27,8 @@ const MIGRATION_COLLECTIONS = [
 type MigrationCollection = (typeof MIGRATION_COLLECTIONS)[number];
 
 const counts: Record<MigrationCollection, number> = {
-  trips: 0,
+  tripTemplates: 0,
+  tripDepartures: 0,
   bookings: 0,
   staff_profiles: 0,
   staff_commission_ledger: 0,
@@ -172,28 +180,55 @@ async function migrateTrips(
   for (const row of (data ?? []) as SupabaseTourRow[]) {
     try {
       await db
-        .collection("trips")
-        .doc(row.id)
+        .collection("tripTemplates")
+        .doc(row.trip_code)
         .set(
           {
             tripCode: row.trip_code,
-            title: row.name_en,
-            description: `${row.destination} · ${row.duration_label}\n${row.name_th}`,
-            itinerary: "",
-            priceAdult: Number(row.price_standard),
-            priceChild: Number(row.price_private ?? row.price_standard),
-            maxSeats: row.max_pax,
-            seatsBooked: row.current_pax,
-            fixedDate: row.next_date,
-            heroImageUrl: "",
+            category: row.duration_label.includes("Day") ? "one-day" : "multi-day",
+            departureType: row.next_date ? "fixed_group" : "seasonal_on_request",
+            nameTH: row.name_th,
+            tagline: row.name_en,
+            highlights: [],
+            itinerary: [],
+            pricing: {
+              standard: {
+                amountAUD: Number(row.price_standard),
+                note: "Migrated from V5",
+              },
+            },
+            inclusions: [],
+            exclusions: [],
+            accommodationPolicy: null,
+            maxSeatsBookable: row.max_pax,
+            promoImageRef: null,
             galleryUrl: "",
             active: row.status !== "CANCELLED",
           },
           { merge: true },
         );
-      counts.trips += 1;
+      counts.tripTemplates += 1;
+
+      if (row.next_date) {
+        const departureId = `${row.trip_code}__${row.next_date}`;
+        await db
+          .collection("tripDepartures")
+          .doc(departureId)
+          .set(
+            {
+              tripCode: row.trip_code,
+              startDate: row.next_date,
+              endDate: null,
+              maxSeats: row.max_pax,
+              seatsBooked: row.current_pax,
+              status: "upcoming",
+            },
+            { merge: true },
+          );
+        counts.tripDepartures += 1;
+      }
     } catch (err) {
-      logError("trips", row.id, String(err));
+      logError("tripTemplates", row.id, String(err));
     }
   }
 }
@@ -202,6 +237,11 @@ async function migrateBookings(
   supabase: SupabaseClient,
   db: Firestore,
 ): Promise<void> {
+  const { data: tours } = await supabase.from("tours").select("id, trip_code, next_date");
+  const tourMap = new Map(
+    (tours ?? []).map((t) => [t.id as string, t as { trip_code: string; next_date: string | null }]),
+  );
+
   const { data, error } = await supabase.from("tour_bookings").select("*");
 
   if (error) {
@@ -211,6 +251,10 @@ async function migrateBookings(
   for (const row of (data ?? []) as SupabaseBookingRow[]) {
     try {
       const paymentMethod = mapPaymentMethod(row.payment_method);
+      const tour = tourMap.get(row.tour_id);
+      const departureId = tour?.next_date
+        ? `${row.trip_code}__${tour.next_date}`
+        : `${row.trip_code}__legacy_${row.tour_id}`;
 
       await db
         .collection("bookings")
@@ -218,15 +262,21 @@ async function migrateBookings(
         .set(
           {
             tripCode: row.trip_code,
+            departureId,
             customerName: `${row.first_name_en} ${row.last_name_en}`.trim(),
             phone: row.phone,
             email: row.email,
             seatsBooked: 1,
             paymentMethod,
-            paymentStatus: mapPaymentStatus(row.booking_status, row.payment_method),
+            paymentStatus: mapPaymentStatus(
+              row.booking_status,
+              row.payment_method,
+            ),
             stripePaymentIntentId: null,
             slipUrl: row.slip_url,
             waiverAccepted: row.waiver_signed,
+            waiverAcceptedAt: row.waiver_signed ? row.booked_at : null,
+            waiverAcceptedIp: null,
             complianceDocsUploaded: false,
             docsDeletedAt: null,
             createdAt: row.booked_at,
@@ -294,7 +344,8 @@ async function migrateCommissionLedger(
         .set(
           {
             staffId: row.staff_id,
-            tripId: row.tour_id,
+            tripCode: null,
+            departureId: row.tour_id,
             amountAud: Number(row.amount_aud),
             note: row.note,
             createdAt: row.created_at,
@@ -325,7 +376,12 @@ async function migrateExpenses(
         .doc(row.id)
         .set(
           {
+            tripCode: null,
+            date: row.created_at.slice(0, 10),
             amountAud: Number(row.amount_aud),
+            description: row.vendor_name,
+            receiptStorageUrl: null,
+            enteredBy: null,
             atoCategory: row.ato_category,
             vendorName: row.vendor_name,
             hasGst: row.has_gst,

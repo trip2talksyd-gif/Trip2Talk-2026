@@ -1,67 +1,58 @@
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import { describe, expect, it } from "vitest";
 
-import { tripCatalog } from "@/data/load-catalog";
-import {
-  expandCatalogToTripDocs,
-  expandTemplateToTripDocs,
-  extractEnglishTitle,
-} from "@/lib/trip-catalog/expand";
+import { parseTripSeedData } from "@/lib/seed/parse-trip-data";
+import type { TripCatalog } from "@/lib/types/trip-catalog";
 
-describe("trip catalog expansion", () => {
-  it("loads all 13 trip templates", () => {
-    expect(tripCatalog.tripTemplates).toHaveLength(13);
-    expect(tripCatalog.company.email).toBe("trip2talksyd@gmail.com");
+function loadSeedData(): TripCatalog {
+  const seedPath = resolve(process.cwd(), "seed-data/trip2talk-v6-trip-data.json");
+  return JSON.parse(readFileSync(seedPath, "utf8")) as TripCatalog;
+}
+
+describe("trip seed data parsing", () => {
+  const catalog = loadSeedData();
+  const parsed = parseTripSeedData(catalog.tripTemplates);
+
+  it("loads 13 trip templates from seed-data JSON", () => {
+    expect(catalog.tripTemplates).toHaveLength(13);
+    expect(parsed.templates).toHaveLength(13);
   });
 
-  it("extracts English title from Thai name parentheses", () => {
-    expect(
-      extractEnglishTitle(
-        "ทริปถ่ายภาพ 4 วัน 3 คืน: จากซิดนีย์สู่เมลเบิร์น (Victoria Photo Trip)",
-      ),
-    ).toBe("Victoria Photo Trip");
+  it("seeds only departures with confirmed startDate", () => {
+    expect(parsed.departures).toHaveLength(8);
+    expect(parsed.departures.every((d) => d.startDate !== null)).toBe(true);
   });
 
-  it("expands fixed departures into separate bookable trip docs", () => {
-    const mel = tripCatalog.tripTemplates.find((t) => t.tripCode === "MEL-4D3N")!;
-    const docs = expandTemplateToTripDocs(mel);
-
-    expect(docs).toHaveLength(1);
-    expect(docs[0]!.docId).toBe("MEL-4D3N__2026-02-22");
-    expect(docs[0]!.fixedDate).toBe("2026-02-22");
-    expect(docs[0]!.maxSeats).toBe(5);
+  it("does not seed departures for seasonal_on_request trips", () => {
+    const seasonal = [
+      "KIA-1DAY",
+      "SYD-1DAY",
+      "PSP-1DAY",
+      "SYD-MW-WIN",
+      "LAV-ANB-1D",
+      "BER-3D2N",
+    ];
+    for (const code of seasonal) {
+      expect(parsed.departures.some((d) => d.tripCode === code)).toBe(false);
+    }
   });
 
-  it("creates Date TBA doc for seasonal on-request trips", () => {
-    const kia = tripCatalog.tripTemplates.find((t) => t.tripCode === "KIA-1DAY")!;
-    const docs = expandTemplateToTripDocs(kia);
-
-    expect(docs).toHaveLength(1);
-    expect(docs[0]!.docId).toBe("KIA-1DAY__tba");
-    expect(docs[0]!.fixedDate).toBeNull();
+  it("seeds two CAN-2D1N departures", () => {
+    const can = parsed.departures.filter((d) => d.tripCode === "CAN-2D1N");
+    expect(can).toHaveLength(2);
   });
 
-  it("expands CAN-2D1N into two departure docs", () => {
-    const can = tripCatalog.tripTemplates.find((t) => t.tripCode === "CAN-2D1N")!;
-    const docs = expandTemplateToTripDocs(can);
-
-    expect(docs).toHaveLength(2);
-    expect(docs.map((d) => d.docId)).toEqual([
-      "CAN-2D1N__2026-10-05",
-      "CAN-2D1N__2026-10-14",
-    ]);
+  it("flags TAS-3D2N date span vs 3D2N itinerary", () => {
+    const tasFlag = parsed.flags.find(
+      (f) => f.tripCode === "TAS-3D2N" && f.severity === "blocker",
+    );
+    expect(tasFlag).toBeDefined();
+    expect(tasFlag!.message).toContain("3D2N");
   });
 
-  it("corrects TAS-3D2N end date to 3D2N range", () => {
-    const tas = tripCatalog.tripTemplates.find((t) => t.tripCode === "TAS-3D2N")!;
-    const docs = expandTemplateToTripDocs(tas);
-
-    expect(docs[0]!.endDate).toBe("2026-03-18");
-  });
-
-  it("expands full catalog to 14 bookable trip docs (8 dated + 6 Date TBA)", () => {
-    const docs = expandCatalogToTripDocs(tripCatalog.tripTemplates);
-    expect(docs).toHaveLength(14);
-    expect(docs.filter((d) => d.fixedDate !== null)).toHaveLength(8);
-    expect(docs.filter((d) => d.fixedDate === null)).toHaveLength(6);
+  it("flags BER-3D2N max seats confirmation", () => {
+    const berFlags = parsed.flags.filter((f) => f.tripCode === "BER-3D2N");
+    expect(berFlags.length).toBeGreaterThan(0);
   });
 });

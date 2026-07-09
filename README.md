@@ -1,30 +1,40 @@
-# Trip2Talk V6
+# Trip2Talk V6 — Hybrid Backend (Firestore + Supabase Storage)
 
-Fresh rebuild of Trip2Talk — Next.js App Router, Firebase Firestore + Storage, Stripe payments, Vercel hosting.
+Premium photography **trip** platform. Single-tenant. Repo: `trip2talk-v6-app`.
 
-**Brand language:** Always **Trip** (never Tour) and **Trip Leader** (never Guide).
+**Brand language:** Trip / Trip Leader only — never Tour / Guide.
 
-## Stack
+## Hybrid architecture (v2)
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | Next.js 14, React, TypeScript, Tailwind CSS |
-| Backend | Next.js API Routes (Vercel serverless) |
-| Database | Firebase Firestore |
-| Storage | Firebase Cloud Storage |
-| Payments | Stripe Payment Element |
-| Cron | Vercel Cron |
+Two services, two jobs — do not mix them up:
+
+| Service | Job | What lives here |
+|---------|-----|-----------------|
+| **Firebase Firestore** | Structured, queryable text data | `tripTemplates`, `tripDepartures`, `bookings`, staff, expenses |
+| **Supabase Storage** | Files only | `trip-photos`, `payment-slips`, `passport-documents`, `expense-receipts` |
+
+**Assumption (confirm with Saen):** Reuse the existing V5 Supabase project (`xwdtjwzjkqunewxjpimm`) for Storage buckets only. Its Postgres tables are retired — Phase 0 migration reads them one last time, then all writes go to Firestore.
+
+```
+Browser → Next.js API Routes (Vercel)
+              ├─► Firestore Admin SDK  (text)
+              └─► Supabase service role (files — signed upload/view URLs)
+                        ↑
+                 Stripe webhook (paymentStatus: paid)
+```
+
+**Do NOT use:** Firebase Storage, Supabase Postgres (after migration), Supabase Auth, Supabase Realtime.
+
+Frontend CTA section (`src/components/cta/*`) is already built — do not modify unless asked.
 
 ## Getting started
 
 ```bash
 npm install
 cp .env.local.example .env.local
-# Fill in .env.local (see Environment variables below)
+npm run build:seed-data
 npm run dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
@@ -32,156 +42,100 @@ Open [http://localhost:3000](http://localhost:3000).
 |---------|---------|
 | `npm run dev` | Local dev server |
 | `npm run build` | Production build |
-| `npm run test` | Run Vitest (includes seat-lock overbooking test) |
-| `npm run migrate:supabase` | One-time V5 → V6 data migration (manual CLI only) |
-| `npm run seed:trips` | Seed Firestore `trips` from catalog templates (requires Firebase env) |
-| `npm run build:catalog` | Export assembled catalog to `src/data/trip-catalog.full.json` |
+| `npm run test` | Seat-lock + catalog tests (12 tests) |
+| `npm run build:seed-data` | Build `seed-data/trip2talk-v6-trip-data.json` |
+| `npm run seed:trips` | Write `tripTemplates` + `tripDepartures` to Firestore |
+| `npm run migrate:supabase` | Phase 0: V5 Postgres → Firestore (one-time) |
 
 ## Environment variables
 
-Copy `.env.local.example` to `.env.local` and fill each value.
+Copy `.env.local.example` → `.env.local`.
 
-### Firebase Admin (server-only)
+### Firebase group (Firestore text data)
 
-Used by API routes, cron jobs, and the migration script. From Firebase Console → Project settings → Service accounts → Generate new private key.
+From Firebase Console → Project settings → Service accounts → Generate private key.
 
 | Variable | Purpose |
 |----------|---------|
 | `FIREBASE_PROJECT_ID` | Firebase project ID |
 | `FIREBASE_CLIENT_EMAIL` | Service account email |
-| `FIREBASE_PRIVATE_KEY` | Service account private key (paste with `\n` for newlines) |
-| `FIREBASE_STORAGE_BUCKET` | e.g. `your-project.appspot.com` |
+| `FIREBASE_PRIVATE_KEY` | Service account private key |
+| `NEXT_PUBLIC_FIREBASE_*` | Client SDK (5 vars) for optional real-time catalog reads |
 
-### Firebase Client (public — safe for browser)
+### Supabase group (Storage only — same V5 project)
 
-From Firebase Console → Project settings → Your apps → Web app config.
-
-| Variable | Purpose |
-|----------|---------|
-| `NEXT_PUBLIC_FIREBASE_API_KEY` | Web API key |
-| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | Auth domain |
-| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | Project ID |
-| `NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET` | Storage bucket |
-| `NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID` | Messaging sender ID |
-| `NEXT_PUBLIC_FIREBASE_APP_ID` | App ID |
-
-### Phase 0 migration (one-time, not deployed)
-
-Read-only access to Trip2Talk V5 Supabase project `xwdtjwzjkqunewxjpimm`.
+From Supabase Dashboard → Project settings → API.
 
 | Variable | Purpose |
 |----------|---------|
-| `OLD_SUPABASE_URL` | V5 Supabase URL |
-| `OLD_SUPABASE_SERVICE_ROLE_KEY` | V5 service role key (read-only usage) |
+| `SUPABASE_URL` | `https://xwdtjwzjkqunewxjpimm.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | **Server only** — uploads, signed URLs, deletes |
+| `NEXT_PUBLIC_SUPABASE_URL` | Public project URL (for `trip-photos` public URLs) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key — RLS blocks all storage writes from browser |
 
-### Admin authentication (server-only)
+Then run `supabase/storage-policies.sql` in the SQL Editor.
 
-| Variable | Purpose |
-|----------|---------|
-| `ADMIN_PIN_TRIP_LEADER` | PIN for Trip Leader dashboard (V5 default: 1111) |
-| `ADMIN_PIN_CASHIER` | PIN for Cashier dashboard (V5 default: 4444) |
-| `ADMIN_PIN_OWNER` | PIN for Owner dashboard (V5 default: 9999) |
-| `ADMIN_SESSION_SECRET` | Secret for signing short-lived admin session cookies |
-
-### Vercel Cron
+### Phase 0 migration (same V5 project, Postgres read-only)
 
 | Variable | Purpose |
 |----------|---------|
-| `CRON_SECRET` | Bearer token Vercel sends on cron requests; set the same value in Vercel env vars |
+| `OLD_SUPABASE_URL` | Same as `SUPABASE_URL` |
+| `OLD_SUPABASE_SERVICE_ROLE_KEY` | Same as `SUPABASE_SERVICE_ROLE_KEY` |
 
-### Stripe (payments phase)
+Existing files in `payment-slips` bucket are **left in place** — migration carries the storage path into Firestore `slipUrl`.
 
-| Variable | Purpose |
-|----------|---------|
-| `STRIPE_SECRET_KEY` | Server-side Stripe API key |
-| `STRIPE_WEBHOOK_SECRET` | Webhook signature verification |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Client-side Stripe.js |
+### Admin PINs
 
-### Bank transfer checkout display
+| Variable | V5 default |
+|----------|------------|
+| `ADMIN_PIN_TRIP_LEADER` | 1111 |
+| `ADMIN_PIN_CASHIER` | 4444 |
+| `ADMIN_PIN_OWNER` | 9999 |
+| `ADMIN_SESSION_SECRET` | Generate random string |
 
-| Variable | Purpose |
-|----------|---------|
-| `NEXT_PUBLIC_BANK_ACCOUNT_NAME` | Account name shown at checkout |
-| `NEXT_PUBLIC_BANK_BSB` | BSB |
-| `NEXT_PUBLIC_BANK_ACCOUNT_NUMBER` | Account number |
-| `NEXT_PUBLIC_PROMPTPAY_ID` | PromptPay ID (if applicable) |
+### Cron + email
 
-## Critical business rule — atomic seat lock
+`CRON_SECRET`, `RESEND_API_KEY`, `RESEND_FROM_EMAIL`, `OWNER_ALERT_EMAIL`
 
-All booking writes **must** go through `createBookingWithSeatLock()` in `src/lib/bookSeat.ts` via a Next.js API route. Never write `seatsBooked` or booking fields from the client.
+### Stripe (next phase)
 
-- `fixedDate === null` → trip is not bookable (show "Date TBA")
-- Transaction rejects when `seatsBooked + requestedSeats > maxSeats`
-- Admin seat +/- uses `adjustTripSeats()` with the same guards
+`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 
-Run the overbooking test:
+### Confirm later
 
-```bash
-npm run test
-```
+`ENABLE_DRIVE_SYNC`, `GOOGLE_DRIVE_*`, `TWILIO_*` (SMS)
 
-## Phase 0 — data migration
+## Upload pattern (Supabase Storage)
 
-Standalone script — **not** wired into the app or Vercel Cron.
+Avoids Vercel's ~4.5MB request body limit:
 
-```bash
-# Requires FIREBASE_* and OLD_SUPABASE_* in .env.local
-npm run migrate:supabase
-```
+1. Client → API route → `createSignedUploadUrl()` (service role) → returns token
+2. Client uploads **directly to Supabase** using the token
+3. Client → confirm API route → writes storage path to Firestore (never writes `paymentStatus` client-side)
 
-- Reads: `tours`, `tour_bookings`, `staff_profiles`, `staff_commission_ledger`, `expenses`, `insurance_alerts`
-- Writes to Firestore using Supabase row UUIDs as doc IDs (idempotent re-runs)
-- Logs per-collection counts; transform errors go to `migration-errors.log`
+## Security
 
-## Firebase security rules
+| Resource | Policy |
+|----------|--------|
+| Firestore `tripTemplates` / `tripDepartures` | Client **read-only** |
+| Firestore everything else | Client **deny** |
+| `trip-photos` | Public read, service-role write |
+| `payment-slips`, `passport-documents`, `expense-receipts` | Service-role only, 5-min signed URLs for admin |
 
-| Path | Access |
-|------|--------|
-| Firestore (all) | Deny client read/write — Admin SDK via API routes only |
-| `trip-photos/*` | Public read |
-| `passport-documents/*` | Deny all — Admin SDK + signed URLs only |
-| `payment-slips/*` | Deny all — Admin SDK + signed URLs only |
+Deploy Firestore rules: `firebase deploy --only firestore:rules`
 
-Deploy rules:
+## Data quality flags (review before go-live)
 
-```bash
-firebase deploy --only firestore:rules,storage
-```
+1. **TAS-3D2N** — seeded departure 16–21 Mar spans 6 days but trip is 3D2N
+2. **BER-3D2N** — no confirmed max seats in source data
 
-## Vercel Cron jobs
+## Vercel Cron
 
-Defined in `vercel.json`:
-
-| Schedule | Route | Purpose |
-|----------|-------|---------|
-| Daily 03:00 UTC | `/api/cron/delete-compliance-docs` | Delete passport docs 7+ days after trip date |
-| Hourly | `/api/cron/expire-pending-slips` | Release seats for unverified bank slips after 48h |
-
-## Trip catalog
-
-Canonical trip content lives in `src/data/trip-catalog/`:
-
-| Path | Purpose |
-|------|---------|
-| `company.json` | Email, ABN, brand rules |
-| `templates/*.json` | One file per trip code (13 templates) |
-| `private-one-day-custom.json` | Inquire-then-quote private routes |
-
-**Brand rule:** UI copy must use **Trip** / **Trip Leader** — never Tour / Guide. Source templates may contain legacy wording in Thai marketing copy; the seed script logs brand violations for review but does not alter source text.
-
-**Firestore expansion:** One `trips` doc = one departure date. Templates with `knownDepartures` expand to multiple docs (e.g. `CAN-2D1N__2026-10-05`). Seasonal/on-request trips with no dates become a single Date TBA doc (`{tripCode}__tba`, `fixedDate: null` → not bookable).
-
-After Firebase credentials are in `.env.local`:
-
-```bash
-npm run seed:trips
-```
-
-This writes **14 trip documents** (8 dated departures + 6 Date TBA) plus `config/company` and `config/privateOneDayCustom`.
-
-## Trip codes (V5 seed)
-
-TAS-3D2N, MEL-4D3N, ULU-4D3N, NZ-6D5N, TAS-LH-4D3N, KIA-1DAY, CAN-2D1N, SYD-1DAY, PSP-1DAY, TAS-SU-4D3N, SYD-MW-WIN, BER-3D2N, LAV-ANB-1D
+| Schedule | Route |
+|----------|-------|
+| Daily 03:00 UTC | `/api/cron/delete-compliance-docs` |
+| Hourly | `/api/cron/expire-pending-slips` |
+| Daily 04:00 UTC | `/api/cron/document-expiry-alerts` |
 
 ## Repo
 

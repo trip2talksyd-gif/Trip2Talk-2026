@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { adjustDepartureSeats } from "@/lib/bookSeat";
 import { verifyCronSecret } from "@/lib/cron-auth";
-import { adjustTripSeats } from "@/lib/bookSeat";
 import { getAdminDb } from "@/lib/firebase-admin";
 
 const EXPIRY_HOURS = 48;
 
 /**
- * Hourly cron: cancel pending_verification bank-slip bookings older than 48h
- * and release their seats via the transaction-guarded adjustTripSeats().
+ * Hourly cron: expire pending_verification bank-slip bookings after 48h,
+ * release seats via transaction-guarded adjustDepartureSeats().
  */
 export async function GET(request: NextRequest) {
   const authError = verifyCronSecret(request);
@@ -30,22 +30,17 @@ export async function GET(request: NextRequest) {
     if (createdAt > cutoff) continue;
 
     const seatsBooked = Number(booking.seatsBooked ?? 1);
-    const tripQuery = await db
-      .collection("trips")
-      .where("tripCode", "==", booking.tripCode)
-      .limit(1)
-      .get();
+    const departureId = booking.departureId as string | undefined;
 
-    if (!tripQuery.empty) {
-      const tripDoc = tripQuery.docs[0]!;
-      await adjustTripSeats(db, {
-        tripId: tripDoc.id,
+    if (departureId) {
+      await adjustDepartureSeats(db, {
+        departureId,
         delta: -seatsBooked,
       });
     }
 
     await bookingDoc.ref.update({
-      paymentStatus: "failed",
+      paymentStatus: "expired",
       expiredAt: new Date().toISOString(),
     });
 

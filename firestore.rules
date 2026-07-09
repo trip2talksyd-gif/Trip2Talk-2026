@@ -2,8 +2,18 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // All reads/writes go through Next.js API routes (Firebase Admin SDK).
-    // Client SDK must never write trips, bookings, or admin data directly.
+    // Public catalog reads for real-time UI (writes always via Admin SDK API routes)
+    match /tripTemplates/{tripCode} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /tripDepartures/{departureId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // All other collections — no client access
     match /{document=**} {
       allow read, write: if false;
     }

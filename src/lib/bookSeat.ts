@@ -4,13 +4,14 @@ import type {
   Transaction,
 } from "firebase-admin/firestore";
 
-import type { BookingWriteData, Trip } from "@/lib/types/firestore";
+import type { BookingWriteData, TripDeparture } from "@/lib/types/firestore";
 
 export type SeatLockErrorCode =
-  | "TRIP_NOT_FOUND"
+  | "DEPARTURE_NOT_FOUND"
   | "NOT_BOOKABLE"
   | "OVERBOOKED"
-  | "INVALID_SEATS";
+  | "INVALID_SEATS"
+  | "DEPARTURE_CANCELLED";
 
 export class SeatLockError extends Error {
   constructor(
@@ -23,75 +24,106 @@ export class SeatLockError extends Error {
 }
 
 export interface CreateBookingParams {
-  tripId: string;
+  departureId: string;
   bookingId: string;
   seatsRequested: number;
   bookingData: BookingWriteData;
 }
 
 export interface AdjustSeatsParams {
-  tripId: string;
+  departureId: string;
   delta: number;
 }
 
-function readTrip(transaction: Transaction, tripRef: DocumentReference) {
-  return transaction.get(tripRef);
+function readDeparture(
+  transaction: Transaction,
+  departureRef: DocumentReference,
+) {
+  return transaction.get(departureRef);
+}
+
+function computeDepartureStatus(
+  departure: TripDeparture,
+  newSeatsBooked: number,
+): TripDeparture["status"] {
+  if (departure.status === "cancelled" || departure.status === "completed") {
+    return departure.status;
+  }
+  if (newSeatsBooked >= departure.maxSeats) return "full";
+  return "upcoming";
 }
 
 function validateSeatRequest(
-  trip: Trip,
+  departure: TripDeparture,
   seatsRequested: number,
-): { newSeatsBooked: number } {
+): { newSeatsBooked: number; newStatus: TripDeparture["status"] } {
   if (seatsRequested <= 0) {
     throw new SeatLockError("Seat count must be at least 1.", "INVALID_SEATS");
   }
 
-  if (trip.fixedDate === null) {
+  if (departure.status === "cancelled") {
     throw new SeatLockError(
-      "This trip is not bookable yet (Date TBA).",
+      "This departure has been cancelled.",
+      "DEPARTURE_CANCELLED",
+    );
+  }
+
+  if (departure.startDate === null) {
+    throw new SeatLockError(
+      "This departure is not bookable (Date TBA — inbox to inquire).",
       "NOT_BOOKABLE",
     );
   }
 
-  const remaining = trip.maxSeats - trip.seatsBooked;
-  const newSeatsBooked = trip.seatsBooked + seatsRequested;
+  const remaining = departure.maxSeats - departure.seatsBooked;
+  const newSeatsBooked = departure.seatsBooked + seatsRequested;
 
-  if (newSeatsBooked > trip.maxSeats) {
+  if (newSeatsBooked > departure.maxSeats) {
     throw new SeatLockError(
       remaining > 0
         ? `Only ${remaining} seat${remaining === 1 ? "" : "s"} remaining.`
-        : "This trip is fully booked.",
+        : "This departure is fully booked.",
       "OVERBOOKED",
     );
   }
 
-  return { newSeatsBooked };
+  return {
+    newSeatsBooked,
+    newStatus: computeDepartureStatus(departure, newSeatsBooked),
+  };
 }
 
 /**
- * Atomically locks seats and creates a booking doc.
+ * Atomically locks seats on a tripDepartures doc and creates a booking.
  * All booking writes MUST go through this function (never client-side).
  */
 export async function createBookingWithSeatLock(
   db: Firestore,
   params: CreateBookingParams,
 ): Promise<void> {
-  const tripRef = db.collection("trips").doc(params.tripId);
+  const departureRef = db.collection("tripDepartures").doc(params.departureId);
   const bookingRef = db.collection("bookings").doc(params.bookingId);
 
   await db.runTransaction(async (transaction) => {
-    const tripSnap = await readTrip(transaction, tripRef);
+    const departureSnap = await readDeparture(transaction, departureRef);
 
-    if (!tripSnap.exists) {
-      throw new SeatLockError("Trip not found.", "TRIP_NOT_FOUND");
+    if (!departureSnap.exists) {
+      throw new SeatLockError("Departure not found.", "DEPARTURE_NOT_FOUND");
     }
 
-    const trip = tripSnap.data() as Trip;
-    const { newSeatsBooked } = validateSeatRequest(trip, params.seatsRequested);
+    const departure = departureSnap.data() as TripDeparture;
+    const { newSeatsBooked, newStatus } = validateSeatRequest(
+      departure,
+      params.seatsRequested,
+    );
 
-    transaction.update(tripRef, { seatsBooked: newSeatsBooked });
+    transaction.update(departureRef, {
+      seatsBooked: newSeatsBooked,
+      status: newStatus,
+    });
     transaction.set(bookingRef, {
       ...params.bookingData,
+      departureId: params.departureId,
       seatsBooked: params.seatsRequested,
       createdAt: new Date().toISOString(),
     });
@@ -99,24 +131,23 @@ export async function createBookingWithSeatLock(
 }
 
 /**
- * Admin Co-Host Terminal seat adjustment (+/-).
- * Uses the same transaction guard — never raw update().
+ * Admin seat adjustment (+/-). Same transaction guard — never raw update().
  */
-export async function adjustTripSeats(
+export async function adjustDepartureSeats(
   db: Firestore,
   params: AdjustSeatsParams,
 ): Promise<number> {
-  const tripRef = db.collection("trips").doc(params.tripId);
+  const departureRef = db.collection("tripDepartures").doc(params.departureId);
 
   return db.runTransaction(async (transaction) => {
-    const tripSnap = await readTrip(transaction, tripRef);
+    const departureSnap = await readDeparture(transaction, departureRef);
 
-    if (!tripSnap.exists) {
-      throw new SeatLockError("Trip not found.", "TRIP_NOT_FOUND");
+    if (!departureSnap.exists) {
+      throw new SeatLockError("Departure not found.", "DEPARTURE_NOT_FOUND");
     }
 
-    const trip = tripSnap.data() as Trip;
-    const newSeatsBooked = trip.seatsBooked + params.delta;
+    const departure = departureSnap.data() as TripDeparture;
+    const newSeatsBooked = departure.seatsBooked + params.delta;
 
     if (newSeatsBooked < 0) {
       throw new SeatLockError(
@@ -125,14 +156,20 @@ export async function adjustTripSeats(
       );
     }
 
-    if (newSeatsBooked > trip.maxSeats) {
+    if (newSeatsBooked > departure.maxSeats) {
       throw new SeatLockError(
-        `Cannot exceed max seats (${trip.maxSeats}).`,
+        `Cannot exceed max seats (${departure.maxSeats}).`,
         "OVERBOOKED",
       );
     }
 
-    transaction.update(tripRef, { seatsBooked: newSeatsBooked });
+    transaction.update(departureRef, {
+      seatsBooked: newSeatsBooked,
+      status: computeDepartureStatus(departure, newSeatsBooked),
+    });
     return newSeatsBooked;
   });
 }
+
+/** @deprecated Use adjustDepartureSeats */
+export const adjustTripSeats = adjustDepartureSeats;

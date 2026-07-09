@@ -1,31 +1,35 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { verifyCronSecret } from "@/lib/cron-auth";
-import { getAdminDb, getAdminStorage } from "@/lib/firebase-admin";
+import { getAdminDb } from "@/lib/firebase-admin";
+import { getOwnerAlertEmail, sendOwnerAlertEmail } from "@/lib/resend";
+import {
+  deleteStorageFolder,
+  STORAGE_BUCKETS,
+} from "@/lib/supabase-storage";
 
 const RETENTION_DAYS = 7;
 
 /**
- * Daily cron: delete passport/ID docs 7+ days after trip fixedDate,
- * reset compliance flags on affected bookings.
+ * Daily cron: delete passport/ID docs 7+ days after departure endDate,
+ * reset compliance flags, email Owner summary via Resend.
  */
 export async function GET(request: NextRequest) {
   const authError = verifyCronSecret(request);
   if (authError) return authError;
 
   const db = getAdminDb();
-  const bucket = getAdminStorage().bucket();
   const cutoff = new Date();
   cutoff.setDate(cutoff.getDate() - RETENTION_DAYS);
   const cutoffIso = cutoff.toISOString().slice(0, 10);
 
-  const tripsSnap = await db.collection("trips").get();
-  const expiredTripCodes = new Set<string>();
+  const departuresSnap = await db.collection("tripDepartures").get();
+  const expiredDepartureIds = new Set<string>();
 
-  for (const tripDoc of tripsSnap.docs) {
-    const fixedDate = tripDoc.data().fixedDate as string | null;
-    if (fixedDate && fixedDate <= cutoffIso) {
-      expiredTripCodes.add(tripDoc.data().tripCode as string);
+  for (const doc of departuresSnap.docs) {
+    const endDate = doc.data().endDate as string | null;
+    if (endDate && endDate <= cutoffIso) {
+      expiredDepartureIds.add(doc.id);
     }
   }
 
@@ -35,23 +39,25 @@ export async function GET(request: NextRequest) {
     .get();
 
   const deleted: string[] = [];
+  const affectedBookings: string[] = [];
 
   for (const bookingDoc of bookingsSnap.docs) {
     const booking = bookingDoc.data();
-    if (!expiredTripCodes.has(booking.tripCode as string)) continue;
+    const departureId = booking.departureId as string | undefined;
+    if (!departureId || !expiredDepartureIds.has(departureId)) continue;
 
-    const prefix = `passport-documents/${bookingDoc.id}/`;
-    const [files] = await bucket.getFiles({ prefix });
-
-    for (const file of files) {
-      await file.delete();
-      deleted.push(file.name);
-    }
+    const folderPrefix = bookingDoc.id;
+    const removed = await deleteStorageFolder(
+      STORAGE_BUCKETS.passportDocuments,
+      folderPrefix,
+    );
+    deleted.push(...removed);
 
     await bookingDoc.ref.update({
       complianceDocsUploaded: false,
       docsDeletedAt: new Date().toISOString(),
     });
+    affectedBookings.push(bookingDoc.id);
   }
 
   console.log(
@@ -59,9 +65,18 @@ export async function GET(request: NextRequest) {
     deleted,
   );
 
+  if (deleted.length > 0) {
+    await sendOwnerAlertEmail({
+      to: getOwnerAlertEmail(),
+      subject: `Trip2Talk — ${deleted.length} compliance doc(s) deleted`,
+      html: `<p>Passport/ID files deleted after ${RETENTION_DAYS}-day retention:</p><ul>${deleted.map((p) => `<li>${p}</li>`).join("")}</ul><p>Bookings affected: ${affectedBookings.join(", ")}</p>`,
+    });
+  }
+
   return NextResponse.json({
     ok: true,
     filesDeleted: deleted.length,
     deletedPaths: deleted,
+    affectedBookings,
   });
 }
