@@ -29,7 +29,8 @@ export function HowItWorks() {
           จองทริปอย่างไร
         </h2>
         <p className="mx-auto mt-3 max-w-xl text-center text-sm text-white/60">
-          สามขั้นตอนง่ายๆ จากเลือกทริปจนถึงวันที่คุณได้ภาพกลับ
+          สามขั้นตอนง่ายๆ — ไม่ต้องหาช่างภาพเอง ไม่ต้องกังวลเรื่องมุมกล้อง แค่เดินไปกับเรา
+          รูปสวยตะโกนกลับบ้านทุกทริป
         </p>
         <ol className="mt-12 grid gap-8 md:grid-cols-3">
           {STEPS.map((step, i) => (

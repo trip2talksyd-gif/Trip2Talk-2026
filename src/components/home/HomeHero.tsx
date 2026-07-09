@@ -39,6 +39,11 @@ export function HomeHero() {
       <div className="absolute inset-0 z-[1] bg-gradient-to-b from-[#0a1628]/40 via-[#0a1628]/60 to-[#0a1628]" />
 
       <div className="relative z-10 mx-auto max-w-4xl px-4 py-24 text-center sm:px-6">
+        <p className="mb-5 flex justify-center">
+          <span className="liquid-glass rounded-full px-3 py-1 text-xs text-white/90 sm:px-4 sm:py-1.5 sm:text-sm">
+            ผลงานระดับ Gallery
+          </span>
+        </p>
         <h1
           className="text-balance text-4xl font-normal leading-tight tracking-tight sm:text-5xl md:text-6xl"
           style={{ fontFamily: "var(--font-instrument-serif), var(--font-noto-serif-thai), serif" }}
