@@ -1,0 +1,8 @@
+{
+  "email": "trip2talksyd@gmail.com",
+  "abn": "81 951 461 769",
+  "brandRules": {
+    "neverUse": ["ทัวร์", "ไกด์", "Tour", "Guide"],
+    "alwaysUse": ["ทริป", "Trip Leader"]
+  }
+}

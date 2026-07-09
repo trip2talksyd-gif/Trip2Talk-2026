@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/delete-compliance-docs",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/expire-pending-slips",
+      "schedule": "0 * * * *"
+    }
+  ]
+}
