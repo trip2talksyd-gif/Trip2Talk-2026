@@ -1,9 +1,13 @@
+import { PDFParse } from "pdf-parse";
 import { describe, expect, it } from "vitest";
 
-import { generateBookingPdf } from "@/lib/generateBookingPdf";
+import {
+  generateBookingPdf,
+  generateBookingPdfResult,
+} from "@/lib/generateBookingPdf";
 import type { Booking, TripDeparture, TripTemplate } from "@/lib/types/firestore";
 
-const template: TripTemplate = {
+const baseTemplate: TripTemplate = {
   tripCode: "TEST-1DAY",
   category: "oneDay",
   departureType: "scheduled",
@@ -16,9 +20,9 @@ const template: TripTemplate = {
   depositRequiredAUD: 100,
   inclusions: [],
   exclusions: [],
-  accommodationPolicy: "No accommodation",
-  cancellationPolicy: ["No refund on deposit"],
-  depositPolicy: "AUD $100 non-refundable",
+  accommodationPolicy: "ไม่มีที่พักในทริปวันเดียว",
+  cancellationPolicy: ["ไม่คืนเงินมัดจำ"],
+  depositPolicy: "มัดจำ AUD $100 ไม่คืน",
   promoImageRef: null,
   galleryUrl: "",
   active: true,
@@ -34,11 +38,11 @@ const departure: TripDeparture = {
   status: "upcoming",
 };
 
-const booking: Booking & { id: string } = {
+const baseBooking: Booking & { id: string } = {
   id: "test-booking-001",
   tripCode: "TEST-1DAY",
   departureId: "TEST-1DAY__2026-08-01",
-  customerName: "Test Customer",
+  customerName: "สมชาย ใจดี",
   phone: "0400000000",
   email: "test@example.com",
   seatsBooked: 2,
@@ -55,11 +59,50 @@ const booking: Booking & { id: string } = {
   createdAt: "2026-07-09T00:00:00.000Z",
 };
 
+async function extractPdfText(bytes: Uint8Array): Promise<string> {
+  const parser = new PDFParse({ data: bytes });
+  const result = await parser.getText();
+  await parser.destroy();
+  return result.text;
+}
+
 describe("generateBookingPdf", () => {
   it("produces a non-empty PDF buffer", async () => {
-    const bytes = await generateBookingPdf({ booking, template, departure });
+    const bytes = await generateBookingPdf({
+      booking: baseBooking,
+      template: baseTemplate,
+      departure,
+    });
     expect(bytes.byteLength).toBeGreaterThan(500);
     const header = String.fromCharCode(...bytes.slice(0, 5));
     expect(header).toBe("%PDF-");
+  });
+
+  it("embeds Noto Sans Thai Regular and Bold fonts", async () => {
+    const { embeddedFontNames } = await generateBookingPdfResult({
+      booking: baseBooking,
+      template: baseTemplate,
+      departure,
+    });
+    expect(embeddedFontNames.some((n) => /NotoSansThai-Regular/i.test(n))).toBe(
+      true,
+    );
+    expect(embeddedFontNames.some((n) => /NotoSansThai-Bold/i.test(n))).toBe(
+      true,
+    );
+  });
+
+  it("renders Thai customer and trip names without replacement question marks", async () => {
+    const bytes = await generateBookingPdf({
+      booking: baseBooking,
+      template: baseTemplate,
+      departure,
+    });
+
+    const text = await extractPdfText(bytes);
+
+    expect(text).toContain("สมชาย");
+    expect(text).toContain("ทริปทดสอบ");
+    expect(text).not.toContain("?");
   });
 });
