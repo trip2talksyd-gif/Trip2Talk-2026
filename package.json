@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "migrate:supabase": "tsx scripts/migrate-from-supabase.ts",
     "seed:trips": "tsx scripts/seed-trips.ts",
+    "seed:reviews": "tsx scripts/seed-reviews.ts",
     "build:seed-data": "tsx scripts/build-seed-data.ts"
   },
   "dependencies": {

@@ -1,24 +1,38 @@
+import type { Metadata } from "next";
+
 import { CtaSection } from "@/components/cta/CtaSection";
+import { FeaturedTrips } from "@/components/home/FeaturedTrips";
+import { HomeHero } from "@/components/home/HomeHero";
+import { HowItWorks } from "@/components/home/HowItWorks";
+import { ReviewsPreview } from "@/components/home/ReviewsPreview";
+import { fetchFeaturedTrips } from "@/server/home-data";
+import { fetchApprovedReviews } from "@/server/reviews-data";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "หน้าแรก",
+  description:
+    "Trip2Talk — ทริปถ่ายภาพทั่วออสเตรเลีย คนขับ Trip Leader และช่างภาพในทีมเดียว จองออนไลน์ได้เลย",
+  openGraph: {
+    title: "หน้าแรก | Trip2Talk",
+    description:
+      "เก็บทุกโมเมนต์ ทุกทริป ให้กลายเป็นภาพในตำนาน — จองทริปถ่ายภาพกับ Trip2Talk",
+  },
+};
+
+export default async function Home() {
+  const [featured, reviews] = await Promise.all([
+    fetchFeaturedTrips(4),
+    fetchApprovedReviews(3),
+  ]);
+
   return (
-    <main className="min-h-screen bg-white text-stone-900">
-      <section className="mx-auto max-w-5xl px-6 py-20 text-center">
-        <p className="mb-3 text-sm font-medium uppercase tracking-widest text-emerald-800">
-          Trip2Talk
-        </p>
-        <h1
-          className="mb-4 text-4xl font-normal tracking-tight sm:text-5xl"
-          style={{ fontFamily: "var(--font-instrument-serif), serif" }}
-        >
-          Photo trips across Australia
-        </h1>
-        <p className="mx-auto max-w-xl text-lg text-stone-600">
-          Small groups, expert Trip Leaders, and professional photographers —
-          every highlight, every golden hour.
-        </p>
-      </section>
-
+    <main className="min-h-screen bg-[#0a1628]">
+      <HomeHero />
+      <FeaturedTrips trips={featured} />
+      <HowItWorks />
+      <ReviewsPreview reviews={reviews} />
       <CtaSection />
     </main>
   );
