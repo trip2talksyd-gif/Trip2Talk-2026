@@ -11,8 +11,13 @@ node_modules
 dist
 dist-ssr
 
+# Env / secrets — never commit
+.env
 .env.local
 .env*.local
+
+# Staff PIN seed (placeholder or real PINs) — run manually in SQL Editor only
+supabase/seed/staff_profiles_seed.sql
 
 # Editor directories and files
 .vscode/*
@@ -26,5 +31,4 @@ dist-ssr
 *.sw?
 
 .vercel
-
 .cursor/
