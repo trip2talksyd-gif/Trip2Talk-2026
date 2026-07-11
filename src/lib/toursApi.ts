@@ -239,7 +239,8 @@ export async function insertWaiverSignature(
 export type BookingInsertPayload = Omit<TourBooking, 'id' | 'booked_at' | 'tour_id'>
 
 /**
- * book_seat only atomically increments tours.booked_seats (returns boolean).
+ * book_seat only atomically increments tours.booked_seats.
+ * Returns json { success: boolean, message: text } (also accepts legacy boolean true).
  * It does NOT create a tour_bookings row — guest details are inserted after a successful hold.
  */
 function isBookSeatSuccess(rpcResult: unknown): boolean {
@@ -248,6 +249,15 @@ function isBookSeatSuccess(rpcResult: unknown): boolean {
     return (rpcResult as { success: unknown }).success === true
   }
   return false
+}
+
+function bookSeatFailureMessage(rpcResult: unknown, rpcError: { message?: string } | null): string {
+  if (rpcResult && typeof rpcResult === 'object' && 'message' in rpcResult) {
+    const msg = String((rpcResult as { message?: unknown }).message ?? '').trim()
+    if (msg) return msg
+  }
+  if (rpcError?.message) return rpcError.message
+  return 'ที่นั่งเต็มแล้วครับ กรุณาเลือกทริปอื่น'
 }
 
 export async function insertBooking(
@@ -264,12 +274,7 @@ export async function insertBooking(
     })
 
     if (rpcError || !isBookSeatSuccess(rpcResult)) {
-      const objectMessage =
-        rpcResult && typeof rpcResult === 'object' && 'message' in rpcResult
-          ? String((rpcResult as { message?: unknown }).message ?? '')
-          : ''
-      const message =
-        objectMessage || rpcError?.message || 'Failed to reserve seat'
+      const message = bookSeatFailureMessage(rpcResult, rpcError)
       logSupabaseError('book_seat RPC', rpcError ?? { message })
       throw new SeatsFullError(message)
     }
@@ -277,9 +282,7 @@ export async function insertBooking(
   } catch (err) {
     if (err instanceof SeatsFullError) throw err
     logSupabaseError('book_seat RPC', err)
-    throw new SeatsFullError(
-      err instanceof Error ? err.message : 'Failed to reserve seat',
-    )
+    throw new SeatsFullError('ที่นั่งเต็มแล้วครับ กรุณาเลือกทริปอื่น')
   }
 
   logSelectColumns(
