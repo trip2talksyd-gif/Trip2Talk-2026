@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, supabaseConfig } from './supabase'
 import { callStaffApi } from './supabaseStaff'
 import { SeatsFullError } from '../types/errors'
 import type {
@@ -42,11 +42,11 @@ function logSupabaseError(context: string, error: unknown): void {
   console.error(`[toursApi] ${context}:`, error)
 }
 
-async function releaseSeat(tourId: string, seats = 1): Promise<void> {
+async function releaseSeat(tourId: string, seatsToRelease = 1): Promise<void> {
   try {
     const { error } = await supabase.rpc('release_seat', {
       p_tour_id: tourId,
-      p_seats_requested: seats,
+      p_seats_to_release: seatsToRelease,
     })
     if (error) {
       logSupabaseError(`release_seat rollback failed (tour ${tourId})`, error)
@@ -177,7 +177,15 @@ export async function updateBookingStatus(
   await callStaffApi('update_booking_status', { id, status, amountPaid })
 }
 
-export async function insertWaiverSignature(
+function isFailedToFetchError(err: unknown): boolean {
+  if (err instanceof TypeError && /failed to fetch/i.test(err.message)) return true
+  if (err && typeof err === 'object' && 'message' in err) {
+    return /failed to fetch/i.test(String((err as { message: unknown }).message))
+  }
+  return false
+}
+
+async function insertWaiverSignatureOnce(
   signature: Omit<WaiverSignature, 'id' | 'created_at'>,
 ): Promise<WaiverSignatureInsertReadback> {
   logSelectColumns(
@@ -185,6 +193,13 @@ export async function insertWaiverSignature(
     'waiver_signatures',
     WAIVER_SIGNATURES_ANON_SELECT_GRANT,
   )
+
+  console.log('[insertWaiverSignature] before Supabase call', {
+    supabaseUrl: supabaseConfig.url,
+    anonKeyPresent: supabaseConfig.anonKey.length > 0,
+    anonKeyLength: supabaseConfig.anonKey.length,
+  })
+
   try {
     const { data, error } = await supabase
       .from('waiver_signatures')
@@ -205,29 +220,66 @@ export async function insertWaiverSignature(
   }
 }
 
+/** Inserts a waiver signature; retries once after 1s on "Failed to fetch" (paused Supabase wake-up). */
+export async function insertWaiverSignature(
+  signature: Omit<WaiverSignature, 'id' | 'created_at'>,
+): Promise<WaiverSignatureInsertReadback> {
+  try {
+    return await insertWaiverSignatureOnce(signature)
+  } catch (err) {
+    if (!isFailedToFetchError(err)) throw err
+    console.warn(
+      '[insertWaiverSignature] Failed to fetch — retrying once after 1s (Supabase project may be waking from pause)',
+    )
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    return await insertWaiverSignatureOnce(signature)
+  }
+}
+
 export type BookingInsertPayload = Omit<TourBooking, 'id' | 'booked_at' | 'tour_id'>
+
+/**
+ * book_seat only atomically increments tours.booked_seats (returns boolean).
+ * It does NOT create a tour_bookings row — guest details are inserted after a successful hold.
+ */
+function isBookSeatSuccess(rpcResult: unknown): boolean {
+  if (rpcResult === true) return true
+  if (rpcResult && typeof rpcResult === 'object' && 'success' in rpcResult) {
+    return (rpcResult as { success: unknown }).success === true
+  }
+  return false
+}
 
 export async function insertBooking(
   tourId: string,
   bookingData: BookingInsertPayload,
+  seatsRequested = 1,
 ): Promise<BookingInsertReadback> {
+  let seatReserved = false
+
   try {
-    const { data: seatOk, error: seatErr } = await supabase.rpc('book_seat', {
+    const { data: rpcResult, error: rpcError } = await supabase.rpc('book_seat', {
       p_tour_id: tourId,
-      p_seats_requested: 1,
+      p_seats_requested: seatsRequested,
     })
 
-    if (seatErr) {
-      logSupabaseError('book_seat RPC', seatErr)
-      throw new SeatsFullError()
+    if (rpcError || !isBookSeatSuccess(rpcResult)) {
+      const objectMessage =
+        rpcResult && typeof rpcResult === 'object' && 'message' in rpcResult
+          ? String((rpcResult as { message?: unknown }).message ?? '')
+          : ''
+      const message =
+        objectMessage || rpcError?.message || 'Failed to reserve seat'
+      logSupabaseError('book_seat RPC', rpcError ?? { message })
+      throw new SeatsFullError(message)
     }
-    if (seatOk !== true) {
-      throw new SeatsFullError()
-    }
+    seatReserved = true
   } catch (err) {
     if (err instanceof SeatsFullError) throw err
     logSupabaseError('book_seat RPC', err)
-    throw new SeatsFullError()
+    throw new SeatsFullError(
+      err instanceof Error ? err.message : 'Failed to reserve seat',
+    )
   }
 
   logSelectColumns(
@@ -245,14 +297,14 @@ export async function insertBooking(
 
     if (error) {
       logSupabaseError('insertBooking', error)
-      await releaseSeat(tourId)
+      if (seatReserved) await releaseSeat(tourId, seatsRequested)
       throw error
     }
     return data as BookingInsertReadback
   } catch (err) {
     if (!(err && typeof err === 'object' && 'code' in err)) {
       logSupabaseError('insertBooking', err)
-      await releaseSeat(tourId)
+      if (seatReserved) await releaseSeat(tourId, seatsRequested)
     }
     throw err
   }

@@ -544,7 +544,7 @@ const th: Map = {
   'validation.required': 'กรุณากรอกข้อมูลนี้',
   'validation.waiverClauses': 'กรุณายอมรับข้อตกลงทั้งหมด',
   'booking.rlsError': 'ไม่สามารถบันทึกการจองได้ กรุณาติดต่อ Trip2Talk ทาง Messenger',
-  'booking.seatsFull': 'เต็มแล้วครับ — ไม่มีที่นั่งเหลือ กรุณาเลือกทริปหรือวันอื่น',
+  'booking.seatsFull': 'ที่นั่งเต็มแล้วครับ กรุณาเลือกทริปอื่น',
   'pin.locked': 'ลองใหม่ใน',
   'pin.invalid': 'PIN ไม่ถูกต้อง',
   'pin.connection': 'เชื่อมต่อไม่สำเร็จ',

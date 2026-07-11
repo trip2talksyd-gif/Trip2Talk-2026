@@ -1,8 +1,9 @@
 -- Trip2Talk V7 — rollback companion to book_seat()
 -- Run after 20260710120000_full_schema_fresh_start.sql
 -- Decrements booked_seats when a tour_bookings insert fails after a successful seat hold.
+-- Param name must match live DB / PostgREST: p_seats_to_release (NOT p_seats_requested).
 
-create or replace function public.release_seat(p_tour_id uuid, p_seats_requested int default 1)
+create or replace function public.release_seat(p_tour_id uuid, p_seats_to_release int default 1)
 returns boolean
 language plpgsql
 security definer
@@ -12,7 +13,7 @@ declare
   v_success boolean;
 begin
   update public.tours
-  set booked_seats = greatest(0, booked_seats - p_seats_requested),
+  set booked_seats = greatest(0, booked_seats - p_seats_to_release),
       updated_at = now()
   where id = p_tour_id;
 

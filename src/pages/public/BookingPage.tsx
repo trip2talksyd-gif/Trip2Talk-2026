@@ -152,7 +152,7 @@ export default function BookingPage() {
       toast(t('toast.bookingSuccess'), 'success')
     } catch (err) {
       if (err instanceof SeatsFullError) {
-        toast('ขออภัยครับ ที่นั่งเต็มแล้ว', 'error')
+        toast('ที่นั่งเต็มแล้วครับ กรุณาเลือกทริปอื่น', 'error')
         return
       }
       const msg = getSupabaseErrorMessage(err)
