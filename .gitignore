@@ -32,3 +32,4 @@ supabase/seed/staff_profiles_seed.sql
 
 .vercel
 .cursor/
+dist_old_*/
