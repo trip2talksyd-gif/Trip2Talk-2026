@@ -5,7 +5,6 @@ import { useLang } from '../../hooks/useLang'
 import { fetchConfirmedTours, formatAud, formatDate, seatsRemaining } from '../../lib/toursApi'
 import type { Tour } from '../../types/tour'
 import { PageError } from '../../components/ui/PageError'
-import CalendarValueProps from '../../components/calendar/CalendarValueProps'
 import CalendarPhotographerBanner from '../../components/calendar/CalendarPhotographerBanner'
 
 function seatBadgeColor(tour: Tour): string {
@@ -41,8 +40,6 @@ export default function CalendarPage() {
       <div className="mt-6">
         <CalendarPhotographerBanner />
       </div>
-
-      <CalendarValueProps />
 
       {loading && (
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
