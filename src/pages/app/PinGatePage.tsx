@@ -64,7 +64,7 @@ export default function PinGatePage() {
       try {
         const staff = await verifyStaffPin(fullPin)
         if (staff) {
-          setStaffSession(staff.staff_id, staff.role, staff.full_name)
+          setStaffSession(staff.token, staff.role, staff.full_name)
           navigate(redirectForRole(staff.role))
           return
         }

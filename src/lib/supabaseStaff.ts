@@ -1,12 +1,13 @@
 const STAFF_ID_KEY = 'staff_id'
 const STAFF_TOKEN_KEY = 'staff_token'
 
-export function setStaffSession(staffId: string, role: string, fullName: string): void {
-  sessionStorage.setItem(STAFF_ID_KEY, staffId)
+/** token is the opaque session token minted by the verify-pin Edge Function
+ * (staff_sessions.token) — this is what staff-api validates on every request. */
+export function setStaffSession(token: string, role: string, fullName: string): void {
+  sessionStorage.setItem(STAFF_ID_KEY, token)
   sessionStorage.setItem('staff_role', role)
   sessionStorage.setItem('staff_name', fullName)
-  // Legacy key used by staff-api Edge Function until staff auth is fully migrated
-  sessionStorage.setItem(STAFF_TOKEN_KEY, staffId)
+  sessionStorage.setItem(STAFF_TOKEN_KEY, token)
 }
 
 export function clearStaffSession(): void {

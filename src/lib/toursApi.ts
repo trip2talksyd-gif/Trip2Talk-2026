@@ -314,40 +314,44 @@ export async function insertBooking(
 }
 
 export interface StaffAuthResult {
-  staff_id: string
+  token: string
   role: StaffRole
   full_name: string
 }
 
-interface VerifyStaffPinRow {
-  staff_id: string
-  full_name: string
-  role: string
-}
-
-/** Verifies PIN via DB RPC — never reads staff_profiles directly. */
+/**
+ * Verifies PIN via the verify-pin Edge Function (service-role, bcrypt-compares
+ * against staff_profiles.pin_hash server-side — the browser never reads
+ * staff_profiles directly). On success this mints an opaque session token in
+ * staff_sessions, which staff-api validates on every subsequent request.
+ * See supabase/functions/verify-pin/index.ts.
+ */
 export async function verifyStaffPin(pin: string): Promise<StaffAuthResult | null> {
   try {
-    const { data, error } = await supabase.rpc('verify_staff_pin', { input_pin: pin })
+    const res = await fetch(`${supabaseConfig.url}/functions/v1/verify-pin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: supabaseConfig.anonKey,
+      },
+      body: JSON.stringify({ pin }),
+    })
 
-    if (error) {
-      logSupabaseError('verify_staff_pin RPC', error)
-      throw error
+    if (res.status === 401 || res.status === 400) return null
+
+    const body = await res.json()
+    if (!res.ok || !body?.token) {
+      logSupabaseError('verify-pin Edge Function', body)
+      throw new Error(body?.error ?? `verify-pin failed: ${res.status}`)
     }
-
-    const rows = (data ?? []) as VerifyStaffPinRow[]
-    if (!Array.isArray(rows) || rows.length === 0) return null
-
-    const row = rows[0]
-    if (!row?.staff_id) return null
 
     return {
-      staff_id: row.staff_id,
-      role: row.role as StaffRole,
-      full_name: row.full_name,
+      token: body.token as string,
+      role: body.role as StaffRole,
+      full_name: body.full_name as string,
     }
   } catch (err) {
-    logSupabaseError('verify_staff_pin RPC', err)
+    logSupabaseError('verify-pin Edge Function', err)
     throw err
   }
 }
