@@ -32,7 +32,7 @@ function ValueCard({
   const isNegative = variant === 'negative'
 
   return (
-    <div className="liquid-glass relative rounded-2xl p-5 sm:p-6">
+    <div className="liquid-glass relative rounded-3xl p-5 transition-transform duration-300 hover:-translate-y-0.5 sm:p-6">
       <ul className="relative z-10 space-y-3.5">
         {items.map((key) => (
           <li key={key} className="flex items-start gap-3">

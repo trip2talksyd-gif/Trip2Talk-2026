@@ -126,6 +126,17 @@ export type TranslationKey =
   | 'calendar.value.positive.3'
   | 'calendar.value.positive.4'
   | 'calendar.value.positive.5'
+  | 'calendar.photo.eyebrow'
+  | 'calendar.photo.heading.line1'
+  | 'calendar.photo.heading.line2'
+  | 'calendar.photo.sub'
+  | 'calendar.photo.feature.1.title'
+  | 'calendar.photo.feature.1.desc'
+  | 'calendar.photo.feature.2.title'
+  | 'calendar.photo.feature.2.desc'
+  | 'calendar.photo.feature.3.title'
+  | 'calendar.photo.feature.3.desc'
+  | 'calendar.trips.badge'
   | 'about.positioning'
   | 'about.stats.heading.line1'
   | 'about.stats.heading.line2'
@@ -323,6 +334,18 @@ const en: Map = {
   'calendar.value.positive.3': 'Real-time seat availability',
   'calendar.value.positive.4': 'Small groups already confirmed',
   'calendar.value.positive.5': 'Book online instantly',
+  'calendar.photo.eyebrow': 'Every trip includes a photographer',
+  'calendar.photo.heading.line1': 'Just show up.',
+  'calendar.photo.heading.line2': 'Come home with hundreds of photos.',
+  'calendar.photo.sub':
+    'A professional photographer and a full styling wardrobe travel with every group — no gear, no outfits to plan.',
+  'calendar.photo.feature.1.title': 'Professional photographer',
+  'calendar.photo.feature.1.desc': 'On every single trip, every group, no add-on fee',
+  'calendar.photo.feature.2.title': 'Wardrobe & styling included',
+  'calendar.photo.feature.2.desc': 'Outfits and props brought along — just pick a look',
+  'calendar.photo.feature.3.title': 'High-res photos to keep',
+  'calendar.photo.feature.3.desc': 'Full-resolution files, ready to post the same trip',
+  'calendar.trips.badge': 'Open for booking',
   'about.positioning': 'Who we are',
   'about.stats.heading.line1': 'About',
   'about.stats.heading.line2': 'our team',
@@ -520,6 +543,18 @@ const th: Map = {
   'calendar.value.positive.3': 'ที่นั่งอัปเดตเรียลไทม์',
   'calendar.value.positive.4': 'กลุ่มเล็กยืนยันแล้ว',
   'calendar.value.positive.5': 'จองออนไลน์ได้ทันที',
+  'calendar.photo.eyebrow': 'ทุกทริปมีทีมช่างภาพมืออาชีพ',
+  'calendar.photo.heading.line1': 'ไปตัวเปล่า',
+  'calendar.photo.heading.line2': 'กลับมาพร้อมรูปสวยเป็นร้อย',
+  'calendar.photo.sub':
+    'ช่างภาพมืออาชีพและตู้เสื้อผ้าสไตล์ลิ่งพร้อมไปด้วยทุกทริป ไม่ต้องพกกล้อง ไม่ต้องคิดว่าจะใส่ชุดอะไร',
+  'calendar.photo.feature.1.title': 'ช่างภาพมืออาชีพ',
+  'calendar.photo.feature.1.desc': 'ไปด้วยทุกทริป ทุกกลุ่ม ไม่มีค่าใช้จ่ายเพิ่ม',
+  'calendar.photo.feature.2.title': 'ตู้เสื้อผ้า+สไตล์ลิ่งพร้อม',
+  'calendar.photo.feature.2.desc': 'มีชุดและของประกอบฉากให้เลือก แค่มาเลือกลุค',
+  'calendar.photo.feature.3.title': 'ได้ไฟล์ภาพความละเอียดสูง',
+  'calendar.photo.feature.3.desc': 'รูปไฟล์เต็ม พร้อมโพสต์ตั้งแต่ทริปยังไม่จบ',
+  'calendar.trips.badge': 'เปิดจองแล้ว',
   'about.positioning': 'เราคือใคร',
   'about.stats.heading.line1': 'เกี่ยวกับ',
   'about.stats.heading.line2': 'ทีมงานของเรา',
