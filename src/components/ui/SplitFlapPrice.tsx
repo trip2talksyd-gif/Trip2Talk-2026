@@ -3,29 +3,36 @@ import { formatAud } from '../../lib/toursApi'
 type Props = {
   amountAud: number
   className?: string
+  /** Airport board digit tiles (mockup .flip-price.board) */
+  board?: boolean
 }
 
 /**
- * Decorative airport-style digit flip on parent `.group:hover`.
- * No price logic — display only.
+ * Airport split-flap price — flips digit-by-digit on parent `.group:hover` or self-hover.
+ * Matches mockup `.flip-price` / `.priceFlip`.
  */
-export default function SplitFlapPrice({ amountAud, className = '' }: Props) {
+export default function SplitFlapPrice({ amountAud, className = '', board = true }: Props) {
   const formatted = formatAud(amountAud)
 
   return (
     <span
-      className={`split-flap-price inline-flex items-baseline font-serif tabular-nums ${className}`}
+      className={`flip-price ${board ? 'board' : ''} ${className}`}
       aria-label={formatted}
     >
-      {formatted.split('').map((char, i) => (
-        <span
-          key={`${i}-${char}`}
-          className="split-flap-digit inline-block"
-          style={{ animationDelay: `${i * 35}ms` }}
-        >
-          {char === ' ' ? '\u00A0' : char}
-        </span>
-      ))}
+      <span className="fdigits">
+        {formatted.split('').map((char, i) => {
+          const isNum = /\d/.test(char)
+          return (
+            <span
+              key={`${i}-${char}`}
+              className={`fdigit ${isNum ? 'is-num' : ''}`}
+              style={{ animationDelay: `${i * 28}ms` }}
+            >
+              <span className="dwrap">{char === ' ' ? '\u00A0' : char}</span>
+            </span>
+          )
+        })}
+      </span>
     </span>
   )
 }

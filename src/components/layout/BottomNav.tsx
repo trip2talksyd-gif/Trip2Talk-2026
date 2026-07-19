@@ -15,8 +15,8 @@ export default function BottomNav() {
   if (pathname === '/') return null
 
   const iconBtn = (isActive: boolean) =>
-    `flex h-9 w-10 items-center justify-center rounded-full transition-colors ${
-      isActive ? 'bg-teal-900/90 text-cream' : 'text-ink/80 hover:bg-teal-900/15'
+    `flex h-6 w-6 items-center justify-center transition-colors ${
+      isActive ? 'text-cream' : 'text-cream/68'
     }`
 
   return (
@@ -25,9 +25,11 @@ export default function BottomNav() {
       aria-label="Primary"
     >
       <div
-        className="pointer-events-auto flex h-[46px] items-center gap-1 rounded-full px-2 shadow-[0_10px_30px_rgba(22,38,43,0.35)]"
+        className="pointer-events-auto flex h-[46px] items-center justify-center gap-4 rounded-[23px] px-[18px]"
         style={{
-          background: 'linear-gradient(135deg, #f4b476 0%, #e8935a 100%)',
+          background: 'linear-gradient(135deg, var(--teal-400), var(--teal-600))',
+          boxShadow:
+            '0 12px 22px -10px rgba(15,28,30,.5), 0 1px 0 rgba(255,255,255,.2) inset',
         }}
       >
         <NavLink to="/" end aria-label={t('nav.explore')} className={({ isActive }) => iconBtn(isActive)}>

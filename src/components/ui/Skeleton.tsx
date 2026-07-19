@@ -13,13 +13,12 @@ export function Skeleton({ className = '' }: SkeletonProps) {
 
 export function TripCardSkeleton() {
   return (
-    <div className="overflow-hidden rounded-editorial">
-      <Skeleton className="aspect-[16/10] w-full rounded-none" />
-      <div className="space-y-3 bg-teal-900 p-4">
-        <Skeleton className="h-8 w-28 bg-white/10" />
-        <Skeleton className="h-3 w-full bg-white/10" />
-        <Skeleton className="h-3 w-4/5 bg-white/10" />
-        <Skeleton className="h-10 w-full rounded-editorial bg-white/10" />
+    <div className="flex gap-2.5 rounded-2xl border border-line bg-card p-2">
+      <Skeleton className="h-[78px] w-[78px] shrink-0 rounded-xl" />
+      <div className="flex-1 space-y-2 py-1">
+        <Skeleton className="h-2.5 w-16" />
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-3 w-1/2" />
       </div>
     </div>
   )

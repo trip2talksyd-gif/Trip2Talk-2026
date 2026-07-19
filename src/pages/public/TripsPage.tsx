@@ -13,7 +13,7 @@ type Filter = 'all' | TripType
 const VALID_TYPES: TripType[] = ['oneday', 'overnight', 'multiday']
 
 export default function TripsPage() {
-  const { t } = useLang()
+  const { t, lang } = useLang()
   const [searchParams] = useSearchParams()
   const typeParam = searchParams.get('type')
   const initialFilter: Filter =
@@ -58,16 +58,18 @@ export default function TripsPage() {
 
   return (
     <div className="pb-2">
-      <header className="space-y-1">
-        <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-teal-600">
-          Trip2Talk
-        </p>
-        <h1 className="font-serif text-3xl tracking-tight text-ink">{t('nav.trips')}</h1>
-        <p className="text-sm text-ink-soft">{t('trips.subtitle')}</p>
+      <header className="border-b border-line bg-card -mx-4 px-4 pb-3 pt-2">
+        <h1 className="font-serif text-[17px] text-ink sm:text-2xl">
+          {t('nav.trips')}
+          <span className="mt-px block font-thai text-[11px] font-medium text-ink-soft">
+            {lang === 'th' ? 'สำรวจทริป' : 'Explore trips'}
+          </span>
+        </h1>
+        <p className="mt-1 text-[11px] text-ink-soft">{t('trips.subtitle')}</p>
       </header>
 
       <div
-        className="mt-5 flex gap-2 overflow-x-auto pb-1"
+        className="mt-3 flex gap-2 overflow-x-auto pb-1"
         role="tablist"
         aria-label={t('nav.trips')}
       >
@@ -78,10 +80,10 @@ export default function TripsPage() {
             role="tab"
             aria-selected={filter === tab.id}
             onClick={() => setFilter(tab.id)}
-            className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-medium uppercase tracking-wider transition-colors ${
+            className={`shrink-0 rounded-full px-3 py-[7px] text-center text-[10px] font-semibold leading-[1.4] ${
               filter === tab.id
-                ? 'bg-teal-900 text-cream shadow-[0_4px_14px_rgba(22,38,43,0.25)]'
-                : 'bg-mint-100 text-ink/65 hover:bg-teal-900/10'
+                ? 'border border-white/20 bg-gradient-to-b from-teal-500 to-teal-800 text-cream shadow-[0_1px_0_rgba(255,255,255,0.35)_inset,0_4px_10px_-4px_rgba(30,20,10,0.5)]'
+                : 'bg-mint-100 text-teal-700'
             }`}
           >
             {tab.label}
@@ -90,7 +92,7 @@ export default function TripsPage() {
       </div>
 
       {loading && (
-        <div className="mt-6 space-y-5">
+        <div className="mt-3.5 space-y-3">
           {Array.from({ length: 3 }).map((_, i) => (
             <TripCardSkeleton key={i} />
           ))}
@@ -108,7 +110,7 @@ export default function TripsPage() {
       )}
 
       {!loading && !error && filtered.length > 0 && (
-        <div className="mt-6 space-y-5">
+        <div className="mt-3.5 flex flex-col gap-3">
           {filtered.map((tour) => (
             <TripCard key={tour.id} tour={tour} />
           ))}
