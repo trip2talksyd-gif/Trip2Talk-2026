@@ -94,8 +94,14 @@ export default function PosingGuidePage() {
 
   return (
     <div className="space-y-6 pb-4">
-      <Link to="/photo-guide" className="text-xs font-semibold text-teal-700">
+      <Link
+        to="/photo-guide"
+        className="mb-4 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-teal-700 no-underline"
+      >
         ← {lang === 'th' ? 'กลับไปหน้าคลังเคล็ดลับ' : 'Back to Photo Guide'}
+        <span className="font-thai text-[11px] font-medium opacity-85">
+          {lang === 'th' ? 'Back to Photo Guide' : 'กลับไปหน้าคลังเคล็ดลับ'}
+        </span>
       </Link>
 
       <header>
