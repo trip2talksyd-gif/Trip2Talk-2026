@@ -2,15 +2,11 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { MessageCircle } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
-import { CONTACT_CHANNELS } from '../../data/contactChannels'
+import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import BookingJourneyTimeline from '../../components/booking/BookingJourneyTimeline'
 import { formatAud, lookupMyTrip, type MyTripLookupResult } from '../../lib/toursApi'
 import { isValidEmail } from '../../lib/validation'
 import type { BookingStatus } from '../../types/tour'
-
-const facebookHref =
-  CONTACT_CHANNELS.find((c) => c.id === 'facebook')?.href ??
-  'https://www.facebook.com/profile.php?id=61586534972406'
 
 const STATUS_LABEL: Record<string, { en: string; th: string }> = {
   pending_payment: { en: 'Deposit pending', th: 'รอชำระมัดจำ' },
@@ -205,7 +201,7 @@ export default function MyTripPage() {
           </article>
 
           <a
-            href={facebookHref}
+            href={FACEBOOK_PAGE_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 rounded-editorial border border-line bg-teal-900 px-4 py-3 text-cream"

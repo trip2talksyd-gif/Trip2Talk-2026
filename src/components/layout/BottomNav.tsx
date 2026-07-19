@@ -1,11 +1,7 @@
 import { Compass, Heart, Luggage, MessageCircle, Ticket } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { CONTACT_CHANNELS } from '../../data/contactChannels'
+import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import { useLang } from '../../hooks/useLang'
-
-const facebookPageHref =
-  CONTACT_CHANNELS.find((c) => c.id === 'facebook')?.href ??
-  'https://www.facebook.com/profile.php?id=61586534972406'
 
 export default function BottomNav() {
   const { t } = useLang()
@@ -49,7 +45,7 @@ export default function BottomNav() {
         </NavLink>
 
         <a
-          href={facebookPageHref}
+          href={FACEBOOK_PAGE_URL}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={t('nav.messages')}

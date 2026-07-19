@@ -3,6 +3,12 @@ import { Mail, MessageCircle, Phone } from 'lucide-react'
 import type { TranslationKey } from '../i18n/translations'
 import { FacebookIcon } from '../components/contact/contactIcons'
 
+/** Canonical Trip2Talk Facebook Page — update only here. */
+export const FACEBOOK_PAGE_URL = 'https://www.facebook.com/TriptoTalk'
+
+/** Messenger deep-link for the same Page (username form). */
+export const FACEBOOK_MESSENGER_URL = 'https://m.me/TriptoTalk'
+
 export type ContactChannelId =
   | 'facebook'
   | 'messenger'
@@ -25,7 +31,7 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
   {
     id: 'facebook',
     enabled: true,
-    href: 'https://www.facebook.com/profile.php?id=61586534972406',
+    href: FACEBOOK_PAGE_URL,
     external: true,
     icon: FacebookIcon,
     labelKey: 'contact.facebook',
@@ -34,7 +40,7 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
   {
     id: 'messenger',
     enabled: true,
-    href: 'https://m.me/61586534972406',
+    href: FACEBOOK_MESSENGER_URL,
     external: true,
     icon: MessageCircle,
     labelKey: 'contact.messenger',

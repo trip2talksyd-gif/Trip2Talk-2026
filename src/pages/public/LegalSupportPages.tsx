@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import ContentPage from '../../components/layout/ContentPage'
-import { CONTACT_CHANNELS } from '../../data/contactChannels'
+import { FACEBOOK_MESSENGER_URL, FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import { CANCELLATION_POLICY } from '../../data/risks'
 import { useState } from 'react'
 
@@ -205,8 +205,6 @@ export function NotificationsPage() {
 
 export function HelpSupportPage() {
   const { lang } = useLang()
-  const facebook = CONTACT_CHANNELS.find((c) => c.id === 'facebook')?.href
-  const messenger = CONTACT_CHANNELS.find((c) => c.id === 'messenger')?.href
   const faqs = [
     {
       qEn: 'How do I pay the deposit?',
@@ -238,26 +236,22 @@ export function HelpSupportPage() {
       }
     >
       <div className="flex flex-wrap gap-2">
-        {facebook && (
-          <a
-            href={facebook}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn-embossed !text-[11px]"
-          >
-            Facebook Page
-          </a>
-        )}
-        {messenger && (
-          <a
-            href={messenger}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full border border-line bg-mint-100 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-ink"
-          >
-            Messenger
-          </a>
-        )}
+        <a
+          href={FACEBOOK_PAGE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-embossed !text-[11px]"
+        >
+          Facebook Page
+        </a>
+        <a
+          href={FACEBOOK_MESSENGER_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="rounded-full border border-line bg-mint-100 px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-ink"
+        >
+          Messenger
+        </a>
       </div>
       <ul className="mt-4 space-y-3">
         {faqs.map((f) => (

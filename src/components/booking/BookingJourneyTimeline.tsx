@@ -1,13 +1,9 @@
 import { Camera, Check, MapPin, MessageCircle, Plane, Star, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { CONTACT_CHANNELS } from '../../data/contactChannels'
+import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import { FacebookIcon } from '../contact/contactIcons'
 import { useLang } from '../../hooks/useLang'
 import type { BookingStatus } from '../../types/tour'
-
-const facebookHref =
-  CONTACT_CHANNELS.find((c) => c.id === 'facebook')?.href ??
-  'https://www.facebook.com/profile.php?id=61586534972406'
 
 type Step = {
   id: string
@@ -43,7 +39,7 @@ const STEPS: Step[] = [
     titleTh: 'ทัก Facebook',
     bodyEn: 'Send your booking reference to our Page inbox to join the group chat.',
     bodyTh: 'ส่งเลขที่การจองเข้าเพจเพื่อเข้ากลุ่มแชท',
-    link: { href: facebookHref, labelEn: 'Open Facebook Page', labelTh: 'เปิดเพจ Facebook' },
+    link: { href: FACEBOOK_PAGE_URL, labelEn: 'Open Facebook Page', labelTh: 'เปิดเพจ Facebook' },
   },
   {
     id: 'setup',

@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Check, Copy } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import BookingJourneyTimeline from '../../components/booking/BookingJourneyTimeline'
-import { CONTACT_CHANNELS } from '../../data/contactChannels'
+import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import {
   fetchTourByCode,
   formatAud,
@@ -189,10 +189,6 @@ export default function BookingPage() {
   }
 
   if (reference) {
-    const facebookHref =
-      CONTACT_CHANNELS.find((c) => c.id === 'facebook')?.href ??
-      'https://www.facebook.com/profile.php?id=61586534972406'
-
     return (
       <div className="flex flex-col items-center px-[22px] pb-[22px] pt-[30px] text-center">
         <div
@@ -214,7 +210,7 @@ export default function BookingPage() {
         </p>
 
         <a
-          href={facebookHref}
+          href={FACEBOOK_PAGE_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-4 flex w-full gap-2.5 rounded-[14px] border border-[#cfe0fb] bg-[#eaf2ff] px-3.5 py-3 text-left"
