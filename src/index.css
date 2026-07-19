@@ -230,3 +230,109 @@
     animation: none;
   }
 }
+
+/* Embossed / 3D CTAs (Home hero) */
+.btn-embossed {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.8rem 1.45rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1b2a2c;
+  background: linear-gradient(180deg, #f4b476 0%, #e8935a 55%, #e07a4a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.18),
+    0 6px 18px rgba(22, 38, 43, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+
+.btn-embossed:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.04);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.2),
+    0 10px 24px rgba(22, 38, 43, 0.4);
+}
+
+.btn-embossed:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.22),
+    0 2px 8px rgba(22, 38, 43, 0.25);
+}
+
+.btn-embossed-ghost {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  padding: 0.8rem 1.45rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #f7f5f0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.btn-embossed-ghost:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.55);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.1) 100%);
+}
+
+.btn-embossed-ghost:active {
+  transform: translateY(1px);
+}
+
+/* Split-flap price digits (TripCard hover) */
+.split-flap-price {
+  perspective: 240px;
+}
+
+.split-flap-digit {
+  transform-origin: center center;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+}
+
+.group:hover .split-flap-digit {
+  animation: split-flap-flip 0.48s ease both;
+}
+
+@keyframes split-flap-flip {
+  0% {
+    transform: rotateX(0deg);
+  }
+  45% {
+    transform: rotateX(-92deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group:hover .split-flap-digit {
+    animation: none;
+  }
+
+  .btn-embossed:hover,
+  .btn-embossed-ghost:hover {
+    transform: none;
+  }
+}
+

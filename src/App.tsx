@@ -12,6 +12,7 @@ import WaiverPage from './pages/public/WaiverPage'
 import BookingPage from './pages/public/BookingPage'
 import FavoritesPage from './pages/public/FavoritesPage'
 import MyTripPage from './pages/public/MyTripPage'
+import PhotoGuideComingSoonPage from './pages/public/PhotoGuideComingSoonPage'
 import PinGatePage from './pages/app/PinGatePage'
 import StaffDashboard from './pages/app/StaffDashboard'
 import CashierPOS from './pages/app/CashierPOS'
@@ -37,6 +38,7 @@ export default function App() {
           <Route path="booking" element={<BookingPage />} />
           <Route path="favorites" element={<FavoritesPage />} />
           <Route path="my-trip" element={<MyTripPage />} />
+          <Route path="photo-guide" element={<PhotoGuideComingSoonPage />} />
         </Route>
 
         <Route path="app" element={<PinGatePage />} />

@@ -38,6 +38,12 @@ export default function TripsPage() {
     load()
   }, [load])
 
+  useEffect(() => {
+    if (typeParam && VALID_TYPES.includes(typeParam as TripType)) {
+      setFilter(typeParam as TripType)
+    }
+  }, [typeParam])
+
   const filtered = useMemo(() => {
     if (filter === 'all') return tours
     return tours.filter((tour) => inferTripType(tour) === filter)
@@ -51,17 +57,31 @@ export default function TripsPage() {
   ]
 
   return (
-    <div>
-      <h1 className="font-serif text-2xl text-ink">{t('nav.trips')}</h1>
+    <div className="pb-2">
+      <header className="space-y-1">
+        <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-teal-600">
+          Trip2Talk
+        </p>
+        <h1 className="font-serif text-3xl tracking-tight text-ink">{t('nav.trips')}</h1>
+        <p className="text-sm text-ink-soft">{t('trips.subtitle')}</p>
+      </header>
 
-      <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
+      <div
+        className="mt-5 flex gap-2 overflow-x-auto pb-1"
+        role="tablist"
+        aria-label={t('nav.trips')}
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}
             type="button"
+            role="tab"
+            aria-selected={filter === tab.id}
             onClick={() => setFilter(tab.id)}
-            className={`shrink-0 rounded-editorial px-3 py-1.5 text-xs font-medium uppercase tracking-wider ${
-              filter === tab.id ? 'bg-teal-900 text-cream' : 'bg-white text-ink/60'
+            className={`shrink-0 rounded-full px-3.5 py-2 text-xs font-medium uppercase tracking-wider transition-colors ${
+              filter === tab.id
+                ? 'bg-teal-900 text-cream shadow-[0_4px_14px_rgba(22,38,43,0.25)]'
+                : 'bg-mint-100 text-ink/65 hover:bg-teal-900/10'
             }`}
           >
             {tab.label}
@@ -70,7 +90,7 @@ export default function TripsPage() {
       </div>
 
       {loading && (
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-5">
           {Array.from({ length: 3 }).map((_, i) => (
             <TripCardSkeleton key={i} />
           ))}
@@ -83,8 +103,12 @@ export default function TripsPage() {
         </div>
       )}
 
-      {!loading && !error && (
-        <div className="mt-6 space-y-4">
+      {!loading && !error && filtered.length === 0 && (
+        <p className="mt-10 text-center text-sm text-ink-soft">{t('trips.empty')}</p>
+      )}
+
+      {!loading && !error && filtered.length > 0 && (
+        <div className="mt-6 space-y-5">
           {filtered.map((tour) => (
             <TripCard key={tour.id} tour={tour} />
           ))}

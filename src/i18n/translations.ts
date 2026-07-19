@@ -55,10 +55,21 @@ export type TranslationKey =
   | 'home.stats.trips'
   | 'home.stats.group'
   | 'home.stats.photographers'
+  | 'home.stats.tripsLabel'
+  | 'home.stats.groupLabel'
+  | 'home.stats.photographersLabel'
   | 'home.hero.badge'
   | 'home.hero.title.line1'
   | 'home.hero.title.line2'
+  | 'home.hero.en.line1'
+  | 'home.hero.en.line2'
+  | 'home.hero.th.line1'
+  | 'home.hero.th.line2'
   | 'home.hero.subtitle'
+  | 'home.promo.eyebrow'
+  | 'home.promo.title'
+  | 'trips.subtitle'
+  | 'trips.empty'
   | 'home.hero.destination.tasmania'
   | 'home.hero.destination.uluru'
   | 'home.hero.destination.sydney'
@@ -280,11 +291,22 @@ const en: Map = {
   'home.stats.trips': '13 Trips',
   'home.stats.group': '100% Small Group',
   'home.stats.photographers': 'Local Photographers',
+  'home.stats.tripsLabel': 'Trips',
+  'home.stats.groupLabel': 'Group size',
+  'home.stats.photographersLabel': 'Photographers',
   'home.hero.badge': '13 curated trips · small groups only · pro photographer on every trip',
   'home.hero.title.line1': 'Photo journeys',
   'home.hero.title.line2': 'worth remembering',
+  'home.hero.en.line1': 'Capture Moments',
+  'home.hero.en.line2': 'Worth Showing Off',
+  'home.hero.th.line1': 'จับภาพโมเมนต์',
+  'home.hero.th.line2': 'ที่อยากอวด',
   'home.hero.subtitle':
     'From aurora hunts in Tasmania to sunrise over Uluru — private, small-group trips with a professional photographer, built for Thai travellers in Australia.',
+  'home.promo.eyebrow': "Let's Learn and Practice",
+  'home.promo.title': 'Photo Guide — posing, settings & mobile tips',
+  'trips.subtitle': 'Small groups, pro photographer on every trip.',
+  'trips.empty': 'No trips in this category yet — check back soon.',
   'home.hero.destination.tasmania': 'Tasmania',
   'home.hero.destination.uluru': 'Uluru',
   'home.hero.destination.sydney': 'Sydney',
@@ -516,11 +538,22 @@ const th: Map = {
   'home.stats.trips': '13 ทริป',
   'home.stats.group': 'กลุ่มเล็ก 100%',
   'home.stats.photographers': 'ช่างภาพท้องถิ่น',
+  'home.stats.tripsLabel': 'ทริป',
+  'home.stats.groupLabel': 'ขนาดกลุ่ม',
+  'home.stats.photographersLabel': 'ช่างภาพ',
   'home.hero.badge': '13 ทริปคัดสรร · กลุ่มเล็กเท่านั้น · มีช่างภาพมืออาชีพทุกทริป',
   'home.hero.title.line1': 'ทริปถ่ายภาพ',
   'home.hero.title.line2': 'ที่คุณจะไม่มีวันลืม',
+  'home.hero.en.line1': 'Capture Moments',
+  'home.hero.en.line2': 'Worth Showing Off',
+  'home.hero.th.line1': 'จับภาพโมเมนต์',
+  'home.hero.th.line2': 'ที่อยากอวด',
   'home.hero.subtitle':
     'ตั้งแต่ล่าแสงใต้ที่แทสเมเนีย ถึงพระอาทิตย์ขึ้นที่อูลูรู — ทริปกลุ่มเล็กส่วนตัว พร้อมช่างภาพมืออาชีพ ออกแบบมาเพื่อคนไทยในออสเตรเลียโดยเฉพาะ',
+  'home.promo.eyebrow': 'Learn and Practice',
+  'home.promo.title': 'คู่มือถ่ายภาพ — โพสท่า ตั้งค่ากล้อง และมือถือ',
+  'trips.subtitle': 'กลุ่มเล็ก มีช่างภาพมืออาชีพทุกทริป',
+  'trips.empty': 'ยังไม่มีทริปในหมวดนี้ — กลับมาเช็คใหม่เร็วๆ นี้',
   'home.hero.destination.tasmania': 'แทสเมเนีย',
   'home.hero.destination.uluru': 'อูลูรู',
   'home.hero.destination.sydney': 'ซิดนีย์',
