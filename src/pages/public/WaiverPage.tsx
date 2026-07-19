@@ -96,7 +96,7 @@ export default function WaiverPage() {
         </div>
       </div>
 
-      <div className="max-h-[42vh] space-y-3 overflow-y-auto rounded-xl border border-line bg-cream p-4 text-sm leading-relaxed text-ink-soft">
+      <div className="max-h-[42vh] space-y-2.5 overflow-y-auto rounded-xl border border-line bg-card p-[11px] text-[9.5px] leading-[1.6] text-ink-soft">
         {clauses.map((clause) => (
           <div key={clause.id}>
             <p className="font-semibold text-ink">{clause.title}</p>
@@ -109,15 +109,15 @@ export default function WaiverPage() {
         {clauses.map((clause) => (
           <label
             key={`check-${clause.id}`}
-            className="flex gap-3 rounded-xl border border-line bg-cream px-3 py-3"
+            className="flex items-start gap-2 text-[10px] text-ink-soft"
           >
             <input
               type="checkbox"
               checked={!!checked[clause.id]}
               onChange={(e) => setChecked((prev) => ({ ...prev, [clause.id]: e.target.checked }))}
-              className="mt-1 accent-teal-700"
+              className="mt-0.5 accent-teal-700"
             />
-            <span className="text-xs text-ink-soft">
+            <span>
               <span className="font-semibold text-ink">{clause.title}</span>
               <span className="mt-0.5 block font-thai">
                 {lang === 'th' ? 'ฉันได้อ่านและยอมรับ' : 'I have read and agree'}
@@ -160,7 +160,7 @@ export default function WaiverPage() {
       <button
         type="submit"
         disabled={!isValid || submitting}
-        className="btn-embossed w-full !rounded-[13px] disabled:opacity-40"
+        className="book-btn w-full disabled:opacity-40"
       >
         {submitting
           ? t('common.loading')
