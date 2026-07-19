@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Check, Copy } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
+import BookingJourneyTimeline from '../../components/booking/BookingJourneyTimeline'
+import { CONTACT_CHANNELS } from '../../data/contactChannels'
 import {
   fetchTourByCode,
   formatAud,
@@ -190,13 +192,33 @@ export default function BookingPage() {
   }
 
   if (reference) {
+    const facebookHref =
+      CONTACT_CHANNELS.find((c) => c.id === 'facebook')?.href ??
+      'https://www.facebook.com/profile.php?id=61586534972406'
+
     return (
-      <div className="rounded-editorial border border-gold/40 bg-gold/10 p-6 text-center">
-        <Check className="mx-auto h-10 w-10 text-gold" />
-        <h2 className="mt-3 font-serif text-xl text-brand-dark">{t('booking.confirmation')}</h2>
-        <p className="mt-2 text-sm text-brand-dark/70">{t('booking.success')}</p>
-        <p className="mt-4 font-serif text-lg text-gold-dark">{reference}</p>
-        <p className="mt-1 text-xs text-gray-500">{t('booking.reference')}</p>
+      <div className="space-y-5">
+        <div className="rounded-editorial border border-gold/40 bg-gold/10 p-6 text-center">
+          <Check className="mx-auto h-10 w-10 text-gold" />
+          <h2 className="mt-3 font-serif text-xl text-brand-dark">{t('booking.confirmation')}</h2>
+          <p className="mt-2 text-sm text-brand-dark/70">{t('booking.success')}</p>
+          <p className="mt-4 font-serif text-lg text-gold-dark">{reference}</p>
+          <p className="mt-1 text-xs text-gray-500">{t('booking.reference')}</p>
+        </div>
+
+        <a
+          href={facebookHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 rounded-editorial bg-deep-green px-4 py-3 text-sm text-cream"
+        >
+          {t('myTrip.messageUs')}
+        </a>
+
+        <BookingJourneyTimeline
+          bookingStatus="pending_payment"
+          className="rounded-editorial border border-deep-green/10 bg-white p-4"
+        />
       </div>
     )
   }

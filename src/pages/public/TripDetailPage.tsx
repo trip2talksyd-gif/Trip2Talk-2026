@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, ChevronRight, Sparkles } from 'lucide-react'
+import { ArrowLeft, ChevronRight, Heart, Sparkles } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
+import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites'
 import { fetchTourByCode } from '../../lib/toursApi'
 import { isAuroraTrip, tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
 import { getTripDetails, listFor, textFor } from '../../data/tripDetails'
@@ -23,6 +24,8 @@ export default function TripDetailPage() {
   const [tour, setTour] = useState<Tour | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const favorited = useIsFavorite(tripCode ?? '')
+  const toggleFavorite = useToggleFavorite()
 
   useEffect(() => {
     if (!tripCode) {
@@ -62,10 +65,25 @@ export default function TripDetailPage() {
 
   return (
     <div className="space-y-6 pb-4">
-      <Link to="/trips" className="inline-flex items-center gap-1 text-sm text-deep-green">
-        <ArrowLeft className="h-4 w-4" />
-        {t('nav.trips')}
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link to="/trips" className="inline-flex items-center gap-1 text-sm text-deep-green">
+          <ArrowLeft className="h-4 w-4" />
+          {t('nav.trips')}
+        </Link>
+        <button
+          type="button"
+          onClick={() => toggleFavorite(tour.trip_code)}
+          aria-label={favorited ? t('favorites.remove') : t('favorites.add')}
+          aria-pressed={favorited}
+          className="inline-flex items-center gap-1.5 rounded-full border border-deep-green/15 bg-white px-3 py-1.5 text-xs font-medium text-brand-dark"
+        >
+          <Heart
+            className={`h-4 w-4 ${favorited ? 'fill-coral text-coral' : 'text-brand-dark/50'}`}
+            strokeWidth={2}
+          />
+          {favorited ? t('favorites.remove') : t('favorites.add')}
+        </button>
+      </div>
 
       <div className="relative overflow-hidden rounded-editorial">
         <TripPhotoHero tripCode={tour.trip_code} alt={name} className="aspect-[16/10] w-full" />

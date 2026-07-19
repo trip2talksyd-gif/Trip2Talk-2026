@@ -1,19 +1,26 @@
-const STORAGE_KEY = 'trip2talk_favorites'
+const STORAGE_KEY = 't2t_favorites'
+const LEGACY_KEY = 'trip2talk_favorites'
 
 function readIds(): string[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
+    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_KEY)
     if (!raw) return []
     const parsed = JSON.parse(raw) as unknown
     if (!Array.isArray(parsed)) return []
-    return parsed.filter((id): id is string => typeof id === 'string' && id.length > 0)
+    const ids = parsed.filter((id): id is string => typeof id === 'string' && id.length > 0)
+    // Migrate legacy key once
+    if (!localStorage.getItem(STORAGE_KEY) && localStorage.getItem(LEGACY_KEY)) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(ids))
+    }
+    return ids
   } catch {
     return []
   }
 }
 
 function writeIds(ids: string[]): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify([...new Set(ids)]))
+  const unique = [...new Set(ids)]
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(unique))
 }
 
 /** Favorites are stored as trip_code values (e.g. TAS-3D2N). */

@@ -122,6 +122,7 @@ const NZ_AUTUMN_WINTER_DAYS: ItineraryDay[] = [
     events: [
       {
         time: '08:00',
+        category: 'flight',
         description: {
           en: 'Jetstar arrival Queenstown — trip begins, SUV pickup',
           th: 'ถึง Queenstown — เริ่มทริป รับรถ SUV',
@@ -129,6 +130,7 @@ const NZ_AUTUMN_WINTER_DAYS: ItineraryDay[] = [
       },
       {
         time: '10:00',
+        category: 'activity',
         description: {
           en: 'Arrowtown — famous autumn foliage, street & tree-tunnel photography in orange/red tones',
           th: 'Arrowtown — ใบไม้เปลี่ยนสีดัง ถ่ายถนนและอุโมงค์ต้นไม้โทนส้ม-แดง',
@@ -136,6 +138,7 @@ const NZ_AUTUMN_WINTER_DAYS: ItineraryDay[] = [
       },
       {
         time: '14:00',
+        category: 'flight',
         description: {
           en: 'Afternoon drive into Wanaka',
           th: 'บ่ายขับเข้า Wanaka',
@@ -143,9 +146,26 @@ const NZ_AUTUMN_WINTER_DAYS: ItineraryDay[] = [
       },
       {
         time: '17:00',
+        category: 'activity',
         description: {
           en: "That Wanaka Tree — lone tree in the lake icon shot",
           th: 'That Wanaka Tree — มุมไอคอนต้นไม้โดดเดี่ยวกลางน้ำ',
+        },
+      },
+      {
+        time: '20:00',
+        category: 'meal',
+        description: {
+          en: 'Group dinner in Wanaka',
+          th: 'มื้อเย็นกลุ่มที่ Wanaka',
+        },
+      },
+      {
+        time: '22:00',
+        category: 'stay',
+        description: {
+          en: 'Check in — overnight Wanaka',
+          th: 'เช็คอิน — ค้างคืน Wanaka',
         },
       },
     ],

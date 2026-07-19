@@ -88,6 +88,8 @@ export type TranslationKey =
   | 'favorites.remove'
   | 'favorites.add'
   | 'myTrip.subtitle'
+  | 'myTrip.refOrCode'
+  | 'myTrip.contact'
   | 'myTrip.or'
   | 'myTrip.lookup'
   | 'myTrip.notFound'
@@ -318,12 +320,14 @@ const en: Map = {
   'favorites.remove': 'Remove',
   'favorites.add': 'Save trip',
   'myTrip.subtitle':
-    'Enter your booking reference plus the email or phone you used at checkout to see deposit status and trip details.',
+    'Enter your booking reference or trip code, plus the email or phone from checkout.',
+  'myTrip.refOrCode': 'Booking reference or trip code',
+  'myTrip.contact': 'Email or phone',
   'myTrip.or': 'or',
   'myTrip.lookup': 'Look up my trip',
   'myTrip.notFound': 'No booking matched that reference and contact. Check and try again.',
   'myTrip.rpcMissing':
-    'Trip lookup is not available yet. Message us on Facebook with your booking reference.',
+    'Trip lookup is not available yet (Edge Function not deployed). Message us on Facebook with your booking reference.',
   'myTrip.error.reference': 'Booking reference is required.',
   'myTrip.error.contact': 'Enter your email or phone.',
   'myTrip.error.email': 'Please enter a valid email.',
@@ -552,12 +556,14 @@ const th: Map = {
   'favorites.remove': 'ลบ',
   'favorites.add': 'บันทึกทริป',
   'myTrip.subtitle':
-    'ใส่เลขที่การจอง พร้อมอีเมลหรือเบอร์ที่ใช้ตอนจอง เพื่อดูสถานะมัดจำและรายละเอียดทริป',
+    'ใส่เลขที่การจองหรือรหัสทริป พร้อมอีเมลหรือเบอร์ที่ใช้ตอนจอง',
+  'myTrip.refOrCode': 'เลขที่การจอง หรือรหัสทริป',
+  'myTrip.contact': 'อีเมล หรือเบอร์โทร',
   'myTrip.or': 'หรือ',
   'myTrip.lookup': 'ค้นหาทริปของฉัน',
   'myTrip.notFound': 'ไม่พบการจองที่ตรงกับเลขที่และข้อมูลติดต่อ ลองตรวจสอบอีกครั้ง',
   'myTrip.rpcMissing':
-    'ระบบค้นหายังไม่พร้อม ทักหาเราทาง Facebook พร้อมเลขที่การจองได้เลย',
+    'ระบบค้นหายังไม่พร้อม (ยังไม่ได้ deploy Edge Function) ทัก Facebook พร้อมเลขที่การจองได้เลย',
   'myTrip.error.reference': 'กรุณาใส่เลขที่การจอง',
   'myTrip.error.contact': 'กรุณาใส่อีเมลหรือเบอร์โทร',
   'myTrip.error.email': 'รูปแบบอีเมลไม่ถูกต้อง',

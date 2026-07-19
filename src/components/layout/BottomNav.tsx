@@ -3,8 +3,9 @@ import { NavLink, useLocation } from 'react-router-dom'
 import { CONTACT_CHANNELS } from '../../data/contactChannels'
 import { useLang } from '../../hooks/useLang'
 
-const messengerHref =
-  CONTACT_CHANNELS.find((c) => c.id === 'messenger')?.href ?? 'https://m.me/61586534972406'
+const facebookPageHref =
+  CONTACT_CHANNELS.find((c) => c.id === 'facebook')?.href ??
+  'https://www.facebook.com/profile.php?id=61586534972406'
 
 export default function BottomNav() {
   const { t } = useLang()
@@ -46,7 +47,7 @@ export default function BottomNav() {
         </NavLink>
 
         <a
-          href={messengerHref}
+          href={facebookPageHref}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={t('nav.messages')}

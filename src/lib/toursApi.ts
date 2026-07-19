@@ -260,22 +260,38 @@ export type MyTripLookupResult = {
 }
 
 export async function lookupMyTrip(params: {
-  reference: string
-  email?: string
-  phone?: string
+  tripCodeOrReference: string
+  contact: string
 }): Promise<MyTripLookupResult> {
-  const { data, error } = await supabase.rpc('lookup_my_trip', {
-    p_reference: params.reference.trim(),
-    p_email: params.email?.trim() || null,
-    p_phone: params.phone?.trim() || null,
-  })
+  try {
+    const res = await fetch(`${supabaseConfig.url}/functions/v1/lookup-my-trip`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: supabaseConfig.anonKey,
+      },
+      body: JSON.stringify({
+        trip_code_or_reference: params.tripCodeOrReference.trim(),
+        contact: params.contact.trim(),
+      }),
+    })
 
-  if (error) {
-    logSupabaseError('lookup_my_trip', error)
-    throw error
+    const body = (await res.json()) as MyTripLookupResult & { error?: string }
+
+    if (res.status === 404 || body?.found === false) {
+      return { found: false, error: body?.error }
+    }
+
+    if (!res.ok) {
+      logSupabaseError('lookup-my-trip Edge Function', body)
+      throw new Error(body?.error ?? `lookup-my-trip failed: ${res.status}`)
+    }
+
+    return body
+  } catch (err) {
+    logSupabaseError('lookup-my-trip Edge Function', err)
+    throw err
   }
-
-  return (data ?? { found: false }) as MyTripLookupResult
 }
 
 /**
