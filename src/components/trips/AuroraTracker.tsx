@@ -45,7 +45,7 @@ export default function AuroraTracker() {
   const moonLabel = lang === 'th' ? MOCK_WEATHER.moonLabel.th : MOCK_WEATHER.moonLabel.en
 
   return (
-    <section className="relative overflow-hidden rounded-editorial border border-deep-green/40 bg-near-black-green p-5 starfield">
+    <section className="relative overflow-hidden rounded-editorial border border-teal-700/40 bg-teal-900 p-5 starfield">
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-emerald-900/40 to-transparent" />
       <div className="relative">
         <div className="flex items-center gap-2">
@@ -57,11 +57,11 @@ export default function AuroraTracker() {
 
         <div className="mt-4 grid grid-cols-3 gap-3">
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-cream-muted">KP Index</p>
+            <p className="text-[10px] uppercase tracking-wider text-cream/70">KP Index</p>
             {kp.loading ? (
-              <p className="mt-1 font-serif text-2xl text-cream-muted">…</p>
+              <p className="mt-1 font-serif text-2xl text-cream/70">…</p>
             ) : kp.error ? (
-              <p className="mt-1 text-xs text-cream-muted">
+              <p className="mt-1 text-xs text-cream/70">
                 {lang === 'th' ? 'ไม่สามารถโหลดข้อมูลได้ขณะนี้' : 'Unable to load data'}
               </p>
             ) : (
@@ -69,21 +69,21 @@ export default function AuroraTracker() {
             )}
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-cream-muted">
+            <p className="text-[10px] uppercase tracking-wider text-cream/70">
               {lang === 'th' ? 'เมฆ' : 'Clouds'}
             </p>
             <p className="mt-1 font-serif text-2xl text-cream">{MOCK_WEATHER.cloudCover}%</p>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wider text-cream-muted">
+            <p className="text-[10px] uppercase tracking-wider text-cream/70">
               {lang === 'th' ? 'ดวงจันทร์' : 'Moon'}
             </p>
             <p className="mt-1 font-serif text-2xl text-cream">{MOCK_WEATHER.moonPhase}%</p>
           </div>
         </div>
 
-        <p className="mt-3 text-xs text-cream-muted">{moonLabel}</p>
-        <p className="mt-3 text-[10px] leading-relaxed text-cream-muted/80">
+        <p className="mt-3 text-xs text-cream/70">{moonLabel}</p>
+        <p className="mt-3 text-[10px] leading-relaxed text-cream/70/80">
           {lang === 'th'
             ? 'KP: NOAA Space Weather · เมฆ/ดวงจันทร์: ข้อมูลตัวอย่าง (รอ API) · แสงใต้เป็นปรากฏการณ์ธรรมชาติ ไม่รับประกันการมองเห็น'
             : 'KP: NOAA Space Weather · Cloud/moon: placeholder (API pending) · Aurora is a natural phenomenon — sightings not guaranteed'}

@@ -15,7 +15,7 @@ export function TripCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-editorial">
       <Skeleton className="aspect-[16/10] w-full rounded-none" />
-      <div className="space-y-3 bg-near-black-green p-4">
+      <div className="space-y-3 bg-teal-900 p-4">
         <Skeleton className="h-8 w-28 bg-white/10" />
         <Skeleton className="h-3 w-full bg-white/10" />
         <Skeleton className="h-3 w-4/5 bg-white/10" />

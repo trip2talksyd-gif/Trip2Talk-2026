@@ -24,7 +24,7 @@ export function PageError({ message, onRetry, dark }: Props) {
         <button
           type="button"
           onClick={onRetry}
-          className={`mt-3 text-sm underline ${dark ? 'text-amber-400' : 'text-brand-green'}`}
+          className={`mt-3 text-sm underline ${dark ? 'text-amber-400' : 'text-teal-700'}`}
         >
           {t('common.retry')}
         </button>

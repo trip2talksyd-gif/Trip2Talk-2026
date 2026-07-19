@@ -70,7 +70,7 @@ export default function PublicFooter() {
     <section className="footer-section relative overflow-visible bg-white px-4 pb-24 pt-8 sm:px-6">
       <div className="footer-wrapper relative z-[1] mx-auto grid max-w-[1150px] grid-cols-1 items-stretch gap-4 md:grid-cols-[minmax(0,350px)_1fr]">
         {/* Left card — video */}
-        <div className="footer-left relative flex min-h-[340px] flex-col justify-between overflow-hidden rounded-[28px] bg-near-black-green p-8 shadow-[0_12px_40px_rgba(13,74,46,0.28)] max-md:min-h-0 max-md:gap-10">
+        <div className="footer-left relative flex min-h-[340px] flex-col justify-between overflow-hidden rounded-[28px] bg-teal-900 p-8 shadow-[0_12px_40px_rgba(13,74,46,0.28)] max-md:min-h-0 max-md:gap-10">
           <video
             className="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover"
             autoPlay
@@ -197,7 +197,7 @@ export default function PublicFooter() {
                   <Link
                     key={to}
                     to={to}
-                    className="mb-3.5 block font-sans text-sm font-semibold text-[#111827] no-underline transition-colors duration-200 hover:text-deep-green"
+                    className="mb-3.5 block font-sans text-sm font-semibold text-[#111827] no-underline transition-colors duration-200 hover:text-teal-700"
                   >
                     {t(key)}
                   </Link>
@@ -211,7 +211,7 @@ export default function PublicFooter() {
                   <Link
                     key={key}
                     to={to}
-                    className="mb-3.5 block font-sans text-sm font-semibold text-[#111827] no-underline transition-colors duration-200 hover:text-deep-green"
+                    className="mb-3.5 block font-sans text-sm font-semibold text-[#111827] no-underline transition-colors duration-200 hover:text-teal-700"
                   >
                     {t(key)}
                   </Link>

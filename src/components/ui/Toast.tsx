@@ -23,7 +23,7 @@ type ToastContextValue = {
 const ToastContext = createContext<ToastContextValue | null>(null)
 
 const VARIANT_STYLES: Record<ToastVariant, string> = {
-  success: 'border-brand-green/30 bg-brand-green-light text-brand-dark',
+  success: 'border-teal-700/30 bg-mint-100 text-ink',
   error: 'border-red-200 bg-red-50 text-red-900',
   info: 'border-blue-200 bg-blue-50 text-blue-900',
 }

@@ -180,8 +180,8 @@ export default function BookingPage() {
   if (!tripCode) {
     return (
       <div>
-        <p className="text-sm text-gray-600">{t('booking.selectTrip')}</p>
-        <Link to="/trips" className="mt-2 inline-block text-deep-green underline">
+        <p className="text-sm text-ink-soft">{t('booking.selectTrip')}</p>
+        <Link to="/trips" className="mt-2 inline-block text-teal-700 underline">
           {t('nav.trips')}
         </Link>
       </div>
@@ -195,26 +195,43 @@ export default function BookingPage() {
 
     return (
       <div className="space-y-5">
-        <div className="rounded-editorial border border-gold/40 bg-gold/10 p-6 text-center">
-          <Check className="mx-auto h-10 w-10 text-gold" />
-          <h2 className="mt-3 font-serif text-xl text-brand-dark">{t('booking.confirmation')}</h2>
-          <p className="mt-2 text-sm text-brand-dark/70">{t('booking.success')}</p>
-          <p className="mt-4 font-serif text-lg text-gold-dark">{reference}</p>
-          <p className="mt-1 text-xs text-gray-500">{t('booking.reference')}</p>
+        <div className="rounded-2xl border border-teal-600/40 bg-teal-500/10 p-6 text-center">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-b from-teal-500 to-teal-800 text-cream shadow">
+            <Check className="h-7 w-7" strokeWidth={2.5} />
+          </div>
+          <h2 className="mt-3 font-serif text-xl text-ink">{t('booking.confirmation')}</h2>
+          <p className="mt-1 font-thai text-sm text-teal-700">จองสำเร็จแล้ว!</p>
+          <p className="mt-2 text-sm text-ink-soft">{t('booking.success')}</p>
+          <p className="mt-4 rounded-xl border border-dashed border-line bg-cream px-4 py-2 font-serif text-lg tracking-wide text-ink">
+            {reference}
+          </p>
+          <p className="mt-1 text-xs text-ink-soft">{t('booking.reference')}</p>
         </div>
 
         <a
           href={facebookHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 rounded-editorial bg-deep-green px-4 py-3 text-sm text-cream"
+          className="flex gap-3 rounded-xl border border-[#cfe0fb] bg-[#eaf2ff] p-3 text-left"
         >
-          {t('myTrip.messageUs')}
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#1877F2] text-xs font-bold text-cream">
+            f
+          </span>
+          <span>
+            <span className="block text-[11px] font-bold text-ink">
+              {lang === 'th'
+                ? 'ขั้นต่อไป: Inbox หาเราทาง Facebook'
+                : 'Next: message us on Facebook'}
+            </span>
+            <span className="mt-1 block text-[9.5px] leading-relaxed text-ink-soft">
+              {t('myTrip.messageUs')}
+            </span>
+          </span>
         </a>
 
         <BookingJourneyTimeline
           bookingStatus="pending_payment"
-          className="rounded-editorial border border-deep-green/10 bg-white p-4"
+          className="rounded-xl border border-line bg-cream p-4"
         />
       </div>
     )
@@ -237,60 +254,158 @@ export default function BookingPage() {
     { key: 'oshc_provider', label: t('form.oshcProvider') },
   ]
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-6" noValidate>
-      <h1 className="font-serif text-2xl text-brand-dark">{t('booking.summary')}</h1>
+  const depositDue = tour.deposit_aud
 
-      <div className="rounded-editorial border border-gold/40 bg-gold/10 p-4">
-        <p className="font-medium text-brand-dark">{name}</p>
-        <p className="text-sm text-brand-dark/60">{tourDurationLabel(tour, lang)}</p>
-        <p className="mt-2 font-serif text-2xl text-gold-dark">{formatAud(tour.price_aud)}</p>
-        <p className="text-sm text-gray-600">
-          {t('booking.deposit')}: {formatAud(tour.deposit_aud)}
-        </p>
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5 pb-4" noValidate>
+      <h1 className="font-serif text-2xl text-ink">
+        {lang === 'th' ? 'จองทริปของคุณ' : 'Book Your Trip'}
+      </h1>
+
+      <div className="flex items-center gap-2.5 rounded-xl bg-mint-100 p-2">
+        {tour.cover_image_url ? (
+          <img
+            src={tour.cover_image_url}
+            alt=""
+            className="h-11 w-11 rounded-[9px] object-cover"
+          />
+        ) : (
+          <div className="flex h-11 w-11 items-center justify-center rounded-[9px] bg-teal-800 text-[10px] text-cream">
+            T2T
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="truncate text-[11px] font-bold text-ink">{name}</p>
+          <p className="text-[9px] text-ink-soft">{tourDurationLabel(tour, lang)}</p>
+        </div>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         {fields.map(({ key, label, type, required }) => (
           <label key={key} className="block">
-            <span className="text-xs font-medium text-gray-600">
+            <span className="text-[9.5px] font-bold uppercase tracking-wide text-ink-soft">
               {label}
-              {required && <span className="text-red-500"> *</span>}
+              {required && <span className="text-coral"> *</span>}
             </span>
             <input
               type={type ?? 'text'}
               value={form[key]}
               onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
               onBlur={() => setTouched(true)}
-              className={`mt-1 w-full rounded-lg border px-3 py-2 text-sm ${
-                fieldErrors[key] ? 'border-red-400' : 'border-gray-200'
+              className={`mt-1 w-full rounded-[10px] border bg-cream px-3 py-2.5 text-[11.5px] text-ink ${
+                fieldErrors[key] ? 'border-coral' : 'border-line'
               }`}
             />
             {fieldErrors[key] && (
-              <p className="mt-1 text-xs text-red-600">{fieldErrors[key]}</p>
+              <p className="mt-1 text-xs text-coral">{fieldErrors[key]}</p>
             )}
           </label>
         ))}
         <label className="block">
-          <span className="text-xs font-medium text-gray-600">{t('form.oshcExpiry')}</span>
+          <span className="text-[9.5px] font-bold uppercase tracking-wide text-ink-soft">
+            {t('form.oshcExpiry')}
+          </span>
           <input
             type="date"
             value={form.oshc_expiry}
             onChange={(e) => setForm((f) => ({ ...f, oshc_expiry: e.target.value }))}
-            className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-[10px] border border-line bg-cream px-3 py-2.5 text-[11.5px] text-ink"
           />
         </label>
       </div>
 
-      <section className="rounded-xl border border-gray-100 bg-white p-4">
-        <h2 className="text-sm font-semibold text-brand-dark">{t('booking.payment')}</h2>
-        <div className="mt-3 flex items-center justify-between rounded-lg bg-gray-50 px-3 py-2">
-          <span className="font-mono text-sm">{PAYID_EMAIL}</span>
-          <button type="button" onClick={copyPayId} className="text-gold">
+      <div className="rounded-[14px] border border-dashed border-line px-3 py-2.5">
+        <div className="flex justify-between text-[11px] text-ink-soft">
+          <span>
+            {lang === 'th' ? 'ราคาทริปโดยประมาณ' : 'Trip total (est.)'}
+          </span>
+          <span>{formatAud(tour.price_aud)}</span>
+        </div>
+      </div>
+
+      <div className="rounded-[14px] bg-mint-100 px-3.5 py-3">
+        <div className="flex justify-between py-0.5 text-[11px] text-ink-soft">
+          <span>
+            {lang === 'th' ? 'ยอดรวมทริปโดยประมาณ' : 'Trip total (est.)'}
+          </span>
+          <span>{formatAud(tour.price_aud)}</span>
+        </div>
+        <div className="flex justify-between py-0.5 text-[11px] text-ink-soft">
+          <span>
+            {lang === 'th' ? `มัดจำ ${formatAud(tour.deposit_aud)}/คน` : `Deposit — ${formatAud(tour.deposit_aud)}`}
+          </span>
+          <span>{formatAud(depositDue)}</span>
+        </div>
+        <div className="mt-1.5 flex justify-between border-t border-dashed border-[#c9d8d1] pt-2 text-sm font-extrabold text-teal-800">
+          <span>
+            {lang === 'th' ? 'ชำระตอนนี้' : 'Due now'}
+            <span className="mt-0.5 block font-thai text-[9.5px] font-medium text-teal-700">
+              ชำระตอนนี้
+            </span>
+          </span>
+          <span>{formatAud(depositDue)} AUD</span>
+        </div>
+        <p className="mt-2 text-[9px] leading-relaxed text-ink-soft">
+          We only collect a {formatAud(tour.deposit_aud)}/person deposit to secure your seat. The
+          remaining balance is arranged directly with Saen & the Trip2Talk team.
+          <span className="mt-0.5 block font-thai">
+            เราเก็บมัดจำเพื่อจองที่นั่ง ส่วนที่เหลือพี่แสนและทีมจะติดต่อจัดการเองโดยตรง
+          </span>
+        </p>
+      </div>
+
+      <div className="flex gap-2 rounded-xl border border-line bg-cream px-3 py-2.5">
+        <span className="text-sm leading-none" aria-hidden>
+          💳
+        </span>
+        <div>
+          <p className="text-[10.5px] font-bold text-ink">
+            {lang === 'th' ? 'แบ่งจ่ายได้ตามสะดวก' : 'Flexible installments'}
+          </p>
+          <p className="text-[9.5px] leading-relaxed text-ink-soft">
+            Pay the remaining balance in 2–4 installments, whatever works for you.
+            <span className="block font-thai">แบ่งจ่ายค่าทริปที่เหลือ 2-4 งวดตามความสะดวก</span>
+          </p>
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-[#f0dfb8] bg-[#fff8ee] px-3 py-2.5">
+        <p className="text-[10.5px] font-bold text-[#7a5b16]">
+          {lang === 'th' ? 'รายการที่ไม่รวมในค่าทริป' : 'Not included in trip price'}
+        </p>
+        <ul className="mt-1.5 space-y-1 text-[9.5px] text-[#7a5b16]">
+          <li>✈️ Flights · ตั๋วเครื่องบิน</li>
+          <li>🍽 Meals · ค่าอาหาร</li>
+          <li>🛡 Travel insurance · ประกันการเดินทาง</li>
+        </ul>
+      </div>
+
+      <div className="flex items-center gap-2.5 rounded-xl border border-line bg-cream px-3 py-2.5">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-mint-100 text-sm">
+          🛏
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="text-[10.5px] font-bold text-ink">
+            {lang === 'th' ? 'อยากได้ที่พักส่วนตัว?' : 'Want a private room?'}
+          </p>
+          <p className="text-[9px] text-ink-soft">
+            {lang === 'th' ? 'จ่ายเพิ่มเล็กน้อย' : 'Extra fee applies'}
+          </p>
+        </div>
+        <span className="shrink-0 rounded-full bg-[#e5f6ec] px-2 py-0.5 text-[8.5px] font-extrabold text-[#1a7a4c]">
+          {lang === 'th' ? 'บริการฟรี' : 'Free to arrange'}
+        </span>
+      </div>
+
+      <section className="rounded-xl border border-line bg-cream p-4">
+        <h2 className="text-sm font-semibold text-ink">{t('booking.payment')}</h2>
+        <div className="mt-3 flex items-center justify-between rounded-lg bg-mint-100 px-3 py-2">
+          <span className="font-mono text-sm text-ink">{PAYID_EMAIL}</span>
+          <button type="button" onClick={copyPayId} className="text-teal-700">
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </button>
         </div>
-        <label className="mt-4 block cursor-pointer rounded-lg border-2 border-dashed border-gray-200 p-4 text-center text-sm">
+        <label className="mt-4 block cursor-pointer rounded-lg border-2 border-dashed border-line p-4 text-center text-sm text-ink-soft">
           {t('booking.uploadSlip')}
           <input
             type="file"
@@ -298,16 +413,20 @@ export default function BookingPage() {
             className="sr-only"
             onChange={(e) => setSlipFile(e.target.files?.[0] ?? null)}
           />
-          {slipFile && <p className="mt-1 text-xs text-gray-500">{slipFile.name}</p>}
+          {slipFile && <p className="mt-1 text-xs text-ink">{slipFile.name}</p>}
         </label>
       </section>
 
       <button
         type="submit"
         disabled={submitting || !isValid}
-        className="btn-primary w-full disabled:opacity-50"
+        className="btn-embossed w-full !rounded-[13px] disabled:opacity-50"
       >
-        {submitting ? t('common.loading') : t('btn.submit')}
+        {submitting
+          ? t('common.loading')
+          : lang === 'th'
+            ? `ชำระมัดจำ ${formatAud(depositDue)}`
+            : `Pay Deposit — ${formatAud(depositDue)}`}
       </button>
     </form>
   )

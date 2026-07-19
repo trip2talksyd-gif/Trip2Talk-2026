@@ -25,10 +25,10 @@ export default function TripPhotoHero({ tripCode, alt, className = '' }: Props) 
 
   return (
     <div
-      className={`flex items-center justify-center bg-gradient-to-br from-brand-green-light to-brand-green/20 ${className}`}
+      className={`flex items-center justify-center bg-gradient-to-br from-mint-100 to-teal-900/20 ${className}`}
       aria-hidden
     >
-      <span className="text-4xl font-bold text-brand-green/30">T2T</span>
+      <span className="text-4xl font-bold text-teal-900/30">T2T</span>
     </div>
   )
 }

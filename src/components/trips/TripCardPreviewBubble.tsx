@@ -25,10 +25,10 @@ export default function TripCardPreviewBubble({ visible, x, y, imageSrc, alt, ha
         transform: `translate(-50%, -50%) scale(${visible ? 1 : 0.95})`,
       }}
     >
-      <div className="relative h-[92px] w-[92px] overflow-hidden rounded-full bg-near-black-green shadow-[0_8px_24px_rgba(19,32,26,0.35)] ring-2 ring-gold/40">
+      <div className="relative h-[92px] w-[92px] overflow-hidden rounded-full bg-teal-900 shadow-[0_8px_24px_rgba(19,32,26,0.35)] ring-2 ring-teal-500/40">
         <img src={imageSrc} alt={alt} className="h-full w-full object-cover" draggable={false} />
         {hasVideo && (
-          <span className="absolute inset-0 flex items-center justify-center bg-near-black-green/25">
+          <span className="absolute inset-0 flex items-center justify-center bg-teal-900/25">
             <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gold/90 text-gold-dark shadow-sm">
               <Play className="ml-0.5 h-4 w-4 fill-current" />
             </span>

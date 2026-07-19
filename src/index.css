@@ -334,5 +334,40 @@
   .btn-embossed-ghost:hover {
     transform: none;
   }
+
+  .cal-filmstrip-track {
+    animation: none;
+  }
+}
+
+/* Auto-scrolling trip photo filmstrip (Calendar / Favorites) */
+.cal-filmstrip-viewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1rem;
+  min-height: 150px;
+  height: 168px;
+}
+
+.cal-filmstrip-track {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  gap: 0.625rem;
+  width: max-content;
+  animation: cal-filmstrip-slide 28s linear infinite;
+}
+
+.cal-filmstrip-viewport:hover .cal-filmstrip-track {
+  animation-play-state: paused;
+}
+
+@keyframes cal-filmstrip-slide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
