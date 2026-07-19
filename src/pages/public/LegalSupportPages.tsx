@@ -120,22 +120,35 @@ export function PaymentMethodsPage() {
   )
 }
 
-function loadNotifyPrefs() {
+type NotifyPrefs = {
+  tripReminders: boolean
+  promo: boolean
+  photoReady: boolean
+}
+
+const DEFAULT_NOTIFY_PREFS: NotifyPrefs = {
+  tripReminders: true,
+  promo: false,
+  photoReady: true,
+}
+
+function loadNotifyPrefs(): NotifyPrefs {
   try {
     const raw = localStorage.getItem('t2t_notify_prefs')
-    if (!raw) return { tripReminders: true, promo: false, photoReady: true }
-    return { tripReminders: true, promo: false, photoReady: true, ...JSON.parse(raw) }
+    if (!raw) return { ...DEFAULT_NOTIFY_PREFS }
+    const parsed = JSON.parse(raw) as Partial<NotifyPrefs>
+    return { ...DEFAULT_NOTIFY_PREFS, ...parsed }
   } catch {
-    return { tripReminders: true, promo: false, photoReady: true }
+    return { ...DEFAULT_NOTIFY_PREFS }
   }
 }
 
 export function NotificationsPage() {
   const { lang } = useLang()
-  const [prefs, setPrefs] = useState(loadNotifyPrefs)
+  const [prefs, setPrefs] = useState<NotifyPrefs>(loadNotifyPrefs)
 
-  function toggle(key: keyof typeof prefs) {
-    setPrefs((p) => {
+  function toggle(key: keyof NotifyPrefs) {
+    setPrefs((p: NotifyPrefs) => {
       const next = { ...p, [key]: !p[key] }
       try {
         localStorage.setItem('t2t_notify_prefs', JSON.stringify(next))
@@ -146,7 +159,7 @@ export function NotificationsPage() {
     })
   }
 
-  const rows: { key: keyof typeof prefs; en: string; th: string }[] = [
+  const rows: { key: keyof NotifyPrefs; en: string; th: string }[] = [
     { key: 'tripReminders', en: 'Trip reminders (departure & meetup)', th: 'แจ้งเตือนวันเดินทางและจุดนัดพบ' },
     { key: 'photoReady', en: 'Photo gallery ready (Pic-Time)', th: 'อัลบั้มภาพพร้อม (Pic-Time)' },
     { key: 'promo', en: 'New trip & promo emails', th: 'อีเมลทริปใหม่และโปรโมชัน' },

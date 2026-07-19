@@ -49,7 +49,7 @@ const HUB_CARDS = [
 export default function PhotoGuideHubPage() {
   const { lang } = useLang()
   const album = galleryByIds(['nz-001', 'nz-013', 'nz-014', 'tas-002', 'tas-003', 'syd-009', 'syd-011'])
-  const slides = album.slice(0, 6).map((photo, i) => ({
+  const slides = album.slice(0, 6).map((photo) => ({
     photo,
     sceneEn: 'From the road',
     sceneTh: 'จากทริปจริง',
