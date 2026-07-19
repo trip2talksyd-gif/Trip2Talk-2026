@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { Lock } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { useToast } from '../ui/Toast'
 import { enabledContactChannels } from '../../data/contactChannels'
@@ -26,7 +27,6 @@ const infoLinks: { to: string; key: TranslationKey }[] = [
   { to: '/payment-methods', key: 'footer.info.payment' },
   { to: '/help', key: 'footer.info.help' },
   { to: '/account', key: 'footer.info.contact' },
-  { to: '/app', key: 'footer.info.portal' },
 ]
 
 export default function PublicFooter() {
@@ -280,9 +280,19 @@ export default function PublicFooter() {
         </svg>
       </div>
 
-      <p className="mx-auto mt-2 max-w-[1150px] text-center font-sans text-[10px] text-[#9ca3af]">
-        33/14 Jubilee Ave, Warriewood NSW 2102 · ABN 81 951 461 769
-      </p>
+      <div className="mx-auto mt-2 flex max-w-[1150px] flex-col items-center gap-1.5 px-4">
+        <p className="text-center font-sans text-[10px] text-[#9ca3af]">
+          33/14 Jubilee Ave, Warriewood NSW 2102 · ABN 81 951 461 769
+        </p>
+        <Link
+          to="/app"
+          className="inline-flex items-center gap-1 font-sans text-[10px] text-[#b0b6c0] no-underline transition-colors hover:text-teal-700/70"
+          aria-label="Staff PIN login"
+        >
+          <Lock className="h-2.5 w-2.5" strokeWidth={2} aria-hidden />
+          พนักงาน
+        </Link>
+      </div>
     </section>
   )
 }
