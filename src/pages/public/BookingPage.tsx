@@ -194,36 +194,41 @@ export default function BookingPage() {
       'https://www.facebook.com/profile.php?id=61586534972406'
 
     return (
-      <div className="space-y-5">
-        <div className="rounded-2xl border border-teal-600/40 bg-teal-500/10 p-6 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-b from-teal-500 to-teal-800 text-cream shadow">
-            <Check className="h-7 w-7" strokeWidth={2.5} />
-          </div>
-          <h2 className="mt-3 font-serif text-xl text-ink">{t('booking.confirmation')}</h2>
-          <p className="mt-1 font-thai text-sm text-teal-700">จองสำเร็จแล้ว!</p>
-          <p className="mt-2 text-sm text-ink-soft">{t('booking.success')}</p>
-          <p className="mt-4 rounded-xl border border-dashed border-line bg-cream px-4 py-2 font-serif text-lg tracking-wide text-ink">
-            {reference}
-          </p>
-          <p className="mt-1 text-xs text-ink-soft">{t('booking.reference')}</p>
+      <div className="flex flex-col items-center px-[22px] pb-[22px] pt-[30px] text-center">
+        <div
+          className="mb-3.5 flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-[28px] text-cream"
+          style={{
+            background: 'linear-gradient(180deg, #efa565, #20363c)',
+            boxShadow: '0 12px 24px -10px rgba(20,50,45,.45)',
+          }}
+        >
+          <Check className="h-7 w-7" strokeWidth={2.5} />
         </div>
+        <h2 className="m-0 mb-[3px] font-serif text-[18px] text-ink">
+          {t('booking.confirmation')}
+        </h2>
+        <p className="mb-3.5 font-thai text-[12px] text-teal-700">จองสำเร็จแล้ว!</p>
+        <p className="mb-4 text-[13px] text-ink-soft">{t('booking.success')}</p>
+        <p className="mb-4 rounded-xl border border-dashed border-line bg-card px-[18px] py-2.5 text-[13px] font-extrabold tracking-[0.06em] text-ink">
+          {reference}
+        </p>
 
         <a
           href={facebookHref}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex gap-3 rounded-xl border border-[#cfe0fb] bg-[#eaf2ff] p-3 text-left"
+          className="mt-4 flex w-full gap-2.5 rounded-[14px] border border-[#cfe0fb] bg-[#eaf2ff] px-3.5 py-3 text-left"
         >
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#1877F2] text-xs font-bold text-cream">
+          <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-[9px] bg-[#1877F2] text-[14px] font-bold text-cream">
             f
           </span>
           <span>
-            <span className="block text-[11px] font-bold text-ink">
+            <b className="block text-[11px] font-bold text-ink">
               {lang === 'th'
                 ? 'ขั้นต่อไป: Inbox หาเราทาง Facebook'
                 : 'Next: message us on Facebook'}
-            </span>
-            <span className="mt-1 block text-[9.5px] leading-relaxed text-ink-soft">
+            </b>
+            <span className="mt-0.5 block text-[9.5px] leading-relaxed text-ink-soft">
               {t('myTrip.messageUs')}
             </span>
           </span>
@@ -231,7 +236,7 @@ export default function BookingPage() {
 
         <BookingJourneyTimeline
           bookingStatus="pending_payment"
-          className="rounded-xl border border-line bg-cream p-4"
+          className="mt-5 w-full text-left"
         />
       </div>
     )
@@ -420,7 +425,7 @@ export default function BookingPage() {
       <button
         type="submit"
         disabled={submitting || !isValid}
-        className="btn-embossed w-full !rounded-[13px] disabled:opacity-50"
+        className="book-btn flip-cta cta-shine w-full disabled:opacity-50"
       >
         {submitting
           ? t('common.loading')
