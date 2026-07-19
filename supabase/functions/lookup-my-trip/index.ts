@@ -114,12 +114,19 @@ Deno.serve(async (req) => {
 
     const { data: tour, error: tourError } = await admin
       .from('tours')
-      .select('name_en, name_th, departure_date, price_aud, deposit_aud')
+      .select('*')
       .eq('id', booking.tour_id)
       .maybeSingle()
 
     if (tourError) throw tourError
     if (!tour) return json({ found: false })
+
+    const t = tour as Record<string, unknown>
+    const departure =
+      (typeof t.departure_date === 'string' ? t.departure_date : null) ??
+      (typeof t.next_date === 'string' ? t.next_date : null)
+    const price = Number(t.price_aud ?? t.price_standard) || 0
+    const deposit = Number(t.deposit_aud ?? t.deposit_amount) || 0
 
     return json({
       found: true,
@@ -131,11 +138,11 @@ Deno.serve(async (req) => {
         booked_at: booking.booked_at,
         first_name_en: booking.first_name_en,
         last_name_en: booking.last_name_en,
-        name_en: tour.name_en,
-        name_th: tour.name_th,
-        departure_date: tour.departure_date,
-        price_aud: Number(tour.price_aud) || 0,
-        deposit_aud: Number(tour.deposit_aud) || 0,
+        name_en: String(t.name_en ?? ''),
+        name_th: String(t.name_th ?? ''),
+        departure_date: departure,
+        price_aud: price,
+        deposit_aud: deposit,
       },
     })
   } catch (err) {

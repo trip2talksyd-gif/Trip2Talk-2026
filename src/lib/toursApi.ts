@@ -56,20 +56,84 @@ async function releaseSeat(tourId: string, seatsToRelease = 1): Promise<void> {
   }
 }
 
+/**
+ * Live production tours (created from supabase/2026-07-00-base-schema.sql) use
+ * next_date / price_standard / max_pax / current_pax / deposit_amount.
+ * Newer migrations use departure_date / price_aud / max_seats / booked_seats /
+ * deposit_aud — but those migrations were never applied to production.
+ * Normalize either shape into the Tour interface the UI expects.
+ */
+type TourRow = Record<string, unknown>
+
+function num(value: unknown, fallback = 0): number {
+  const n = typeof value === 'number' ? value : Number(value)
+  return Number.isFinite(n) ? n : fallback
+}
+
+function strOrNull(value: unknown): string | null {
+  if (value == null) return null
+  const s = String(value).trim()
+  return s.length ? s : null
+}
+
+export function normalizeTour(row: TourRow): Tour {
+  const departure =
+    strOrNull(row.departure_date) ?? strOrNull(row.next_date) ?? null
+
+  return {
+    id: String(row.id ?? ''),
+    trip_code: String(row.trip_code ?? ''),
+    name_en: String(row.name_en ?? ''),
+    name_th: String(row.name_th ?? ''),
+    description_en: strOrNull(row.description_en),
+    description_th: strOrNull(row.description_th),
+    duration_days: row.duration_days == null ? null : num(row.duration_days),
+    duration_nights: row.duration_nights == null ? null : num(row.duration_nights),
+    departure_date: departure,
+    price_aud: num(row.price_aud ?? row.price_standard),
+    deposit_aud: num(row.deposit_aud ?? row.deposit_amount, 100),
+    max_seats: num(row.max_seats ?? row.max_pax, 6),
+    booked_seats: num(row.booked_seats ?? row.current_pax),
+    status: String(row.status ?? 'draft'),
+    cover_image_url: strOrNull(row.cover_image_url),
+    created_at: String(row.created_at ?? ''),
+    updated_at: String(row.updated_at ?? row.created_at ?? ''),
+  }
+}
+
+function normalizeTours(rows: TourRow[] | null | undefined): Tour[] {
+  return (rows ?? []).map(normalizeTour)
+}
+
+/** Client-side date sort — avoids .order('departure_date') which 42703's on live DB. */
+function sortByDepartureDate(tours: Tour[]): Tour[] {
+  return [...tours].sort((a, b) => {
+    if (!a.departure_date && !b.departure_date) return 0
+    if (!a.departure_date) return 1
+    if (!b.departure_date) return -1
+    return a.departure_date.localeCompare(b.departure_date)
+  })
+}
+
+function statusLower(tour: Tour): string {
+  return (tour.status ?? '').toLowerCase()
+}
+
 export async function fetchFeaturedTours(limit = 3): Promise<Tour[]> {
   logSelectColumns('fetchFeaturedTours', 'tours', '*')
   try {
-    const { data, error } = await supabase
-      .from('tours')
-      .select('*')
-      .eq('status', 'confirmed')
-      .order('departure_date', { ascending: true, nullsFirst: false })
+    // Do not .order('departure_date') — column does not exist on production (uses next_date).
+    const { data, error } = await supabase.from('tours').select('*')
 
     if (error) {
       logSupabaseError('fetchFeaturedTours', error)
       throw error
     }
-    return sortToursForListing((data ?? []) as Tour[]).slice(0, limit)
+    const tours = sortByDepartureDate(normalizeTours(data as TourRow[])).filter((t) => {
+      const s = statusLower(t)
+      return s === 'confirmed' || s === 'published' || s === 'active'
+    })
+    return sortToursForListing(tours).slice(0, limit)
   } catch (err) {
     if (!(err && typeof err === 'object' && 'code' in err)) {
       logSupabaseError('fetchFeaturedTours', err)
@@ -81,17 +145,16 @@ export async function fetchFeaturedTours(limit = 3): Promise<Tour[]> {
 export async function fetchAllTours(): Promise<Tour[]> {
   logSelectColumns('fetchAllTours', 'tours', '*')
   try {
-    const { data, error } = await supabase
-      .from('tours')
-      .select('*')
-      .neq('status', 'cancelled')
-      .order('departure_date', { ascending: true, nullsFirst: false })
+    const { data, error } = await supabase.from('tours').select('*')
 
     if (error) {
       logSupabaseError('fetchAllTours', error)
       throw error
     }
-    return (data ?? []) as Tour[]
+    const tours = sortByDepartureDate(normalizeTours(data as TourRow[])).filter(
+      (t) => statusLower(t) !== 'cancelled',
+    )
+    return tours
   } catch (err) {
     if (!(err && typeof err === 'object' && 'code' in err)) {
       logSupabaseError('fetchAllTours', err)
@@ -120,17 +183,16 @@ export function sortToursForListing(tours: Tour[]): Tour[] {
 export async function fetchConfirmedTours(): Promise<Tour[]> {
   logSelectColumns('fetchConfirmedTours', 'tours', '*')
   try {
-    const { data, error } = await supabase
-      .from('tours')
-      .select('*')
-      .eq('status', 'confirmed')
-      .order('departure_date', { ascending: true, nullsFirst: false })
+    const { data, error } = await supabase.from('tours').select('*')
 
     if (error) {
       logSupabaseError('fetchConfirmedTours', error)
       throw error
     }
-    return (data ?? []) as Tour[]
+    return sortByDepartureDate(normalizeTours(data as TourRow[])).filter((t) => {
+      const s = statusLower(t)
+      return s === 'confirmed' || s === 'published' || s === 'active'
+    })
   } catch (err) {
     if (!(err && typeof err === 'object' && 'code' in err)) {
       logSupabaseError('fetchConfirmedTours', err)
@@ -152,7 +214,7 @@ export async function fetchTourByCode(tripCode: string): Promise<Tour | null> {
       logSupabaseError(`fetchTourByCode (${tripCode})`, error)
       throw error
     }
-    return data as Tour | null
+    return data ? normalizeTour(data as TourRow) : null
   } catch (err) {
     if (!(err && typeof err === 'object' && 'code' in err)) {
       logSupabaseError(`fetchTourByCode (${tripCode})`, err)
@@ -455,11 +517,19 @@ export function seatsRemaining(tour: Tour): number {
   return Math.max(0, tour.max_seats - tour.booked_seats)
 }
 
-/** Bookable when confirmed/published, has departure date, and seats remain. */
+/** Bookable when confirmed/published/active, has departure date, and seats remain. */
 export function isTourBookable(tour: Tour): boolean {
   const status = (tour.status ?? '').toLowerCase()
-  if (status === 'draft' || status === 'cancelled' || status === 'completed') return false
-  if (status !== 'confirmed' && status !== 'published') return false
+  if (status === 'draft' || status === 'cancelled' || status === 'completed' || status === 'planning') {
+    return false
+  }
+  if (
+    status !== 'confirmed' &&
+    status !== 'published' &&
+    status !== 'active'
+  ) {
+    return false
+  }
   if (!tour.departure_date) return false
   if (tour.max_seats <= 0) return false
   return tour.booked_seats < tour.max_seats
