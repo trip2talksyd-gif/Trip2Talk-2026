@@ -4,9 +4,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // New palette (Phase 0)
-        // Note: teal-600/500/400 are warm amber accents in the approved mockup
-        // naming (not literal teal). Dark stops are moody teal-grey.
+        // Exact tokens from Trip2Talk-Mockup-Teal.html :root
         teal: {
           900: '#16262b',
           800: '#20363c',
@@ -17,15 +15,16 @@ module.exports = {
         },
         mint: {
           100: '#f0efe9',
+          200: '#f4ece0',
         },
         cream: '#f7f5f0',
+        card: '#ffffff',
         ink: '#1b2a2c',
         'ink-soft': '#5a6c6a',
         line: '#e6e4dc',
         coral: '#e2734a',
 
-  // Legacy aliases -> new values (kept until remaining pages are renamed).
-  // Do not add new usages — prefer teal-*, ink, mint-100, line, coral.
+        // Legacy aliases → exact mockup values (do not invent new usages)
         'deep-green': '#16262b',
         'near-black-green': '#16262b',
         gold: '#efa565',
@@ -38,16 +37,20 @@ module.exports = {
         amber: '#e8935a',
       },
       fontFamily: {
-        // EN body
+        // body/UI — mockup body { font-family: Inter, Sarabun }
         sans: ['Inter', 'Sarabun', 'system-ui', 'sans-serif'],
-        // Thai display (headlines / bilingual hero lines)
-        thai: ['Prompt', 'Sarabun', 'system-ui', 'sans-serif'],
-        // Editorial serif (kept for existing EN display usage)
-        serif: ['"Noto Serif"', '"Noto Serif Thai"', 'Georgia', 'serif'],
+        // Thai sub-lines — mockup --font-th: Prompt, Noto Serif Thai
+        thai: ['Prompt', 'Noto Serif Thai', 'sans-serif'],
+        // Headings — mockup h1,h2,h3 { Noto Serif Thai, Inter, serif }
+        serif: ['"Noto Serif Thai"', 'Inter', 'serif'],
         hand: ['Caveat', 'cursive'],
+        mono: ['Inter', 'ui-monospace', 'monospace'],
       },
       borderRadius: {
         editorial: '4px',
+      },
+      boxShadow: {
+        mockup: '0 20px 45px -20px rgba(15, 28, 30, 0.4)',
       },
     },
   },

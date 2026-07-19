@@ -1,8 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Noto+Serif+Thai:wght@400;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap');
+/* Exact Google Fonts stack from Trip2Talk-Mockup-Teal.html (+ Caveat for hand accents) */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Thai:wght@500;600;700&family=Prompt:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Mockup :root design tokens — single source of truth */
+:root {
+  --teal-900: #16262b;
+  --teal-800: #20363c;
+  --teal-700: #2e4d53;
+  --teal-600: #e8935a;
+  --teal-500: #efa565;
+  --teal-400: #f4b476;
+  --mint-200: #f4ece0;
+  --mint-100: #f0efe9;
+  --ink: #1b2a2c;
+  --ink-soft: #5a6c6a;
+  --cream: #f7f5f0;
+  --card: #ffffff;
+  --line: #e6e4dc;
+  --coral: #e2734a;
+  --shadow: 0 20px 45px -20px rgba(15, 28, 30, 0.4);
+  --font-th: 'Prompt', 'Noto Serif Thai', sans-serif;
+}
 
 @property --t2t-x1 { syntax: '<percentage>'; inherits: false; initial-value: 10%; }
 @property --t2t-y1 { syntax: '<percentage>'; inherits: false; initial-value: 10%; }
@@ -85,19 +106,21 @@
 @layer base {
   body {
     @apply font-sans text-ink antialiased;
-    letter-spacing: -0.01em;
+    background: var(--cream);
+    color: var(--ink);
   }
 
   h1,
   h2,
   h3,
-  .font-serif-display {
-    @apply font-serif;
+  .font-serif-display,
+  .serif {
+    font-family: 'Noto Serif Thai', Inter, serif;
   }
 
-  /* Thai display lines — use className="font-thai" on TH headlines */
+  /* Mockup --font-th */
   .font-thai {
-    font-family: Prompt, Sarabun, system-ui, sans-serif;
+    font-family: var(--font-th);
   }
 }
 
@@ -186,8 +209,10 @@
   }
 
   .font-instrument-italic {
-    font-family: 'Instrument Serif', serif;
+    /* Was Instrument Serif — map to mockup serif italic accent */
+    font-family: 'Noto Serif Thai', Inter, serif;
     font-style: italic;
+    font-weight: 600;
   }
 
   .noise-overlay {
@@ -231,41 +256,40 @@
   }
 }
 
-/* Embossed / 3D CTAs (Home hero) */
+/* Embossed CTAs — exact .btn-pill.primary / .ghost from mockup */
 .btn-embossed {
   position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 1;
+  text-align: center;
   border-radius: 9999px;
-  padding: 0.8rem 1.45rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #1b2a2c;
-  background: linear-gradient(180deg, #f4b476 0%, #e8935a 55%, #e07a4a 100%);
+  padding: 7px 18px;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #fff;
+  background: linear-gradient(180deg, var(--teal-400) 0%, var(--teal-600) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.18),
-    0 6px 18px rgba(22, 38, 43, 0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+    0 1px 0 rgba(255, 255, 255, 0.55) inset,
+    0 -3px 0 rgba(0, 0, 0, 0.16) inset,
+    0 9px 16px -6px rgba(50, 25, 8, 0.55);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .btn-embossed:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.04);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.6),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.2),
-    0 10px 24px rgba(22, 38, 43, 0.4);
+  transform: translateY(-1px);
 }
 
 .btn-embossed:active {
-  transform: translateY(1px);
+  transform: translateY(2px);
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, 0.22),
-    0 2px 8px rgba(22, 38, 43, 0.25);
+    0 1px 0 rgba(255, 255, 255, 0.3) inset,
+    0 2px 6px -2px rgba(50, 25, 8, 0.5);
 }
 
 .btn-embossed-ghost {
@@ -273,32 +297,236 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 1;
+  text-align: center;
   border-radius: 9999px;
-  padding: 0.8rem 1.45rem;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: #f7f5f0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.06) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  padding: 7px 18px;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: #fff;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.35),
-    0 4px 14px rgba(0, 0, 0, 0.25);
-  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    0 1px 0 rgba(255, 255, 255, 0.25) inset,
+    0 6px 14px -8px rgba(0, 0, 0, 0.55);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
 
 .btn-embossed-ghost:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.55);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24) 0%, rgba(255, 255, 255, 0.1) 100%);
+  transform: translateY(-1px);
 }
 
 .btn-embossed-ghost:active {
-  transform: translateY(1px);
+  transform: translateY(2px);
+  box-shadow: none;
 }
 
-/* Split-flap price digits (TripCard hover) */
+/* Book / nav CTAs — exact .book-btn / .nav-cta / .book-bar .go */
+.book-btn,
+.nav-cta {
+  display: block;
+  text-align: center;
+  background: #0d0d0f;
+  color: #fff;
+  padding: 13px 20px;
+  border-radius: 13px;
+  font-weight: 700;
+  font-size: 12.5px;
+  line-height: 1.4;
+  border: none;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.12) inset,
+    0 10px 22px -10px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.book-btn:hover,
+.nav-cta:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.15) inset,
+    0 14px 26px -10px rgba(0, 0, 0, 0.5);
+}
+
+.book-btn:active,
+.nav-cta:active {
+  transform: scale(0.97);
+  box-shadow: 0 4px 10px -6px rgba(0, 0, 0, 0.35);
+}
+
+/* CTA shine + pulse (.cta-shine) */
+.cta-shine {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  animation: ctaPulse 2.6s ease-in-out infinite;
+}
+
+.cta-shine::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -60%;
+  width: 35%;
+  height: 180%;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.85) 50%,
+    transparent 100%
+  );
+  transform: skewX(-22deg);
+  animation: ctaShine 2.6s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+
+@keyframes ctaShine {
+  0% {
+    left: -60%;
+  }
+  22% {
+    left: 130%;
+  }
+  100% {
+    left: 130%;
+  }
+}
+
+@keyframes ctaPulse {
+  0%,
+  100% {
+    filter: brightness(1) saturate(1);
+  }
+  18% {
+    filter: brightness(1.22) saturate(1.15);
+  }
+  30% {
+    filter: brightness(1) saturate(1);
+  }
+}
+
+/* Airport split-flap price — .flip-price.board */
+.flip-price {
+  cursor: pointer;
+  user-select: none;
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.flip-price .fdigits {
+  display: inline-flex;
+}
+
+.fdigit {
+  position: relative;
+  display: inline-block;
+  perspective: 240px;
+}
+
+.fdigit .dwrap {
+  display: inline-block;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  border-radius: 4px;
+  padding: 0 1px;
+}
+
+.flip-price.board .fdigit.is-num .dwrap {
+  background: #0d1b2e;
+  color: #ffce6b;
+  box-shadow: 0 2px 0 #000 inset, 0 -2px 0 rgba(255, 255, 255, 0.08) inset;
+  font-family: Inter, monospace;
+  padding: 1px 3px;
+  margin: 0 0.5px;
+}
+
+.group:hover .flip-price .fdigit.is-num .dwrap,
+.flip-price:hover .fdigit.is-num .dwrap {
+  animation: priceFlip 0.16s linear;
+}
+
+@keyframes priceFlip {
+  0% {
+    transform: rotateX(0deg);
+    filter: brightness(1);
+  }
+  45% {
+    transform: rotateX(-90deg);
+    filter: brightness(0.5);
+  }
+  55% {
+    transform: rotateX(-90deg);
+    filter: brightness(0.5);
+  }
+  100% {
+    transform: rotateX(0deg);
+    filter: brightness(1);
+  }
+}
+
+/* Split-flap button text (.flip-cta / .flip-text) */
+.flip-cta:hover .flip-text .fchar .cwrap {
+  animation: priceFlip 0.16s linear;
+}
+
+.flip-cta:hover .flip-text .fchar:nth-child(odd) .cwrap {
+  animation-delay: 0.04s;
+}
+
+.flip-cta:hover .flip-text .fchar:nth-child(3n) .cwrap {
+  animation-delay: 0.08s;
+}
+
+.flip-text .fchar {
+  position: relative;
+  display: inline-block;
+  perspective: 200px;
+}
+
+.flip-text .fchar .cwrap {
+  display: inline-block;
+}
+
+/* Stat flip-num ticker */
+.flip-num {
+  display: inline-block;
+  perspective: 200px;
+}
+
+.flip-num .digitwrap {
+  display: inline-block;
+  transform-style: preserve-3d;
+}
+
+.flip-num.flip .digitwrap {
+  animation: flipDigit 0.22s linear;
+}
+
+@keyframes flipDigit {
+  0% {
+    transform: rotateX(0deg);
+    filter: brightness(1);
+  }
+  45% {
+    transform: rotateX(-90deg);
+    filter: brightness(0.6);
+  }
+  55% {
+    transform: rotateX(-90deg);
+    filter: brightness(0.6);
+  }
+  100% {
+    transform: rotateX(0deg);
+    filter: brightness(1);
+  }
+}
+
+/* Legacy alias kept for existing classnames */
 .split-flap-price {
   perspective: 240px;
 }
@@ -310,28 +538,23 @@
 }
 
 .group:hover .split-flap-digit {
-  animation: split-flap-flip 0.48s ease both;
-}
-
-@keyframes split-flap-flip {
-  0% {
-    transform: rotateX(0deg);
-  }
-  45% {
-    transform: rotateX(-92deg);
-  }
-  100% {
-    transform: rotateX(0deg);
-  }
+  animation: priceFlip 0.16s linear;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .group:hover .split-flap-digit {
+  .group:hover .flip-price .fdigit.is-num .dwrap,
+  .flip-price:hover .fdigit.is-num .dwrap,
+  .group:hover .split-flap-digit,
+  .flip-cta:hover .flip-text .fchar .cwrap,
+  .cta-shine,
+  .cta-shine::after {
     animation: none;
   }
 
   .btn-embossed:hover,
-  .btn-embossed-ghost:hover {
+  .btn-embossed-ghost:hover,
+  .book-btn:hover,
+  .nav-cta:hover {
     transform: none;
   }
 
@@ -340,11 +563,11 @@
   }
 }
 
-/* Auto-scrolling trip photo filmstrip (Calendar / Favorites) */
+/* Auto-scrolling trip photo filmstrip — mockup .cal-slider / calSlide 26s */
 .cal-filmstrip-viewport {
   position: relative;
   overflow: hidden;
-  border-radius: 1rem;
+  border-radius: 16px;
   min-height: 150px;
   height: 168px;
 }
@@ -353,21 +576,45 @@
   position: absolute;
   inset: 0;
   display: flex;
-  gap: 0.625rem;
+  gap: 10px;
   width: max-content;
-  animation: cal-filmstrip-slide 28s linear infinite;
+  animation: calSlide 26s linear infinite;
 }
 
 .cal-filmstrip-viewport:hover .cal-filmstrip-track {
   animation-play-state: paused;
 }
 
-@keyframes cal-filmstrip-slide {
+@keyframes calSlide {
   0% {
     transform: translateX(0);
   }
   100% {
     transform: translateX(-50%);
   }
+}
+
+/* Shot slideshow dots — mockup .ss-dots */
+.ss-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.ss-dots button {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--line);
+  padding: 0;
+  border: none;
+  transition: width 0.2s ease, background 0.2s ease, border-radius 0.2s ease;
+}
+
+.ss-dots button.on {
+  width: 16px;
+  border-radius: 3px;
+  background: var(--teal-700);
 }
 
