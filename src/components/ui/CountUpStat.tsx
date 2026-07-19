@@ -7,9 +7,10 @@ type Props = {
   className?: string
 }
 
-/** Counts from 0 → end once when the element enters the viewport. */
+/** Counts 0→end once in view; wraps digits in mockup `.flip-num` for airport ticker feel. */
 export default function CountUpStat({ end, durationMs = 1200, suffix = '', className = '' }: Props) {
   const [value, setValue] = useState(0)
+  const [flipping, setFlipping] = useState(false)
   const ref = useRef<HTMLSpanElement>(null)
   const started = useRef(false)
 
@@ -33,7 +34,9 @@ export default function CountUpStat({ end, durationMs = 1200, suffix = '', class
         const t = Math.min(1, (now - start) / durationMs)
         const eased = 1 - (1 - t) ** 3
         setValue(Math.round(end * eased))
+        setFlipping(true)
         if (t < 1) requestAnimationFrame(tick)
+        else setTimeout(() => setFlipping(false), 220)
       }
       requestAnimationFrame(tick)
     }
@@ -51,10 +54,15 @@ export default function CountUpStat({ end, durationMs = 1200, suffix = '', class
     return () => observer.disconnect()
   }, [end, durationMs])
 
+  const display = `${value}${suffix}`
+
   return (
-    <span ref={ref} className={className}>
-      {value}
-      {suffix}
+    <span ref={ref} className={`flip-num ${flipping ? 'flip' : ''} ${className}`}>
+      {display.split('').map((char, i) => (
+        <span key={`${i}-${char}`} className="digitwrap">
+          {char}
+        </span>
+      ))}
     </span>
   )
 }
