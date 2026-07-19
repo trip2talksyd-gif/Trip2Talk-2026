@@ -49,6 +49,7 @@ export interface TourBooking {
   amount_paid_aud: number
   payment_method: string | null
   slip_url: string | null
+  booking_reference: string | null
   booked_at: string
 }
 

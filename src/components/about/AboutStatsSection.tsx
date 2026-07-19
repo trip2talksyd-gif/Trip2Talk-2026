@@ -64,7 +64,7 @@ function StatCard({
         <p
           className="font-serif text-5xl font-semibold leading-none tracking-tight sm:text-6xl"
           style={{
-            backgroundImage: 'linear-gradient(294deg, #0d4a2e 20%, #d4a853)',
+            backgroundImage: 'linear-gradient(294deg, #16262b 20%, #efa565)',
             WebkitBackgroundClip: 'text',
             backgroundClip: 'text',
             color: 'transparent',
@@ -107,7 +107,7 @@ export default function AboutStatsSection() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-32 sm:h-40"
         style={{
           background:
-            'linear-gradient(to bottom, rgba(247,244,236,0), rgba(247,244,236,0.7), #f7f4ec)',
+            'linear-gradient(to bottom, rgba(247,245,240,0), rgba(247,245,240,0.7), #f7f5f0)',
         }}
         aria-hidden
       />

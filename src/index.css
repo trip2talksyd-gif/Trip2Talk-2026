@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Noto+Serif+Thai:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Noto+Serif+Thai:wght@400;600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -20,15 +20,15 @@
 @property --t2t-s4 { syntax: '<percentage>'; inherits: false; initial-value: 55%; }
 @property --t2t-s5 { syntax: '<percentage>'; inherits: false; initial-value: 65%; }
 
-/* Trip2Talk-brand animated gradient (green/gold/coral instead of the generic fintech palette) */
+/* Trip2Talk-brand animated gradient (moody teal + warm amber + coral) */
 .hero-cta-gradient {
-  background-color: #0d4a2e;
+  background-color: #16262b;
   background-image:
-    radial-gradient(circle at var(--t2t-x1) var(--t2t-y1), #d4a853 0px, transparent var(--t2t-s1)),
-    radial-gradient(circle at var(--t2t-x2) var(--t2t-y2), #13201a 0px, transparent var(--t2t-s2)),
-    radial-gradient(circle at var(--t2t-x3) var(--t2t-y3), #1a7a4a 0px, transparent var(--t2t-s3)),
-    radial-gradient(circle at var(--t2t-x4) var(--t2t-y4), #c9952e 0px, transparent var(--t2t-s4)),
-    radial-gradient(circle at var(--t2t-x5) var(--t2t-y5), #e07a6a 0px, transparent var(--t2t-s5));
+    radial-gradient(circle at var(--t2t-x1) var(--t2t-y1), #efa565 0px, transparent var(--t2t-s1)),
+    radial-gradient(circle at var(--t2t-x2) var(--t2t-y2), #20363c 0px, transparent var(--t2t-s2)),
+    radial-gradient(circle at var(--t2t-x3) var(--t2t-y3), #2e4d53 0px, transparent var(--t2t-s3)),
+    radial-gradient(circle at var(--t2t-x4) var(--t2t-y4), #e8935a 0px, transparent var(--t2t-s4)),
+    radial-gradient(circle at var(--t2t-x5) var(--t2t-y5), #e2734a 0px, transparent var(--t2t-s5));
   animation:
     t2t-blob1 5s ease-in-out infinite,
     t2t-blob2 6s ease-in-out infinite,
@@ -84,7 +84,7 @@
 
 @layer base {
   body {
-    @apply font-sans text-brand-dark antialiased;
+    @apply font-sans text-ink antialiased;
     letter-spacing: -0.01em;
   }
 
@@ -93,6 +93,11 @@
   h3,
   .font-serif-display {
     @apply font-serif;
+  }
+
+  /* Thai display lines — use className="font-thai" on TH headlines */
+  .font-thai {
+    font-family: Prompt, Sarabun, system-ui, sans-serif;
   }
 }
 

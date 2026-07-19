@@ -90,9 +90,13 @@ export function getSeasonVariant(
   return itinerary.seasonalItineraries?.[season]
 }
 
+export type ItineraryEventCategory = 'flight' | 'stay' | 'activity' | 'meal'
+
 export type ItineraryEvent = {
   time: string
   description: { en: string; th: string }
+  /** Optional activity type for Trip Plan timeline icons. Defaults to 'activity'. */
+  category?: ItineraryEventCategory
 }
 
 export type ItineraryDay = {

@@ -51,7 +51,7 @@ export default function TripTypeCategories() {
   const { ref, isVisible } = useInView<HTMLDivElement>(0.1)
 
   return (
-    <section className="w-full bg-near-black-green text-white">
+    <section className="w-full bg-teal-900 text-white">
       <h2 className="px-4 py-4 text-center font-serif text-xl text-cream sm:hidden">
         {t('home.category.title')}
       </h2>

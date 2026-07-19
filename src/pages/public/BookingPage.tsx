@@ -146,6 +146,7 @@ export default function BookingPage() {
         amount_paid_aud: 0,
         payment_method: 'payid',
         slip_url: slipUrl,
+        booking_reference: bookingRef,
       })
 
       setReference(bookingRef)

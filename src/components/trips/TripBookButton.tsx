@@ -22,7 +22,7 @@ export default function TripBookButton({
   if (!bookable) {
     return (
       <span
-        className={`block w-full rounded-editorial bg-cream-muted/30 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-cream-muted ${className}`}
+        className={`block w-full rounded-editorial bg-cream/20 py-2.5 text-center text-xs font-medium uppercase tracking-wider text-cream/50 ${className}`}
         aria-disabled
       >
         {t('btn.comingSoon')}
@@ -37,8 +37,8 @@ export default function TripBookButton({
     variant === 'ghost'
       ? 'border border-white/35 bg-transparent text-cream hover:border-white/55'
       : variant === 'deep'
-        ? 'bg-deep-green text-cream hover:bg-deep-green/90'
-        : 'bg-gold text-gold-dark hover:opacity-90'
+        ? 'bg-teal-900 text-cream hover:bg-teal-900/90'
+        : 'bg-teal-500 text-ink hover:opacity-90'
 
   return (
     <Link

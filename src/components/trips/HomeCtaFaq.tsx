@@ -33,7 +33,7 @@ export default function HomeCtaFaq() {
           {t('home.cta.title.line2')}
         </h2>
         <p className="mt-3 text-sm opacity-90">{t('home.cta.subtitle')}</p>
-        <Link to="/trips" className="btn-primary mt-7 !bg-cream !text-brand-dark">
+        <Link to="/trips" className="btn-primary mt-7 !bg-cream !text-ink">
           {t('btn.bookNow')}
         </Link>
       </div>
@@ -48,28 +48,30 @@ export default function HomeCtaFaq() {
               onClick={() => toggle(i)}
               className={`group cursor-pointer overflow-hidden rounded-editorial border bg-white transition-all duration-300 ${
                 isActive
-                  ? 'border-gold/50 shadow-[0_8px_20px_rgba(212,168,83,0.15)]'
-                  : 'border-deep-green/8 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:border-deep-green/20 hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]'
+                  ? 'border-teal-500/50 shadow-[0_8px_20px_rgba(233,149,90,0.15)]'
+                  : 'border-teal-900/8 shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 hover:border-teal-900/20 hover:shadow-[0_6px_16px_rgba(0,0,0,0.06)]'
               }`}
             >
               <div className="flex items-center gap-3 px-4 py-3.5">
                 <span
                   className={`shrink-0 font-serif text-xs transition-colors duration-300 ${
-                    isActive ? 'text-gold' : 'text-brand-dark/25'
+                    isActive ? 'text-teal-500' : 'text-ink/25'
                   }`}
                 >
                   {String(i + 1).padStart(2, '0')}
                 </span>
                 <span
                   className={`flex-1 text-sm transition-colors duration-300 ${
-                    isActive ? 'font-medium text-brand-dark' : 'text-brand-dark/80'
+                    isActive ? 'font-medium text-ink' : 'text-ink/80'
                   }`}
                 >
                   {t(q)}
                 </span>
                 <span
                   className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full transition-all duration-300 ${
-                    isActive ? 'bg-gold text-gold-dark' : 'bg-deep-green/5 text-brand-dark/40 group-hover:bg-deep-green/10'
+                    isActive
+                      ? 'bg-teal-500 text-ink'
+                      : 'bg-teal-900/5 text-ink/40 group-hover:bg-teal-900/10'
                   }`}
                 >
                   <ChevronDown
@@ -84,7 +86,7 @@ export default function HomeCtaFaq() {
                 }`}
               >
                 <div className="overflow-hidden">
-                  <p className="px-4 pb-4 pl-11 text-sm leading-relaxed text-brand-dark/60">{t(a)}</p>
+                  <p className="px-4 pb-4 pl-11 text-sm leading-relaxed text-ink/60">{t(a)}</p>
                 </div>
               </div>
             </div>

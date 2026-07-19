@@ -2,12 +2,16 @@ export type Lang = 'en' | 'th'
 
 export type TranslationKey =
   | 'nav.home'
+  | 'nav.explore'
   | 'nav.trips'
   | 'nav.gallery'
   | 'nav.calendar'
   | 'nav.pricing'
   | 'nav.about'
   | 'nav.portal'
+  | 'nav.favorites'
+  | 'nav.messages'
+  | 'nav.myTrip'
   | 'btn.bookNow'
   | 'btn.viewTrip'
   | 'btn.comingSoon'
@@ -78,6 +82,25 @@ export type TranslationKey =
   | 'home.faq.q6'
   | 'home.faq.a6'
   | 'home.featured'
+  | 'favorites.subtitle'
+  | 'favorites.empty'
+  | 'favorites.stale'
+  | 'favorites.remove'
+  | 'favorites.add'
+  | 'myTrip.subtitle'
+  | 'myTrip.or'
+  | 'myTrip.lookup'
+  | 'myTrip.notFound'
+  | 'myTrip.rpcMissing'
+  | 'myTrip.error.reference'
+  | 'myTrip.error.contact'
+  | 'myTrip.error.email'
+  | 'myTrip.status'
+  | 'myTrip.departure'
+  | 'myTrip.paid'
+  | 'myTrip.balance'
+  | 'myTrip.tripTotal'
+  | 'myTrip.messageUs'
   | 'home.features.title'
   | 'home.features.toggle.title'
   | 'home.features.toggle.desc'
@@ -202,12 +225,16 @@ type Map = Record<TranslationKey, string>
 
 const en: Map = {
   'nav.home': 'Home',
+  'nav.explore': 'Explore',
   'nav.trips': 'Trips',
   'nav.gallery': 'Gallery',
   'nav.calendar': 'Calendar',
   'nav.pricing': 'Pricing',
   'nav.about': 'About',
   'nav.portal': 'Portal',
+  'nav.favorites': 'Favorites',
+  'nav.messages': 'Messages',
+  'nav.myTrip': 'My Trip',
   'btn.bookNow': 'Book Now',
   'btn.viewTrip': 'View Trip',
   'btn.comingSoon': 'Coming soon',
@@ -285,6 +312,27 @@ const en: Map = {
   'home.faq.a6':
     'Book via PayID with a deposit to secure your seat, then pay the balance before departure. Cancellation and refund terms vary by trip and are shown on the digital waiver before you confirm.',
   'home.featured': 'Featured Trips',
+  'favorites.subtitle': 'Saved on this device — no account needed.',
+  'favorites.empty': 'No saved trips yet. Tap the heart on any trip card to save it here.',
+  'favorites.stale': 'Some saved trip codes are no longer listed. You can remove them below.',
+  'favorites.remove': 'Remove',
+  'favorites.add': 'Save trip',
+  'myTrip.subtitle':
+    'Enter your booking reference plus the email or phone you used at checkout to see deposit status and trip details.',
+  'myTrip.or': 'or',
+  'myTrip.lookup': 'Look up my trip',
+  'myTrip.notFound': 'No booking matched that reference and contact. Check and try again.',
+  'myTrip.rpcMissing':
+    'Trip lookup is not available yet. Message us on Facebook with your booking reference.',
+  'myTrip.error.reference': 'Booking reference is required.',
+  'myTrip.error.contact': 'Enter your email or phone.',
+  'myTrip.error.email': 'Please enter a valid email.',
+  'myTrip.status': 'Status',
+  'myTrip.departure': 'Departure',
+  'myTrip.paid': 'Paid so far',
+  'myTrip.balance': 'Balance owing',
+  'myTrip.tripTotal': 'Trip total',
+  'myTrip.messageUs': 'Message us on Facebook to arrange flights, installments, or pickup.',
   'home.features.title': 'Trip rate',
   'home.features.toggle.title': 'Want a private group?',
   'home.features.toggle.desc':
@@ -411,12 +459,16 @@ const en: Map = {
 
 const th: Map = {
   'nav.home': 'หน้าแรก',
+  'nav.explore': 'สำรวจ',
   'nav.trips': 'ทริป',
   'nav.gallery': 'แกลเลอรี',
   'nav.calendar': 'ปฏิทิน',
   'nav.pricing': 'ราคา',
   'nav.about': 'เกี่ยวกับ',
   'nav.portal': 'พอร์ทัล',
+  'nav.favorites': 'รายการโปรด',
+  'nav.messages': 'ข้อความ',
+  'nav.myTrip': 'ทริปของฉัน',
   'btn.bookNow': 'จองเลย',
   'btn.viewTrip': 'ดูทริป',
   'btn.comingSoon': 'เร็วๆ นี้',
@@ -494,6 +546,27 @@ const th: Map = {
   'home.faq.a6':
     'จองผ่าน PayID พร้อมมัดจำเพื่อล็อคที่นั่ง แล้วจ่ายส่วนที่เหลือก่อนวันเดินทาง เงื่อนไขการยกเลิก/คืนเงินแตกต่างกันไปตามทริป ดูรายละเอียดได้ในเอกสาร waiver ก่อนยืนยันการจอง',
   'home.featured': 'ทริปแนะนำ',
+  'favorites.subtitle': 'บันทึกไว้ในเครื่องนี้ — ไม่ต้องมีบัญชี',
+  'favorites.empty': 'ยังไม่มีทริปที่บันทึก กดหัวใจบนการ์ดทริปเพื่อเซฟไว้ที่นี่',
+  'favorites.stale': 'บางรหัสทริปที่บันทึกไว้ไม่มีในรายการแล้ว ลบออกได้ด้านล่าง',
+  'favorites.remove': 'ลบ',
+  'favorites.add': 'บันทึกทริป',
+  'myTrip.subtitle':
+    'ใส่เลขที่การจอง พร้อมอีเมลหรือเบอร์ที่ใช้ตอนจอง เพื่อดูสถานะมัดจำและรายละเอียดทริป',
+  'myTrip.or': 'หรือ',
+  'myTrip.lookup': 'ค้นหาทริปของฉัน',
+  'myTrip.notFound': 'ไม่พบการจองที่ตรงกับเลขที่และข้อมูลติดต่อ ลองตรวจสอบอีกครั้ง',
+  'myTrip.rpcMissing':
+    'ระบบค้นหายังไม่พร้อม ทักหาเราทาง Facebook พร้อมเลขที่การจองได้เลย',
+  'myTrip.error.reference': 'กรุณาใส่เลขที่การจอง',
+  'myTrip.error.contact': 'กรุณาใส่อีเมลหรือเบอร์โทร',
+  'myTrip.error.email': 'รูปแบบอีเมลไม่ถูกต้อง',
+  'myTrip.status': 'สถานะ',
+  'myTrip.departure': 'วันเดินทาง',
+  'myTrip.paid': 'ชำระแล้ว',
+  'myTrip.balance': 'ยอดคงเหลือ',
+  'myTrip.tripTotal': 'ราคารวมทริป',
+  'myTrip.messageUs': 'ทัก Facebook เพื่อจัดไฟลต์ ผ่อนชำระ หรือจุดรับ',
   'home.features.title': 'ราคาทริป',
   'home.features.toggle.title': 'อยากได้กลุ่มส่วนตัวไหม?',
   'home.features.toggle.desc':

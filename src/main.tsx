@@ -26,8 +26,8 @@ class RootErrorBoundary extends Component<{ children: ReactNode }, { error: Erro
             placeItems: 'center',
             padding: 24,
             fontFamily: 'system-ui, sans-serif',
-            background: '#13201a',
-            color: '#f7f4ec',
+            background: '#16262b',
+            color: '#f7f5f0',
             textAlign: 'center',
           }}
         >
@@ -40,8 +40,8 @@ class RootErrorBoundary extends Component<{ children: ReactNode }, { error: Erro
               type="button"
               onClick={() => location.reload()}
               style={{
-                background: '#d4a853',
-                color: '#1a1305',
+                background: '#efa565',
+                color: '#1b2a2c',
                 border: 0,
                 borderRadius: 4,
                 padding: '10px 18px',

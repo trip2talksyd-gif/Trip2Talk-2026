@@ -52,7 +52,7 @@ export default function TripsPage() {
 
   return (
     <div>
-      <h1 className="font-serif text-2xl text-brand-dark">{t('nav.trips')}</h1>
+      <h1 className="font-serif text-2xl text-ink">{t('nav.trips')}</h1>
 
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1">
         {tabs.map((tab) => (
@@ -61,7 +61,7 @@ export default function TripsPage() {
             type="button"
             onClick={() => setFilter(tab.id)}
             className={`shrink-0 rounded-editorial px-3 py-1.5 text-xs font-medium uppercase tracking-wider ${
-              filter === tab.id ? 'bg-deep-green text-cream' : 'bg-white text-brand-dark/60'
+              filter === tab.id ? 'bg-teal-900 text-cream' : 'bg-white text-ink/60'
             }`}
           >
             {tab.label}

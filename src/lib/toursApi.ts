@@ -238,6 +238,46 @@ export async function insertWaiverSignature(
 
 export type BookingInsertPayload = Omit<TourBooking, 'id' | 'booked_at' | 'tour_id'>
 
+export type MyTripBookingSummary = {
+  reference: string | null
+  trip_code: string
+  booking_status: string
+  amount_paid_aud: number
+  booked_at: string
+  first_name_en: string
+  last_name_en: string
+  name_en: string
+  name_th: string
+  departure_date: string | null
+  price_aud: number
+  deposit_aud: number
+}
+
+export type MyTripLookupResult = {
+  found: boolean
+  error?: string
+  booking?: MyTripBookingSummary
+}
+
+export async function lookupMyTrip(params: {
+  reference: string
+  email?: string
+  phone?: string
+}): Promise<MyTripLookupResult> {
+  const { data, error } = await supabase.rpc('lookup_my_trip', {
+    p_reference: params.reference.trim(),
+    p_email: params.email?.trim() || null,
+    p_phone: params.phone?.trim() || null,
+  })
+
+  if (error) {
+    logSupabaseError('lookup_my_trip', error)
+    throw error
+  }
+
+  return (data ?? { found: false }) as MyTripLookupResult
+}
+
 /**
  * book_seat only atomically increments tours.booked_seats.
  * Returns json { success: boolean, message: text } (also accepts legacy boolean true).
