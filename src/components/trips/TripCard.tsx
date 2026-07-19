@@ -7,10 +7,10 @@ import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites'
 import {
   inferTripType,
   isAuroraTrip,
-  tourDestination,
+  tourDestinationLabel,
   tourDurationLabel,
 } from '../../lib/tourDisplay'
-import { formatAud, seatsRemaining } from '../../lib/toursApi'
+import { seatsRemaining } from '../../lib/toursApi'
 import { getPreviewPhotoForTrip, photoSrc } from '../../data/galleryPhotos'
 import TripPhotoHero from './TripPhotoHero'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
@@ -89,7 +89,7 @@ export default function TripCard({ tour }: Props) {
 
       <div className="min-w-0 flex-1 py-0.5 pr-1">
         <p className="text-[9px] font-bold uppercase tracking-[0.04em] text-teal-600">
-          {tourDestination(tour.trip_code)}
+          {tourDestinationLabel(tour.trip_code, lang)}
           {specialty ? ` · ${specialty}` : ''}
         </p>
         <Link to={`/trips/${tour.trip_code}`}>
@@ -102,13 +102,11 @@ export default function TripCard({ tour }: Props) {
         </Link>
         <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-ink-soft">
           <span className="truncate">{tourDurationLabel(tour, lang)}</span>
-          <span className="shrink-0 font-extrabold text-coral">
-            <SplitFlapPrice
-              amountAud={tour.price_aud}
-              board={false}
-              className="text-[10px] font-extrabold text-coral"
-            />
-          </span>
+          <SplitFlapPrice
+            amountAud={tour.price_aud}
+            board
+            className="shrink-0 text-[11px] font-extrabold leading-none"
+          />
         </div>
         <p className="mt-0.5 text-[9px] font-bold text-coral">
           {seats === 0
@@ -135,9 +133,6 @@ export default function TripCard({ tour }: Props) {
       >
         <Heart className={`h-3 w-3 ${favorited ? 'fill-coral' : ''}`} strokeWidth={2} />
       </button>
-
-      {/* Hidden price for a11y when board=false shows formatAud via SplitFlap */}
-      <span className="sr-only">{formatAud(tour.price_aud)}</span>
     </article>
   )
 }

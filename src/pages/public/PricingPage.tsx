@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { CANCELLATION_POLICY } from '../../data/risks'
+import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
 
 const TIERS = [
   {
@@ -9,7 +10,7 @@ const TIERS = [
     popular: false,
     titleEn: 'Day Trip',
     titleTh: 'ทริปวันเดียว',
-    price: '$150',
+    priceAud: 150,
     descEn: 'A few hours, one professional photographer, minimal logistics.',
     descTh: 'ไม่กี่ชั่วโมง ช่างภาพมืออาชีพหนึ่งคน โลจิสติกส์น้อย',
     checksEn: [
@@ -27,7 +28,7 @@ const TIERS = [
     popular: true,
     titleEn: 'Multi-day Adventure',
     titleTh: 'ทริปหลายวัน',
-    price: '$990',
+    priceAud: 990,
     descEn: '3–4 days, vehicle & driver, accommodation coordination.',
     descTh: '3–4 วัน รวมรถและคนขับ ช่วยจัดการที่พัก',
     checksEn: [
@@ -50,7 +51,7 @@ const TIERS = [
     popular: false,
     titleEn: 'Flagship Experience',
     titleTh: 'ทริปเรือธง',
-    price: '$2,450',
+    priceAud: 2450,
     descEn: '6 days, flights coordinated, our most immersive trip.',
     descTh: '6 วัน ช่วยประสานตั๋วบิน ทริปเข้มข้นที่สุด',
     checksEn: [
@@ -104,9 +105,16 @@ export default function PricingPage() {
                 {lang === 'th' ? tier.titleEn : tier.titleTh}
               </span>
             </h2>
-            <p className="mt-2.5 text-[26px] font-extrabold text-ink">
-              {tier.price}
-              <small className="ml-1 text-[11px] font-semibold text-ink-soft">+ / person</small>
+            <div className="group mt-2.5 flex flex-wrap items-baseline gap-1.5">
+              <SplitFlapPrice
+                amountAud={tier.priceAud}
+                board
+                className="text-[26px] font-extrabold leading-none text-ink"
+              />
+              <small className="text-[11px] font-semibold text-ink-soft">AUD / person</small>
+            </div>
+            <p className="mt-1 text-[10px] text-ink-soft">
+              {lang === 'th' ? 'จิ้มหรือโฮเวอร์ตัวเลขดูแอนิเมชัน' : 'Tap or hover the price to flip'}
             </p>
             <p className="mb-3.5 mt-0.5 text-[11.5px] text-ink-soft">
               {lang === 'th' ? tier.descTh : tier.descEn}

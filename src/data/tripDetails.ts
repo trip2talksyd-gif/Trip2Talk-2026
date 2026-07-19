@@ -13,15 +13,15 @@ export type TripDetailContent = {
 export const TRIP_DETAILS: Record<string, TripDetailContent> = {
   'SYD-INFLU-3H': {
     tagline: {
-      en: 'Level-up your Sydney feed — 5 curated North & South locations, pro photographer, 3-hour session.',
-      th: 'เก็บภาพสุดปังในซิดนีย์ด้วยแพ็กเกจถ่ายภาพสำหรับอินฟลูเอนเซอร์',
+      en: 'Level-up your Sydney feed — 5 curated North & South locations, pro photographer, 3-hour session. We are Sydney-based: meetup pickup only, no flights or hotel.',
+      th: 'เก็บภาพสุดปังในซิดนีย์ด้วยแพ็กเกจถ่ายภาพสำหรับอินฟลูเอนเซอร์ — เรา base ที่ซิดนีย์ นัดพบรับ–ส่ง ไม่มีตั๋วบินหรือที่พัก',
     },
     highlights: {
       en: [
         '5 curated locations across Sydney North & South',
         'Professional local photographer',
         '3-hour session with unlimited outfit changes',
-        'Hotel pickup & drop-off',
+        'Pickup & drop-off along the route (Thai Town / Starbucks meetup)',
         'Unlimited photos with colour grading',
         'Delivered via online album',
       ],
@@ -29,18 +29,26 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
         '5 จุดถ่ายคัดสรรทั่วซิดนีย์ฝั่งเหนือและใต้',
         'ช่างภาพท้องถิ่นมืออาชีพ',
         'เซสชัน 3 ชั่วโมง เปลี่ยนชุดได้ไม่จำกัด',
-        'รับ-ส่งที่โรงแรม',
+        'รถรับ–ส่งตามเส้นทาง (นัดพบ Thai Town / Starbucks)',
         'ภาพไม่จำกัดพร้อมแต่งสี',
         'ส่งงานผ่านออนไลน์อัลบั้ม',
       ],
     },
     includes: {
-      en: ['Professional local photographer', 'Hotel pickup & drop-off', 'Unlimited photos with colour grading'],
-      th: ['ช่างภาพท้องถิ่นมืออาชีพ', 'รับ-ส่งโรงแรม', 'ภาพไม่จำกัดพร้อมแต่งสี'],
+      en: [
+        'Professional local photographer',
+        'Route pickup & drop-off (Thai Town / Starbucks meetup)',
+        'Unlimited photos with colour grading',
+      ],
+      th: [
+        'ช่างภาพท้องถิ่นมืออาชีพ',
+        'รถรับ–ส่งตามเส้นทาง (นัดพบ Thai Town / Starbucks)',
+        'ภาพไม่จำกัดพร้อมแต่งสี',
+      ],
     },
     excludes: {
-      en: ['Personal travel costs', 'Food and drinks'],
-      th: ['ค่าเดินทางส่วนตัว', 'อาหารและเครื่องดื่ม'],
+      en: ['Flights', 'Accommodation', 'Personal travel costs', 'Food and drinks'],
+      th: ['ตั๋วเครื่องบิน', 'ที่พัก', 'ค่าเดินทางส่วนตัว', 'อาหารและเครื่องดื่ม'],
     },
   },
   'MEL-4D3N': {
@@ -271,38 +279,78 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
   },
   'SYD-MW-WIN': {
     tagline: {
-      en: 'Milky Way night out with mates — we drive, you shoot, no gear stress.',
-      th: 'ออกล่าทางช้างเผือกกับเพื่อนๆ — เราขับรถให้ คุณแค่ถ่ายรูป ไม่ต้องเครียดเรื่องรถ',
+      en: 'Milky Way night out with mates — Sydney-based Tesla pickup at Thai Town / Starbucks. No flights or hotel; we drive the route and shoot.',
+      th: 'ออกล่าทางช้างเผือกกับเพื่อนๆ — base ซิดนีย์ นัดพบ Thai Town / Starbucks ไม่มีตั๋วบินหรือที่พัก เราขับรถตามเส้นทางให้',
     },
     highlights: {
-      en: ['Dark sky locations', 'Milky Way portraits', 'Astro camera coaching'],
-      th: ['จุดท้องฟ้ามืด', 'ถ่ายภาพกับทางช้างเผือก', 'โค้ชตั้งค่ากล้องดาราศาสตร์'],
+      en: [
+        'Dark sky locations',
+        'Milky Way portraits',
+        'Astro camera coaching',
+        'Meetup pickup Thai Town / Starbucks',
+      ],
+      th: [
+        'จุดท้องฟ้ามืด',
+        'ถ่ายภาพกับทางช้างเผือก',
+        'โค้ชตั้งค่ากล้องดาราศาสตร์',
+        'นัดพบรับ–ส่ง Thai Town / Starbucks',
+      ],
     },
     includes: {
-      en: ['Evening transport', 'Pro photographer', 'Tripod guidance'],
-      th: ['รถช่วงเย็น', 'ช่างภาพมืออาชีพ', 'แนะนำการใช้ขาตั้ง'],
+      en: [
+        'Tesla Model Y transport along the route (max 4 guests)',
+        'Meetup pickup & drop-off at Thai Town / Starbucks',
+        'Pro photographer',
+        'Tripod guidance',
+      ],
+      th: [
+        'รถ Tesla Model Y ตามเส้นทาง (สูงสุด 4 คน)',
+        'รับ–ส่งนัดพบ Thai Town / Starbucks',
+        'ช่างภาพมืออาชีพ',
+        'แนะนำการใช้ขาตั้ง',
+      ],
     },
     excludes: {
-      en: ['Meals', 'Travel insurance', 'Warm clothing (bring layers)'],
-      th: ['ค่าอาหาร', 'ประกันการเดินทาง', 'เสื้อกันหนาว (เตรียมเอง)'],
+      en: ['Flights', 'Accommodation', 'Meals', 'Travel insurance', 'Warm clothing (bring layers)'],
+      th: ['ตั๋วเครื่องบิน', 'ที่พัก', 'ค่าอาหาร', 'ประกันการเดินทาง', 'เสื้อกันหนาว (เตรียมเอง)'],
     },
   },
   'SYD-1DAY': {
     tagline: {
-      en: 'Sydney day trip with friends — no driving, curated photo spots, mentor on tap.',
-      th: 'ทริปวันเดียวซิดนีย์กับเพื่อน — ไม่ต้องขับรถเอง จุดถ่ายคัดแล้ว มีช่างภาพคอยแนะนำ',
+      en: 'Sydney day trip with friends — we are based in Sydney. Meetup at Thai Town / Starbucks; route pickup only. No flights or accommodation.',
+      th: 'ทริปวันเดียวซิดนีย์กับเพื่อน — เรา base ที่ซิดนีย์ นัดพบ Thai Town / Starbucks มีแค่รถรับ–ส่งตามเส้นทาง ไม่รวมบินและที่พัก',
     },
     highlights: {
-      en: ['Sydney 5 best photo locations', 'Anna Bay sand dunes', 'Milky Way hunt (winter)'],
-      th: ['5 จุดถ่ายภาพซิดนีย์', 'เนินทราย Anna Bay', 'ล่าทางช้างเผือก (ฤดูหนาว)'],
+      en: [
+        'Sydney 5 best photo locations',
+        'Anna Bay sand dunes',
+        'Milky Way hunt (winter)',
+        'Meetup Thai Town / Starbucks',
+      ],
+      th: [
+        '5 จุดถ่ายภาพซิดนีย์',
+        'เนินทราย Anna Bay',
+        'ล่าทางช้างเผือก (ฤดูหนาว)',
+        'นัดพบ Thai Town / Starbucks',
+      ],
     },
     includes: {
-      en: ['Vehicle & driver', 'Pro photographer', 'Drone on select packages'],
-      th: ['รถและคนขับ', 'ช่างภาพมืออาชีพ', 'โดรนในแพ็กที่กำหนด'],
+      en: [
+        'Tesla Model Y & driver along the route (max 4 guests)',
+        'Meetup pickup & drop-off at Thai Town / Starbucks',
+        'Pro photographer',
+        'Drone on select packages',
+      ],
+      th: [
+        'รถ Tesla Model Y & คนขับตามเส้นทาง (สูงสุด 4 คน)',
+        'รับ–ส่งนัดพบ Thai Town / Starbucks',
+        'ช่างภาพมืออาชีพ',
+        'โดรนในแพ็กที่กำหนด',
+      ],
     },
     excludes: {
-      en: ['Meals', 'Travel insurance', 'Influencer package extras'],
-      th: ['ค่าอาหาร', 'ประกันการเดินทาง', 'ค่าใช้จ่ายแพ็ก Influencer เพิ่มเติม'],
+      en: ['Flights', 'Accommodation', 'Meals', 'Travel insurance', 'Influencer package extras'],
+      th: ['ตั๋วเครื่องบิน', 'ที่พัก', 'ค่าอาหาร', 'ประกันการเดินทาง', 'ค่าใช้จ่ายแพ็ก Influencer เพิ่มเติม'],
     },
   },
 }

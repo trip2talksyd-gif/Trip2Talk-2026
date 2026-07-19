@@ -212,6 +212,7 @@ export default function MyTripPage() {
 
           <BookingJourneyTimeline
             bookingStatus={booking.booking_status as BookingStatus}
+            tripCode={booking.trip_code}
             className="rounded-editorial border border-line bg-cream p-4"
           />
         </div>

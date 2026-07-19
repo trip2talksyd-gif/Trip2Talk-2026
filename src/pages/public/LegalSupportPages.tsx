@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import ContentPage from '../../components/layout/ContentPage'
+import PayIdDepositPanel from '../../components/booking/PayIdDepositPanel'
 import { FACEBOOK_MESSENGER_URL, FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import { CANCELLATION_POLICY } from '../../data/risks'
 import { useState } from 'react'
@@ -97,10 +98,13 @@ export function PaymentMethodsPage() {
         </p>
         <p className="mt-1 text-ink-soft">
           {lang === 'th'
-            ? 'ปกติ $100 AUD × จำนวนผู้เดินทาง (ตามที่แสดงในหน้าทริป) ชำระผ่าน PayID แล้วอัปโหลดสลิปได้'
-            : 'Typically $100 AUD × travellers (as shown on the trip). Pay via PayID and upload your slip.'}
+            ? 'ปกติ $100 AUD × จำนวนผู้เดินทาง (ตามที่แสดงในหน้าทริป) โอนผ่าน PayID ด้านล่าง แล้วอัปโหลดสลิปในหน้าจอง'
+            : 'Typically $100 AUD × travellers (as shown on the trip). Pay via PayID below, then upload your slip on the booking page.'}
         </p>
       </div>
+
+      <PayIdDepositPanel variant="page" />
+
       <p>
         We only collect a deposit to secure your seat — the remaining balance is arranged directly
         with our team, in 2–4 flexible installments.

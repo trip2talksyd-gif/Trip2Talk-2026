@@ -14,8 +14,11 @@ import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
 import type { Tour } from '../../types/tour'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
+import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
 import TripPhotoHero from '../../components/trips/TripPhotoHero'
 import TripPricingCard from '../../components/trips/TripPricingCard'
+import TripBookButton from '../../components/trips/TripBookButton'
+import TripStickyBookBar from '../../components/trips/TripStickyBookBar'
 import AuroraTracker from '../../components/trips/AuroraTracker'
 import TripTimeline from '../../components/trips/TripTimeline'
 import PremiumTripCallout from '../../components/trips/PremiumTripCallout'
@@ -77,7 +80,7 @@ export default function TripDetailPage() {
   const mapCfg = getTripMap(tour.trip_code)
 
   return (
-    <div className="space-y-6 pb-4">
+    <div className="space-y-6 pb-28 md:pb-4">
       <div className="flex items-center justify-between gap-3">
         <Link to="/trips" className="inline-flex items-center gap-1 text-sm text-teal-700">
           <ArrowLeft className="h-4 w-4" />
@@ -109,6 +112,24 @@ export default function TripDetailPage() {
         </div>
       </div>
 
+      {/* Top CTA — visible without scrolling past the whole page */}
+      <div className="flex items-center gap-3 rounded-2xl border border-line bg-card p-3 shadow-[0_8px_22px_-14px_rgba(15,28,30,0.35)]">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-baseline gap-1.5">
+            <SplitFlapPrice
+              amountAud={tour.price_aud}
+              board
+              className="text-[15px] font-extrabold leading-none"
+            />
+            <span className="text-[10px] font-semibold text-ink-soft">AUD</span>
+          </div>
+          <p className="mt-0.5 truncate text-[10px] text-ink-soft">
+            {lang === 'th' ? 'ต่อคน · มัดจำล็อคที่นั่ง' : 'per person · deposit locks your seat'}
+          </p>
+        </div>
+        <TripBookButton tour={tour} variant="deep" className="!w-auto shrink-0 !px-5 !py-2.5" />
+      </div>
+
       {/* Horizontal swipeable strip */}
       {stripPhotos.length > 0 && (
         <div className="-mx-4 overflow-x-auto px-4 pb-1">
@@ -131,7 +152,7 @@ export default function TripDetailPage() {
       {isPremiumTrip(tour.trip_code) && <PremiumTripCallout tripCode={tour.trip_code} />}
 
       <div className="grid gap-8 lg:grid-cols-[1fr_320px] lg:items-start">
-        <div className="space-y-6">
+        <div className="order-2 space-y-6 lg:order-1">
           {isAuroraTrip(tour) && (
             <>
               <AuroraTracker />
@@ -240,8 +261,12 @@ export default function TripDetailPage() {
           </Link>
         </div>
 
-        <TripPricingCard tour={tour} includes={includes} />
+        <div className="order-1 lg:order-2">
+          <TripPricingCard tour={tour} includes={includes} />
+        </div>
       </div>
+
+      <TripStickyBookBar tour={tour} />
     </div>
   )
 }

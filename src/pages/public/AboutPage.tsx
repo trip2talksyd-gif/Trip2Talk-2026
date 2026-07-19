@@ -1,7 +1,9 @@
 import { Clock, Mail, MapPin, Phone } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
+import { TEAM_MEMBERS } from '../../data/teamMembers'
 import CountUpStat from '../../components/ui/CountUpStat'
+import TeamAvatar from '../../components/about/TeamAvatar'
 
 export default function AboutPage() {
   const { lang } = useLang()
@@ -98,13 +100,17 @@ Over the past 10 years I've honed landscape photography. For me, photography isn
 
       <section className="rounded-2xl border border-line bg-cream p-5">
         <div className="flex gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-teal-900 font-serif text-xl text-cream">
-            S
-          </div>
-          <div>
-            <p className="font-serif text-lg font-semibold text-ink">Saen</p>
+          <TeamAvatar
+            srcs={TEAM_MEMBERS[0].photoSrcs}
+            alt={TEAM_MEMBERS[0].nameEn}
+            initial={TEAM_MEMBERS[0].initial}
+          />
+          <div className="min-w-0 flex-1">
+            <p className="font-serif text-lg font-semibold text-ink">
+              {lang === 'th' ? TEAM_MEMBERS[0].nameTh : TEAM_MEMBERS[0].nameEn}
+            </p>
             <p className="text-sm text-teal-700">
-              {lang === 'th' ? 'หัวหน้าทริป & ช่างภาพ' : 'Trip Leader & Photographer'}
+              {lang === 'th' ? TEAM_MEMBERS[0].roleTh : TEAM_MEMBERS[0].roleEn}
             </p>
             <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink/80">{saenBio}</p>
           </div>
@@ -113,13 +119,17 @@ Over the past 10 years I've honed landscape photography. For me, photography isn
 
       <section className="rounded-2xl border border-line bg-cream p-5">
         <div className="flex gap-4">
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-teal-800 font-serif text-xl text-cream">
-            P
-          </div>
-          <div>
-            <p className="font-serif text-lg font-semibold text-ink">Monsicha Chayakorn (Ploy)</p>
+          <TeamAvatar
+            srcs={TEAM_MEMBERS[1].photoSrcs}
+            alt={TEAM_MEMBERS[1].nameEn}
+            initial={TEAM_MEMBERS[1].initial}
+          />
+          <div className="min-w-0 flex-1">
+            <p className="font-serif text-lg font-semibold text-ink">
+              {lang === 'th' ? TEAM_MEMBERS[1].nameTh : TEAM_MEMBERS[1].nameEn}
+            </p>
             <p className="text-sm text-teal-700">
-              {lang === 'th' ? 'แอดมิน & ทีมทริป' : 'Admin & Trip Staff'}
+              {lang === 'th' ? TEAM_MEMBERS[1].roleTh : TEAM_MEMBERS[1].roleEn}
             </p>
             <p className="mt-3 text-sm leading-relaxed text-ink/80">{ployBio}</p>
           </div>

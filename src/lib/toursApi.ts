@@ -80,6 +80,13 @@ export function normalizeTour(row: TourRow): Tour {
   const departure =
     strOrNull(row.departure_date) ?? strOrNull(row.next_date) ?? null
 
+  const durationLabel = strOrNull(row.duration_label)
+  const parsed = parseDurationLabel(durationLabel)
+  const days =
+    row.duration_days == null ? parsed.days : num(row.duration_days)
+  const nights =
+    row.duration_nights == null ? parsed.nights : num(row.duration_nights)
+
   return {
     id: String(row.id ?? ''),
     trip_code: String(row.trip_code ?? ''),
@@ -87,8 +94,10 @@ export function normalizeTour(row: TourRow): Tour {
     name_th: String(row.name_th ?? ''),
     description_en: strOrNull(row.description_en),
     description_th: strOrNull(row.description_th),
-    duration_days: row.duration_days == null ? null : num(row.duration_days),
-    duration_nights: row.duration_nights == null ? null : num(row.duration_nights),
+    duration_days: days,
+    duration_nights: nights,
+    trip_type: strOrNull(row.trip_type),
+    duration_label: durationLabel,
     departure_date: departure,
     price_aud: num(row.price_aud ?? row.price_standard),
     deposit_aud: num(row.deposit_aud ?? row.deposit_amount, 100),
@@ -99,6 +108,22 @@ export function normalizeTour(row: TourRow): Tour {
     created_at: String(row.created_at ?? ''),
     updated_at: String(row.updated_at ?? row.created_at ?? ''),
   }
+}
+
+/** Parse ops labels like 4D3N, 1DAY, 2D1N, NIGHT → days/nights. */
+function parseDurationLabel(label: string | null): { days: number | null; nights: number | null } {
+  if (!label) return { days: null, nights: null }
+  const u = label.toUpperCase().replace(/\s+/g, '')
+  if (u === 'NIGHT' || u === 'EVENING') return { days: 1, nights: 0 }
+  if (u.includes('1DAY') || u === '1D' || u === 'DAY') return { days: 1, nights: 0 }
+  const m = u.match(/^(\d+)D(?:(\d+)N)?/)
+  if (m) {
+    return {
+      days: Number(m[1]),
+      nights: m[2] != null ? Number(m[2]) : 0,
+    }
+  }
+  return { days: null, nights: null }
 }
 
 function normalizeTours(rows: TourRow[] | null | undefined): Tour[] {
@@ -544,9 +569,10 @@ export function formatAud(amount: number): string {
   }).format(amount)
 }
 
-export function formatDate(dateStr: string | null, lang: 'en' | 'th'): string {
+/** Always English day–month–year (en-AU) so staff/guests can read dates consistently. */
+export function formatDate(dateStr: string | null, lang: 'en' | 'th' = 'en'): string {
   if (!dateStr) return lang === 'th' ? 'รอประกาศ' : 'TBA'
-  return new Date(dateStr).toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-AU', {
+  return new Date(dateStr).toLocaleDateString('en-AU', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',

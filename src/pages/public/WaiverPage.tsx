@@ -153,7 +153,7 @@ export default function WaiverPage() {
         {errors.name && <p className="mt-1 text-xs text-coral">{errors.name}</p>}
         <p className="mt-1 text-xs text-ink-soft">
           {lang === 'th' ? 'บันทึกเวลา: ' : 'Timestamp: '}
-          {new Date().toLocaleString(lang === 'th' ? 'th-TH' : 'en-AU')}
+          {new Date().toLocaleString('en-AU')}
         </p>
       </label>
 

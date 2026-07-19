@@ -15,22 +15,22 @@ function monthKey(iso: string | null | undefined): string | null {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
 }
 
-function monthLabel(key: string, lang: 'en' | 'th'): string {
+function monthLabel(key: string): string {
   const [y, m] = key.split('-').map(Number)
   const d = new Date(y, m - 1, 1)
-  return d.toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-AU', {
+  return d.toLocaleDateString('en-AU', {
     month: 'short',
     year: 'numeric',
   })
 }
 
-function dayParts(iso: string | null | undefined, lang: 'en' | 'th') {
+function dayParts(iso: string | null | undefined) {
   if (!iso) return { day: '—', mon: '' }
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return { day: '—', mon: '' }
   return {
     day: String(d.getDate()).padStart(2, '0'),
-    mon: d.toLocaleDateString(lang === 'th' ? 'th-TH' : 'en-AU', { month: 'short' }),
+    mon: d.toLocaleDateString('en-AU', { month: 'short' }),
   }
 }
 
@@ -98,7 +98,7 @@ export default function CalendarPage() {
                   : 'bg-mint-100 text-teal-700'
               }`}
             >
-              {monthLabel(m, lang)}
+              {monthLabel(m)}
             </button>
           ))}
         </div>
@@ -136,7 +136,7 @@ export default function CalendarPage() {
             {filtered.map((tour) => {
               const seats = seatsRemaining(tour)
               const name = lang === 'th' ? tour.name_th : tour.name_en
-              const parts = dayParts(tour.departure_date, lang)
+              const parts = dayParts(tour.departure_date)
               return (
                 <li key={tour.id}>
                   <Link

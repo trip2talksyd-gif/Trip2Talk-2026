@@ -410,6 +410,69 @@
   }
 }
 
+/* Airport departure-board destination rows on /trips */
+.flight-board-shell {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.flight-board-shell:hover {
+  border-color: rgba(255, 206, 107, 0.45);
+  box-shadow:
+    0 12px 28px -14px rgba(13, 27, 46, 0.55),
+    0 0 0 1px rgba(255, 206, 107, 0.12);
+  transform: translateY(-1px);
+}
+
+.flight-board {
+  position: relative;
+  overflow: hidden;
+  transition: background 0.22s ease;
+}
+
+.flight-board::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 40%,
+    rgba(255, 206, 107, 0.08) 50%,
+    transparent 60%
+  );
+  transform: translateX(-120%);
+  pointer-events: none;
+}
+
+.flight-board:hover::after {
+  animation: boardSweep 0.85s ease;
+}
+
+.flight-board:hover {
+  background: linear-gradient(90deg, #0d1b2e 0%, #16262b 55%, #20363c 100%);
+}
+
+.flight-board:hover .flight-board-tag {
+  display: inline;
+}
+
+@keyframes boardSweep {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flight-board-shell:hover {
+    transform: none;
+  }
+  .flight-board:hover::after {
+    animation: none;
+  }
+}
+
 /* Airport split-flap price — .flip-price.board */
 .flip-price {
   cursor: pointer;
@@ -446,8 +509,11 @@
 }
 
 .group:hover .flip-price .fdigit.is-num .dwrap,
-.flip-price:hover .fdigit.is-num .dwrap {
-  animation: priceFlip 0.16s linear;
+.group:active .flip-price .fdigit.is-num .dwrap,
+.flip-price:hover .fdigit.is-num .dwrap,
+.flip-price:active .fdigit.is-num .dwrap,
+.flip-price.is-flipping .fdigit.is-num .dwrap {
+  animation: priceFlip 0.16s linear both;
 }
 
 @keyframes priceFlip {
@@ -543,7 +609,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .group:hover .flip-price .fdigit.is-num .dwrap,
+  .group:active .flip-price .fdigit.is-num .dwrap,
   .flip-price:hover .fdigit.is-num .dwrap,
+  .flip-price:active .fdigit.is-num .dwrap,
+  .flip-price.is-flipping .fdigit.is-num .dwrap,
   .group:hover .split-flap-digit,
   .flip-cta:hover .flip-text .fchar .cwrap,
   .cta-shine,

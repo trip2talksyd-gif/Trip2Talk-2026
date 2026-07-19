@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Check, Copy } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import BookingJourneyTimeline from '../../components/booking/BookingJourneyTimeline'
+import PayIdDepositPanel from '../../components/booking/PayIdDepositPanel'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import {
   fetchTourByCode,
@@ -11,7 +12,7 @@ import {
   uploadPaymentSlip,
 } from '../../lib/toursApi'
 import { SeatsFullError } from '../../types/errors'
-import { tourDurationLabel } from '../../lib/tourDisplay'
+import { tourDurationLabel, isSydneyTrip } from '../../lib/tourDisplay'
 import { isWaiverSigned, getWaiverSession } from '../../lib/waiverSession'
 import {
   getSupabaseErrorMessage,
@@ -22,9 +23,8 @@ import {
 import type { Tour } from '../../types/tour'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
+import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
 import { useToast } from '../../components/ui/Toast'
-
-const PAYID_EMAIL = import.meta.env.VITE_PAYID_EMAIL ?? 'payments@trip2talk.com.au'
 
 type FormState = {
   first_name_en: string
@@ -53,7 +53,6 @@ export default function BookingPage() {
   const [submitting, setSubmitting] = useState(false)
   const [touched, setTouched] = useState(false)
   const [reference, setReference] = useState('')
-  const [copied, setCopied] = useState(false)
   const [slipFile, setSlipFile] = useState<File | null>(null)
 
   const [form, setForm] = useState<FormState>({
@@ -98,12 +97,6 @@ export default function BookingPage() {
     REQUIRED.every((k) => form[k].trim()) &&
     isValidEmail(form.email) &&
     isValidAuMobile(form.phone)
-
-  async function copyPayId() {
-    await navigator.clipboard.writeText(PAYID_EMAIL)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -232,6 +225,7 @@ export default function BookingPage() {
 
         <BookingJourneyTimeline
           bookingStatus="pending_payment"
+          tripCode={tripCode}
           className="mt-5 w-full text-left"
         />
       </div>
@@ -316,35 +310,54 @@ export default function BookingPage() {
       </div>
 
       <div className="rounded-[14px] border border-dashed border-line px-3 py-2.5">
-        <div className="flex justify-between text-[11px] text-ink-soft">
+        <div className="flex items-center justify-between gap-2 text-[11px] text-ink-soft">
           <span>
             {lang === 'th' ? 'ราคาทริปโดยประมาณ' : 'Trip total (est.)'}
           </span>
-          <span>{formatAud(tour.price_aud)}</span>
+          <SplitFlapPrice
+            amountAud={tour.price_aud}
+            board
+            className="text-[12px] font-extrabold leading-none text-ink"
+          />
         </div>
       </div>
 
       <div className="rounded-[14px] bg-mint-100 px-3.5 py-3">
-        <div className="flex justify-between py-0.5 text-[11px] text-ink-soft">
+        <div className="flex items-center justify-between gap-2 py-0.5 text-[11px] text-ink-soft">
           <span>
             {lang === 'th' ? 'ยอดรวมทริปโดยประมาณ' : 'Trip total (est.)'}
           </span>
-          <span>{formatAud(tour.price_aud)}</span>
+          <SplitFlapPrice
+            amountAud={tour.price_aud}
+            board
+            className="text-[12px] font-extrabold leading-none text-ink"
+          />
         </div>
-        <div className="flex justify-between py-0.5 text-[11px] text-ink-soft">
+        <div className="flex items-center justify-between gap-2 py-0.5 text-[11px] text-ink-soft">
           <span>
             {lang === 'th' ? `มัดจำ ${formatAud(tour.deposit_aud)}/คน` : `Deposit — ${formatAud(tour.deposit_aud)}`}
           </span>
-          <span>{formatAud(depositDue)}</span>
+          <SplitFlapPrice
+            amountAud={depositDue}
+            board
+            className="text-[12px] font-extrabold leading-none text-ink"
+          />
         </div>
-        <div className="mt-1.5 flex justify-between border-t border-dashed border-[#c9d8d1] pt-2 text-sm font-extrabold text-teal-800">
+        <div className="mt-1.5 flex items-center justify-between gap-2 border-t border-dashed border-[#c9d8d1] pt-2 text-sm font-extrabold text-teal-800">
           <span>
             {lang === 'th' ? 'ชำระตอนนี้' : 'Due now'}
             <span className="mt-0.5 block font-thai text-[9.5px] font-medium text-teal-700">
               ชำระตอนนี้
             </span>
           </span>
-          <span>{formatAud(depositDue)} AUD</span>
+          <span className="inline-flex items-baseline gap-1">
+            <SplitFlapPrice
+              amountAud={depositDue}
+              board
+              className="text-[15px] font-extrabold leading-none"
+            />
+            <span className="text-[10px] font-semibold">AUD</span>
+          </span>
         </div>
         <p className="mt-2 text-[9px] leading-relaxed text-ink-soft">
           We only collect a {formatAud(tour.deposit_aud)}/person deposit to secure your seat. The
@@ -375,12 +388,31 @@ export default function BookingPage() {
           {lang === 'th' ? 'รายการที่ไม่รวมในค่าทริป' : 'Not included in trip price'}
         </p>
         <ul className="mt-1.5 space-y-1 text-[9.5px] text-[#7a5b16]">
-          <li>✈️ Flights · ตั๋วเครื่องบิน</li>
-          <li>🍽 Meals · ค่าอาหาร</li>
-          <li>🛡 Travel insurance · ประกันการเดินทาง</li>
+          {tour && isSydneyTrip(tour.trip_code) ? (
+            <>
+              <li>✈️ Flights · ตั๋วเครื่องบิน (ทริปซิดนีย์ไม่รวม)</li>
+              <li>🛏 Accommodation · ที่พัก (ทริปซิดนีย์ไม่รวม)</li>
+              <li>🍽 Meals · ค่าอาหาร</li>
+              <li>🛡 Travel insurance · ประกันการเดินทาง</li>
+            </>
+          ) : (
+            <>
+              <li>✈️ Flights · ตั๋วเครื่องบิน</li>
+              <li>🍽 Meals · ค่าอาหาร</li>
+              <li>🛡 Travel insurance · ประกันการเดินทาง</li>
+            </>
+          )}
         </ul>
+        {tour && isSydneyTrip(tour.trip_code) && (
+          <p className="mt-2 text-[9px] leading-relaxed text-[#7a5b16]/90">
+            {lang === 'th'
+              ? 'ทริปซิดนีย์: นัดพบ Thai Town / Starbucks มีแค่รถรับ–ส่งตามเส้นทาง (เรา base ที่ซิดนีย์)'
+              : 'Sydney trips: meetup at Thai Town / Starbucks — route pickup only (we are Sydney-based).'}
+          </p>
+        )}
       </div>
 
+      {tour && !isSydneyTrip(tour.trip_code) && (
       <div className="flex items-center gap-2.5 rounded-xl border border-line bg-cream px-3 py-2.5">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-mint-100 text-sm">
           🛏
@@ -397,26 +429,20 @@ export default function BookingPage() {
           {lang === 'th' ? 'บริการฟรี' : 'Free to arrange'}
         </span>
       </div>
+      )}
 
-      <section className="rounded-xl border border-line bg-cream p-4">
-        <h2 className="text-sm font-semibold text-ink">{t('booking.payment')}</h2>
-        <div className="mt-3 flex items-center justify-between rounded-lg bg-mint-100 px-3 py-2">
-          <span className="font-mono text-sm text-ink">{PAYID_EMAIL}</span>
-          <button type="button" onClick={copyPayId} className="text-teal-700">
-            {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-          </button>
-        </div>
-        <label className="mt-4 block cursor-pointer rounded-lg border-2 border-dashed border-line p-4 text-center text-sm text-ink-soft">
-          {t('booking.uploadSlip')}
-          <input
-            type="file"
-            accept="image/*,.pdf"
-            className="sr-only"
-            onChange={(e) => setSlipFile(e.target.files?.[0] ?? null)}
-          />
-          {slipFile && <p className="mt-1 text-xs text-ink">{slipFile.name}</p>}
-        </label>
-      </section>
+      <PayIdDepositPanel variant="booking" />
+
+      <label className="mt-1 block cursor-pointer rounded-lg border-2 border-dashed border-line bg-cream p-4 text-center text-sm text-ink-soft">
+        {t('booking.uploadSlip')}
+        <input
+          type="file"
+          accept="image/*,.pdf"
+          className="sr-only"
+          onChange={(e) => setSlipFile(e.target.files?.[0] ?? null)}
+        />
+        {slipFile && <p className="mt-1 text-xs text-ink">{slipFile.name}</p>}
+      </label>
 
       <button
         type="submit"

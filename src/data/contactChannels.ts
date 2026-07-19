@@ -49,7 +49,7 @@ export const CONTACT_CHANNELS: ContactChannel[] = [
   {
     id: 'email',
     enabled: true,
-    href: 'mailto:chapter99solutions@gmail.com',
+    href: 'mailto:trip2talksyd@gmail.com',
     icon: Mail,
     labelKey: 'contact.email',
     subtextKey: 'contact.email.sub',

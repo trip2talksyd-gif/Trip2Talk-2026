@@ -1,7 +1,7 @@
-import { Camera, Check, Plane, BedDouble } from 'lucide-react'
+import { Camera, Car, Check, MapPin, Plane, BedDouble } from 'lucide-react'
 import type { Tour } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
-import { tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
+import { isSydneyTrip, tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
 import { formatAud, formatDate, seatsRemaining } from '../../lib/toursApi'
 import { isPremiumTrip } from '../../data/tripTiers'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
@@ -14,16 +14,25 @@ type Props = {
 
 const AVATAR_COLORS = ['bg-teal-600', 'bg-teal-700', 'bg-coral', 'bg-teal-800']
 
+const SYDNEY_FEATURE_ICONS = [
+  { icon: Car, en: 'Route pickup', th: 'รถรับ–ส่งตามเส้นทาง' },
+  { icon: MapPin, en: 'Thai Town / Starbucks', th: 'นัดพบ Thai Town / Starbucks' },
+  { icon: Camera, en: 'Photographer', th: 'ช่างภาพ' },
+] as const
+
+const TRAVEL_FEATURE_ICONS = [
+  { icon: Plane, en: 'Flight help', th: 'ช่วยจองบิน' },
+  { icon: BedDouble, en: 'Stay included', th: 'รวมที่พัก' },
+  { icon: Camera, en: 'Photographer', th: 'ช่างภาพ' },
+] as const
+
 export default function TripPricingCard({ tour, includes }: Props) {
   const { lang } = useLang()
   const seats = seatsRemaining(tour)
+  const sydney = isSydneyTrip(tour.trip_code)
   const booked = Math.min(tour.booked_seats, 4)
   const more = Math.max(0, tour.booked_seats - 4)
-  const icons = [
-    { icon: Plane, en: 'Flight help', th: 'ช่วยจองบิน' },
-    { icon: BedDouble, en: 'Stay included', th: 'รวมที่พัก' },
-    { icon: Camera, en: 'Photographer', th: 'ช่างภาพ' },
-  ]
+  const icons = sydney ? SYDNEY_FEATURE_ICONS : TRAVEL_FEATURE_ICONS
 
   return (
     <aside className="rounded-2xl border border-line bg-cream p-5 shadow-[0_12px_40px_rgba(22,38,43,0.1)] lg:sticky lg:top-24">
@@ -53,7 +62,7 @@ export default function TripPricingCard({ tour, includes }: Props) {
       <p className="mt-1 text-[10.5px] text-ink-soft">
         {lang === 'th'
           ? 'จิ้มหรือโฮเวอร์ตัวเลขดูแอนิเมชัน'
-          : 'Hover the price for the split-flap flip'}
+          : 'Tap or hover the price for the split-flap flip'}
       </p>
 
       <div className="mt-4 grid grid-cols-3 gap-2">
@@ -78,15 +87,27 @@ export default function TripPricingCard({ tour, includes }: Props) {
             </span>
           </p>
           <p>
-            📍 {tourDestination(tour.trip_code)}
-            <span className="font-thai">
-              {lang === 'en' ? ' · pickup details after deposit' : ' · จุดรับหลังมัดจำ'}
-            </span>
+            📍{' '}
+            {sydney
+              ? lang === 'th'
+                ? 'Thai Town / Starbucks · รับ–ส่งตามเส้นทางทริป'
+                : 'Thai Town / Starbucks · pickup along the route'
+              : tourDestination(tour.trip_code)}
+            {!sydney && (
+              <span className="font-thai">
+                {lang === 'en' ? ' · pickup details after deposit' : ' · จุดรับหลังมัดจำ'}
+              </span>
+            )}
           </p>
         </div>
         <div className="mt-3 flex items-center justify-between gap-2">
           <span className="text-[11px] font-semibold text-teal-700">
             {seats} {lang === 'th' ? 'ที่นั่งว่าง' : 'seats left'}
+            {sydney && (
+              <span className="mt-0.5 block text-[9px] font-medium text-ink-soft">
+                {lang === 'th' ? 'สูงสุด 4 คน / ทริป' : 'Max 4 guests / trip'}
+              </span>
+            )}
           </span>
           <div className="flex -space-x-2">
             {Array.from({ length: Math.max(booked, 1) }).map((_, i) => (
@@ -104,6 +125,14 @@ export default function TripPricingCard({ tour, includes }: Props) {
             )}
           </div>
         </div>
+        {sydney && (
+          <p className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold text-teal-800">
+            <Car className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} />
+            {lang === 'th'
+              ? 'Tesla Model Y · base ซิดนีย์ · ไม่รวมบิน/ที่พัก'
+              : 'Tesla Model Y · Sydney-based · no flights or stay'}
+          </p>
+        )}
       </div>
 
       {includes.length > 0 && (

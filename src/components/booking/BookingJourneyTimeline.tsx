@@ -1,6 +1,7 @@
-import { Camera, Check, MapPin, MessageCircle, Plane, Star, Users } from 'lucide-react'
+import { Camera, Car, Check, MapPin, MessageCircle, Plane, Star, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
+import { isSydneyTrip } from '../../lib/tourDisplay'
 import { FacebookIcon } from '../contact/contactIcons'
 import { useLang } from '../../hooks/useLang'
 import type { BookingStatus } from '../../types/tour'
@@ -93,12 +94,17 @@ function completedCount(status: BookingStatus | string): number {
 
 type Props = {
   bookingStatus: BookingStatus | string
-  /** Highlight Facebook step as the next action after deposit */
+  tripCode?: string
   className?: string
 }
 
-export default function BookingJourneyTimeline({ bookingStatus, className = '' }: Props) {
+export default function BookingJourneyTimeline({
+  bookingStatus,
+  tripCode = '',
+  className = '',
+}: Props) {
   const { lang } = useLang()
+  const sydney = tripCode ? isSydneyTrip(tripCode) : false
   const doneThrough = completedCount(bookingStatus)
   const nextIndex = Math.min(doneThrough, STEPS.length - 1)
 
@@ -113,11 +119,26 @@ export default function BookingJourneyTimeline({ bookingStatus, className = '' }
           aria-hidden
         />
         {STEPS.map((step, index) => {
-          const Icon = step.icon
+          const Icon = sydney && step.id === 'tripday' ? Car : step.icon
           const done = index < doneThrough
           const current = index === nextIndex && doneThrough < STEPS.length
-          const title = lang === 'th' ? step.titleTh : step.titleEn
-          const body = lang === 'th' ? step.bodyTh : step.bodyEn
+          let title = lang === 'th' ? step.titleTh : step.titleEn
+          let body = lang === 'th' ? step.bodyTh : step.bodyEn
+
+          if (sydney && step.id === 'setup') {
+            title = lang === 'th' ? 'ยืนยันจุดนัดพบ' : 'Confirm meetup point'
+            body =
+              lang === 'th'
+                ? 'นัดพบ Thai Town / Starbucks · รถรับ–ส่งตามเส้นทาง · ผ่อนชำระ (ไม่มีบิน/ที่พัก)'
+                : 'Meetup Thai Town / Starbucks · route pickup · installments (no flights or hotel)'
+          }
+          if (sydney && step.id === 'tripday') {
+            title = lang === 'th' ? 'วันทริป' : 'Trip day'
+            body =
+              lang === 'th'
+                ? 'พบที่จุดนัด แล้วขึ้นรถไปตามเส้นทางถ่ายภาพ'
+                : 'Meet at the pickup point, then we drive the photo route together.'
+          }
 
           return (
             <li key={step.id} className="relative flex gap-3 pb-5 last:pb-0">

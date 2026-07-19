@@ -2,16 +2,13 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight, Check } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
+import SplitFlapPrice from '../ui/SplitFlapPrice'
 
 const HERO_MEDIA =
   'https://xwdtjwzjkqunewxjpimm.supabase.co/storage/v1/object/public/trip-photos/VDO/Copy%20of%202026%20t2t%20tripLandscape%20(1).mp4'
 
 const BASE_PRICE = 1390
 const PRIVATE_ADDON = 500
-
-function formatPrice(n: number) {
-  return `$${n.toLocaleString('en-AU')}`
-}
 
 export default function HomeFeaturesSection() {
   const { t } = useLang()
@@ -61,8 +58,13 @@ export default function HomeFeaturesSection() {
                 </p>
               </div>
               <div className="mt-5 flex items-center justify-between gap-3">
-                <span className="text-sm font-medium text-white/80">
-                  +{formatPrice(PRIVATE_ADDON)}
+                <span className="inline-flex items-baseline gap-0.5 text-sm font-medium text-white/80">
+                  +
+                  <SplitFlapPrice
+                    amountAud={PRIVATE_ADDON}
+                    board
+                    className="text-sm font-semibold leading-none"
+                  />
                 </span>
                 <button
                   type="button"
@@ -85,13 +87,16 @@ export default function HomeFeaturesSection() {
 
             {/* Middle — price */}
             <div className="flex flex-col items-start justify-center px-1 py-2 lg:px-6">
-              <p className="text-3xl font-semibold tracking-tight text-white sm:text-4xl md:text-[40px]">
-                {formatPrice(total)}
+              <div className="flex flex-wrap items-baseline gap-2">
+                <SplitFlapPrice
+                  amountAud={total}
+                  board
+                  className="text-3xl font-semibold leading-none tracking-tight sm:text-4xl md:text-[40px]"
+                />
                 <span className="text-lg font-normal text-white/50 sm:text-xl">
-                  {' '}
                   {t('home.features.price.unit')}
                 </span>
-              </p>
+              </div>
               <p className="mt-1.5 text-sm text-white/45">
                 {privateOn ? t('home.features.price.notePrivate') : t('home.features.price.note')}
               </p>

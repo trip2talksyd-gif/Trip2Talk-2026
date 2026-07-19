@@ -17,6 +17,9 @@ export interface Tour {
   description_th: string | null
   duration_days: number | null
   duration_nights: number | null
+  /** Legacy / ops column — preferred for oneday|overnight|multiday when present */
+  trip_type?: string | null
+  duration_label?: string | null
   departure_date: string | null
   price_aud: number
   deposit_aud: number

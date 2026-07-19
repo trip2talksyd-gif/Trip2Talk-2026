@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Lock } from 'lucide-react'
+import { Lock, MessageCircle } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
-import { useToast } from '../ui/Toast'
-import { enabledContactChannels } from '../../data/contactChannels'
+import { enabledContactChannels, FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import type { TranslationKey } from '../../i18n/translations'
 
 const FOOTER_VIDEO_URL =
@@ -31,8 +30,6 @@ const infoLinks: { to: string; key: TranslationKey }[] = [
 
 export default function PublicFooter() {
   const { t } = useLang()
-  const { toast } = useToast()
-  const [email, setEmail] = useState('')
   const watermarkSvgRef = useRef<SVGSVGElement>(null)
   const watermarkTextRef = useRef<SVGTextElement>(null)
   const socials = enabledContactChannels().slice(0, 4)
@@ -58,13 +55,6 @@ export default function PublicFooter() {
     window.addEventListener('resize', fitWatermark)
     return () => window.removeEventListener('resize', fitWatermark)
   }, [])
-
-  function handleSubscribe(e: FormEvent) {
-    e.preventDefault()
-    if (!email.trim()) return
-    toast(t('footer.subscribe.toast'), 'success')
-    setEmail('')
-  }
 
   return (
     <section className="footer-section relative overflow-visible bg-white px-4 pb-24 pt-8 sm:px-6">
@@ -224,32 +214,23 @@ export default function PublicFooter() {
             <p className="font-sans text-[12.5px] font-medium text-[#9ca3af]">
               {t('footer.copyright')}
             </p>
-            <div className="flex w-full flex-col gap-3.5 sm:w-auto">
+            <div className="flex w-full flex-col gap-3.5 sm:w-auto sm:max-w-[340px]">
               <h4 className="font-sans text-[15px] font-normal leading-[1.45] text-[#6b7280]">
                 {t('footer.bottom.cta.line1')}
                 <br />
-                  <strong className="block text-[19px] font-bold text-ink">
+                <strong className="mt-0.5 block text-[17px] font-bold leading-snug text-ink sm:text-[19px]">
                   {t('footer.bottom.cta.line2')}
                 </strong>
               </h4>
-              <form
-                onSubmit={handleSubscribe}
-                className="flex w-full flex-row rounded-xl border border-line bg-card p-[5px] shadow-[0_2px_10px_rgba(0,0,0,0.04)] sm:w-[310px]"
+              <a
+                href={FACEBOOK_PAGE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#0d0d0f] px-5 py-3 font-sans text-[13.5px] font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_8px_18px_-8px_rgba(0,0,0,0.5)] transition-[background,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(255,255,255,0.15)_inset,0_12px_22px_-8px_rgba(0,0,0,0.55)] sm:w-auto"
               >
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={t('footer.subscribe.placeholder')}
-                  className="min-w-0 flex-1 border-none bg-transparent px-3.5 py-[11px] font-sans text-[13.5px] text-ink outline-none placeholder:text-ink-soft"
-                />
-                <button
-                  type="submit"
-                  className="whitespace-nowrap rounded-[13px] bg-[#0d0d0f] px-[22px] py-[11px] font-sans text-[13.5px] font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_8px_18px_-8px_rgba(0,0,0,0.5)] transition-[background,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(255,255,255,0.15)_inset,0_12px_22px_-8px_rgba(0,0,0,0.55)]"
-                >
-                  {t('footer.subscribe.button')}
-                </button>
-              </form>
+                <MessageCircle className="h-4 w-4 shrink-0" strokeWidth={2.25} />
+                {t('footer.subscribe.button')}
+              </a>
             </div>
           </div>
         </div>
