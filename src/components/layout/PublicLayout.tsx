@@ -5,14 +5,18 @@ import { useLang } from '../../hooks/useLang'
 import InstallPrompt from '../InstallPrompt'
 import PublicFooter from './PublicFooter'
 import BottomNav from './BottomNav'
+import OfflineBanner from './OfflineBanner'
 
 const menuLinks = [
   { to: '/trips', key: 'nav.trips' as const },
   { to: '/favorites', key: 'nav.favorites' as const },
   { to: '/my-trip', key: 'nav.myTrip' as const },
+  { to: '/account', key: 'nav.account' as const },
+  { to: '/photo-guide', key: 'nav.photoGuide' as const },
   { to: '/gallery', key: 'nav.gallery' as const },
   { to: '/calendar', key: 'nav.calendar' as const },
   { to: '/pricing', key: 'nav.pricing' as const },
+  { to: '/help', key: 'nav.help' as const },
   { to: '/about', key: 'nav.about' as const },
   { to: '/app', key: 'nav.portal' as const },
 ]
@@ -25,15 +29,18 @@ export default function PublicLayout() {
 
   return (
     <div className={`flex min-h-svh flex-col ${isHome ? 'bg-teal-900' : 'bg-cream'}`}>
+      <OfflineBanner />
       <header className="sticky top-0 z-50 border-b border-white/8 bg-teal-900/95 backdrop-blur">
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-3">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
           <Link to="/" className="font-serif text-lg font-semibold text-cream">
             Trip2Talk
           </Link>
 
-          <nav className="hidden flex-1 items-center justify-center gap-1 md:flex">
+          <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex">
             {menuLinks
-              .filter((l) => l.to !== '/app')
+              .filter((l) =>
+                ['/trips', '/gallery', '/calendar', '/pricing', '/about', '/account'].includes(l.to),
+              )
               .map(({ to, key }) => (
                 <NavLink
                   key={to}
@@ -91,8 +98,8 @@ export default function PublicLayout() {
       </header>
 
       <main
-        className={`mx-auto w-full max-w-2xl flex-1 px-4 pt-4 ${
-          isHome ? 'pb-4 text-cream' : 'pb-24 text-ink'
+        className={`mx-auto w-full flex-1 px-4 pt-4 ${
+          isHome ? 'max-w-2xl pb-4 text-cream' : 'max-w-5xl pb-24 text-ink'
         }`}
       >
         <Outlet />

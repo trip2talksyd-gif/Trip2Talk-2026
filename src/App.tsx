@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import PublicLayout from './components/layout/PublicLayout'
 import HomePage from './pages/public/HomePage'
 import TripsPage from './pages/public/TripsPage'
@@ -12,7 +12,21 @@ import WaiverPage from './pages/public/WaiverPage'
 import BookingPage from './pages/public/BookingPage'
 import FavoritesPage from './pages/public/FavoritesPage'
 import MyTripPage from './pages/public/MyTripPage'
-import PhotoGuideComingSoonPage from './pages/public/PhotoGuideComingSoonPage'
+import AccountPage from './pages/public/AccountPage'
+import PhotoGuideHubPage from './pages/public/PhotoGuideHubPage'
+import PosingGuidePage from './pages/public/PosingGuidePage'
+import CameraGuidePage from './pages/public/CameraGuidePage'
+import MobileGuidePage from './pages/public/MobileGuidePage'
+import {
+  CancellationPage,
+  HelpSupportPage,
+  NotFoundPage,
+  NotificationsPage,
+  PaymentMethodsPage,
+  PrivacyPage,
+  TermsPage,
+  WriteReviewPage,
+} from './pages/public/LegalSupportPages'
 import PinGatePage from './pages/app/PinGatePage'
 import StaffDashboard from './pages/app/StaffDashboard'
 import CashierPOS from './pages/app/CashierPOS'
@@ -38,7 +52,19 @@ export default function App() {
           <Route path="booking" element={<BookingPage />} />
           <Route path="favorites" element={<FavoritesPage />} />
           <Route path="my-trip" element={<MyTripPage />} />
-          <Route path="photo-guide" element={<PhotoGuideComingSoonPage />} />
+          <Route path="account" element={<AccountPage />} />
+          <Route path="photo-guide" element={<PhotoGuideHubPage />} />
+          <Route path="photo-guide/posing" element={<PosingGuidePage />} />
+          <Route path="photo-guide/camera" element={<CameraGuidePage />} />
+          <Route path="photo-guide/mobile" element={<MobileGuidePage />} />
+          <Route path="terms" element={<TermsPage />} />
+          <Route path="privacy" element={<PrivacyPage />} />
+          <Route path="cancellation" element={<CancellationPage />} />
+          <Route path="payment-methods" element={<PaymentMethodsPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
+          <Route path="help" element={<HelpSupportPage />} />
+          <Route path="review" element={<WriteReviewPage />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Route>
 
         <Route path="app" element={<PinGatePage />} />
@@ -83,8 +109,6 @@ export default function App() {
             </RequireStaffRole>
           }
         />
-
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )

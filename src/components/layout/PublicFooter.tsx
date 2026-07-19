@@ -20,8 +20,12 @@ const navLinks: { to: string; key: TranslationKey }[] = [
 ]
 
 const infoLinks: { to: string; key: TranslationKey }[] = [
-  { to: '/waiver', key: 'footer.info.terms' },
-  { to: '/about', key: 'footer.info.contact' },
+  { to: '/terms', key: 'footer.info.terms' },
+  { to: '/privacy', key: 'footer.info.privacy' },
+  { to: '/cancellation', key: 'footer.info.cancellation' },
+  { to: '/payment-methods', key: 'footer.info.payment' },
+  { to: '/help', key: 'footer.info.help' },
+  { to: '/account', key: 'footer.info.contact' },
   { to: '/app', key: 'footer.info.portal' },
 ]
 

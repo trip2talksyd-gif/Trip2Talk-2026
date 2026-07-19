@@ -27,8 +27,6 @@ import { useToast } from '../../components/ui/Toast'
 const PAYID_EMAIL = import.meta.env.VITE_PAYID_EMAIL ?? 'payments@trip2talk.com.au'
 
 type FormState = {
-  first_name_th: string
-  last_name_th: string
   first_name_en: string
   last_name_en: string
   passport_number: string
@@ -59,8 +57,6 @@ export default function BookingPage() {
   const [slipFile, setSlipFile] = useState<File | null>(null)
 
   const [form, setForm] = useState<FormState>({
-    first_name_th: '',
-    last_name_th: '',
     first_name_en: '',
     last_name_en: '',
     passport_number: '',
@@ -131,8 +127,9 @@ export default function BookingPage() {
 
       await insertBooking(tour.id, {
         trip_code: tour.trip_code,
-        first_name_th: form.first_name_th.trim() || form.first_name_en.trim(),
-        last_name_th: form.last_name_th.trim() || form.last_name_en.trim(),
+        // DB columns are NOT NULL on V7 schema — send empty string (no longer collected)
+        first_name_th: '',
+        last_name_th: '',
         first_name_en: form.first_name_en.trim(),
         last_name_en: form.last_name_en.trim(),
         passport_number: form.passport_number.trim() || 'PENDING',
@@ -230,10 +227,8 @@ export default function BookingPage() {
   const name = lang === 'th' ? tour.name_th : tour.name_en
 
   const fields: { key: keyof FormState; label: string; type?: string; required?: boolean }[] = [
-    { key: 'first_name_th', label: t('form.nameTh') },
-    { key: 'last_name_th', label: t('form.nameTh') },
-    { key: 'first_name_en', label: t('form.nameEn'), required: true },
-    { key: 'last_name_en', label: t('form.nameEn'), required: true },
+    { key: 'first_name_en', label: t('form.firstName'), required: true },
+    { key: 'last_name_en', label: t('form.lastName'), required: true },
     { key: 'passport_number', label: t('form.passport') },
     { key: 'email', label: t('form.email'), type: 'email', required: true },
     { key: 'phone', label: t('form.phone'), required: true },

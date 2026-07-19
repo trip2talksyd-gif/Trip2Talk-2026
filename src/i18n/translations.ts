@@ -12,6 +12,9 @@ export type TranslationKey =
   | 'nav.favorites'
   | 'nav.messages'
   | 'nav.myTrip'
+  | 'nav.account'
+  | 'nav.photoGuide'
+  | 'nav.help'
   | 'btn.bookNow'
   | 'btn.viewTrip'
   | 'btn.comingSoon'
@@ -21,6 +24,8 @@ export type TranslationKey =
   | 'form.name'
   | 'form.nameTh'
   | 'form.nameEn'
+  | 'form.firstName'
+  | 'form.lastName'
   | 'form.email'
   | 'form.phone'
   | 'form.passport'
@@ -225,6 +230,10 @@ export type TranslationKey =
   | 'footer.nav.title1'
   | 'footer.nav.title2'
   | 'footer.info.terms'
+  | 'footer.info.privacy'
+  | 'footer.info.cancellation'
+  | 'footer.info.payment'
+  | 'footer.info.help'
   | 'footer.info.contact'
   | 'footer.info.portal'
   | 'footer.bottom.cta.line1'
@@ -248,6 +257,9 @@ const en: Map = {
   'nav.favorites': 'Favorites',
   'nav.messages': 'Messages',
   'nav.myTrip': 'My Trip',
+  'nav.account': 'Account',
+  'nav.photoGuide': 'Photo Guide',
+  'nav.help': 'Help',
   'btn.bookNow': 'Book Now',
   'btn.viewTrip': 'View Trip',
   'btn.comingSoon': 'Coming soon',
@@ -257,6 +269,8 @@ const en: Map = {
   'form.name': 'Name',
   'form.nameTh': 'Name (Thai)',
   'form.nameEn': 'Name (English)',
+  'form.firstName': 'ชื่อ (First name)',
+  'form.lastName': 'นามสกุล (Last name)',
   'form.email': 'Email',
   'form.phone': 'Phone',
   'form.passport': 'Passport Number',
@@ -472,7 +486,11 @@ const en: Map = {
   'footer.lucky.text': 'Book now!',
   'footer.nav.title1': 'Navigation',
   'footer.nav.title2': 'Info',
-  'footer.info.terms': 'Booking Terms',
+  'footer.info.terms': 'Terms of Service',
+  'footer.info.privacy': 'Privacy Policy',
+  'footer.info.cancellation': 'Cancellation Policy',
+  'footer.info.payment': 'Payment Methods',
+  'footer.info.help': 'Help & Support',
   'footer.info.contact': 'Contact Us',
   'footer.info.portal': 'Staff Portal',
   'footer.bottom.cta.line1': 'Light moves fast.',
@@ -495,6 +513,9 @@ const th: Map = {
   'nav.favorites': 'รายการโปรด',
   'nav.messages': 'ข้อความ',
   'nav.myTrip': 'ทริปของฉัน',
+  'nav.account': 'บัญชี',
+  'nav.photoGuide': 'คู่มือถ่ายภาพ',
+  'nav.help': 'ช่วยเหลือ',
   'btn.bookNow': 'จองเลย',
   'btn.viewTrip': 'ดูทริป',
   'btn.comingSoon': 'เร็วๆ นี้',
@@ -504,6 +525,8 @@ const th: Map = {
   'form.name': 'ชื่อ',
   'form.nameTh': 'ชื่อ (ไทย)',
   'form.nameEn': 'ชื่อ (อังกฤษ)',
+  'form.firstName': 'ชื่อ (First name)',
+  'form.lastName': 'นามสกุล (Last name)',
   'form.email': 'อีเมล',
   'form.phone': 'เบอร์โทร',
   'form.passport': 'เลขหนังสือเดินทาง',
@@ -719,7 +742,11 @@ const th: Map = {
   'footer.lucky.text': 'จองเลย!',
   'footer.nav.title1': 'เมนู',
   'footer.nav.title2': 'ข้อมูล',
-  'footer.info.terms': 'เงื่อนไขการจอง',
+  'footer.info.terms': 'เงื่อนไขการใช้งาน',
+  'footer.info.privacy': 'นโยบายความเป็นส่วนตัว',
+  'footer.info.cancellation': 'นโยบายการยกเลิก',
+  'footer.info.payment': 'วิธีการชำระเงิน',
+  'footer.info.help': 'ช่วยเหลือ',
   'footer.info.contact': 'ติดต่อเรา',
   'footer.info.portal': 'พอร์ทัลพนักงาน',
   'footer.bottom.cta.line1': 'แสงเคลื่อนเร็ว.',

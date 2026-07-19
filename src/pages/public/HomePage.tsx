@@ -95,7 +95,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Photo Guide promo — stub target until Phase 4 */}
+      {/* Photo Guide promo */}
       <Link
         to="/photo-guide"
         className="group flex items-center gap-3 border-y border-teal-800 bg-teal-800 px-4 py-3.5 transition-colors hover:bg-teal-700"
