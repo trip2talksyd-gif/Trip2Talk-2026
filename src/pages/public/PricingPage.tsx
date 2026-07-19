@@ -89,30 +89,31 @@ export default function PricingPage() {
         {TIERS.map((tier) => (
           <article
             key={tier.id}
-            className={`relative flex flex-col rounded-2xl border p-6 ${
-              tier.popular
-                ? 'border-teal-600/50 bg-cream shadow-[0_16px_40px_rgba(22,38,43,0.12)]'
-                : 'border-line bg-mint-100/60'
+            className={`relative flex flex-col rounded-[18px] border bg-card p-6 shadow-mockup ${
+              tier.popular ? 'border-2 border-teal-600' : 'border-line'
             }`}
           >
             {tier.popular && (
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-coral px-3 py-1 text-[10px] font-extrabold uppercase tracking-wide text-cream">
+              <span className="absolute -top-3 left-6 rounded-full bg-coral px-3 py-1 text-[10px] font-extrabold uppercase text-cream">
                 Most Popular
               </span>
             )}
-            <h2 className="font-serif text-xl text-ink">
+            <h2 className="font-serif text-[15px] text-ink">
               {lang === 'th' ? tier.titleTh : tier.titleEn}
+              <span className="mt-0.5 block text-[12px] font-medium text-teal-700">
+                {lang === 'th' ? tier.titleEn : tier.titleTh}
+              </span>
             </h2>
-            <p className="mt-3 font-serif text-3xl font-semibold text-ink">
+            <p className="mt-2.5 text-[26px] font-extrabold text-ink">
               {tier.price}
-              <small className="ml-1 text-sm font-medium text-ink-soft">+ / person</small>
+              <small className="ml-1 text-[11px] font-semibold text-ink-soft">+ / person</small>
             </p>
-            <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+            <p className="mb-3.5 mt-0.5 text-[11.5px] text-ink-soft">
               {lang === 'th' ? tier.descTh : tier.descEn}
             </p>
-            <ul className="mt-5 flex-1 space-y-2.5">
+            <ul className="mb-[18px] flex flex-1 flex-col gap-2">
               {(lang === 'th' ? tier.checksTh : tier.checksEn).map((item) => (
-                <li key={item} className="flex items-start gap-2 text-sm text-ink">
+                <li key={item} className="flex items-start gap-[7px] text-[12px] text-ink-soft">
                   <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal-700" strokeWidth={2.5} />
                   {item}
                 </li>
@@ -120,10 +121,8 @@ export default function PricingPage() {
             </ul>
             <Link
               to="/trips"
-              className={`mt-6 block rounded-[13px] px-4 py-3 text-center text-sm font-semibold transition-transform hover:-translate-y-0.5 ${
-                tier.popular
-                  ? 'btn-embossed !w-full !rounded-[13px]'
-                  : 'border border-line bg-cream text-ink shadow-sm'
+              className={`block text-center ${
+                tier.popular ? 'book-btn flip-cta cta-shine' : 'book-btn'
               }`}
             >
               {lang === 'th' ? tier.ctaTh : tier.ctaEn}

@@ -126,7 +126,7 @@ export default function PublicFooter() {
         </div>
 
         {/* Right card */}
-        <div className="footer-right relative flex flex-col justify-between overflow-visible rounded-[28px] bg-[#f0f1f5] p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] sm:p-10">
+        <div className="footer-right relative flex flex-col justify-between overflow-visible rounded-[28px] bg-mint-100 p-6 shadow-[0_4px_20px_rgba(0,0,0,0.04)] sm:p-10">
           {/* Floating lucky badge */}
           <Link
             to="/booking"
@@ -197,7 +197,7 @@ export default function PublicFooter() {
                   <Link
                     key={to}
                     to={to}
-                    className="mb-3.5 block font-sans text-sm font-semibold text-[#111827] no-underline transition-colors duration-200 hover:text-teal-700"
+                    className="mb-3.5 block font-sans text-sm font-semibold text-ink no-underline transition-colors duration-200 hover:text-teal-700"
                   >
                     {t(key)}
                   </Link>
@@ -211,7 +211,7 @@ export default function PublicFooter() {
                   <Link
                     key={key}
                     to={to}
-                    className="mb-3.5 block font-sans text-sm font-semibold text-[#111827] no-underline transition-colors duration-200 hover:text-teal-700"
+                    className="mb-3.5 block font-sans text-sm font-semibold text-ink no-underline transition-colors duration-200 hover:text-teal-700"
                   >
                     {t(key)}
                   </Link>
@@ -228,24 +228,24 @@ export default function PublicFooter() {
               <h4 className="font-sans text-[15px] font-normal leading-[1.45] text-[#6b7280]">
                 {t('footer.bottom.cta.line1')}
                 <br />
-                <strong className="block text-[19px] font-bold text-[#111827]">
+                  <strong className="block text-[19px] font-bold text-ink">
                   {t('footer.bottom.cta.line2')}
                 </strong>
               </h4>
               <form
                 onSubmit={handleSubscribe}
-                className="flex w-full flex-row rounded-xl border border-[#e5e7eb] bg-white p-[5px] shadow-[0_2px_10px_rgba(0,0,0,0.04)] sm:w-[310px]"
+                className="flex w-full flex-row rounded-xl border border-line bg-card p-[5px] shadow-[0_2px_10px_rgba(0,0,0,0.04)] sm:w-[310px]"
               >
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder={t('footer.subscribe.placeholder')}
-                  className="min-w-0 flex-1 border-none bg-transparent px-3.5 py-[11px] font-sans text-[13.5px] text-[#111827] outline-none placeholder:text-[#9ca3af]"
+                  className="min-w-0 flex-1 border-none bg-transparent px-3.5 py-[11px] font-sans text-[13.5px] text-ink outline-none placeholder:text-ink-soft"
                 />
                 <button
                   type="submit"
-                  className="whitespace-nowrap rounded-lg bg-[#111214] px-[22px] py-[11px] font-sans text-[13.5px] font-semibold text-white shadow-[0_6px_20px_rgba(0,0,0,0.28),0_2px_8px_rgba(0,0,0,0.15)] transition-[background,box-shadow,transform] duration-200 hover:-translate-y-px hover:bg-black hover:shadow-[0_10px_28px_rgba(0,0,0,0.35),0_4px_12px_rgba(0,0,0,0.2)]"
+                  className="whitespace-nowrap rounded-[13px] bg-[#0d0d0f] px-[22px] py-[11px] font-sans text-[13.5px] font-semibold text-white shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_8px_18px_-8px_rgba(0,0,0,0.5)] transition-[background,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:shadow-[0_1px_0_rgba(255,255,255,0.15)_inset,0_12px_22px_-8px_rgba(0,0,0,0.55)]"
                 >
                   {t('footer.subscribe.button')}
                 </button>

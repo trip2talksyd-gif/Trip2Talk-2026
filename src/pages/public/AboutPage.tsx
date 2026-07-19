@@ -48,47 +48,47 @@ Over the past 10 years I've honed landscape photography. For me, photography isn
         </h1>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
+      <div className="grid gap-9 lg:grid-cols-2 lg:items-center">
         {heroPhoto && (
           <img
             src={photoSrc(heroPhoto)}
             alt="Trip2Talk team on location"
-            className="aspect-[700/520] w-full rounded-2xl object-cover shadow-[0_16px_40px_rgba(22,38,43,0.15)]"
+            className="aspect-[700/520] w-full rounded-[18px] object-cover shadow-mockup"
           />
         )}
         <div>
-          <h2 className="font-serif text-2xl text-ink sm:text-3xl">
+          <h2 className="m-0 font-serif text-[22px] text-ink">
             {lang === 'th' ? 'ทริปถ่ายภาพ ที่จัดการให้ครบ' : 'Photo trips, handled end-to-end'}
           </h2>
-          <p className="mt-1 font-thai text-sm text-teal-700">
+          <p className="mb-3.5 mt-1.5 font-thai text-[14px] text-teal-700">
             ทริปถ่ายภาพ ที่จัดการให้ครบทุกขั้นตอน
           </p>
-          <p className="mt-4 text-sm leading-relaxed text-ink/85">{brandStory}</p>
+          <p className="mb-3 text-[13.5px] leading-[1.75] text-ink-soft">{brandStory}</p>
           {lang === 'en' && (
-            <p className="mt-3 font-thai text-sm leading-relaxed text-ink-soft">{brandStoryTh}</p>
+            <p className="mb-3 font-thai text-[13.5px] leading-[1.75] text-ink-soft">{brandStoryTh}</p>
           )}
-          <div className="mt-6 grid grid-cols-3 gap-3 border-t border-line pt-5">
+          <div className="mt-4 flex gap-[26px]">
             <div>
-              <p className="font-serif text-2xl text-ink">
+              <p className="m-0 text-[20px] font-extrabold text-ink">
                 <CountUpStat end={13} />
               </p>
-              <p className="text-[10px] uppercase tracking-wider text-ink-soft">
+              <p className="mt-0.5 text-[10px] uppercase tracking-[0.04em] text-ink-soft">
                 {lang === 'th' ? 'ทริป' : 'Trips'}
               </p>
             </div>
             <div>
-              <p className="font-serif text-2xl text-ink">
+              <p className="m-0 text-[20px] font-extrabold text-ink">
                 <CountUpStat end={10} suffix="+" />
               </p>
-              <p className="text-[10px] uppercase tracking-wider text-ink-soft">
+              <p className="mt-0.5 text-[10px] uppercase tracking-[0.04em] text-ink-soft">
                 {lang === 'th' ? 'ช่างภาพ' : 'Photographers'}
               </p>
             </div>
             <div>
-              <p className="font-serif text-2xl text-ink">
+              <p className="m-0 text-[20px] font-extrabold text-ink">
                 <CountUpStat end={500} suffix="+" />
               </p>
-              <p className="text-[10px] uppercase tracking-wider text-ink-soft">
+              <p className="mt-0.5 text-[10px] uppercase tracking-[0.04em] text-ink-soft">
                 {lang === 'th' ? 'นักเดินทาง' : 'Travelers'}
               </p>
             </div>
