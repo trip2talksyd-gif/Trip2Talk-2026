@@ -4,7 +4,6 @@ import { GALLERY_PHOTOS, photoSrc, type GalleryPhoto } from '../../data/galleryP
 
 type Slide = {
   photo?: GalleryPhoto
-  /** Fallback remote URL when no gallery photo */
   src?: string
   sceneEn: string
   sceneTh: string
@@ -15,11 +14,12 @@ type Slide = {
 
 type Props = {
   slides: Slide[]
+  /** Mockup shot-slideshow uses 4s per slide × 6 = 24s loop */
   intervalMs?: number
   className?: string
 }
 
-export default function PhotoSlideshow({ slides, intervalMs = 4200, className = '' }: Props) {
+export default function PhotoSlideshow({ slides, intervalMs = 4000, className = '' }: Props) {
   const { lang } = useLang()
   const [index, setIndex] = useState(0)
 
@@ -38,7 +38,8 @@ export default function PhotoSlideshow({ slides, intervalMs = 4200, className = 
 
   return (
     <div className={className}>
-      <div className="relative aspect-[16/8] overflow-hidden rounded-2xl bg-teal-900">
+      {/* Mockup .shot-slideshow — 21/9 desktop, 16/10 mobile, radius 16 */}
+      <div className="shot-slideshow relative aspect-[16/10] overflow-hidden rounded-2xl bg-teal-900 shadow-mockup md:aspect-[21/9]">
         {slides.map((s, i) => {
           const url = s.photo ? photoSrc(s.photo) : (s.src ?? '')
           return (
@@ -53,28 +54,36 @@ export default function PhotoSlideshow({ slides, intervalMs = 4200, className = 
             />
           )
         })}
-        <div className="absolute inset-0 bg-gradient-to-t from-teal-900/90 via-transparent to-transparent" />
-        <span className="absolute left-3 top-3 rounded-md bg-coral px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-cream">
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background: 'linear-gradient(180deg,rgba(0,0,0,0) 42%,rgba(0,0,0,.82) 100%)',
+          }}
+        />
+        {/* .sc-scene — white pill */}
+        <span className="absolute left-2.5 top-2.5 rounded-full bg-white/92 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.02em] text-ink">
           {scene}
         </span>
-        <div className="absolute inset-x-0 bottom-0 p-4 text-cream">
-          <p className="text-sm font-semibold">{title}</p>
+        <div className="absolute inset-x-3.5 bottom-3 text-cream">
+          <p className="text-[13.5px] font-bold leading-[1.3]">{title}</p>
           {lang === 'en' && (
-            <p className="mt-0.5 font-thai text-xs font-normal text-cream/75">{slide.titleTh}</p>
+            <p className="mt-0.5 font-thai text-[10px] opacity-85">{slide.titleTh}</p>
           )}
-          {slide.meta && <p className="mt-1 text-[11px] text-teal-400">{slide.meta}</p>}
+          {slide.meta && (
+            <p className="mt-1.5 font-mono text-[9.5px] font-bold tracking-[0.01em] opacity-92">
+              {slide.meta}
+            </p>
+          )}
         </div>
       </div>
-      <div className="mt-2 flex justify-center gap-1.5">
+      <div className="ss-dots">
         {slides.map((_, i) => (
           <button
             key={i}
             type="button"
             aria-label={`Slide ${i + 1}`}
             onClick={() => setIndex(i)}
-            className={`h-1.5 rounded-full transition-all ${
-              i === index ? 'w-4 bg-teal-700' : 'w-1.5 bg-line'
-            }`}
+            className={i === index ? 'on' : ''}
           />
         ))}
       </div>

@@ -47,7 +47,7 @@ export default function TripPricingCard({ tour, includes }: Props) {
       </p>
 
       <div className="group mt-3">
-        <SplitFlapPrice amountAud={tour.price_aud} className="text-[28px] font-extrabold text-ink" />
+        <SplitFlapPrice amountAud={tour.price_aud} className="text-[28px] font-extrabold text-ink" board />
         <span className="ml-1 text-xs font-semibold text-ink-soft">AUD / person</span>
       </div>
       <p className="mt-1 text-[10.5px] text-ink-soft">
@@ -121,11 +121,7 @@ export default function TripPricingCard({ tour, includes }: Props) {
         {lang === 'th' ? 'มัดจำ' : 'Deposit'}: {formatAud(tour.deposit_aud)}
       </p>
 
-      <TripBookButton
-        tour={tour}
-        variant="deep"
-        className="mt-3 !rounded-[13px] !bg-[#0d0d0f] !py-3.5 !text-[12.5px] !text-cream shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_10px_22px_-10px_rgba(0,0,0,0.45)] hover:!-translate-y-0.5"
-      />
+      <TripBookButton tour={tour} variant="deep" className="mt-1.5" />
     </aside>
   )
 }
