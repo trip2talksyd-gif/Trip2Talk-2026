@@ -40,31 +40,30 @@ export default function GalleryPage() {
 
   return (
     <div className="space-y-4 pb-4">
-      <header>
-        <h1 className="font-serif text-2xl text-ink">{t('nav.gallery')}</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          {lang === 'th'
-            ? 'ผลงานถ่ายภาพจากทริป Trip2Talk'
-            : 'Photography from Trip2Talk journeys'}
-        </p>
+      <header className="-mx-4 border-b border-line bg-card px-4 pb-2.5 pt-2">
+        <h1 className="mb-2.5 font-serif text-[17px] text-ink sm:text-2xl">
+          {t('nav.gallery')}
+          <span className="mt-px block font-thai text-[11px] font-medium text-ink-soft">
+            {lang === 'th' ? 'แกลเลอรีภาพ' : 'Photo gallery'}
+          </span>
+        </h1>
+        <div className="flex gap-[7px] overflow-x-auto pb-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setCat(tab.id)}
+              className={`shrink-0 rounded-full px-3 py-[7px] text-[10px] font-semibold leading-[1.4] ${
+                cat === tab.id
+                  ? 'border border-white/20 bg-gradient-to-b from-teal-500 to-teal-800 text-cream'
+                  : 'bg-mint-100 text-teal-700'
+              }`}
+            >
+              {lang === 'th' ? tab.th : tab.label}
+            </button>
+          ))}
+        </div>
       </header>
-
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            type="button"
-            onClick={() => setCat(tab.id)}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium ${
-              cat === tab.id
-                ? 'bg-teal-900 text-cream'
-                : 'border border-line bg-cream text-ink-soft'
-            }`}
-          >
-            {lang === 'th' ? tab.th : tab.label}
-          </button>
-        ))}
-      </div>
 
       {GALLERY_PHOTOS.length === 0 ? (
         <div className="mt-6 flex flex-col items-center rounded-2xl border border-dashed border-line bg-mint-100 px-6 py-12 text-center">
@@ -86,7 +85,7 @@ export default function GalleryPage() {
             <PhotoSlideshow slides={slides} />
           </section>
 
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="grid grid-cols-3 gap-[5px]">
             {items.map((photo, idx) => {
               const caption = lang === 'th' ? photo.caption_th : photo.caption_en
               const tall = idx % 7 === 0
