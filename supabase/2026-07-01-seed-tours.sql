@@ -5,7 +5,7 @@
 insert into public.tours (trip_code, name_en, name_th, destination, duration_label, trip_type, price_standard, price_private, max_pax, min_pax, current_pax, deposit_amount, next_date, status, season, aurora_trip)
 select * from (values
   ('MEL-4D3N', 'Victoria Photo Trip: Sydney to Melbourne', 'ทริปถ่ายภาพ 4 วัน 3 คืน: จากซิดนีย์สู่เมลเบิร์น', 'Melbourne', '4D3N', 'multiday', 1550::numeric, 2300::numeric, 5, 4, 0, 100::numeric, '2026-02-22'::date, 'CONFIRMED', array['all seasons'], false),
-  ('ULU-4D3N', 'Uluru-Kata Tjuta Photo Trip', 'ทริปถ่ายภาพ 4 วัน 3 คืน: ดินแดน Outback อุลูรู', 'Uluru', '4D3N', 'multiday', 1690::numeric, null, 5, 4, 0, 100::numeric, '2026-03-15'::date, 'CONFIRMED', array['all seasons'], true),
+  ('ULU-4D3N', 'Uluru–Kata Tjuta Outback Photo Trip (4 Days 3 Nights)', 'ทริปถ่ายภาพ 4 วัน 3 คืน: ดินแดน Outback อุลูรู', 'Uluru', '4D3N', 'multiday', 1690::numeric, null, 5, 4, 0, 100::numeric, '2026-09-20'::date, 'CONFIRMED', array['all seasons'], true),
   ('NZ-6D5N', 'New Zealand South Island Photo Road Trip', 'ทริปถ่ายภาพนิวซีแลนด์เกาะใต้ 6 วัน', 'New Zealand', '6D5N', 'multiday', 2300::numeric, null, 5, 4, 0, 100::numeric, '2026-04-12'::date, 'CONFIRMED', array['all seasons'], false),
   ('TAS-3D2N', 'Tasmania Mini Aurora Hunt (Hobart)', 'ทริปพร้อมช่างภาพ สัมผัสประวัติศาสตร์ ศิลปะ และตามล่าแสงใต้เมือง Hobart', 'Tasmania', '3D2N', 'overnight', 1350::numeric, 1600::numeric, 6, 4, 0, 100::numeric, '2026-03-16'::date, 'CONFIRMED', array['all seasons'], true),
   ('TAS-LH-4D3N', 'Tasmania Summer: Launceston - Hobart', 'ทริปพร้อมช่างภาพ สัมผัสประวัติศาสตร์ ศิลปะ และตามล่าแสงใต้', 'Tasmania', '4D3N', 'multiday', 1650::numeric, 1850::numeric, 6, 4, 0, 100::numeric, '2026-03-18'::date, 'CONFIRMED', array['summer'], true),

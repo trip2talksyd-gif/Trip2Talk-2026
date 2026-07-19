@@ -6,6 +6,8 @@ export type TripDetailContent = {
   highlights: BilingualList
   includes: BilingualList
   excludes: BilingualList
+  /** Optional stay policy shown on Trip Detail (e.g. dorm vs private upgrade). */
+  accommodationNote?: BilingualText
 }
 
 export const TRIP_DETAILS: Record<string, TripDetailContent> = {
@@ -61,20 +63,48 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
   },
   'ULU-4D3N': {
     tagline: {
-      en: 'Uluru odyssey, zero logistics stress — flights, lodge & park passes coordinated. You focus on the shots.',
-      th: 'ตะลุยอุลูรู ไม่ต้องยุ่งเรื่องจอง — ตั๋วเครื่องบิน ที่พัก และอุทยานเราประสานให้ คุณโฟกัสแค่ถ่ายภาพ',
+      en: 'Trade the crowded tour bus for your own red-desert photo studio — with Sean, a professional photographer, capturing your best profile shots yet.',
+      th: 'เบื่อไหมกับการเที่ยวแบบเดิมๆ? นี่คือทริปสำหรับสายลุยที่รักการถ่ายภาพอย่างแท้จริง พี่แสนพาคุณตะลุยหัวใจสีแดงของออสเตรเลีย เปลี่ยนทะเลทรายแดงให้เป็นสตูดิโอส่วนตัว',
     },
     highlights: {
-      en: ['Uluru sunrise & sunset', 'Field of Light installation', 'Kata Tjuta (The Olgas)'],
-      th: ['พระอาทิตย์ขึ้นและตกที่อุลูรู', 'Field of Light', 'Kata Tjuta (The Olgas)'],
+      en: [
+        'Uluru — Watch the giant monolith blaze from orange to fiery red at sunset, then witness one of the clearest Milky Way skies of your life once the desert night falls.',
+        "Field of Light — Bruce Munro's world-famous art installation — over 50,000 glowing glass spheres. Shoot the twilight glow and the pre-dawn field before sunrise.",
+        'Kata Tjuta (The Olgas) — 36 dramatic rock domes — landscape shots with real geological depth, plus a scenic walking trail.',
+      ],
+      th: [
+        'Uluru (หินอุลูรู) — ชมหินยักษ์เปลี่ยนสีจากส้มเป็นแดงเพลิงยามอาทิตย์อัสดง และสัมผัสความมืดสนิทที่มองเห็นทางช้างเผือกชัดเจนที่สุดในชีวิต',
+        'Field of Light — งานศิลปะระดับโลกโดย Bruce Munro หลอดไฟแก้วเปลี่ยนสีกว่า 50,000 ดวง เก็บภาพแสง twilight คู่กับทุ่งแสงไฟช่วงเช้ามืดก่อนพระอาทิตย์ขึ้น',
+        'Kata Tjuta (The Olgas) — กลุ่มโดมหินกว่า 36 ก้อน ถ่ายภาพแลนด์สเคปที่มีมิติเชิงธรณีวิทยา พร้อมเส้นทางเดินป่าสำรวจที่สวยงาม',
+      ],
     },
     includes: {
-      en: ['Vehicle & driver', 'Outback lodge accommodation (we coordinate booking)', 'Uluru-Kata Tjuta park pass', 'Field of Light ticket', 'Flight booking assistance'],
-      th: ['รถและคนขับ', 'ที่พัก Outback Lodge (เราช่วยจอง)', 'ตั๋วอุทยาน Uluru-Kata Tjuta', 'ตั๋ว Field of Light', 'ช่วยจองตั๋วเครื่องบิน'],
+      en: [
+        'Vehicle, driver & fuel for the whole trip',
+        '3 nights accommodation',
+        'Full 3-day Uluru-Kata Tjuta National Park entry',
+        'Field of Light entry ticket',
+        'Drinking water throughout',
+        'Professional photographer guiding angles & posing',
+        'Free flight booking assistance',
+      ],
+      th: [
+        'รถพร้อมคนขับและค่าน้ำมันตลอดทริป',
+        'ที่พัก 3 คืน',
+        'ค่าเข้าอุทยาน Uluru-Kata Tjuta 3 วันเต็ม',
+        'ตั๋วเข้าชม Field of Light',
+        'น้ำดื่มตลอดทาง',
+        'ช่างภาพมืออาชีพคอยดูแลมุมกล้องและโพสท่า',
+        'บริการฟรีช่วยจองตั๋วเครื่องบิน',
+      ],
     },
     excludes: {
-      en: ['Flights (we coordinate booking)', 'Meals', 'Travel insurance'],
-      th: ['ตั๋วเครื่องบิน (เราช่วยจอง)', 'ค่าอาหาร', 'ประกันการเดินทาง'],
+      en: ['Round-trip flights', 'All meals', 'Travel insurance'],
+      th: ['ตั๋วเครื่องบินไป-กลับ', 'ค่าอาหารทุกมื้อ', 'ประกันการเดินทาง'],
+    },
+    accommodationNote: {
+      en: 'Stay at the Outback Lodge — clean, safe, backpacker-style dorm rooms (shared). Want privacy? Upgrade to a private room for an extra $350–$550 AUD/night (please request before departure).',
+      th: 'พักที่ Outback Lodge สไตล์ Backpackers สะอาด ปลอดภัย ห้องพักรวม (Dormitory) หากต้องการความเป็นส่วนตัวสามารถอัปเกรดเป็นห้องเดี่ยว จ่ายเพิ่ม $350-$550 AUD ต่อคืน (กรุณาแจ้งก่อนออกเดินทาง)',
     },
   },
   'NZ-6D5N': {

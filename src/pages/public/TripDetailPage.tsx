@@ -69,6 +69,9 @@ export default function TripDetailPage() {
   const includes = details ? listFor(details.includes, lang) : []
   const excludes = details ? listFor(details.excludes, lang) : []
   const tagline = details ? textFor(details.tagline, lang) : ''
+  const accommodationNote = details?.accommodationNote
+    ? textFor(details.accommodationNote, lang)
+    : ''
   const durationLabel = tourDurationLabel(tour, lang)
   const itinerary = getItinerary(tour.trip_code, details?.highlights, durationLabel)
   const mapCfg = getTripMap(tour.trip_code)
@@ -184,6 +187,15 @@ export default function TripDetailPage() {
               </section>
             )}
           </div>
+
+          {accommodationNote && (
+            <section className="rounded-editorial border border-line bg-mint-100/80 p-4">
+              <h2 className="text-sm font-medium text-ink">
+                {lang === 'th' ? 'ที่พัก' : 'Accommodation'}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-ink/80">{accommodationNote}</p>
+            </section>
+          )}
 
           {itinerary && <TripTimeline itinerary={itinerary} nextDate={tour.departure_date} />}
 

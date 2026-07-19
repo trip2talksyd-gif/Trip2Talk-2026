@@ -369,53 +369,149 @@ export const TRIP_ITINERARIES: Record<string, TripItinerary> = {
     days: [
       {
         day: 1,
-        title: { en: 'Day 1 — Sydney to Uluru', th: 'วัน 1 — ซิดนีย์สู่อุลูรู' },
-        subtitle: { en: 'Jetstar flight & sunset at Uluru', th: 'บิน Jetstar & พระอาทิตย์ตกที่อุลูรู' },
+        title: { en: 'Day 1 — Sydney → Ayers Rock', th: 'วัน 1 — ซิดนีย์ → แอร์สร็อก' },
+        subtitle: { en: 'Sydney → Ayers Rock', th: 'ซิดนีย์ → แอร์สร็อก' },
         events: [
-          { time: '06:00', description: { en: 'Meet at Sydney Airport — Jetstar check-in', th: 'พบกันที่สนามบินซิดนีย์ — เช็คอิน Jetstar' } },
-          { time: '09:30', description: { en: 'Flight to Ayers Rock (Uluru) Airport', th: 'บินสู่สนามบิน Ayers Rock (Uluru)' } },
-          { time: '12:00', description: { en: 'Lunch & lodge check-in at Yulara', th: 'มื้อกลางวัน & เช็คอินที่ Yulara' } },
-          { time: '16:30', description: { en: 'Uluru sunset viewing & photography session', th: 'ชมและถ่ายภาพพระอาทิตย์ตกที่อุลูรู' } },
-          { time: '20:00', description: { en: 'Dinner & early rest for sunrise mission', th: 'มื้อเย็น & พักผ่อนเตรียมตื่นเช้า' } },
+          {
+            time: 'Morning',
+            category: 'flight',
+            description: {
+              en: 'Direct flight Sydney → Ayers Rock',
+              th: 'บินตรงจาก Sydney สู่ Ayers Rock',
+            },
+          },
+          {
+            time: 'Afternoon',
+            category: 'activity',
+            description: { en: 'Car rental pickup', th: 'รับรถ' },
+          },
+          {
+            time: 'Sunset',
+            category: 'activity',
+            description: {
+              en: 'Chase the sunset light at Uluru Sunset Area',
+              th: 'ล่าแสงเย็นที่ Uluru Sunset Area',
+            },
+          },
+          {
+            time: 'Night',
+            category: 'activity',
+            description: {
+              en: 'First night under the Milky Way in the desert',
+              th: 'คืนแรกกับทางช้างเผือกกลางทะเลทราย',
+            },
+          },
         ],
+        note: { en: 'Stay: Outback Lodge', th: 'พัก: Outback Lodge' },
       },
       {
         day: 2,
-        title: { en: 'Day 2 — Field of Light & Kata Tjuta', th: 'วัน 2 — Field of Light & Kata Tjuta' },
-        subtitle: { en: 'Iconic installations and the Olgas', th: 'งานศิลป์และ Kata Tjuta' },
-        events: [
-          { time: '05:15', description: { en: 'Field of Light viewing — pre-dawn entry', th: 'Field of Light — เข้าชมก่อนฟ้าสาง' } },
-          { time: '07:30', description: { en: 'Breakfast at lodge', th: 'อาหารเช้าที่ที่พัก' } },
-          { time: '10:00', description: { en: 'Kata Tjuta (The Olgas) valley walk', th: 'เดินชม Kata Tjuta (The Olgas)' } },
-          { time: '14:00', description: { en: 'Rest & edit session — lodge downtime', th: 'พักผ่อน & ตัดต่อภาพที่ที่พัก' } },
-          { time: '17:30', description: { en: 'Second Uluru sunset from alternate angle', th: 'พระอาทิตย์ตกอุลูรูมุมที่สอง' } },
-        ],
-        note: {
-          en: 'Pack thermal layers — desert nights drop below 0°C',
-          th: 'เตรียมเสื้อกันหนาว — กลางคืนทะเลทรายต่ำกว่า 0°C',
+        title: {
+          en: 'Day 2 — Field of Light & Kata Tjuta',
+          th: 'วัน 2 — Field of Light และ Kata Tjuta',
         },
+        subtitle: {
+          en: 'Field of Light & Kata Tjuta',
+          th: 'Field of Light และ Kata Tjuta',
+        },
+        events: [
+          {
+            time: '05:15',
+            category: 'activity',
+            description: {
+              en: 'Early wake-up for Field of Light',
+              th: 'ตื่นเช้ามืดลุย Field of Light',
+            },
+          },
+          {
+            time: 'Day',
+            category: 'activity',
+            description: {
+              en: 'Full-day Kata Tjuta trail exploration',
+              th: 'เดินป่าสำรวจ Kata Tjuta ทั้งวัน',
+            },
+          },
+          {
+            time: 'Sunset',
+            category: 'activity',
+            description: {
+              en: 'Kata Tjuta sunset (bring warm layers!)',
+              th: 'ชมพระอาทิตย์ตกที่ Kata Tjuta (เตรียมชุดกันหนาว)',
+            },
+          },
+        ],
+        note: { en: 'Stay: Outback Lodge', th: 'พัก: Outback Lodge' },
       },
       {
         day: 3,
-        title: { en: 'Day 3 — Uluru sunrise & cultural sites', th: 'วัน 3 — พระอาทิตย์ขึ้น & แหล่งวัฒนธรรม' },
-        subtitle: { en: 'Golden hour at the rock', th: 'Golden hour ที่โขดหินแดง' },
+        title: {
+          en: 'Day 3 — Uluru Sunrise & Base Walk',
+          th: 'วัน 3 — แสงแรกอุลูรู และ Base Walk',
+        },
+        subtitle: {
+          en: 'Uluru Sunrise & Base Walk',
+          th: 'แสงแรกอุลูรู และ Base Walk',
+        },
         events: [
-          { time: '05:30', description: { en: 'Uluru sunrise — main photography mission', th: 'พระอาทิตย์ขึ้นอุลูรู — ภารกิจถ่ายภาพหลัก' } },
-          { time: '08:00', description: { en: 'Breakfast & base walk viewing points', th: 'อาหารเช้า & จุดชมรอบฐานอุลูรู' } },
-          { time: '11:00', description: { en: 'Cultural centre visit (optional)', th: 'เยี่ยมชมศูนย์วัฒนธรรม (ทางเลือก)' } },
-          { time: '15:00', description: { en: 'Free time / photo review with mentor', th: 'เวลาว่าง / ทบทวนภาพกับ Mentor' } },
-          { time: '18:00', description: { en: 'Milky Way prep briefing (conditions permitting)', th: 'บรรยายเตรียมถ่ายทางช้างเผือก (ตามสภาพอากาศ)' } },
+          {
+            time: 'Sunrise',
+            category: 'activity',
+            description: { en: 'Sunrise light at Uluru', th: 'ชมแสงแรกที่ Uluru Sunrise' },
+          },
+          {
+            time: 'Day',
+            category: 'activity',
+            description: {
+              en: 'Uluru Base Walk — up close around the rock',
+              th: 'ลุย Base Walk รอบฐานหินอุลูรูแบบใกล้ชิด',
+            },
+          },
+          {
+            time: 'Night',
+            category: 'activity',
+            description: {
+              en: 'Full Milky Way night photography session',
+              th: 'ล่าทางช้างเผือกแบบจัดเต็มช่วงค่ำ',
+            },
+          },
         ],
+        note: { en: 'Stay: Outback Lodge', th: 'พัก: Outback Lodge' },
       },
       {
         day: 4,
-        title: { en: 'Day 4 — Final sunrise & departure', th: 'วัน 4 — พระอาทิตย์ขึ้นสุดท้าย & กลับ' },
-        subtitle: { en: 'Last shots before Jetstar return', th: 'ถ่ายภาพครั้งสุดท้ายก่อนบินกลับ' },
+        title: {
+          en: 'Day 4 — Kata Tjuta Dune & Departure',
+          th: 'วัน 4 — เนินทราย Kata Tjuta และเดินทางกลับ',
+        },
+        subtitle: {
+          en: 'Kata Tjuta Dune & Departure',
+          th: 'เนินทราย Kata Tjuta และเดินทางกลับ',
+        },
         events: [
-          { time: '05:45', description: { en: 'Final sunrise session — mentor picks best location', th: 'พระอาทิตย์ขึ้นครั้งสุดท้าย — Mentor เลือกจุดที่ดีที่สุด' } },
-          { time: '08:30', description: { en: 'Checkout & transfer to airport', th: 'เช็คเอาท์ & รถไปสนามบิน' } },
-          { time: '11:00', description: { en: 'Jetstar flight return to Sydney', th: 'บิน Jetstar กลับซิดนีย์' } },
-          { time: '15:00', description: { en: 'Arrive Sydney — trip concludes', th: 'ถึงซิดนีย์ — จบทริป' } },
+          {
+            time: 'Morning',
+            category: 'activity',
+            description: {
+              en: 'Morning light at Kata Tjuta Dune',
+              th: 'ชมแสงเช้าที่ Kata Tjuta Dune',
+            },
+          },
+          {
+            time: 'Midday',
+            category: 'activity',
+            description: {
+              en: 'Visit Camel Express camel farm',
+              th: 'แวะเยี่ยมชมปางอูฐ Camel Express',
+            },
+          },
+          {
+            time: 'Afternoon',
+            category: 'flight',
+            description: {
+              en: 'Transfer to airport, fly back to Sydney',
+              th: 'เดินทางสู่สนามบิน บินกลับ Sydney',
+            },
+          },
         ],
       },
     ],
