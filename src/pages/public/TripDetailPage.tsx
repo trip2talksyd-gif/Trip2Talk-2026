@@ -11,6 +11,7 @@ import { isPremiumTrip } from '../../data/tripTiers'
 import { AURORA_DISCLAIMER } from '../../data/risks'
 import { getTripMap, googleMapsEmbedUrl } from '../../data/tripMaps'
 import { GALLERY_PHOTOS, photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
+import { getTripCoverVideoUrl } from '../../data/tripVideos'
 import type { Tour } from '../../types/tour'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
@@ -87,6 +88,7 @@ export default function TripDetailPage() {
   const durationLabel = tourDurationLabel(tour, lang)
   const itinerary = getItinerary(tour.trip_code, details?.highlights, durationLabel)
   const mapCfg = getTripMap(tour.trip_code)
+  const coverVideoUrl = getTripCoverVideoUrl(tour.trip_code)
 
   return (
     <div className="space-y-6 pb-28 md:pb-4">
@@ -110,12 +112,24 @@ export default function TripDetailPage() {
       </div>
 
       <div className="relative overflow-hidden rounded-2xl">
-        <TripPhotoHero
-          tripCode={tour.trip_code}
-          alt={name}
-          className="aspect-[16/10] w-full transition-opacity duration-150"
-          overridePhoto={previewPhoto}
-        />
+        {coverVideoUrl && !previewPhoto ? (
+          <video
+            key={coverVideoUrl}
+            src={coverVideoUrl}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="aspect-[16/10] w-full object-cover"
+          />
+        ) : (
+          <TripPhotoHero
+            tripCode={tour.trip_code}
+            alt={name}
+            className="aspect-[16/10] w-full transition-opacity duration-150"
+            overridePhoto={previewPhoto}
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-teal-900/85 via-teal-900/20 to-transparent" />
         <div className="absolute bottom-0 p-4 sm:p-5">
           <p className="text-[10px] uppercase tracking-wider text-cream/65">{tour.trip_code}</p>
