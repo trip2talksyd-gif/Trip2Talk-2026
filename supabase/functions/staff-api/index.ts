@@ -52,6 +52,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   delete_tour: ['OWNER', 'MANAGER'],
   record_payment: ['OWNER', 'MANAGER', 'CASHIER'],
   list_payments_for_booking: ['OWNER', 'MANAGER', 'CASHIER'],
+  update_booking_details: ['OWNER', 'MANAGER', 'CASHIER'],
 }
 
 /**
@@ -513,6 +514,38 @@ Deno.serve(async (req) => {
             installment_plan: booking.payment_plan_installments ?? null,
           },
         })
+      }
+
+      case 'update_booking_details': {
+        // Fixes typos entered at booking time (name/phone/email) — does NOT
+        // touch payment amounts, status, or seat counts. Staff use this when
+        // a customer's name was misspelled so the tax invoice/receipt can be
+        // reissued correctly.
+        const { id, first_name_en, last_name_en, phone, email } = params as {
+          id: string
+          first_name_en?: string
+          last_name_en?: string
+          phone?: string
+          email?: string
+        }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+
+        const payload: Record<string, unknown> = {}
+        if (first_name_en !== undefined) payload.first_name_en = first_name_en.trim()
+        if (last_name_en !== undefined) payload.last_name_en = last_name_en.trim()
+        if (phone !== undefined) payload.phone = phone.trim()
+        if (email !== undefined) payload.email = email.trim()
+
+        if (Object.keys(payload).length === 0) return json({ error: 'invalid_params' }, 400)
+
+        const { data, error } = await admin
+          .from('tour_bookings')
+          .update(payload)
+          .eq('id', id)
+          .select()
+          .single()
+        if (error) throw error
+        return json({ data })
       }
 
       case 'list_payments_for_booking': {

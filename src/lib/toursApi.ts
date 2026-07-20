@@ -679,6 +679,15 @@ export async function fetchPaymentsForBooking(bookingId: string): Promise<Bookin
   return callStaffApi<BookingPayment[]>('list_payments_for_booking', { bookingId })
 }
 
+/** Fixes a typo'd name/phone/email on an existing booking. Does not touch
+ * payment amounts, status, or seat counts. Pass only the fields to change. */
+export async function updateBookingDetails(
+  id: string,
+  fields: { first_name_en?: string; last_name_en?: string; phone?: string; email?: string },
+): Promise<TourBooking> {
+  return callStaffApi<TourBooking>('update_booking_details', { id, ...fields })
+}
+
 export type YearSummary = {
   bookings: TourBooking[]
   expenses: Expense[]
