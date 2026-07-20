@@ -16,16 +16,27 @@ export type ReceiptData = {
   source?: string | null
 }
 
+// Tax invoice is an AU legal/customer-facing document — English + AUD only,
+// regardless of what language the internal staff tools use.
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
-  cash: 'เงินสด',
+  cash: 'Cash',
   payid: 'PayID',
-  bank_transfer: 'โอนธนาคาร',
-  manual: 'อื่นๆ',
+  bank_transfer: 'Bank Transfer',
+  manual: 'Other',
 }
 
 const STATUS_LABEL: Record<string, string> = {
-  deposit_paid: 'มัดจำแล้ว',
-  fully_paid: 'ชำระเต็มจำนวน',
+  deposit_paid: 'Deposit Paid',
+  fully_paid: 'Paid in Full',
+}
+
+const SOURCE_LABEL_EN: Record<string, string> = {
+  facebook: 'Facebook',
+  phone: 'Phone',
+  line: 'LINE',
+  walk_in: 'Walk-in',
+  website: 'Website',
+  other: 'Other',
 }
 
 // Seller details for the ATO-compliant tax invoice — issued under the
@@ -58,7 +69,6 @@ export default function ReceiptPage() {
   const navigate = useNavigate()
   const { toast } = useToast()
   const data = location.state as ReceiptData | null
-  const staffName = sessionStorage.getItem('staff_name') ?? 'Staff'
   const issuedAt = new Date()
   const cardRef = useRef<HTMLDivElement>(null)
   const [downloading, setDownloading] = useState(false)
@@ -153,13 +163,15 @@ export default function ReceiptPage() {
 
         <div className="mt-4 space-y-1.5 border-t border-dashed border-black/20 pt-4 text-sm">
           <Row label="Description" value={`${data.tripName} (${data.tripCode})`} />
-          {data.departureDate && <Row label="วันเดินทาง" value={data.departureDate} />}
-          <Row label="สถานะ" value={STATUS_LABEL[data.bookingStatus] ?? data.bookingStatus} />
+          {data.departureDate && <Row label="Travel Date" value={data.departureDate} />}
+          <Row label="Status" value={STATUS_LABEL[data.bookingStatus] ?? data.bookingStatus} />
           <Row
-            label="ช่องทางชำระเงิน"
+            label="Payment Method"
             value={data.paymentMethod ? PAYMENT_METHOD_LABEL[data.paymentMethod] ?? data.paymentMethod : '—'}
           />
-          {data.source && <Row label="ช่องทางติดต่อ" value={data.source} />}
+          {data.source && (
+            <Row label="Referred Via" value={SOURCE_LABEL_EN[data.source] ?? data.source} />
+          )}
         </div>
 
         <div className="mt-4 space-y-1.5 border-t border-dashed border-black/20 pt-4 text-sm">
@@ -172,8 +184,8 @@ export default function ReceiptPage() {
         </div>
 
         <div className="mt-5 border-t border-dashed border-black/20 pt-4 text-center text-xs text-black/60">
-          <p>ออกใบเสร็จโดย {staffName}</p>
-          <p className="mt-1">ขอบคุณที่ใช้บริการ Trip2Talk 🙏</p>
+          <p>Issued by Chapter99</p>
+          <p className="mt-1">Thank you for choosing Trip2Talk 🙏</p>
         </div>
       </div>
     </div>

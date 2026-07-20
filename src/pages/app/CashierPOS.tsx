@@ -14,15 +14,6 @@ import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import { useLang } from '../../hooks/useLang'
 
-const SOURCE_LABEL: Record<string, string> = {
-  facebook: 'Facebook',
-  phone: 'โทรศัพท์',
-  line: 'LINE',
-  walk_in: 'Walk-in',
-  website: 'เว็บไซต์',
-  other: 'อื่นๆ',
-}
-
 export default function CashierPOS() {
   const { t } = useLang()
   const { toast } = useToast()
@@ -107,7 +98,7 @@ export default function CashierPOS() {
             amountPaid: paidAmount,
             paymentMethod,
             bookingStatus,
-            source: SOURCE_LABEL[source] ?? source,
+            source,
           },
         })
       }
@@ -149,7 +140,7 @@ export default function CashierPOS() {
           amountPaid: amount,
           paymentMethod: booking.payment_method ?? 'manual',
           bookingStatus: status,
-          source: booking.source ? SOURCE_LABEL[booking.source] ?? booking.source : null,
+          source: booking.source ?? null,
         },
       })
     } catch (err) {
