@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { Tour } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
-import { isTourBookable } from '../../lib/toursApi'
+import { getUnbookableReason, isTourBookable } from '../../lib/toursApi'
 import FlipText from '../ui/FlipText'
 
 type Props = {
@@ -21,6 +21,17 @@ export default function TripBookButton({
   const bookable = isTourBookable(tour)
 
   if (!bookable) {
+    const reason = getUnbookableReason(tour)
+    if (reason === 'full' && !detailOnly) {
+      return (
+        <Link
+          to={`/waitlist?trip=${tour.trip_code}`}
+          className={`block w-full rounded-[13px] border border-coral/50 bg-coral/10 py-3 text-center text-[12.5px] font-bold text-coral ${className}`}
+        >
+          {lang === 'th' ? 'เต็มแล้ว — ลงชื่อ Waitlist' : 'Full — Join Waitlist'}
+        </Link>
+      )
+    }
     return (
       <span
         className={`block w-full rounded-[13px] bg-mint-100 py-3 text-center text-[12.5px] font-bold text-ink-soft ${className}`}

@@ -11,6 +11,7 @@ import PricingPage from './pages/public/PricingPage'
 import AboutPage from './pages/public/AboutPage'
 import WaiverPage from './pages/public/WaiverPage'
 import BookingPage from './pages/public/BookingPage'
+import WaitlistPage from './pages/public/WaitlistPage'
 import FavoritesPage from './pages/public/FavoritesPage'
 import MyTripPage from './pages/public/MyTripPage'
 import AccountPage from './pages/public/AccountPage'
@@ -32,6 +33,7 @@ import PinGatePage from './pages/app/PinGatePage'
 import StaffDashboard from './pages/app/StaffDashboard'
 import CashierPOS from './pages/app/CashierPOS'
 import OwnerDashboard from './pages/app/OwnerDashboard'
+import TripManagerPage from './pages/app/TripManagerPage'
 import ExpenseEntryPage from './pages/app/ExpenseEntryPage'
 import SystemCheckPage from './pages/app/SystemCheckPage'
 import RequireStaffRole from './components/app/RequireStaffRole'
@@ -52,6 +54,7 @@ export default function App() {
           <Route path="about" element={<AboutPage />} />
           <Route path="waiver" element={<WaiverPage />} />
           <Route path="booking" element={<BookingPage />} />
+          <Route path="waitlist" element={<WaitlistPage />} />
           <Route path="favorites" element={<FavoritesPage />} />
           <Route path="my-trip" element={<MyTripPage />} />
           <Route path="account" element={<AccountPage />} />
@@ -91,6 +94,14 @@ export default function App() {
           element={
             <RequireStaffRole allow={['OWNER']}>
               <OwnerDashboard />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/trips"
+          element={
+            <RequireStaffRole allow={['OWNER', 'MANAGER']}>
+              <TripManagerPage />
             </RequireStaffRole>
           }
         />

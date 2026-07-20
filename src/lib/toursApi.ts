@@ -10,6 +10,7 @@ import type {
   TourBooking,
   WaiverSignature,
   WaiverSignatureInsertReadback,
+  WaitlistEntry,
 } from '../types/tour'
 
 /** Featured trip codes pinned to the top of home + /trips (in this order). */
@@ -509,6 +510,110 @@ export async function fetchBookingsThisMonth(): Promise<TourBooking[]> {
 
 export async function fetchComplianceItems(): Promise<ComplianceItem[]> {
   return callStaffApi<ComplianceItem[]>('compliance_items')
+}
+
+// ---------------------------------------------------------------------------
+// Trip Manager (staff): schedule new dated departures from an existing trip.
+// ---------------------------------------------------------------------------
+
+/** All tours regardless of status (draft included) — staff-only, for the Trip Manager. */
+export async function fetchToursAdmin(): Promise<Tour[]> {
+  const rows = await callStaffApi<TourRow[]>('list_tours_admin')
+  return sortByDepartureDate(normalizeTours(rows))
+}
+
+export type NewTripDateInput = {
+  templateTripCode: string
+  trip_code: string
+  name_en?: string
+  name_th?: string
+  departure_date: string
+  price_aud?: number
+  deposit_aud?: number
+  max_seats?: number
+  status?: string
+}
+
+export async function createTour(input: NewTripDateInput): Promise<Tour> {
+  const row = await callStaffApi<TourRow>('create_tour', input)
+  return normalizeTour(row)
+}
+
+export async function createToursBulk(
+  templateTripCode: string,
+  entries: Omit<NewTripDateInput, 'templateTripCode'>[],
+): Promise<{ data: Tour[]; skipped: string[] }> {
+  const result = await callStaffApi<{ data: TourRow[]; skipped: string[] }>('create_tours_bulk', {
+    templateTripCode,
+    entries,
+  })
+  return { data: normalizeTours(result.data), skipped: result.skipped ?? [] }
+}
+
+const MONTH_ABBRS = [
+  'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+]
+
+/**
+ * Derives a new trip_code for a cloned departure date. If the template's code
+ * already ends in a month abbreviation (e.g. "TAS-LH-4D3N-JUL"), swaps it for
+ * the new date's month; otherwise appends one. Keeps codes readable and avoids
+ * relying on the person to invent a unique suffix by hand.
+ */
+export function deriveTripCodeForDate(baseTripCode: string, isoDate: string): string {
+  const d = new Date(isoDate)
+  const abbr = MONTH_ABBRS[d.getMonth()] ?? 'TBA'
+  const parts = baseTripCode.split('-')
+  const last = parts[parts.length - 1]?.toUpperCase()
+  if (last && MONTH_ABBRS.includes(last)) {
+    parts[parts.length - 1] = abbr
+  } else {
+    parts.push(abbr)
+  }
+  return parts.join('-')
+}
+
+/** Adds `months` calendar months to an ISO date string, returning ISO (yyyy-mm-dd). */
+export function addMonthsIso(isoDate: string, months: number): string {
+  const d = new Date(isoDate)
+  d.setMonth(d.getMonth() + months)
+  return d.toISOString().slice(0, 10)
+}
+
+export type UnbookableReason = 'draft' | 'no_date' | 'cancelled' | 'completed' | 'full' | null
+
+/** Why a tour can't be booked right now — lets the UI offer a waitlist specifically when full. */
+export function getUnbookableReason(tour: Tour): UnbookableReason {
+  const status = (tour.status ?? '').toLowerCase()
+  if (status === 'cancelled') return 'cancelled'
+  if (status === 'completed') return 'completed'
+  if (status !== 'confirmed' && status !== 'published' && status !== 'active') return 'draft'
+  if (!tour.departure_date) return 'no_date'
+  if (tour.max_seats <= 0 || tour.booked_seats >= tour.max_seats) return 'full'
+  return null
+}
+
+// ---------------------------------------------------------------------------
+// Waitlist
+// ---------------------------------------------------------------------------
+
+export async function insertWaitlistEntry(
+  entry: Omit<WaitlistEntry, 'id' | 'created_at' | 'contacted'>,
+): Promise<void> {
+  const { error } = await supabase.from('waitlist_entries').insert(entry)
+  if (error) {
+    logSupabaseError('insertWaitlistEntry', error)
+    throw error
+  }
+}
+
+/** Staff-only — every waitlist entry across all trips. */
+export async function fetchWaitlist(): Promise<WaitlistEntry[]> {
+  return callStaffApi<WaitlistEntry[]>('list_waitlist')
+}
+
+export async function markWaitlistContacted(id: string, contacted = true): Promise<void> {
+  await callStaffApi('mark_waitlist_contacted', { id, contacted })
 }
 
 export async function insertExpense(expense: Omit<Expense, 'id' | 'created_at'>): Promise<Expense> {

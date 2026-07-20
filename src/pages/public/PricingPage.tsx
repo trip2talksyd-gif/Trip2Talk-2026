@@ -7,10 +7,10 @@ import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
 const TIERS = [
   {
     id: 'day',
-    popular: false,
+    popular: true,
     titleEn: 'Day Trip',
     titleTh: 'ทริปวันเดียว',
-    priceAud: 150,
+    priceAud: 260,
     descEn: 'A few hours, one professional photographer, minimal logistics.',
     descTh: 'ไม่กี่ชั่วโมง ช่างภาพมืออาชีพหนึ่งคน โลจิสติกส์น้อย',
     checksEn: [
@@ -25,7 +25,7 @@ const TIERS = [
   },
   {
     id: 'multi',
-    popular: true,
+    popular: false,
     titleEn: 'Multi-day Adventure',
     titleTh: 'ทริปหลายวัน',
     priceAud: 990,

@@ -54,14 +54,24 @@ export default function CalendarPage() {
     load()
   }, [load])
 
+  // Departure dates that have already passed shouldn't clutter the calendar —
+  // trips with no date yet (TBA) still show since they haven't happened.
+  const upcomingTours = useMemo(() => {
+    const today = new Date(new Date().toDateString())
+    return tours.filter((tour) => {
+      if (!tour.departure_date) return true
+      return new Date(tour.departure_date) >= today
+    })
+  }, [tours])
+
   const months = useMemo(() => {
     const keys = new Set<string>()
-    for (const tour of tours) {
+    for (const tour of upcomingTours) {
       const k = monthKey(tour.departure_date)
       if (k) keys.add(k)
     }
     return [...keys].sort()
-  }, [tours])
+  }, [upcomingTours])
 
   useEffect(() => {
     if (months.length > 0 && activeMonth === 'all') {
@@ -70,9 +80,9 @@ export default function CalendarPage() {
   }, [months, activeMonth])
 
   const filtered = useMemo(() => {
-    if (activeMonth === 'all') return tours
-    return tours.filter((tour) => monthKey(tour.departure_date) === activeMonth)
-  }, [tours, activeMonth])
+    if (activeMonth === 'all') return upcomingTours
+    return upcomingTours.filter((tour) => monthKey(tour.departure_date) === activeMonth)
+  }, [upcomingTours, activeMonth])
 
   return (
     <div className="space-y-4 pb-4">
@@ -179,7 +189,7 @@ export default function CalendarPage() {
           </ul>
 
           <TripFilmstrip
-            tours={tours}
+            tours={upcomingTours}
             labelEn="More destinations"
             labelTh="ทริปอื่นๆ ที่น่าสนใจ"
             className="mt-4"

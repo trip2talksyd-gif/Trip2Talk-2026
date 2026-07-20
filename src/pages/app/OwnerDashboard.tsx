@@ -128,12 +128,20 @@ export default function OwnerDashboard() {
               ))}
             </div>
 
-            <Link
-              to="/app/expenses/new"
-              className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-            >
-              + Add expense
-            </Link>
+            <div className="grid grid-cols-2 gap-3">
+              <Link
+                to="/app/trips"
+                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+              >
+                + ลงทริปใหม่
+              </Link>
+              <Link
+                to="/app/expenses/new"
+                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+              >
+                + Add expense
+              </Link>
+            </div>
 
             {urgentItems.length === 0 && (
               <section>

@@ -41,6 +41,66 @@ const ACTION_ROLES: Record<string, Role[]> = {
   insert_expense: ['OWNER', 'MANAGER'],
   insurance_alerts: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   compliance_items: ['OWNER', 'MANAGER'],
+  list_tours_admin: ['OWNER', 'MANAGER'],
+  create_tour: ['OWNER', 'MANAGER'],
+  create_tours_bulk: ['OWNER', 'MANAGER'],
+  list_waitlist: ['OWNER', 'MANAGER'],
+  mark_waitlist_contacted: ['OWNER', 'MANAGER'],
+}
+
+/**
+ * Clones an existing tour row (whatever columns it actually has — production's
+ * `tours` table has accumulated both legacy V5 names — next_date, price_standard,
+ * max_pax, current_pax, deposit_amount — and newer ones — departure_date,
+ * price_aud, max_seats, booked_seats — over time, so we don't assume a fixed
+ * schema shape) and applies overrides, writing to BOTH naming conventions for
+ * any field the template row actually has, so the new row displays correctly
+ * regardless of which columns the live table uses.
+ */
+function buildTourInsert(
+  template: Record<string, unknown>,
+  overrides: {
+    trip_code: string
+    name_en?: string
+    name_th?: string
+    departure_date: string
+    price_aud?: number
+    deposit_aud?: number
+    max_seats?: number
+    status?: string
+  },
+): Record<string, unknown> {
+  const row: Record<string, unknown> = { ...template }
+  delete row.id
+  delete row.created_at
+  delete row.updated_at
+
+  row.trip_code = overrides.trip_code
+  if (overrides.name_en) row.name_en = overrides.name_en
+  if (overrides.name_th) row.name_th = overrides.name_th
+  if (overrides.status) row.status = overrides.status
+
+  // Reset seat count for the new date regardless of naming.
+  if ('booked_seats' in row) row.booked_seats = 0
+  if ('current_pax' in row) row.current_pax = 0
+
+  if ('departure_date' in row || !('next_date' in template)) row.departure_date = overrides.departure_date
+  if ('next_date' in row) row.next_date = overrides.departure_date
+
+  if (overrides.price_aud !== undefined) {
+    if ('price_aud' in row || !('price_standard' in template)) row.price_aud = overrides.price_aud
+    if ('price_standard' in row) row.price_standard = overrides.price_aud
+  }
+  if (overrides.deposit_aud !== undefined) {
+    if ('deposit_aud' in row || !('deposit_amount' in template)) row.deposit_aud = overrides.deposit_aud
+    if ('deposit_amount' in row) row.deposit_amount = overrides.deposit_aud
+  }
+  if (overrides.max_seats !== undefined) {
+    if ('max_seats' in row || !('max_pax' in template)) row.max_seats = overrides.max_seats
+    if ('max_pax' in row) row.max_pax = overrides.max_seats
+  }
+
+  return row
 }
 
 Deno.serve(async (req) => {
@@ -163,6 +223,133 @@ Deno.serve(async (req) => {
           .order('due_date', { ascending: true })
         if (error) throw error
         return json({ data })
+      }
+
+      case 'list_tours_admin': {
+        const { data, error } = await admin.from('tours').select('*')
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'create_tour': {
+        const { templateTripCode, trip_code, name_en, name_th, departure_date, price_aud, deposit_aud, max_seats, status } =
+          params as {
+            templateTripCode?: string
+            trip_code: string
+            name_en?: string
+            name_th?: string
+            departure_date: string
+            price_aud?: number
+            deposit_aud?: number
+            max_seats?: number
+            status?: string
+          }
+        if (!trip_code || !departure_date) return json({ error: 'invalid_params' }, 400)
+
+        const { data: existing } = await admin
+          .from('tours')
+          .select('id')
+          .eq('trip_code', trip_code)
+          .maybeSingle()
+        if (existing) return json({ error: 'duplicate_trip_code' }, 409)
+
+        let template: Record<string, unknown> | null = null
+        if (templateTripCode) {
+          const { data: templateRow, error: templateError } = await admin
+            .from('tours')
+            .select('*')
+            .eq('trip_code', templateTripCode)
+            .maybeSingle()
+          if (templateError) throw templateError
+          template = templateRow
+        }
+        if (!template) return json({ error: 'template_not_found' }, 404)
+
+        const insertRow = buildTourInsert(template, {
+          trip_code,
+          name_en,
+          name_th,
+          departure_date,
+          price_aud,
+          deposit_aud,
+          max_seats,
+          status,
+        })
+
+        const { data, error } = await admin.from('tours').insert(insertRow).select().single()
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'create_tours_bulk': {
+        const { templateTripCode, entries } = params as {
+          templateTripCode?: string
+          entries: {
+            trip_code: string
+            name_en?: string
+            name_th?: string
+            departure_date: string
+            price_aud?: number
+            deposit_aud?: number
+            max_seats?: number
+            status?: string
+          }[]
+        }
+        if (!templateTripCode || !Array.isArray(entries) || entries.length === 0) {
+          return json({ error: 'invalid_params' }, 400)
+        }
+
+        const { data: templateRow, error: templateError } = await admin
+          .from('tours')
+          .select('*')
+          .eq('trip_code', templateTripCode)
+          .maybeSingle()
+        if (templateError) throw templateError
+        if (!templateRow) return json({ error: 'template_not_found' }, 404)
+
+        const { data: existingRows, error: existingError } = await admin
+          .from('tours')
+          .select('trip_code')
+          .in(
+            'trip_code',
+            entries.map((e) => e.trip_code),
+          )
+        if (existingError) throw existingError
+        const existingCodes = new Set((existingRows ?? []).map((r) => r.trip_code as string))
+
+        const toInsert = entries
+          .filter((e) => !existingCodes.has(e.trip_code))
+          .map((e) => buildTourInsert(templateRow, e))
+
+        const skipped = entries.filter((e) => existingCodes.has(e.trip_code)).map((e) => e.trip_code)
+
+        if (toInsert.length === 0) {
+          return json({ data: [], skipped })
+        }
+
+        const { data, error } = await admin.from('tours').insert(toInsert).select()
+        if (error) throw error
+        return json({ data, skipped })
+      }
+
+      case 'list_waitlist': {
+        const { data, error } = await admin
+          .from('waitlist_entries')
+          .select('*')
+          .order('created_at', { ascending: false })
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'mark_waitlist_contacted': {
+        const { id, contacted } = params as { id: string; contacted: boolean }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+        const { error } = await admin
+          .from('waitlist_entries')
+          .update({ contacted: contacted !== false })
+          .eq('id', id)
+        if (error) throw error
+        return json({ ok: true })
       }
 
       default:

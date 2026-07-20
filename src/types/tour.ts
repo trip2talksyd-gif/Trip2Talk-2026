@@ -111,3 +111,15 @@ export interface WaiverSignatureInsertReadback {
   trip_code: string
   signed_at: string
 }
+
+export interface WaitlistEntry {
+  id: string
+  tour_id: string | null
+  trip_code: string
+  name: string
+  phone: string
+  email: string | null
+  note: string | null
+  contacted: boolean
+  created_at: string
+}
