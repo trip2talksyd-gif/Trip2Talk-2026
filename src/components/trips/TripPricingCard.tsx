@@ -1,8 +1,8 @@
 import { Camera, Car, Check, MapPin, Plane, BedDouble } from 'lucide-react'
 import type { Tour } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
-import { isSydneyTrip, tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
-import { formatAud, formatDate, seatsRemaining } from '../../lib/toursApi'
+import { isOneDayTrip, tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
+import { formatAud, formatDate, getUnbookableReason, seatsRemaining } from '../../lib/toursApi'
 import { isPremiumTrip } from '../../data/tripTiers'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 import TripBookButton from './TripBookButton'
@@ -14,7 +14,7 @@ type Props = {
 
 const AVATAR_COLORS = ['bg-teal-600', 'bg-teal-700', 'bg-coral', 'bg-teal-800']
 
-const SYDNEY_FEATURE_ICONS = [
+const ONE_DAY_FEATURE_ICONS = [
   { icon: Car, en: 'Route pickup', th: 'รถรับ–ส่งตามเส้นทาง' },
   { icon: MapPin, en: 'Thai Town / Starbucks', th: 'นัดพบ Thai Town / Starbucks' },
   { icon: Camera, en: 'Photographer', th: 'ช่างภาพ' },
@@ -29,10 +29,38 @@ const TRAVEL_FEATURE_ICONS = [
 export default function TripPricingCard({ tour, includes }: Props) {
   const { lang } = useLang()
   const seats = seatsRemaining(tour)
-  const sydney = isSydneyTrip(tour.trip_code)
+  const oneDay = isOneDayTrip(tour.trip_code)
   const booked = Math.min(tour.booked_seats, 4)
   const more = Math.max(0, tour.booked_seats - 4)
-  const icons = sydney ? SYDNEY_FEATURE_ICONS : TRAVEL_FEATURE_ICONS
+  const icons = oneDay ? ONE_DAY_FEATURE_ICONS : TRAVEL_FEATURE_ICONS
+  const cancelled = getUnbookableReason(tour) === 'cancelled'
+
+  if (cancelled) {
+    return (
+      <aside className="rounded-2xl border border-line bg-cream p-5 shadow-[0_12px_40px_rgba(22,38,43,0.1)] lg:sticky lg:top-24">
+        <p className="text-[12.5px] text-ink-soft">
+          {tourDurationLabel(tour, lang)}
+          <span className="ml-1 font-thai text-[#8aa39a]">
+            {lang === 'th' ? '' : ` · ${tourDurationLabel(tour, 'th')}`}
+          </span>
+        </p>
+        <p className="mt-1 text-[12.5px] font-bold text-ink">
+          {tourDestination(tour.trip_code)} · {tour.trip_code}
+        </p>
+        <div className="mt-4 rounded-xl border border-ink-soft/20 bg-ink-soft/5 p-3.5 text-center">
+          <p className="text-sm font-bold text-ink-soft">
+            {lang === 'th' ? 'ทริปนี้งดจัดแล้ว' : 'This trip has been cancelled'}
+          </p>
+          <p className="mt-1 text-[11px] leading-relaxed text-ink-soft">
+            {lang === 'th'
+              ? 'ขออภัยในความไม่สะดวก หากจองไว้แล้วทีมงานจะติดต่อกลับเรื่องการคืนเงิน/ย้ายทริป'
+              : 'Sorry for the inconvenience — if you had already booked, our team will reach out about a refund or transfer.'}
+          </p>
+        </div>
+        <TripBookButton tour={tour} variant="deep" className="mt-3" />
+      </aside>
+    )
+  }
 
   return (
     <aside className="rounded-2xl border border-line bg-cream p-5 shadow-[0_12px_40px_rgba(22,38,43,0.1)] lg:sticky lg:top-24">
@@ -88,12 +116,12 @@ export default function TripPricingCard({ tour, includes }: Props) {
           </p>
           <p>
             📍{' '}
-            {sydney
+            {oneDay
               ? lang === 'th'
                 ? 'Thai Town / Starbucks · รับ–ส่งตามเส้นทางทริป'
                 : 'Thai Town / Starbucks · pickup along the route'
               : tourDestination(tour.trip_code)}
-            {!sydney && (
+            {!oneDay && (
               <span className="font-thai">
                 {lang === 'en' ? ' · pickup details after deposit' : ' · จุดรับหลังมัดจำ'}
               </span>
@@ -103,9 +131,11 @@ export default function TripPricingCard({ tour, includes }: Props) {
         <div className="mt-3 flex items-center justify-between gap-2">
           <span className="text-[11px] font-semibold text-teal-700">
             {seats} {lang === 'th' ? 'ที่นั่งว่าง' : 'seats left'}
-            {sydney && (
+            {oneDay && (
               <span className="mt-0.5 block text-[9px] font-medium text-ink-soft">
-                {lang === 'th' ? 'สูงสุด 4 คน / ทริป' : 'Max 4 guests / trip'}
+                {lang === 'th'
+                  ? `สูงสุด ${tour.max_seats} คน / ทริป`
+                  : `Max ${tour.max_seats} guests / trip`}
               </span>
             )}
           </span>
@@ -125,12 +155,12 @@ export default function TripPricingCard({ tour, includes }: Props) {
             )}
           </div>
         </div>
-        {sydney && (
+        {oneDay && (
           <p className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold text-teal-800">
             <Car className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} />
             {lang === 'th'
-              ? 'Tesla Model Y · base ซิดนีย์ · ไม่รวมบิน/ที่พัก'
-              : 'Tesla Model Y · Sydney-based · no flights or stay'}
+              ? 'Tesla Model Y · รับจาก Thai Town · ไม่รวมบิน/ที่พัก'
+              : 'Tesla Model Y · pickup from Thai Town · no flights or stay'}
           </p>
         )}
       </div>

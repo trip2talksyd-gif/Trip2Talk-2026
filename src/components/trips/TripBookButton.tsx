@@ -32,6 +32,16 @@ export default function TripBookButton({
         </Link>
       )
     }
+    if (reason === 'cancelled') {
+      return (
+        <span
+          className={`block w-full rounded-[13px] border border-ink-soft/25 bg-ink-soft/10 py-3 text-center text-[12.5px] font-bold text-ink-soft ${className}`}
+          aria-disabled
+        >
+          {t('btn.tripCancelled')}
+        </span>
+      )
+    }
     return (
       <span
         className={`block w-full rounded-[13px] bg-mint-100 py-3 text-center text-[12.5px] font-bold text-ink-soft ${className}`}

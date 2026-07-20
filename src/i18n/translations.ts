@@ -18,6 +18,7 @@ export type TranslationKey =
   | 'btn.bookNow'
   | 'btn.viewTrip'
   | 'btn.comingSoon'
+  | 'btn.tripCancelled'
   | 'btn.submit'
   | 'btn.copy'
   | 'btn.copied'
@@ -266,6 +267,7 @@ const en: Map = {
   'btn.bookNow': 'Book Now',
   'btn.viewTrip': 'View Trip',
   'btn.comingSoon': 'Coming soon',
+  'btn.tripCancelled': 'This trip has been cancelled',
   'btn.submit': 'Submit Booking',
   'btn.copy': 'Copy',
   'btn.copied': 'Copied!',
@@ -525,6 +527,7 @@ const th: Map = {
   'btn.bookNow': 'จองเลย',
   'btn.viewTrip': 'ดูทริป',
   'btn.comingSoon': 'เร็วๆ นี้',
+  'btn.tripCancelled': 'ทริปนี้งดจัดแล้ว',
   'btn.submit': 'ส่งการจอง',
   'btn.copy': 'คัดลอก',
   'btn.copied': 'คัดลอกแล้ว!',
