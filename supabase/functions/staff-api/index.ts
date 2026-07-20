@@ -46,6 +46,9 @@ const ACTION_ROLES: Record<string, Role[]> = {
   create_tours_bulk: ['OWNER', 'MANAGER'],
   list_waitlist: ['OWNER', 'MANAGER'],
   mark_waitlist_contacted: ['OWNER', 'MANAGER'],
+  create_booking_manual: ['OWNER', 'MANAGER', 'CASHIER'],
+  mark_attendance: ['OWNER', 'MANAGER', 'GUIDE'],
+  year_summary: ['OWNER', 'MANAGER'],
 }
 
 /**
@@ -350,6 +353,103 @@ Deno.serve(async (req) => {
           .eq('id', id)
         if (error) throw error
         return json({ ok: true })
+      }
+
+      case 'create_booking_manual': {
+        const b = params as Record<string, unknown>
+        const tripCode = b.trip_code as string | undefined
+        if (!tripCode) return json({ error: 'invalid_params' }, 400)
+
+        const { data: tour, error: tourError } = await admin
+          .from('tours')
+          .select('*')
+          .eq('trip_code', tripCode)
+          .maybeSingle()
+        if (tourError) throw tourError
+        if (!tour) return json({ error: 'tour_not_found' }, 404)
+
+        // Same seat-hold RPC the public booking flow uses, so staff-entered
+        // bookings (phone/Facebook customers) can't oversell a trip either.
+        const { data: rpcResult, error: rpcError } = await admin.rpc('book_seat', {
+          p_tour_id: tour.id,
+          p_seats_requested: 1,
+        })
+        const rpcOk =
+          rpcResult === true ||
+          (rpcResult && typeof rpcResult === 'object' && (rpcResult as { success?: unknown }).success === true)
+        if (rpcError || !rpcOk) {
+          return json({ error: 'seats_full' }, 409)
+        }
+
+        const bookingRef = `T2T-STAFF-${tripCode}-${Date.now().toString(36).toUpperCase()}`
+
+        const { data, error } = await admin
+          .from('tour_bookings')
+          .insert({
+            tour_id: tour.id,
+            trip_code: tripCode,
+            first_name_th: '',
+            last_name_th: '',
+            first_name_en: b.first_name_en ?? '',
+            last_name_en: b.last_name_en ?? '',
+            passport_number: b.passport_number || 'PENDING',
+            date_of_birth: b.date_of_birth ?? null,
+            email: b.email ?? '',
+            phone: b.phone ?? '',
+            emergency_contact_name: b.emergency_contact_name ?? null,
+            emergency_contact_phone: b.emergency_contact_phone ?? null,
+            dietary_requirements: b.dietary_requirements ?? null,
+            medical_conditions: b.medical_conditions ?? null,
+            oshc_provider: null,
+            oshc_expiry: null,
+            waiver_signed: false,
+            waiver_signed_at: null,
+            booking_status: b.booking_status ?? 'pending_payment',
+            amount_paid_aud: b.amount_paid_aud ?? 0,
+            payment_method: b.payment_method ?? 'manual',
+            slip_url: null,
+            booking_reference: bookingRef,
+          })
+          .select()
+          .single()
+
+        if (error) {
+          await admin.rpc('release_seat', { p_tour_id: tour.id, p_seats_to_release: 1 })
+          throw error
+        }
+        return json({ data })
+      }
+
+      case 'mark_attendance': {
+        const { id, attended } = params as { id: string; attended: boolean | null }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+        const { error } = await admin.from('tour_bookings').update({ attended }).eq('id', id)
+        if (error) throw error
+        return json({ ok: true })
+      }
+
+      case 'year_summary': {
+        const { year } = params as { year: number }
+        const y = Number(year) || new Date().getFullYear()
+        const start = `${y}-01-01T00:00:00.000Z`
+        const end = `${y + 1}-01-01T00:00:00.000Z`
+
+        const [bookingsRes, expensesRes] = await Promise.all([
+          admin
+            .from('tour_bookings')
+            .select('*')
+            .gte('booked_at', start)
+            .lt('booked_at', end),
+          admin
+            .from('expenses')
+            .select('*')
+            .gte('expense_date', `${y}-01-01`)
+            .lt('expense_date', `${y + 1}-01-01`),
+        ])
+        if (bookingsRes.error) throw bookingsRes.error
+        if (expensesRes.error) throw expensesRes.error
+
+        return json({ data: { bookings: bookingsRes.data, expenses: expensesRes.data } })
       }
 
       default:

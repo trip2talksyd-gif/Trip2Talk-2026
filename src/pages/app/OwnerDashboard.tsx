@@ -143,6 +143,13 @@ export default function OwnerDashboard() {
               </Link>
             </div>
 
+            <Link
+              to="/app/tax-summary"
+              className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+            >
+              📊 Tax Summary (รายทริป + Export)
+            </Link>
+
             {urgentItems.length === 0 && (
               <section>
                 <h2 className="text-sm font-medium text-cream-muted">Compliance alerts (30 days)</h2>

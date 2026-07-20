@@ -1,8 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { fetchPendingBookings, fetchTourByCode, updateBookingStatus } from '../../lib/toursApi'
+import {
+  createBookingManual,
+  fetchPendingBookings,
+  fetchToursAdmin,
+  fetchTourByCode,
+  updateBookingStatus,
+} from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
-import type { TourBooking } from '../../types/tour'
+import type { Tour, TourBooking } from '../../types/tour'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
@@ -13,14 +19,28 @@ export default function CashierPOS() {
   const { toast } = useToast()
   const navigate = useNavigate()
   const [bookings, setBookings] = useState<TourBooking[]>([])
+  const [tours, setTours] = useState<Tour[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+
+  const [formOpen, setFormOpen] = useState(false)
+  const [tripCode, setTripCode] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [email, setEmail] = useState('')
+  const [amountPaid, setAmountPaid] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [submitting, setSubmitting] = useState(false)
 
   const load = useCallback(() => {
     setLoading(true)
     setError('')
-    fetchPendingBookings()
-      .then(setBookings)
+    Promise.all([fetchPendingBookings(), fetchToursAdmin()])
+      .then(([b, tourList]) => {
+        setBookings(b)
+        setTours(tourList.filter((x) => x.status.toLowerCase() !== 'cancelled'))
+      })
       .catch((err) => {
         if (err instanceof StaffSessionExpiredError) {
           navigate('/app')
@@ -34,6 +54,49 @@ export default function CashierPOS() {
   useEffect(() => {
     load()
   }, [load])
+
+  const isValid = tripCode && firstName.trim() && lastName.trim() && (phone.trim() || email.trim())
+
+  async function handleCreateBooking(e: React.FormEvent) {
+    e.preventDefault()
+    if (!isValid) return
+    setSubmitting(true)
+    try {
+      await createBookingManual({
+        trip_code: tripCode,
+        first_name_en: firstName.trim(),
+        last_name_en: lastName.trim(),
+        phone: phone.trim(),
+        email: email.trim(),
+        amount_paid_aud: amountPaid ? Number(amountPaid) : 0,
+        payment_method: paymentMethod,
+        booking_status: amountPaid ? 'deposit_paid' : 'pending_payment',
+      })
+      toast('เพิ่มการจองสำเร็จ', 'success')
+      setFormOpen(false)
+      setTripCode('')
+      setFirstName('')
+      setLastName('')
+      setPhone('')
+      setEmail('')
+      setAmountPaid('')
+      load()
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      const msg = err instanceof Error ? err.message : ''
+      toast(msg.includes('seats_full') ? 'ที่นั่งเต็มแล้ว' : 'เพิ่มการจองไม่สำเร็จ', 'error')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const bookableTours = useMemo(
+    () => tours.filter((tr) => ['published', 'confirmed', 'active', 'draft'].includes(tr.status.toLowerCase())),
+    [tours],
+  )
 
   async function markPaid(booking: TourBooking, status: 'deposit_paid' | 'fully_paid') {
     try {
@@ -64,7 +127,115 @@ export default function CashierPOS() {
         <h1 className="mt-2 font-serif text-lg text-cream">Cashier POS</h1>
       </header>
 
-      <main className="mx-auto max-w-2xl px-4 py-6">
+      <main className="mx-auto max-w-2xl space-y-5 px-4 py-6">
+        <button
+          type="button"
+          onClick={() => setFormOpen((v) => !v)}
+          className="block w-full rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+        >
+          {formOpen ? '− ปิดฟอร์ม' : '+ เพิ่มการจองใหม่ (โทร/Facebook)'}
+        </button>
+
+        {formOpen && (
+          <form
+            onSubmit={handleCreateBooking}
+            className="space-y-3 rounded-editorial border border-white/8 bg-surface-card p-4"
+          >
+            <label className="block">
+              <span className="text-xs text-cream-muted">ทริป</span>
+              <select
+                value={tripCode}
+                onChange={(e) => setTripCode(e.target.value)}
+                required
+                className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+              >
+                <option value="">— เลือกทริป —</option>
+                {bookableTours.map((tr) => (
+                  <option key={tr.id} value={tr.trip_code}>
+                    {tr.name_en} · {tr.trip_code}
+                    {tr.departure_date ? ` · ${tr.departure_date}` : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-xs text-cream-muted">ชื่อ</span>
+                <input
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
+                  required
+                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs text-cream-muted">นามสกุล</span>
+                <input
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  required
+                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-xs text-cream-muted">เบอร์โทร</span>
+                <input
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs text-cream-muted">อีเมล</span>
+                <input
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                />
+              </label>
+            </div>
+            <p className="text-xs text-cream-muted">กรอกอย่างน้อยเบอร์โทรหรืออีเมลอย่างใดอย่างหนึ่ง</p>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="text-xs text-cream-muted">รับเงินแล้ว (AUD)</span>
+                <input
+                  type="number"
+                  min={0}
+                  value={amountPaid}
+                  onChange={(e) => setAmountPaid(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                />
+              </label>
+              <label className="block">
+                <span className="text-xs text-cream-muted">ช่องทาง</span>
+                <select
+                  value={paymentMethod}
+                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                >
+                  <option value="cash">เงินสด</option>
+                  <option value="payid">PayID</option>
+                  <option value="bank_transfer">โอนธนาคาร</option>
+                  <option value="manual">อื่นๆ</option>
+                </select>
+              </label>
+            </div>
+
+            <button
+              type="submit"
+              disabled={!isValid || submitting}
+              className="w-full rounded-lg bg-gold px-4 py-2.5 text-sm font-bold text-near-black-green disabled:opacity-50"
+            >
+              {submitting ? 'กำลังบันทึก...' : 'บันทึกการจอง'}
+            </button>
+          </form>
+        )}
+
         {loading && <ListRowSkeleton count={3} />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
 

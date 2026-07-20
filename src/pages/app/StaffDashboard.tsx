@@ -1,19 +1,32 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { fetchConfirmedTours, fetchBookingsForTour, seatsRemaining } from '../../lib/toursApi'
+import { fetchConfirmedTours, fetchBookingsForTour, markAttendance, seatsRemaining } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { Tour, TourBooking } from '../../types/tour'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
+import { useToast } from '../../components/ui/Toast'
 
 export default function StaffDashboard() {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [tours, setTours] = useState<Tour[]>([])
   const [selected, setSelected] = useState<Tour | null>(null)
   const [manifest, setManifest] = useState<TourBooking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const staffName = sessionStorage.getItem('staff_name') ?? 'Staff'
+
+  async function toggleAttended(booking: TourBooking, attended: boolean) {
+    const next = booking.attended === attended ? null : attended
+    setManifest((prev) => prev.map((b) => (b.id === booking.id ? { ...b, attended: next } : b)))
+    try {
+      await markAttendance(booking.id, next)
+    } catch {
+      toast('บันทึกไม่สำเร็จ', 'error')
+      setManifest((prev) => prev.map((b) => (b.id === booking.id ? booking : b)))
+    }
+  }
 
   const load = useCallback(() => {
     setLoading(true)
@@ -93,8 +106,37 @@ export default function StaffDashboard() {
             ) : (
               <ul className="mt-3 space-y-2">
                 {manifest.map((b) => (
-                  <li key={b.id} className="rounded-editorial bg-surface-card px-3 py-2 text-sm text-cream">
-                    {b.first_name_en} {b.last_name_en} · {b.booking_status}
+                  <li
+                    key={b.id}
+                    className="flex items-center justify-between gap-2 rounded-editorial bg-surface-card px-3 py-2 text-sm text-cream"
+                  >
+                    <span className="min-w-0 truncate">
+                      {b.first_name_en} {b.last_name_en} · {b.booking_status}
+                    </span>
+                    <span className="flex shrink-0 gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => toggleAttended(b, true)}
+                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                          b.attended === true
+                            ? 'bg-gold text-near-black-green'
+                            : 'bg-white/10 text-cream-muted hover:bg-white/15'
+                        }`}
+                      >
+                        มา
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => toggleAttended(b, false)}
+                        className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                          b.attended === false
+                            ? 'bg-coral text-white'
+                            : 'bg-white/10 text-cream-muted hover:bg-white/15'
+                        }`}
+                      >
+                        ไม่มา
+                      </button>
+                    </span>
                   </li>
                 ))}
               </ul>

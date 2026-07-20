@@ -51,6 +51,8 @@ export interface TourBooking {
   oshc_expiry: string | null
   waiver_signed: boolean
   waiver_signed_at: string | null
+  /** Day-of check-in, separate from payment status. null/undefined = not checked yet. */
+  attended?: boolean | null
   booking_status: BookingStatus
   amount_paid_aud: number
   payment_method: string | null
@@ -77,6 +79,8 @@ export interface Expense {
   receipt_url: string | null
   created_by: string | null
   created_at: string
+  /** Optional — which trip this was spent on. null/empty = general business expense. */
+  trip_code?: string | null
 }
 
 export interface ComplianceItem {

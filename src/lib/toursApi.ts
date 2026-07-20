@@ -616,6 +616,91 @@ export async function markWaitlistContacted(id: string, contacted = true): Promi
   await callStaffApi('mark_waitlist_contacted', { id, contacted })
 }
 
+// ---------------------------------------------------------------------------
+// Staff-assisted booking, attendance, and year-end tax summary
+// ---------------------------------------------------------------------------
+
+export type ManualBookingInput = {
+  trip_code: string
+  first_name_en: string
+  last_name_en: string
+  email?: string
+  phone?: string
+  passport_number?: string
+  date_of_birth?: string
+  emergency_contact_name?: string
+  emergency_contact_phone?: string
+  dietary_requirements?: string
+  medical_conditions?: string
+  booking_status?: string
+  amount_paid_aud?: number
+  payment_method?: string
+}
+
+/** Staff-entered booking for a phone/Facebook customer — holds a real seat via the same RPC the public flow uses. */
+export async function createBookingManual(input: ManualBookingInput): Promise<TourBooking> {
+  return callStaffApi<TourBooking>('create_booking_manual', input)
+}
+
+export async function markAttendance(id: string, attended: boolean | null): Promise<void> {
+  await callStaffApi('mark_attendance', { id, attended })
+}
+
+export type YearSummary = {
+  bookings: TourBooking[]
+  expenses: Expense[]
+}
+
+export async function fetchYearSummary(year: number): Promise<YearSummary> {
+  return callStaffApi<YearSummary>('year_summary', { year })
+}
+
+/** Per-trip revenue / cost / profit rollup from a year's bookings + expenses. */
+export type TripFinancialRow = {
+  trip_code: string
+  revenue_aud: number
+  expense_aud: number
+  profit_aud: number
+  bookings_count: number
+}
+
+export function summarizeByTrip(summary: YearSummary): TripFinancialRow[] {
+  const rows = new Map<string, TripFinancialRow>()
+
+  function ensure(tripCode: string): TripFinancialRow {
+    let row = rows.get(tripCode)
+    if (!row) {
+      row = { trip_code: tripCode, revenue_aud: 0, expense_aud: 0, profit_aud: 0, bookings_count: 0 }
+      rows.set(tripCode, row)
+    }
+    return row
+  }
+
+  for (const b of summary.bookings) {
+    const row = ensure(b.trip_code)
+    row.revenue_aud += b.amount_paid_aud ?? 0
+    row.bookings_count += 1
+  }
+  for (const e of summary.expenses) {
+    const row = ensure(e.trip_code || '(General / non-trip)')
+    row.expense_aud += e.amount_aud ?? 0
+  }
+  for (const row of rows.values()) {
+    row.profit_aud = row.revenue_aud - row.expense_aud
+  }
+
+  return [...rows.values()].sort((a, b) => a.trip_code.localeCompare(b.trip_code))
+}
+
+/** Builds a downloadable CSV Blob URL from year summary rows — caller revokes the URL after use. */
+export function tripFinancialsToCsv(rows: TripFinancialRow[]): string {
+  const header = 'Trip Code,Bookings,Revenue (AUD),Expenses (AUD),Profit (AUD)'
+  const lines = rows.map(
+    (r) => `${r.trip_code},${r.bookings_count},${r.revenue_aud.toFixed(2)},${r.expense_aud.toFixed(2)},${r.profit_aud.toFixed(2)}`,
+  )
+  return [header, ...lines].join('\n')
+}
+
 export async function insertExpense(expense: Omit<Expense, 'id' | 'created_at'>): Promise<Expense> {
   return callStaffApi<Expense>('insert_expense', expense)
 }

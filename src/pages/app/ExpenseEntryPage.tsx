@@ -1,7 +1,8 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { insertExpense } from '../../lib/toursApi'
+import { fetchToursAdmin, insertExpense } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
+import type { Tour } from '../../types/tour'
 import { useToast } from '../../components/ui/Toast'
 
 const ATO_CATEGORIES = [
@@ -26,8 +27,18 @@ export default function ExpenseEntryPage() {
   const [atoCategory, setAtoCategory] = useState<string>(ATO_CATEGORIES[0])
   const [hasGst, setHasGst] = useState(true)
   const [gstAmount, setGstAmount] = useState('')
+  const [tripCode, setTripCode] = useState('')
+  const [tours, setTours] = useState<Tour[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    fetchToursAdmin()
+      .then((all) => setTours(all.filter((t) => t.status.toLowerCase() !== 'cancelled')))
+      .catch(() => {
+        /* trip picker is a nice-to-have — expense entry still works without it */
+      })
+  }, [])
 
   const amountValid = Number(amount) > 0
   const vendorValid = vendorName.trim().length > 0
@@ -56,6 +67,7 @@ export default function ExpenseEntryPage() {
         gst_amount_aud: hasGst ? Number(gstAmount) || 0 : 0,
         receipt_url: null,
         created_by: null,
+        trip_code: tripCode || null,
       })
       toast('Expense saved', 'success')
       navigate('/app/owner')
@@ -105,6 +117,24 @@ export default function ExpenseEntryPage() {
               onChange={(e) => setVendorName(e.target.value)}
               className="mt-1 w-full rounded-editorial border border-white/8 bg-surface-card px-3 py-2 text-sm text-cream"
             />
+          </label>
+
+          <label className="block">
+            <span className="text-sm font-medium text-cream-muted">
+              ทริป (ถ้ามี — เว้นว่างถ้าเป็นค่าใช้จ่ายทั่วไป)
+            </span>
+            <select
+              value={tripCode}
+              onChange={(e) => setTripCode(e.target.value)}
+              className="mt-1 w-full rounded-editorial border border-white/8 bg-surface-card px-3 py-2 text-sm text-cream"
+            >
+              <option value="">— ทั่วไป / ไม่ผูกกับทริป —</option>
+              {tours.map((tr) => (
+                <option key={tr.id} value={tr.trip_code}>
+                  {tr.name_en} · {tr.trip_code}
+                </option>
+              ))}
+            </select>
           </label>
 
           <label className="block">
