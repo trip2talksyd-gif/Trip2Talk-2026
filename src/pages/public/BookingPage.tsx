@@ -30,15 +30,26 @@ type FormState = {
   first_name_en: string
   last_name_en: string
   passport_number: string
+  date_of_birth: string
   email: string
   phone: string
+  emergency_contact_name: string
+  emergency_contact_phone: string
   dietary_requirements: string
   medical_conditions: string
   oshc_provider: string
   oshc_expiry: string
 }
 
-const REQUIRED: (keyof FormState)[] = ['first_name_en', 'last_name_en', 'email', 'phone']
+const REQUIRED: (keyof FormState)[] = [
+  'first_name_en',
+  'last_name_en',
+  'date_of_birth',
+  'email',
+  'phone',
+  'emergency_contact_name',
+  'emergency_contact_phone',
+]
 
 export default function BookingPage() {
   const { lang, t } = useLang()
@@ -59,8 +70,11 @@ export default function BookingPage() {
     first_name_en: '',
     last_name_en: '',
     passport_number: '',
+    date_of_birth: '',
     email: '',
     phone: '',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
     dietary_requirements: '',
     medical_conditions: '',
     oshc_provider: '',
@@ -126,8 +140,11 @@ export default function BookingPage() {
         first_name_en: form.first_name_en.trim(),
         last_name_en: form.last_name_en.trim(),
         passport_number: form.passport_number.trim() || 'PENDING',
+        date_of_birth: form.date_of_birth || null,
         email: form.email.trim(),
         phone: normalizeAuMobile(form.phone),
+        emergency_contact_name: form.emergency_contact_name.trim() || null,
+        emergency_contact_phone: form.emergency_contact_phone.trim() || null,
         dietary_requirements: form.dietary_requirements || null,
         medical_conditions: form.medical_conditions || null,
         oshc_provider: form.oshc_provider || null,
@@ -242,8 +259,11 @@ export default function BookingPage() {
     { key: 'first_name_en', label: t('form.firstName'), required: true },
     { key: 'last_name_en', label: t('form.lastName'), required: true },
     { key: 'passport_number', label: t('form.passport') },
+    { key: 'date_of_birth', label: t('form.dob'), type: 'date', required: true },
     { key: 'email', label: t('form.email'), type: 'email', required: true },
     { key: 'phone', label: t('form.phone'), required: true },
+    { key: 'emergency_contact_name', label: t('form.emergencyName'), required: true },
+    { key: 'emergency_contact_phone', label: t('form.emergencyPhone'), required: true },
     { key: 'dietary_requirements', label: t('form.dietary') },
     { key: 'medical_conditions', label: t('form.medical') },
     { key: 'oshc_provider', label: t('form.oshcProvider') },

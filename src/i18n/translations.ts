@@ -33,6 +33,9 @@ export type TranslationKey =
   | 'form.medical'
   | 'form.oshcProvider'
   | 'form.oshcExpiry'
+  | 'form.dob'
+  | 'form.emergencyName'
+  | 'form.emergencyPhone'
   | 'booking.selectTrip'
   | 'booking.deposit'
   | 'booking.payment'
@@ -278,6 +281,9 @@ const en: Map = {
   'form.medical': 'Medical Conditions',
   'form.oshcProvider': 'OSHC Provider',
   'form.oshcExpiry': 'OSHC Expiry Date',
+  'form.dob': 'Date of Birth',
+  'form.emergencyName': 'Emergency Contact Name',
+  'form.emergencyPhone': 'Emergency Contact Phone',
   'booking.selectTrip': 'Select a trip',
   'booking.deposit': 'Deposit due',
   'booking.payment': 'PayID Payment',
@@ -534,6 +540,9 @@ const th: Map = {
   'form.medical': 'โรคประจำตัว',
   'form.oshcProvider': 'ผู้ให้บริการ OSHC',
   'form.oshcExpiry': 'วันหมดอายุ OSHC',
+  'form.dob': 'วันเดือนปีเกิด (ตรงกับพาสปอร์ต)',
+  'form.emergencyName': 'ชื่อผู้ติดต่อฉุกเฉิน',
+  'form.emergencyPhone': 'เบอร์โทรผู้ติดต่อฉุกเฉิน',
   'booking.selectTrip': 'เลือกทริป',
   'booking.deposit': 'มัดจำ',
   'booking.payment': 'ชำระ PayID',

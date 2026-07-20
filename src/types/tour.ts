@@ -42,6 +42,9 @@ export interface TourBooking {
   passport_number: string
   email: string
   phone: string
+  date_of_birth: string | null
+  emergency_contact_name: string | null
+  emergency_contact_phone: string | null
   dietary_requirements: string | null
   medical_conditions: string | null
   oshc_provider: string | null
