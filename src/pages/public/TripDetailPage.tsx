@@ -55,7 +55,10 @@ export default function TripDetailPage() {
     const matched = GALLERY_PHOTOS.filter(
       (p) => p.id.startsWith(prefix) || p.id.includes(prefix),
     )
-    return (matched.length > 0 ? matched : GALLERY_PHOTOS).slice(0, 8)
+    // No unrelated fallback here on purpose — an empty strip (hidden by the
+    // `stripPhotos.length > 0` check below) beats showing photos of a
+    // different destination, e.g. NSW beach shots on the Uluru trip page.
+    return matched.slice(0, 8)
   }, [tour])
 
   if (loading) {

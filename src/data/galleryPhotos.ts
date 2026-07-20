@@ -139,8 +139,6 @@ export const TRIP_GALLERY_CATEGORY: Record<string, GalleryCategory> = {
   'TAS-3D2N': 'tasmania',
   'TAS-LH-4D3N': 'tasmania',
   'TAS-SU-4D3N': 'tasmania',
-  'ULU-4D3N': 'nsw',
-  'MEL-4D3N': 'nsw',
   'BER-3D2N': 'nsw',
   'CAN-2D1N': 'nsw',
   'KIA-1DAY': 'nsw',
@@ -157,9 +155,15 @@ export function filterGalleryPhotos(filter: GalleryFilter): GalleryPhoto[] {
   return GALLERY_PHOTOS.filter((p) => p.category === filter)
 }
 
+/**
+ * Returns undefined (→ TripPhotoHero's brand gradient placeholder) when a trip
+ * has no matching category rather than guessing with an unrelated photo —
+ * showing "no photo yet" is honest; showing the wrong destination's photo
+ * (e.g. an NSW beach on the Uluru trip) actively misleads customers.
+ */
 export function getHeroPhotoForTrip(tripCode: string): GalleryPhoto | undefined {
   const category = TRIP_GALLERY_CATEGORY[tripCode.toUpperCase()]
-  if (!category) return GALLERY_PHOTOS[0]
+  if (!category) return undefined
   return GALLERY_PHOTOS.find((p) => p.category === category)
 }
 
@@ -167,7 +171,7 @@ export function getHeroPhotoForTrip(tripCode: string): GalleryPhoto | undefined 
 export function getPreviewPhotoForTrip(tripCode: string): GalleryPhoto | undefined {
   const hero = getHeroPhotoForTrip(tripCode)
   const category = TRIP_GALLERY_CATEGORY[tripCode.toUpperCase()]
-  if (!category) return hero ?? GALLERY_PHOTOS[0]
+  if (!category) return undefined
   const inCategory = GALLERY_PHOTOS.filter((p) => p.category === category)
   const alternate = inCategory.find((p) => p.id !== hero?.id)
   return alternate ?? hero ?? inCategory[0]

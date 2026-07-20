@@ -11,14 +11,16 @@ export type TripMapConfig = {
 
 const MAPS: Record<string, TripMapConfig> = {
   NZ: {
-    center: '-44.35,169.65',
-    zoom: 7,
-    markers:
-      '-43.5320,172.6306,lightblue1|-45.0312,168.6626,lightblue1|-44.6414,167.9256,orange1',
-    path: 'color:0xe2734add|weight:4|-43.5320,172.6306|-45.0312,168.6626|-44.6414,167.9256',
+    // Flights land in Queenstown only — no Christchurch leg on any NZ trip,
+    // so the route (and the Google Maps embed built from these markers)
+    // must start at Queenstown, not Christchurch.
+    center: '-44.84,168.29',
+    zoom: 8,
+    markers: '-45.0312,168.6626,orange1|-44.6414,167.9256,lightblue1',
+    path: 'color:0xe2734add|weight:4|-45.0312,168.6626|-44.6414,167.9256',
     caption: {
-      en: 'Christchurch → Queenstown → Milford Sound',
-      th: 'ไครสต์เชิร์ช → ควีนส์ทาวน์ → มิลฟอร์ดซาวด์',
+      en: 'Queenstown → Milford Sound',
+      th: 'ควีนส์ทาวน์ → มิลฟอร์ดซาวด์',
     },
     fallbackSeed: 'nz-route-map',
   },
