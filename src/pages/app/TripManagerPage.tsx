@@ -55,6 +55,7 @@ export default function TripManagerPage() {
   const [status, setStatus] = useState('')
   const [repeatMonths, setRepeatMonths] = useState(1)
   const [submitting, setSubmitting] = useState(false)
+  const [showPast, setShowPast] = useState(false)
 
   const load = useCallback(() => {
     setLoading(true)
@@ -99,9 +100,18 @@ export default function TripManagerPage() {
     [tours],
   )
 
-  const upcomingTours = useMemo(
+  // Every trip stays in the database forever (booking/revenue history is
+  // needed for tax records) — this only controls what's shown in the list.
+  // Past trips are hidden by default so the list doesn't grow forever, but
+  // "แสดงทริปเก่า" reveals full history any time, e.g. at tax time.
+  const allTours = useMemo(
     () => tours.filter((t) => t.status.toLowerCase() !== 'cancelled'),
     [tours],
+  )
+  const pastCount = useMemo(() => allTours.filter((t) => !isUpcoming(t)).length, [allTours])
+  const visibleTours = useMemo(
+    () => (showPast ? allTours : allTours.filter(isUpcoming)),
+    [allTours, showPast],
   )
 
   const existingCodes = useMemo(() => new Set(tours.map((t) => t.trip_code)), [tours])
@@ -396,9 +406,27 @@ export default function TripManagerPage() {
             </section>
 
             <section>
-              <h2 className="text-sm font-medium text-cream-muted">ทริปทั้งหมด</h2>
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-medium text-cream-muted">
+                  {showPast ? 'ทริปทั้งหมด' : 'ทริปที่กำลังจะมาถึง'}
+                </h2>
+                {pastCount > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPast((v) => !v)}
+                    className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-cream-muted hover:bg-white/15"
+                  >
+                    {showPast ? 'ซ่อนทริปเก่า' : `แสดงทริปเก่า (${pastCount})`}
+                  </button>
+                )}
+              </div>
+              {!showPast && pastCount > 0 && (
+                <p className="mt-1 text-xs text-cream-muted">
+                  ทริปเก่ายังอยู่ครบสำหรับทำบัญชี/ภาษี แค่ซ่อนจากลิสต์นี้ไว้ไม่ให้รก
+                </p>
+              )}
               <ul className="mt-2 space-y-1.5">
-                {upcomingTours.map((t) => {
+                {visibleTours.map((t) => {
                   const ratio = seatFillRatio(t)
                   const badgeColor =
                     ratio >= 1
