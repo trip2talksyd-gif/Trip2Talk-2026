@@ -10,7 +10,7 @@ import { getItinerary } from '../../data/itineraries'
 import { isPremiumTrip } from '../../data/tripTiers'
 import { AURORA_DISCLAIMER } from '../../data/risks'
 import { getTripMap, googleMapsEmbedUrl } from '../../data/tripMaps'
-import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
+import { GALLERY_PHOTOS, photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
 import type { Tour } from '../../types/tour'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
@@ -31,6 +31,7 @@ export default function TripDetailPage() {
   const [error, setError] = useState('')
   const favorited = useIsFavorite(tripCode ?? '')
   const toggleFavorite = useToggleFavorite()
+  const [previewPhoto, setPreviewPhoto] = useState<GalleryPhoto | null>(null)
 
   useEffect(() => {
     if (!tripCode) {
@@ -42,6 +43,11 @@ export default function TripDetailPage() {
       .catch(() => setError(t('common.error')))
       .finally(() => setLoading(false))
   }, [tripCode, t])
+
+  // Reset the hover preview whenever the trip changes so it doesn't carry over.
+  useEffect(() => {
+    setPreviewPhoto(null)
+  }, [tripCode])
 
   const stripPhotos = useMemo(() => {
     if (!tour) return []
@@ -101,7 +107,12 @@ export default function TripDetailPage() {
       </div>
 
       <div className="relative overflow-hidden rounded-2xl">
-        <TripPhotoHero tripCode={tour.trip_code} alt={name} className="aspect-[16/10] w-full" />
+        <TripPhotoHero
+          tripCode={tour.trip_code}
+          alt={name}
+          className="aspect-[16/10] w-full transition-opacity duration-150"
+          overridePhoto={previewPhoto}
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-teal-900/85 via-teal-900/20 to-transparent" />
         <div className="absolute bottom-0 p-4 sm:p-5">
           <p className="text-[10px] uppercase tracking-wider text-cream/65">{tour.trip_code}</p>
@@ -130,18 +141,33 @@ export default function TripDetailPage() {
         <TripBookButton tour={tour} variant="deep" className="!w-auto shrink-0 !px-5 !py-2.5" />
       </div>
 
-      {/* Horizontal swipeable strip */}
+      {/* Horizontal swipeable strip — hover/focus a thumbnail to preview it in the hero above */}
       {stripPhotos.length > 0 && (
         <div className="-mx-4 overflow-x-auto px-4 pb-1">
           <div className="flex gap-2">
             {stripPhotos.map((photo) => (
-              <img
+              <button
                 key={photo.id}
-                src={photoSrc(photo)}
-                alt={name}
-                className="h-20 w-28 shrink-0 rounded-lg object-cover ring-1 ring-line"
-                loading="lazy"
-              />
+                type="button"
+                aria-label={lang === 'th' ? 'ดูรูปนี้' : 'Preview this photo'}
+                onMouseEnter={() => setPreviewPhoto(photo)}
+                onMouseLeave={() => setPreviewPhoto(null)}
+                onFocus={() => setPreviewPhoto(photo)}
+                onBlur={() => setPreviewPhoto(null)}
+                onClick={() => setPreviewPhoto(photo)}
+                className={`h-20 w-28 shrink-0 overflow-hidden rounded-lg ring-1 transition-all ${
+                  previewPhoto?.id === photo.id
+                    ? 'ring-2 ring-teal-600'
+                    : 'ring-line hover:ring-teal-600/60'
+                }`}
+              >
+                <img
+                  src={photoSrc(photo)}
+                  alt={name}
+                  className="h-full w-full object-cover"
+                  loading="lazy"
+                />
+              </button>
             ))}
           </div>
         </div>

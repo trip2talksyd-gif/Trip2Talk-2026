@@ -1,15 +1,18 @@
 import { useMemo } from 'react'
-import { getHeroPhotoForTrip, photoSrc } from '../../data/galleryPhotos'
+import { getHeroPhotoForTrip, photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
 
 type Props = {
   tripCode: string
   alt: string
   className?: string
+  /** When set (e.g. hovering a filmstrip thumbnail), shows this photo instead of the trip's default hero photo. */
+  overridePhoto?: GalleryPhoto | null
 }
 
 /** Hero/thumbnail from gallery base64, or brand gradient fallback */
-export default function TripPhotoHero({ tripCode, alt, className = '' }: Props) {
-  const photo = useMemo(() => getHeroPhotoForTrip(tripCode), [tripCode])
+export default function TripPhotoHero({ tripCode, alt, className = '', overridePhoto }: Props) {
+  const defaultPhoto = useMemo(() => getHeroPhotoForTrip(tripCode), [tripCode])
+  const photo = overridePhoto ?? defaultPhoto
   const src = useMemo(() => (photo ? photoSrc(photo) : ''), [photo])
 
   if (photo) {
