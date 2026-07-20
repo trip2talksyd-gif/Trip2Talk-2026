@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useToast } from '../../components/ui/Toast'
+import { PAYID_OPTIONS } from '../../data/paymentDetails'
 
 /** Data handed off via router state right after a payment is recorded —
  * no extra staff-api round trip, since the caller already has everything. */
@@ -62,6 +63,14 @@ const SELLER = {
   logoSrc:
     'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Logo/Trip2talk%20(1).png',
 }
+
+// Bank details shown in the invoice footer — the NAB PayID matches the
+// contact phone number shown elsewhere on the invoice (0452 044 382).
+const PAYMENT_BANK = PAYID_OPTIONS.find((p) => p.id === 'nab') ?? PAYID_OPTIONS[0]
+
+// Invoice accent color — deliberately a formal blue rather than the app's
+// gold/teal theme, since this is a printable legal document, not in-app UI.
+const ACCENT = '#1d4ed8'
 
 const GST_RATE = 0.1
 
@@ -180,79 +189,132 @@ export default function ReceiptPage() {
         </button>
       </div>
 
-      <div ref={cardRef} className="mx-auto mt-6 max-w-md rounded-editorial bg-white p-6 text-black print:mt-0 print:max-w-none print:rounded-none">
-        <div className="flex items-start justify-between gap-4">
-          <img
-            src={SELLER.logoSrc}
-            alt="Chapter99"
-            crossOrigin="anonymous"
-            className="h-16 w-16 shrink-0 rounded-full object-cover"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none'
-            }}
-          />
+      <div
+        ref={cardRef}
+        className="mx-auto mt-6 max-w-md overflow-hidden rounded-editorial bg-white text-black print:mt-0 print:max-w-none print:rounded-none"
+      >
+        <div className="p-6">
+          {/* Logo + brand */}
+          <div className="flex items-start justify-between gap-4">
+            <img
+              src={SELLER.logoSrc}
+              alt="Chapter99"
+              crossOrigin="anonymous"
+              className="h-14 w-14 shrink-0 rounded-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none'
+              }}
+            />
+            <div className="text-right">
+              <p className="text-lg font-bold leading-tight" style={{ color: ACCENT }}>
+                {SELLER.legalName}
+              </p>
+              <p className="text-xs text-black/50">{SELLER.tradingAs}</p>
+              <p className="text-xs text-black/50">{SELLER.email}</p>
+            </div>
+          </div>
+
+          {/* Client + invoice meta */}
+          <div className="mt-5 flex items-start justify-between gap-4 border-t border-black/10 pt-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-wide text-black/40">Client</p>
+              <p className="mt-0.5 font-semibold text-black">{data.customerName}</p>
+              {data.source && (
+                <p className="text-xs text-black/50">via {SOURCE_LABEL_EN[data.source] ?? data.source}</p>
+              )}
+            </div>
+            <div className="text-right">
+              <p className="text-base font-bold tracking-wide" style={{ color: ACCENT }}>
+                TAX INVOICE
+              </p>
+              <p className="text-xs text-black/60">Invoice: {data.bookingReference ?? '—'}</p>
+              <p className="text-xs text-black/60">{issuedAt.toLocaleDateString('en-AU')}</p>
+            </div>
+          </div>
+
+          {/* Line item table */}
+          <table className="mt-5 w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b border-black/15 text-left text-[10px] font-semibold uppercase tracking-wide text-black/40">
+                <th className="pb-2 font-semibold">Description</th>
+                <th className="pb-2 font-semibold">Travel Date</th>
+                <th className="pb-2 text-right font-semibold">Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-black/10">
+                <td className="py-2.5 pr-2 align-top">
+                  <p className="font-medium text-black">{data.tripName}</p>
+                  <p className="text-xs text-black/50">{data.tripCode}</p>
+                  {isInstallment && (
+                    <p className="mt-0.5 text-xs text-black/50">
+                      Installment {data.installmentNo ?? 1} of {data.installmentPlan}
+                    </p>
+                  )}
+                </td>
+                <td className="py-2.5 pr-2 align-top text-xs text-black/70">{data.departureDate ?? '—'}</td>
+                <td className="py-2.5 text-right align-top font-medium text-black">
+                  {formatAudCents(data.amountPaid)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+
+          {/* Totals */}
+          <div className="mt-3 space-y-1.5 text-sm">
+            <Row label="Subtotal (ex. GST)" value={formatAudCents(data.amountPaid / (1 + GST_RATE))} />
+            <Row label="GST (10%)" value={formatAudCents(data.amountPaid - data.amountPaid / (1 + GST_RATE))} />
+            <div
+              className="flex items-center justify-between border-t border-black/15 pt-2 text-base font-bold"
+              style={{ color: ACCENT }}
+            >
+              <span>{isInstallment ? `This Payment (Installment ${data.installmentNo ?? 1})` : 'Total Amount (inc. GST)'}</span>
+              <span>{formatAudCents(data.amountPaid)}</span>
+            </div>
+            {isInstallment && typeof data.priceAud === 'number' && (
+              <Row label="Trip Total (inc. GST)" value={formatAudCents(data.priceAud)} />
+            )}
+            {isInstallment && typeof data.balanceRemaining === 'number' && (
+              <Row
+                label="Balance Remaining"
+                value={data.balanceRemaining > 0 ? formatAudCents(data.balanceRemaining) : 'Paid in Full'}
+              />
+            )}
+          </div>
+
+          {/* Status / payment method */}
+          <div className="mt-4 space-y-1 border-t border-black/10 pt-3 text-xs">
+            <Row label="Status" value={STATUS_LABEL[data.bookingStatus] ?? data.bookingStatus} />
+            <Row
+              label="Payment Method"
+              value={data.paymentMethod ? PAYMENT_METHOD_LABEL[data.paymentMethod] ?? data.paymentMethod : '—'}
+            />
+          </div>
+        </div>
+
+        {/* Footer — payment details + contact info, two columns */}
+        <div className="grid grid-cols-2 gap-4 px-6 py-5 text-xs" style={{ backgroundColor: '#eef2ff' }}>
+          <div>
+            <p className="font-bold" style={{ color: ACCENT }}>
+              Payment Details
+            </p>
+            <p className="mt-1 text-black/70">{PAYMENT_BANK.bankEn}</p>
+            <p className="text-black/70">PayID: {PAYMENT_BANK.payIdDisplay}</p>
+            <p className="text-black/70">Account Name: {PAYMENT_BANK.accountName}</p>
+          </div>
           <div className="text-right">
-            <h1 className="text-lg font-bold tracking-wide text-black">TAX INVOICE</h1>
-            <p className="text-xs text-black/60">Invoice: {data.bookingReference ?? '—'}</p>
-            <p className="text-xs text-black/60">{issuedAt.toLocaleDateString('en-AU')}</p>
+            <p className="font-bold" style={{ color: ACCENT }}>
+              Contact Info
+            </p>
+            <p className="mt-1 text-black/70">ABN: {SELLER.abn}</p>
+            <p className="text-black/70">{SELLER.address}</p>
+            <p className="text-black/70">{SELLER.phone}</p>
+            <p className="text-black/70">{SELLER.email}</p>
           </div>
         </div>
 
-        <div className="mt-4 border-t border-dashed border-black/20 pt-4 text-sm">
-          <p className="font-bold text-black">{SELLER.legalName}</p>
-          <p className="text-xs text-black/70">{SELLER.tradingAs}</p>
-          <p className="mt-1 text-xs text-black/70">ABN: {SELLER.abn}</p>
-          <p className="text-xs text-black/70">{SELLER.address}</p>
-          <p className="text-xs text-black/70">
-            {SELLER.phone} · {SELLER.email}
-          </p>
-        </div>
-
-        <div className="mt-4 border-t border-dashed border-black/20 pt-4 text-sm">
-          <p className="text-xs text-black/60">Bill to</p>
-          <p className="font-medium text-black">{data.customerName}</p>
-        </div>
-
-        <div className="mt-4 space-y-1.5 border-t border-dashed border-black/20 pt-4 text-sm">
-          <Row label="Description" value={`${data.tripName} (${data.tripCode})`} />
-          {data.departureDate && <Row label="Travel Date" value={data.departureDate} />}
-          <Row label="Status" value={STATUS_LABEL[data.bookingStatus] ?? data.bookingStatus} />
-          <Row
-            label="Payment Method"
-            value={data.paymentMethod ? PAYMENT_METHOD_LABEL[data.paymentMethod] ?? data.paymentMethod : '—'}
-          />
-          {data.source && (
-            <Row label="Referred Via" value={SOURCE_LABEL_EN[data.source] ?? data.source} />
-          )}
-          {isInstallment && (
-            <Row
-              label="Installment"
-              value={`${data.installmentNo ?? 1} of ${data.installmentPlan}`}
-            />
-          )}
-        </div>
-
-        <div className="mt-4 space-y-1.5 border-t border-dashed border-black/20 pt-4 text-sm">
-          <Row label="Subtotal (ex. GST)" value={formatAudCents(data.amountPaid / (1 + GST_RATE))} />
-          <Row label="GST (10%)" value={formatAudCents(data.amountPaid - data.amountPaid / (1 + GST_RATE))} />
-          <div className="flex items-center justify-between pt-2 text-base font-bold">
-            <span>{isInstallment ? `This Payment (Installment ${data.installmentNo ?? 1})` : 'Total (inc. GST)'}</span>
-            <span>{formatAudCents(data.amountPaid)}</span>
-          </div>
-          {isInstallment && typeof data.priceAud === 'number' && (
-            <Row label="Trip Total (inc. GST)" value={formatAudCents(data.priceAud)} />
-          )}
-          {isInstallment && typeof data.balanceRemaining === 'number' && (
-            <Row
-              label="Balance Remaining"
-              value={data.balanceRemaining > 0 ? formatAudCents(data.balanceRemaining) : 'Paid in Full'}
-            />
-          )}
-        </div>
-
-        <div className="mt-5 border-t border-dashed border-black/20 pt-4 text-center text-xs text-black/60">
-          <p>Issued by Chapter99</p>
-          <p className="mt-1">Thank you for choosing Trip2Talk 🙏</p>
+        <div className="border-t border-black/10 px-6 py-3 text-center text-xs text-black/50">
+          Thank you for choosing Trip2Talk 🙏
         </div>
       </div>
     </div>
