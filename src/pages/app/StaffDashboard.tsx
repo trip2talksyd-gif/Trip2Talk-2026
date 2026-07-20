@@ -16,6 +16,7 @@ export default function StaffDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const staffName = sessionStorage.getItem('staff_name') ?? 'Staff'
+  const staffRole = sessionStorage.getItem('staff_role')
 
   async function toggleAttended(booking: TourBooking, attended: boolean) {
     const next = booking.attended === attended ? null : attended
@@ -65,6 +66,14 @@ export default function StaffDashboard() {
         </Link>
         <h1 className="mt-2 font-serif text-lg text-cream">Staff Dashboard</h1>
         <p className="text-sm text-cream-muted">{staffName}</p>
+        {staffRole === 'MANAGER' && (
+          <Link
+            to="/app/cashier"
+            className="mt-3 inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
+          >
+            💳 Cashier POS
+          </Link>
+        )}
       </header>
 
       <main className="mx-auto max-w-2xl space-y-6 px-4 py-6">

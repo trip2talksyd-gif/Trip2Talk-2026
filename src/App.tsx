@@ -85,7 +85,7 @@ export default function App() {
         <Route
           path="app/cashier"
           element={
-            <RequireStaffRole allow={['CASHIER', 'OWNER']}>
+            <RequireStaffRole allow={['CASHIER', 'OWNER', 'MANAGER']}>
               <CashierPOS />
             </RequireStaffRole>
           }

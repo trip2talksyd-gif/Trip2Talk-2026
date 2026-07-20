@@ -141,6 +141,18 @@ export default function OwnerDashboard() {
               >
                 + Add expense
               </Link>
+              <Link
+                to="/app/cashier"
+                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+              >
+                💳 Cashier POS
+              </Link>
+              <Link
+                to="/app/staff"
+                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+              >
+                📋 Staff Dashboard
+              </Link>
             </div>
 
             <Link
