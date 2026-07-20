@@ -7,6 +7,8 @@ import { useToast } from '../../components/ui/Toast'
 export type ReceiptData = {
   bookingReference: string | null
   customerName: string
+  /** Customer's email, if on file — used to prefill the "Email receipt" mailto link. */
+  customerEmail?: string | null
   tripName: string
   tripCode: string
   departureDate: string | null
@@ -104,6 +106,39 @@ export default function ReceiptPage() {
 
   const isInstallment = (data?.installmentPlan ?? 1) > 1
 
+  function handleEmailReceipt() {
+    if (!data) return
+    const subject = `Trip2Talk Tax Invoice — ${data.bookingReference ?? ''}`.trim()
+    const installmentLine = isInstallment
+      ? `\nInstallment: ${data.installmentNo ?? 1} of ${data.installmentPlan}${
+          typeof data.balanceRemaining === 'number'
+            ? `\nBalance remaining: ${formatAudCents(data.balanceRemaining)}`
+            : ''
+        }`
+      : ''
+    const body = [
+      `Hi ${data.customerName},`,
+      '',
+      'Here is your tax invoice for Trip2Talk:',
+      '',
+      `Invoice: ${data.bookingReference ?? '—'}`,
+      `Trip: ${data.tripName} (${data.tripCode})`,
+      data.departureDate ? `Travel Date: ${data.departureDate}` : '',
+      `Amount: ${formatAudCents(data.amountPaid)}${installmentLine}`,
+      '',
+      '(Please attach the receipt image — tap "Download receipt image" above first, then attach it here.)',
+      '',
+      'Thank you for choosing Trip2Talk!',
+      'Chapter99 · ABN 81 951 461 769',
+    ]
+      .filter((line) => line !== undefined)
+      .join('\n')
+
+    const to = data.customerEmail ?? ''
+    const mailto = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.location.href = mailto
+  }
+
   if (!data) {
     return (
       <div className="min-h-svh bg-near-black-green px-4 py-6 text-cream">
@@ -128,6 +163,13 @@ export default function ReceiptPage() {
           className="block w-full rounded-editorial bg-gold px-4 py-3 text-center text-sm font-bold text-near-black-green disabled:opacity-60"
         >
           {downloading ? 'กำลังสร้างรูป...' : '📥 ดาวน์โหลดรูปใบเสร็จ (ส่ง FB ได้เลย)'}
+        </button>
+        <button
+          type="button"
+          onClick={handleEmailReceipt}
+          className="block w-full rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold"
+        >
+          📧 ส่งอีเมลใบเสร็จ{data.customerEmail ? '' : ' (ไม่มีอีเมลลูกค้าในระบบ — กรอกเองได้)'}
         </button>
         <button
           type="button"

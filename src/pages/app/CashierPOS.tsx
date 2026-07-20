@@ -101,6 +101,7 @@ export default function CashierPOS() {
           state: {
             bookingReference: booking.booking_reference,
             customerName: `${firstName.trim()} ${lastName.trim()}`,
+            customerEmail: email.trim() || null,
             tripName: tour?.name_en ?? tripCode,
             tripCode,
             departureDate: tour?.departure_date ?? null,
@@ -162,6 +163,7 @@ export default function CashierPOS() {
         state: {
           bookingReference: booking.booking_reference,
           customerName: `${booking.first_name_en} ${booking.last_name_en}`,
+          customerEmail: booking.email || null,
           tripName: tour?.name_en ?? booking.trip_code,
           tripCode: booking.trip_code,
           departureDate: tour?.departure_date ?? null,
