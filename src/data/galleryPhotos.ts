@@ -468,25 +468,65 @@ export function filterGalleryPhotos(filter: GalleryFilter): GalleryPhoto[] {
 }
 
 /**
+ * Trip codes are added faster than TRIP_GALLERY_CATEGORY gets updated (every
+ * new dated departure like NZ-6D5N-NOV or TAS-LH-3D2N-DEC is its own
+ * trip_code) — this fallback matches by destination prefix so a new date
+ * variant automatically inherits its photos instead of showing no photo at
+ * all until someone remembers to add an exact-match entry above.
+ */
+const PREFIX_CATEGORY_FALLBACK: Array<[string, GalleryCategory]> = [
+  ['NZ-', 'new-zealand'],
+  ['TAS-', 'tasmania'],
+  ['ULU-', 'outback'],
+  ['MEL-', 'melbourne'],
+  ['SYD-', 'sydney'],
+  ['BER-', 'nsw'],
+  ['CAN-', 'nsw'],
+  ['KIA-', 'nsw'],
+  ['PSP-', 'nsw'],
+  ['LAV-', 'nsw'],
+]
+
+function resolveCategory(tripCode: string): GalleryCategory | undefined {
+  const code = tripCode.toUpperCase()
+  if (TRIP_GALLERY_CATEGORY[code]) return TRIP_GALLERY_CATEGORY[code]
+  return PREFIX_CATEGORY_FALLBACK.find(([prefix]) => code.startsWith(prefix))?.[1]
+}
+
+/** Stable (non-random) index into a photo pool, derived from the trip code —
+ * so two trips sharing a category (e.g. two Tasmania departures) show
+ * different photos instead of every card in that category displaying the
+ * exact same first match, while the same trip always gets the same photo on
+ * every reload. `salt` shifts the pick so hero vs. preview can differ. */
+function stableIndex(tripCode: string, poolSize: number, salt: number): number {
+  if (poolSize <= 0) return 0
+  let hash = 0
+  for (const ch of tripCode.toUpperCase()) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0
+  return (hash + salt) % poolSize
+}
+
+/**
  * Returns undefined (→ TripPhotoHero's brand gradient placeholder) when a trip
  * has no matching category rather than guessing with an unrelated photo —
  * showing "no photo yet" is honest; showing the wrong destination's photo
  * (e.g. an NSW beach on the Uluru trip) actively misleads customers.
  */
 export function getHeroPhotoForTrip(tripCode: string): GalleryPhoto | undefined {
-  const category = TRIP_GALLERY_CATEGORY[tripCode.toUpperCase()]
+  const category = resolveCategory(tripCode)
   if (!category) return undefined
-  return GALLERY_PHOTOS.find((p) => p.category === category)
+  const pool = GALLERY_PHOTOS.filter((p) => p.category === category)
+  if (pool.length === 0) return undefined
+  return pool[stableIndex(tripCode, pool.length, 0)]
 }
 
 /** Alternate gallery photo for hover/long-press preview (differs from card hero when possible) */
 export function getPreviewPhotoForTrip(tripCode: string): GalleryPhoto | undefined {
-  const hero = getHeroPhotoForTrip(tripCode)
-  const category = TRIP_GALLERY_CATEGORY[tripCode.toUpperCase()]
+  const category = resolveCategory(tripCode)
   if (!category) return undefined
-  const inCategory = GALLERY_PHOTOS.filter((p) => p.category === category)
-  const alternate = inCategory.find((p) => p.id !== hero?.id)
-  return alternate ?? hero ?? inCategory[0]
+  const pool = GALLERY_PHOTOS.filter((p) => p.category === category)
+  if (pool.length === 0) return undefined
+  if (pool.length === 1) return pool[0]
+  return pool[stableIndex(tripCode, pool.length, 1)]
 }
 
 /**
@@ -497,7 +537,7 @@ export function getPreviewPhotoForTrip(tripCode: string): GalleryPhoto | undefin
  * ended up in the Tasmania trip's thumbnail strip).
  */
 export function getGalleryPhotosForTrip(tripCode: string): GalleryPhoto[] {
-  const category = TRIP_GALLERY_CATEGORY[tripCode.toUpperCase()]
+  const category = resolveCategory(tripCode)
   if (!category) return []
   return GALLERY_PHOTOS.filter((p) => p.category === category)
 }
