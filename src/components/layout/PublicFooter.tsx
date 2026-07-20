@@ -6,10 +6,10 @@ import { enabledContactChannels, FACEBOOK_PAGE_URL } from '../../data/contactCha
 import type { TranslationKey } from '../../i18n/translations'
 
 const FOOTER_VIDEO_URL =
-  'https://xwdtjwzjkqunewxjpimm.supabase.co/storage/v1/object/public/trip-photos/VDO/Copy%20of%202026%20t2t%20tripLandscape%20(1).mp4'
+  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/VDO/NZ/NZ02.mp4'
 
 const TRIP2TALK_LOGO_URL =
-  'https://xwdtjwzjkqunewxjpimm.supabase.co/storage/v1/object/public/trip-photos/web%20photos/Icon/Trip2talk%20(1).png'
+  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Logo/Trip2talk%20(1).png'
 
 const navLinks: { to: string; key: TranslationKey }[] = [
   { to: '/trips', key: 'nav.trips' },

@@ -1,8 +1,13 @@
-export type GalleryCategory = 'new-zealand' | 'tasmania' | 'nsw' | 'sydney' | 'outback'
+export type GalleryCategory = 'new-zealand' | 'tasmania' | 'nsw' | 'sydney' | 'outback' | 'melbourne'
 
 export interface GalleryPhoto {
   id: string
-  base64: string
+  /** Inline base64 data URI — legacy photos only. Prefer `url` for new photos
+   * (hosted in Supabase Storage) so we stop bloating this file with more
+   * multi-KB base64 blobs. */
+  base64?: string
+  /** Public Supabase Storage URL — preferred over `base64` for new photos. */
+  url?: string
   category: GalleryCategory
   caption_th: string
   caption_en: string
@@ -138,6 +143,70 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
     caption_th: 'Avalon Beach ยามเช้า',
     location: 'Avalon Beach · Northern Beaches NSW',
   },
+  {
+    id: 'mel-001',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Melbourne/cover/473758456_10235067123449148_6218687640351110316_n%20(1).jpg',
+    category: 'melbourne',
+    caption_en: 'Melbourne City',
+    caption_th: 'เมลเบิร์นซิตี้',
+    location: 'Melbourne, VIC',
+  },
+  {
+    id: 'mel-002',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Melbourne/cover/Mel01%20-%20Copy.jpg',
+    category: 'melbourne',
+    caption_en: 'Melbourne & Great Ocean Road',
+    caption_th: 'ทริปเมลเบิร์น & เกรทโอเชียนโร้ด',
+    location: 'Melbourne, VIC',
+  },
+  {
+    id: 'mel-003',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Melbourne/cover/Mel02%20-%20Copy.jpg',
+    category: 'melbourne',
+    caption_en: 'Melbourne & Great Ocean Road',
+    caption_th: 'ทริปเมลเบิร์น & เกรทโอเชียนโร้ด',
+    location: 'Melbourne, VIC',
+  },
+  {
+    id: 'mel-004',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Melbourne/cover/Mel03%20-%20Copy.jpg',
+    category: 'melbourne',
+    caption_en: 'Melbourne & Great Ocean Road',
+    caption_th: 'ทริปเมลเบิร์น & เกรทโอเชียนโร้ด',
+    location: 'Melbourne, VIC',
+  },
+  {
+    id: 'mel-005',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Melbourne/cover/Mel04.jpg',
+    category: 'melbourne',
+    caption_en: 'Melbourne & Great Ocean Road',
+    caption_th: 'ทริปเมลเบิร์น & เกรทโอเชียนโร้ด',
+    location: 'Melbourne, VIC',
+  },
+  {
+    id: 'mel-006',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Melbourne/cover/Mel07.jpg',
+    category: 'melbourne',
+    caption_en: 'Melbourne & Great Ocean Road',
+    caption_th: 'ทริปเมลเบิร์น & เกรทโอเชียนโร้ด',
+    location: 'Melbourne, VIC',
+  },
+  {
+    id: 'mel-007',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Melbourne/cover/t2t002.jpeg',
+    category: 'melbourne',
+    caption_en: 'Trip2Talk Melbourne Group',
+    caption_th: 'กลุ่ม Trip2Talk ที่เมลเบิร์น',
+    location: 'Melbourne, VIC',
+  },
+  {
+    id: 'mel-008',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Melbourne/cover/t2t003.jpeg',
+    category: 'melbourne',
+    caption_en: 'Trip2Talk Melbourne Group',
+    caption_th: 'กลุ่ม Trip2Talk ที่เมลเบิร์น',
+    location: 'Melbourne, VIC',
+  },
 ]
 
 /** Map trip codes to gallery category for hero/thumbnail lookup */
@@ -153,6 +222,7 @@ export const TRIP_GALLERY_CATEGORY: Record<string, GalleryCategory> = {
   'LAV-ANB-1D': 'nsw',
   'SYD-MW-WIN': 'sydney',
   'SYD-1DAY': 'sydney',
+  'MEL-4D3N': 'melbourne',
 }
 
 export type GalleryFilter = 'all' | GalleryCategory
@@ -200,11 +270,11 @@ export function getGalleryPhotosForTrip(tripCode: string): GalleryPhoto[] {
 const _photoSrcCache = new Map<string, string>()
 
 export function photoSrc(photo: GalleryPhoto): string {
+  if (photo.url) return photo.url
   const cached = _photoSrcCache.get(photo.id)
   if (cached) return cached
-  const src = photo.base64.startsWith('data:')
-    ? photo.base64
-    : `data:image/jpeg;base64,${photo.base64}`
+  const base64 = photo.base64 ?? ''
+  const src = base64.startsWith('data:') ? base64 : `data:image/jpeg;base64,${base64}`
   _photoSrcCache.set(photo.id, src)
   return src
 }

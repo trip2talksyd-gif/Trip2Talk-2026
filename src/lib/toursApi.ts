@@ -3,6 +3,7 @@ import { callStaffApi } from './supabaseStaff'
 import { SeatsFullError } from '../types/errors'
 import type {
   BookingInsertReadback,
+  BookingPayment,
   ComplianceItem,
   Expense,
   StaffRole,
@@ -636,6 +637,7 @@ export type ManualBookingInput = {
   amount_paid_aud?: number
   payment_method?: string
   source?: string
+  payment_plan_installments?: number
 }
 
 /** Staff-entered booking for a phone/Facebook customer — holds a real seat via the same RPC the public flow uses. */
@@ -652,6 +654,29 @@ export async function markAttendance(id: string, attended: boolean | null): Prom
  * never had a real booking (test/example rows). */
 export async function deleteTour(id: string): Promise<void> {
   await callStaffApi('delete_tour', { id })
+}
+
+export type RecordPaymentResult = {
+  payment: BookingPayment
+  amount_paid_aud: number
+  booking_status: string
+  price_aud: number
+  installment_no: number
+  installment_plan: number | null
+}
+
+/** Records one installment payment against a booking — bumps the running
+ * total and auto-flips status to fully_paid once it reaches the trip price. */
+export async function recordPayment(
+  bookingId: string,
+  amount: number,
+  paymentMethod?: string,
+): Promise<RecordPaymentResult> {
+  return callStaffApi<RecordPaymentResult>('record_payment', { bookingId, amount, paymentMethod })
+}
+
+export async function fetchPaymentsForBooking(bookingId: string): Promise<BookingPayment[]> {
+  return callStaffApi<BookingPayment[]>('list_payments_for_booking', { bookingId })
 }
 
 export type YearSummary = {
@@ -700,13 +725,40 @@ export function summarizeByTrip(summary: YearSummary): TripFinancialRow[] {
   return [...rows.values()].sort((a, b) => a.trip_code.localeCompare(b.trip_code))
 }
 
-/** Builds a downloadable CSV Blob URL from year summary rows — caller revokes the URL after use. */
+/** Builds a downloadable CSV Blob URL from year summary rows — caller revokes the URL after use.
+ * Revenue is GST-inclusive (matches the tax invoices issued at booking time), so the GST/ex-GST
+ * columns are back-calculated here (revenue / 11) for the accountant's BAS at tax time. */
 export function tripFinancialsToCsv(rows: TripFinancialRow[]): string {
-  const header = 'Trip Code,Bookings,Revenue (AUD),Expenses (AUD),Profit (AUD)'
-  const lines = rows.map(
-    (r) => `${r.trip_code},${r.bookings_count},${r.revenue_aud.toFixed(2)},${r.expense_aud.toFixed(2)},${r.profit_aud.toFixed(2)}`,
-  )
-  return [header, ...lines].join('\n')
+  const header =
+    'Trip Code,Bookings,Revenue inc. GST (AUD),GST (AUD),Revenue ex. GST (AUD),Expenses (AUD),Profit (AUD)'
+  const lines = rows.map((r) => {
+    const gst = r.revenue_aud / 11
+    const exGst = r.revenue_aud - gst
+    return [
+      r.trip_code,
+      r.bookings_count,
+      r.revenue_aud.toFixed(2),
+      gst.toFixed(2),
+      exGst.toFixed(2),
+      r.expense_aud.toFixed(2),
+      r.profit_aud.toFixed(2),
+    ].join(',')
+  })
+  const totalRevenue = rows.reduce((s, r) => s + r.revenue_aud, 0)
+  const totalGst = totalRevenue / 11
+  const totalExpense = rows.reduce((s, r) => s + r.expense_aud, 0)
+  const totalProfit = rows.reduce((s, r) => s + r.profit_aud, 0)
+  const totalBookings = rows.reduce((s, r) => s + r.bookings_count, 0)
+  const totalLine = [
+    'TOTAL',
+    totalBookings,
+    totalRevenue.toFixed(2),
+    totalGst.toFixed(2),
+    (totalRevenue - totalGst).toFixed(2),
+    totalExpense.toFixed(2),
+    totalProfit.toFixed(2),
+  ].join(',')
+  return [header, ...lines, totalLine].join('\n')
 }
 
 export async function insertExpense(expense: Omit<Expense, 'id' | 'created_at'>): Promise<Expense> {

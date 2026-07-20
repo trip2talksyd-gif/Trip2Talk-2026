@@ -101,6 +101,19 @@ export default function TripManagerPage() {
     [tours],
   )
 
+  // Surfaces trips that now have an open seat AND still have uncontacted
+  // waitlist entries — so staff sees it the moment they open Trip Manager
+  // instead of having to remember to cross-check the two lists by hand.
+  const waitlistMatches = useMemo(() => {
+    return tours
+      .filter((t) => isLiveStatus(t.status) && t.max_seats - t.booked_seats > 0)
+      .map((t) => ({
+        tour: t,
+        waiting: waitlist.filter((w) => w.trip_code === t.trip_code && !w.contacted),
+      }))
+      .filter((m) => m.waiting.length > 0)
+  }, [tours, waitlist])
+
   // Every trip stays in the database forever (booking/revenue history is
   // needed for tax records) — this only controls what's shown in the list.
   // Past trips are hidden by default so the list doesn't grow forever, but
@@ -258,6 +271,59 @@ export default function TripManagerPage() {
 
         {!loading && !error && (
           <>
+            {waitlistMatches.length > 0 && (
+              <section className="rounded-editorial border-2 border-gold bg-gold/15 p-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-gold">
+                    🔔 มีที่ว่าง + คนรอคิว
+                  </h2>
+                  <span className="rounded-full bg-gold px-2 py-0.5 text-xs font-medium text-near-black-green">
+                    {waitlistMatches.reduce((sum, m) => sum + m.waiting.length, 0)}
+                  </span>
+                </div>
+                <ul className="mt-3 space-y-2">
+                  {waitlistMatches.map(({ tour: t, waiting }) => (
+                    <li
+                      key={t.id}
+                      className="rounded-editorial border border-gold/40 bg-near-black-green/60 px-3 py-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-cream">
+                          {t.name_en} <span className="text-cream-muted">· {t.trip_code}</span>
+                        </span>
+                        <span className="rounded-full bg-gold px-2 py-0.5 text-xs font-medium text-near-black-green">
+                          {t.max_seats - t.booked_seats} ว่าง
+                        </span>
+                      </div>
+                      <ul className="mt-2 space-y-1">
+                        {waiting.map((w) => (
+                          <li
+                            key={w.id}
+                            className="flex items-center justify-between gap-2 text-xs text-cream-muted"
+                          >
+                            <span className="truncate">
+                              {w.name} · {w.phone}
+                              {w.email ? ` · ${w.email}` : ''}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => toggleContacted(w)}
+                              className="shrink-0 rounded-full bg-gold px-2 py-0.5 text-[10px] font-medium text-near-black-green"
+                            >
+                              ติดต่อแล้ว
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-xs text-cream-muted">
+                  ทริปเหล่านี้มีที่ว่างแล้ว และยังมีคนลงชื่อ waitlist รออยู่ — ติดต่อได้เลยก่อนที่ว่างจะเต็มอีกครั้ง
+                </p>
+              </section>
+            )}
+
             {lowSeatTrips.length > 0 && (
               <section className="rounded-editorial border-2 border-coral bg-coral/15 p-4">
                 <div className="flex items-center justify-between">

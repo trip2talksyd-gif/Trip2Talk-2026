@@ -14,6 +14,14 @@ export type ReceiptData = {
   paymentMethod: string | null
   bookingStatus: string
   source?: string | null
+  /** Which installment this payment/receipt is for (1 = first payment). Omit or 1 with no plan = pay-in-full. */
+  installmentNo?: number | null
+  /** How many installments the customer's plan has (1 = no split). */
+  installmentPlan?: number | null
+  /** Full trip price (inc. GST), used to show "Installment X of Y" + balance remaining. */
+  priceAud?: number | null
+  /** Trip price minus everything paid so far, after this payment. */
+  balanceRemaining?: number | null
 }
 
 // Tax invoice is an AU legal/customer-facing document — English + AUD only,
@@ -94,6 +102,8 @@ export default function ReceiptPage() {
     }
   }
 
+  const isInstallment = (data?.installmentPlan ?? 1) > 1
+
   if (!data) {
     return (
       <div className="min-h-svh bg-near-black-green px-4 py-6 text-cream">
@@ -172,15 +182,30 @@ export default function ReceiptPage() {
           {data.source && (
             <Row label="Referred Via" value={SOURCE_LABEL_EN[data.source] ?? data.source} />
           )}
+          {isInstallment && (
+            <Row
+              label="Installment"
+              value={`${data.installmentNo ?? 1} of ${data.installmentPlan}`}
+            />
+          )}
         </div>
 
         <div className="mt-4 space-y-1.5 border-t border-dashed border-black/20 pt-4 text-sm">
           <Row label="Subtotal (ex. GST)" value={formatAudCents(data.amountPaid / (1 + GST_RATE))} />
           <Row label="GST (10%)" value={formatAudCents(data.amountPaid - data.amountPaid / (1 + GST_RATE))} />
           <div className="flex items-center justify-between pt-2 text-base font-bold">
-            <span>Total (inc. GST)</span>
+            <span>{isInstallment ? `This Payment (Installment ${data.installmentNo ?? 1})` : 'Total (inc. GST)'}</span>
             <span>{formatAudCents(data.amountPaid)}</span>
           </div>
+          {isInstallment && typeof data.priceAud === 'number' && (
+            <Row label="Trip Total (inc. GST)" value={formatAudCents(data.priceAud)} />
+          )}
+          {isInstallment && typeof data.balanceRemaining === 'number' && (
+            <Row
+              label="Balance Remaining"
+              value={data.balanceRemaining > 0 ? formatAudCents(data.balanceRemaining) : 'Paid in Full'}
+            />
+          )}
         </div>
 
         <div className="mt-5 border-t border-dashed border-black/20 pt-4 text-center text-xs text-black/60">

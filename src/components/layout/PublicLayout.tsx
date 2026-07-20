@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
-import { Menu, X } from 'lucide-react'
+import { Menu, User, X } from 'lucide-react'
 import { useState } from 'react'
 import { useLang } from '../../hooks/useLang'
 import InstallPrompt from '../InstallPrompt'
@@ -21,6 +21,11 @@ const menuLinks = [
   { to: '/app', key: 'nav.portal' as const },
 ]
 
+// Desktop top bar only — deliberately excludes /account (that lives next to
+// the language toggle as an icon instead, so it doesn't get mistaken for a
+// content section like Trips/Gallery/Calendar/Pricing/About).
+const desktopNavOrder = ['/trips', '/about', '/gallery', '/calendar', '/pricing']
+
 export default function PublicLayout() {
   const { t, toggleLang } = useLang()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -37,10 +42,9 @@ export default function PublicLayout() {
           </Link>
 
           <nav className="hidden flex-1 items-center justify-center gap-1 lg:flex">
-            {menuLinks
-              .filter((l) =>
-                ['/trips', '/gallery', '/calendar', '/pricing', '/about', '/account'].includes(l.to),
-              )
+            {desktopNavOrder
+              .map((to) => menuLinks.find((l) => l.to === to))
+              .filter((l): l is (typeof menuLinks)[number] => Boolean(l))
               .map(({ to, key }) => (
                 <NavLink
                   key={to}
@@ -56,13 +60,25 @@ export default function PublicLayout() {
               ))}
           </nav>
 
-          <button
-            type="button"
-            onClick={toggleLang}
-            className="rounded-editorial border border-teal-400/40 px-3 py-1 text-xs font-medium text-teal-400"
-          >
-            {t('lang.toggle')}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={toggleLang}
+              className="rounded-editorial border border-teal-400/40 px-3 py-1 text-xs font-medium text-teal-400"
+            >
+              {t('lang.toggle')}
+            </button>
+
+            <NavLink
+              to="/account"
+              aria-label={t('nav.account')}
+              className={({ isActive }) =>
+                `rounded-editorial p-2 hover:bg-white/5 ${isActive ? 'text-teal-400' : 'text-cream/70 hover:text-cream'}`
+              }
+            >
+              <User className="h-4 w-4" />
+            </NavLink>
+          </div>
 
           <button
             type="button"

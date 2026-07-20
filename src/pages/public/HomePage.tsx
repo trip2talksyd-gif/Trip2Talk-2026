@@ -6,9 +6,9 @@ import TripTypeCategories from '../../components/trips/TripTypeCategories'
 import HomeFeaturesSection from '../../components/trips/HomeFeaturesSection'
 import HomeCtaFaq from '../../components/trips/HomeCtaFaq'
 
-/** Existing Trip2Talk hero reel in public storage */
+/** Trip2Talk hero reel — hosted in the main Supabase project's storage bucket */
 const HERO_VIDEO_URL =
-  'https://xwdtjwzjkqunewxjpimm.supabase.co/storage/v1/object/public/trip-photos/VDO/t2t%20herocover.mp4'
+  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/VDO/Tasmania_cover.mp4'
 
 export default function HomePage() {
   const { t, lang } = useLang()

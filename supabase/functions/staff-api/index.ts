@@ -50,6 +50,8 @@ const ACTION_ROLES: Record<string, Role[]> = {
   mark_attendance: ['OWNER', 'MANAGER', 'GUIDE'],
   year_summary: ['OWNER', 'MANAGER'],
   delete_tour: ['OWNER', 'MANAGER'],
+  record_payment: ['OWNER', 'MANAGER', 'CASHIER'],
+  list_payments_for_booking: ['OWNER', 'MANAGER', 'CASHIER'],
 }
 
 /**
@@ -410,6 +412,7 @@ Deno.serve(async (req) => {
             amount_paid_aud: b.amount_paid_aud ?? 0,
             payment_method: b.payment_method ?? 'manual',
             source: b.source ?? 'facebook',
+            payment_plan_installments: b.payment_plan_installments ?? 1,
             slip_url: null,
             booking_reference: bookingRef,
           })
@@ -420,6 +423,20 @@ Deno.serve(async (req) => {
           await admin.rpc('release_seat', { p_tour_id: tour.id, p_seats_to_release: 1 })
           throw error
         }
+
+        // Keep the payments ledger consistent with amount_paid_aud so
+        // "installment X of Y" displays correctly even for the first
+        // payment taken at the moment the booking is created.
+        const initialAmount = Number(b.amount_paid_aud ?? 0)
+        if (initialAmount > 0 && data) {
+          await admin.from('booking_payments').insert({
+            booking_id: data.id,
+            amount_aud: initialAmount,
+            payment_method: b.payment_method ?? 'manual',
+            installment_no: 1,
+          })
+        }
+
         return json({ data })
       }
 
@@ -429,6 +446,85 @@ Deno.serve(async (req) => {
         const { error } = await admin.from('tour_bookings').update({ attended }).eq('id', id)
         if (error) throw error
         return json({ ok: true })
+      }
+
+      case 'record_payment': {
+        // Records one installment against a booking (append-only ledger) and
+        // bumps the booking's running total + status. Supports customers who
+        // split the trip price into 2-4 payments — each call here is one of
+        // those payments, and each gets its own tax invoice on the frontend.
+        const { bookingId, amount, paymentMethod } = params as {
+          bookingId: string
+          amount: number
+          paymentMethod?: string
+        }
+        if (!bookingId || !amount || amount <= 0) return json({ error: 'invalid_params' }, 400)
+
+        const { data: booking, error: bookingError } = await admin
+          .from('tour_bookings')
+          .select('*')
+          .eq('id', bookingId)
+          .maybeSingle()
+        if (bookingError) throw bookingError
+        if (!booking) return json({ error: 'booking_not_found' }, 404)
+
+        const { data: tour } = await admin
+          .from('tours')
+          .select('*')
+          .eq('id', booking.tour_id)
+          .maybeSingle()
+        const priceAud = tour ? Number(tour.price_aud ?? tour.price_standard ?? 0) : 0
+
+        const { count, error: countError } = await admin
+          .from('booking_payments')
+          .select('id', { count: 'exact', head: true })
+          .eq('booking_id', bookingId)
+        if (countError) throw countError
+        const installmentNo = (count ?? 0) + 1
+
+        const { data: payment, error: paymentError } = await admin
+          .from('booking_payments')
+          .insert({
+            booking_id: bookingId,
+            amount_aud: amount,
+            payment_method: paymentMethod ?? 'manual',
+            installment_no: installmentNo,
+          })
+          .select()
+          .single()
+        if (paymentError) throw paymentError
+
+        const newTotal = Number(booking.amount_paid_aud ?? 0) + Number(amount)
+        const newStatus = priceAud > 0 && newTotal >= priceAud ? 'fully_paid' : 'deposit_paid'
+
+        const { error: updateError } = await admin
+          .from('tour_bookings')
+          .update({ amount_paid_aud: newTotal, booking_status: newStatus })
+          .eq('id', bookingId)
+        if (updateError) throw updateError
+
+        return json({
+          data: {
+            payment,
+            amount_paid_aud: newTotal,
+            booking_status: newStatus,
+            price_aud: priceAud,
+            installment_no: installmentNo,
+            installment_plan: booking.payment_plan_installments ?? null,
+          },
+        })
+      }
+
+      case 'list_payments_for_booking': {
+        const { bookingId } = params as { bookingId: string }
+        if (!bookingId) return json({ error: 'invalid_params' }, 400)
+        const { data, error } = await admin
+          .from('booking_payments')
+          .select('*')
+          .eq('booking_id', bookingId)
+          .order('installment_no', { ascending: true })
+        if (error) throw error
+        return json({ data })
       }
 
       case 'delete_tour': {

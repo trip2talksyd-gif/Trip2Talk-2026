@@ -55,12 +55,24 @@ export interface TourBooking {
   attended?: boolean | null
   /** Where this booking came from — 'website' for public bookings, or facebook/phone/line/walk_in/other for staff-entered ones. */
   source?: string | null
+  /** Installment plan the customer picked (1 = pay in full, 2 or 4 = split). Informational — payments are still manual PayID transfers recorded one at a time. */
+  payment_plan_installments?: number | null
   booking_status: BookingStatus
   amount_paid_aud: number
   payment_method: string | null
   slip_url: string | null
   booking_reference: string | null
   booked_at: string
+}
+
+/** One recorded payment against a booking — lets a booking be paid off in several installments, each with its own receipt. */
+export interface BookingPayment {
+  id: string
+  booking_id: string
+  amount_aud: number
+  payment_method: string | null
+  installment_no: number
+  created_at: string
 }
 
 export interface StaffProfile {

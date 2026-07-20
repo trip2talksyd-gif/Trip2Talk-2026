@@ -21,22 +21,44 @@ export default function GalleryPage() {
     { id: 'tasmania', label: 'Tasmania', th: 'แทสเมเนีย' },
     { id: 'nsw', label: 'NSW', th: 'NSW' },
     { id: 'sydney', label: 'Sydney', th: 'ซิดนีย์' },
+    { id: 'melbourne', label: 'Melbourne', th: 'เมลเบิร์น' },
   ]
 
   const items = useMemo(() => filterGalleryPhotos(cat), [cat])
 
-  const slides = useMemo(
-    () =>
-      items.slice(0, 8).map((photo) => ({
-        photo,
-        sceneEn: photo.caption_en || 'Gallery',
-        sceneTh: photo.caption_th || 'แกลเลอรี',
-        titleEn: 'Example album from Saen & team',
-        titleTh: 'อัลบั้มตัวอย่างจากพี่แสนและทีม',
-        meta: photo.id,
-      })),
-    [items],
-  )
+  // Featured slideshow always mixes photos from every trip/destination
+  // (regardless of which filter tab is selected below) so it feels like a
+  // showcase of the whole gallery, not just whatever category is active.
+  // Interleaved round-robin by category so it doesn't just show Melbourne's
+  // 8 photos back-to-back before getting to anywhere else.
+  const slides = useMemo(() => {
+    const byCategory = new Map<string, typeof GALLERY_PHOTOS>()
+    for (const photo of GALLERY_PHOTOS) {
+      const list = byCategory.get(photo.category)
+      if (list) list.push(photo)
+      else byCategory.set(photo.category, [photo])
+    }
+    const buckets = [...byCategory.values()]
+    const mixed: typeof GALLERY_PHOTOS = []
+    for (let i = 0; mixed.length < GALLERY_PHOTOS.length; i++) {
+      let addedAny = false
+      for (const bucket of buckets) {
+        if (bucket[i]) {
+          mixed.push(bucket[i])
+          addedAny = true
+        }
+      }
+      if (!addedAny) break
+    }
+    return mixed.slice(0, 10).map((photo) => ({
+      photo,
+      sceneEn: photo.caption_en || 'Gallery',
+      sceneTh: photo.caption_th || 'แกลเลอรี',
+      titleEn: 'Example album from Saen & team',
+      titleTh: 'อัลบั้มตัวอย่างจากพี่แสนและทีม',
+      meta: photo.id,
+    }))
+  }, [])
 
   return (
     <div className="space-y-4 pb-4">

@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom'
 import { ArrowLeft, ChevronRight, Heart, Sparkles } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites'
-import { fetchTourByCode } from '../../lib/toursApi'
+import { fetchTourByCode, isTourBookable, seatsRemaining } from '../../lib/toursApi'
 import { isAuroraTrip, tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
 import { getTripDetails, listFor, textFor } from '../../data/tripDetails'
 import { getItinerary } from '../../data/itineraries'
@@ -12,6 +12,7 @@ import { AURORA_DISCLAIMER } from '../../data/risks'
 import { getTripMap, googleMapsEmbedUrl } from '../../data/tripMaps'
 import { getGalleryPhotosForTrip, photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
 import { getTripCoverVideoUrl } from '../../data/tripVideos'
+import { getTestimonialsForTrip } from '../../data/testimonials'
 import type { Tour } from '../../types/tour'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
@@ -23,6 +24,7 @@ import TripStickyBookBar from '../../components/trips/TripStickyBookBar'
 import AuroraTracker from '../../components/trips/AuroraTracker'
 import TripTimeline from '../../components/trips/TripTimeline'
 import PremiumTripCallout from '../../components/trips/PremiumTripCallout'
+import TestimonialSection from '../../components/trips/TestimonialSection'
 
 export default function TripDetailPage() {
   const { tripCode } = useParams<{ tripCode: string }>()
@@ -88,6 +90,12 @@ export default function TripDetailPage() {
   const itinerary = getItinerary(tour.trip_code, details?.highlights, durationLabel)
   const mapCfg = getTripMap(tour.trip_code)
   const coverVideoUrl = getTripCoverVideoUrl(tour.trip_code)
+  const bookable = isTourBookable(tour)
+  const remaining = seatsRemaining(tour)
+  const testimonials = getTestimonialsForTrip(tour.trip_code)
+  // Urgency badge once seats are genuinely scarce — not from the very first
+  // booking, so it doesn't cry wolf on a trip that just opened.
+  const lowSeats = bookable && tour.max_seats > 0 && remaining <= Math.max(2, Math.ceil(tour.max_seats * 0.34))
 
   return (
     <div className="space-y-6 pb-28 md:pb-4">
@@ -130,6 +138,13 @@ export default function TripDetailPage() {
           />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-teal-900/85 via-teal-900/20 to-transparent" />
+        {lowSeats && (
+          <span className="absolute right-3 top-3 animate-pulse rounded-full bg-coral px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wide text-white shadow-[0_4px_12px_-4px_rgba(0,0,0,0.5)]">
+            {lang === 'th'
+              ? `🔥 เหลือ ${remaining} ที่นั่ง`
+              : `🔥 Only ${remaining} seat${remaining === 1 ? '' : 's'} left`}
+          </span>
+        )}
         <div className="absolute bottom-0 p-4 sm:p-5">
           <p className="text-[10px] uppercase tracking-wider text-cream/65">{tour.trip_code}</p>
           <h1 className="font-serif text-2xl text-cream sm:text-3xl">{name}</h1>
@@ -151,7 +166,17 @@ export default function TripDetailPage() {
             <span className="text-[10px] font-semibold text-ink-soft">AUD</span>
           </div>
           <p className="mt-0.5 truncate text-[10px] text-ink-soft">
-            {lang === 'th' ? 'ต่อคน · มัดจำล็อคที่นั่ง' : 'per person · deposit locks your seat'}
+            {bookable
+              ? lowSeats
+                ? lang === 'th'
+                  ? `เหลือ ${remaining} ที่นั่ง · มัดจำล็อคที่นั่ง`
+                  : `${remaining} seat${remaining === 1 ? '' : 's'} left · deposit locks your seat`
+                : lang === 'th'
+                  ? 'ต่อคน · มัดจำล็อคที่นั่ง'
+                  : 'per person · deposit locks your seat'
+              : lang === 'th'
+                ? 'ต่อคน · มัดจำล็อคที่นั่ง'
+                : 'per person · deposit locks your seat'}
           </p>
         </div>
         <TripBookButton tour={tour} variant="deep" className="!w-auto shrink-0 !px-5 !py-2.5" />
@@ -223,6 +248,8 @@ export default function TripDetailPage() {
               </ul>
             </section>
           )}
+
+          <TestimonialSection testimonials={testimonials} />
 
           <div className="grid gap-4 sm:grid-cols-2">
             {includes.length > 0 && (

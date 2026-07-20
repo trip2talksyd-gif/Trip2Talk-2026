@@ -4,8 +4,7 @@ import {
   createBookingManual,
   fetchPendingBookings,
   fetchToursAdmin,
-  fetchTourByCode,
-  updateBookingStatus,
+  recordPayment,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { Tour, TourBooking } from '../../types/tour'
@@ -32,7 +31,15 @@ export default function CashierPOS() {
   const [amountPaid, setAmountPaid] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
   const [source, setSource] = useState('facebook')
+  const [installmentPlan, setInstallmentPlan] = useState('1')
   const [submitting, setSubmitting] = useState(false)
+
+  // Inline "+ บันทึกการชำระ" flow — which pending booking has its payment
+  // entry row open, plus the draft amount/method for it.
+  const [payingId, setPayingId] = useState<string | null>(null)
+  const [payAmount, setPayAmount] = useState('')
+  const [payMethod, setPayMethod] = useState('cash')
+  const [payingSubmitting, setPayingSubmitting] = useState(false)
 
   const load = useCallback(() => {
     setLoading(true)
@@ -75,6 +82,7 @@ export default function CashierPOS() {
         payment_method: paymentMethod,
         booking_status: bookingStatus,
         source,
+        payment_plan_installments: Number(installmentPlan),
       })
       toast('เพิ่มการจองสำเร็จ', 'success')
       const tour = tours.find((tr) => tr.trip_code === tripCode)
@@ -86,6 +94,7 @@ export default function CashierPOS() {
       setEmail('')
       setAmountPaid('')
       setSource('facebook')
+      setInstallmentPlan('1')
       load()
       if (paidAmount > 0) {
         navigate('/app/receipt', {
@@ -99,6 +108,10 @@ export default function CashierPOS() {
             paymentMethod,
             bookingStatus,
             source,
+            installmentNo: 1,
+            installmentPlan: Number(installmentPlan),
+            priceAud: tour?.price_aud ?? null,
+            balanceRemaining: tour ? Math.max(0, tour.price_aud - paidAmount) : null,
           },
         })
       }
@@ -119,16 +132,31 @@ export default function CashierPOS() {
     [tours],
   )
 
-  async function markPaid(booking: TourBooking, status: 'deposit_paid' | 'fully_paid') {
-    try {
-      const tour = await fetchTourByCode(booking.trip_code)
-      const amount =
-        status === 'deposit_paid'
-          ? tour?.deposit_aud ?? 100
-          : tour?.price_aud ?? booking.amount_paid_aud
+  function openPaymentRow(booking: TourBooking) {
+    const tour = tours.find((tr) => tr.trip_code === booking.trip_code)
+    const remaining = tour ? Math.max(0, tour.price_aud - booking.amount_paid_aud) : 0
+    const plan = booking.payment_plan_installments ?? 1
+    const perInstallment = tour && plan > 1 ? Math.min(remaining, tour.price_aud / plan) : remaining
+    setPayingId(booking.id)
+    setPayAmount(perInstallment > 0 ? String(Math.round(perInstallment * 100) / 100) : '')
+    setPayMethod(booking.payment_method ?? 'cash')
+  }
 
-      await updateBookingStatus(booking.id, status, amount)
+  function closePaymentRow() {
+    setPayingId(null)
+    setPayAmount('')
+    setPayMethod('cash')
+  }
+
+  async function submitPayment(booking: TourBooking) {
+    const amount = Number(payAmount)
+    if (!amount || amount <= 0) return
+    setPayingSubmitting(true)
+    try {
+      const result = await recordPayment(booking.id, amount, payMethod)
       toast(t('toast.paymentUpdated'), 'success')
+      const tour = tours.find((tr) => tr.trip_code === booking.trip_code)
+      closePaymentRow()
       load()
       navigate('/app/receipt', {
         state: {
@@ -138,9 +166,13 @@ export default function CashierPOS() {
           tripCode: booking.trip_code,
           departureDate: tour?.departure_date ?? null,
           amountPaid: amount,
-          paymentMethod: booking.payment_method ?? 'manual',
-          bookingStatus: status,
+          paymentMethod: payMethod,
+          bookingStatus: result.booking_status,
           source: booking.source ?? null,
+          installmentNo: result.installment_no,
+          installmentPlan: result.installment_plan,
+          priceAud: result.price_aud,
+          balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
         },
       })
     } catch (err) {
@@ -149,6 +181,8 @@ export default function CashierPOS() {
         return
       }
       toast(t('toast.paymentFailed'), 'error')
+    } finally {
+      setPayingSubmitting(false)
     }
   }
 
@@ -275,6 +309,19 @@ export default function CashierPOS() {
               </label>
             </div>
 
+            <label className="block">
+              <span className="text-xs text-cream-muted">แบ่งจ่าย (ถ้าลูกค้าขอ)</span>
+              <select
+                value={installmentPlan}
+                onChange={(e) => setInstallmentPlan(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+              >
+                <option value="1">จ่ายเต็มจำนวน (ไม่แบ่งงวด)</option>
+                <option value="2">แบ่งจ่าย 2 งวด</option>
+                <option value="4">แบ่งจ่าย 4 งวด</option>
+              </select>
+            </label>
+
             <button
               type="submit"
               disabled={!isValid || submitting}
@@ -294,32 +341,107 @@ export default function CashierPOS() {
 
         {!loading && !error && (
           <ul className="space-y-3">
-            {bookings.map((b) => (
-              <li key={b.id} className="rounded-editorial border border-white/8 bg-surface-card p-4">
-                <p className="font-medium text-cream">
-                  {b.first_name_en} {b.last_name_en}
-                </p>
-                <p className="text-xs text-cream-muted">
-                  {b.trip_code} · {b.email}
-                </p>
-                <div className="mt-3 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => markPaid(b, 'deposit_paid')}
-                    className="rounded-editorial bg-gold px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-gold-dark transition-transform active:scale-95"
-                  >
-                    Deposit Paid
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => markPaid(b, 'fully_paid')}
-                    className="rounded-editorial border border-gold px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-gold transition-transform active:scale-95"
-                  >
-                    Fully Paid
-                  </button>
-                </div>
-              </li>
-            ))}
+            {bookings.map((b) => {
+              const tour = tours.find((tr) => tr.trip_code === b.trip_code)
+              const plan = b.payment_plan_installments ?? 1
+              const remaining = tour ? Math.max(0, tour.price_aud - b.amount_paid_aud) : null
+              const isPaying = payingId === b.id
+
+              return (
+                <li key={b.id} className="rounded-editorial border border-white/8 bg-surface-card p-4">
+                  <p className="font-medium text-cream">
+                    {b.first_name_en} {b.last_name_en}
+                  </p>
+                  <p className="text-xs text-cream-muted">
+                    {b.trip_code} · {b.email}
+                  </p>
+                  <p className="mt-1 text-xs text-cream-muted">
+                    จ่ายแล้ว {b.amount_paid_aud.toLocaleString()} AUD
+                    {tour ? ` / ${tour.price_aud.toLocaleString()} AUD` : ''}
+                    {plan > 1 ? ` · แบ่งจ่าย ${plan} งวด` : ''}
+                    {remaining !== null && remaining > 0 ? ` · เหลือ ${remaining.toLocaleString()} AUD` : ''}
+                  </p>
+
+                  {!isPaying ? (
+                    <div className="mt-3">
+                      <button
+                        type="button"
+                        onClick={() => openPaymentRow(b)}
+                        className="rounded-editorial bg-gold px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-gold-dark transition-transform active:scale-95"
+                      >
+                        + บันทึกการชำระ
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="mt-3 space-y-2 rounded-lg border border-gold/30 bg-near-black-green p-3">
+                      <div className="grid grid-cols-2 gap-2">
+                        <label className="block">
+                          <span className="text-xs text-cream-muted">จำนวนเงิน (AUD)</span>
+                          <input
+                            type="number"
+                            min={0}
+                            autoFocus
+                            value={payAmount}
+                            onChange={(e) => setPayAmount(e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-white/15 bg-surface-card px-3 py-2 text-sm text-cream"
+                          />
+                        </label>
+                        <label className="block">
+                          <span className="text-xs text-cream-muted">ช่องทาง</span>
+                          <select
+                            value={payMethod}
+                            onChange={(e) => setPayMethod(e.target.value)}
+                            className="mt-1 w-full rounded-lg border border-white/15 bg-surface-card px-3 py-2 text-sm text-cream"
+                          >
+                            <option value="cash">เงินสด</option>
+                            <option value="payid">PayID</option>
+                            <option value="bank_transfer">โอนธนาคาร</option>
+                            <option value="manual">อื่นๆ</option>
+                          </select>
+                        </label>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {tour?.deposit_aud ? (
+                          <button
+                            type="button"
+                            onClick={() => setPayAmount(String(tour.deposit_aud))}
+                            className="rounded-full border border-white/15 px-2.5 py-1 text-[11px] text-cream-muted"
+                          >
+                            มัดจำ {tour.deposit_aud}
+                          </button>
+                        ) : null}
+                        {remaining ? (
+                          <button
+                            type="button"
+                            onClick={() => setPayAmount(String(remaining))}
+                            className="rounded-full border border-white/15 px-2.5 py-1 text-[11px] text-cream-muted"
+                          >
+                            จ่ายครบ {remaining}
+                          </button>
+                        ) : null}
+                      </div>
+                      <div className="flex gap-2 pt-1">
+                        <button
+                          type="button"
+                          disabled={!payAmount || Number(payAmount) <= 0 || payingSubmitting}
+                          onClick={() => submitPayment(b)}
+                          className="flex-1 rounded-lg bg-gold px-3 py-2 text-xs font-bold uppercase tracking-wider text-gold-dark disabled:opacity-50"
+                        >
+                          {payingSubmitting ? 'กำลังบันทึก...' : 'ยืนยันรับเงิน'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={closePaymentRow}
+                          className="rounded-lg border border-white/15 px-3 py-2 text-xs text-cream-muted"
+                        >
+                          ยกเลิก
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </li>
+              )
+            })}
           </ul>
         )}
       </main>

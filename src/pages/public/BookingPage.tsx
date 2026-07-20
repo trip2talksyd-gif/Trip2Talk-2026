@@ -65,6 +65,7 @@ export default function BookingPage() {
   const [touched, setTouched] = useState(false)
   const [reference, setReference] = useState('')
   const [slipFile, setSlipFile] = useState<File | null>(null)
+  const [installmentPlan, setInstallmentPlan] = useState<1 | 2 | 4>(1)
 
   const [form, setForm] = useState<FormState>({
     first_name_en: '',
@@ -157,6 +158,7 @@ export default function BookingPage() {
         source: 'website',
         slip_url: slipUrl,
         booking_reference: bookingRef,
+        payment_plan_installments: installmentPlan,
       })
 
       setReference(bookingRef)
@@ -389,19 +391,50 @@ export default function BookingPage() {
         </p>
       </div>
 
-      <div className="flex gap-2 rounded-xl border border-line bg-cream px-3 py-2.5">
-        <span className="text-sm leading-none" aria-hidden>
-          💳
-        </span>
-        <div>
-          <p className="text-[10.5px] font-bold text-ink">
-            {lang === 'th' ? 'แบ่งจ่ายได้ตามสะดวก' : 'Flexible installments'}
-          </p>
-          <p className="text-[9.5px] leading-relaxed text-ink-soft">
-            Pay the remaining balance in 2–4 installments, whatever works for you.
-            <span className="block font-thai">แบ่งจ่ายค่าทริปที่เหลือ 2-4 งวดตามความสะดวก</span>
-          </p>
+      <div className="rounded-xl border border-line bg-cream px-3 py-2.5">
+        <div className="flex gap-2">
+          <span className="text-sm leading-none" aria-hidden>
+            💳
+          </span>
+          <div>
+            <p className="text-[10.5px] font-bold text-ink">
+              {lang === 'th' ? 'แบ่งจ่ายได้ตามสะดวก' : 'Flexible installments'}
+            </p>
+            <p className="text-[9.5px] leading-relaxed text-ink-soft">
+              Pay the remaining balance in 2–4 installments, whatever works for you.
+              <span className="block font-thai">แบ่งจ่ายค่าทริปที่เหลือ 2-4 งวดตามความสะดวก</span>
+            </p>
+          </div>
         </div>
+        <div className="mt-2.5 grid grid-cols-3 gap-1.5">
+          {([1, 2, 4] as const).map((plan) => (
+            <button
+              key={plan}
+              type="button"
+              onClick={() => setInstallmentPlan(plan)}
+              className={`rounded-[10px] border px-2 py-2 text-center text-[10px] font-bold transition-colors ${
+                installmentPlan === plan
+                  ? 'border-teal-700 bg-teal-800 text-cream'
+                  : 'border-line bg-white text-ink-soft'
+              }`}
+            >
+              {plan === 1
+                ? lang === 'th'
+                  ? 'จ่ายเต็ม'
+                  : 'Pay in full'
+                : lang === 'th'
+                  ? `แบ่ง ${plan} งวด`
+                  : `Split ×${plan}`}
+            </button>
+          ))}
+        </div>
+        {installmentPlan > 1 && (
+          <p className="mt-1.5 text-[9px] leading-relaxed text-ink-soft">
+            {lang === 'th'
+              ? 'พี่แสนจะติดต่อนัดวันโอนแต่ละงวดกับคุณโดยตรงหลังจองเสร็จ'
+              : "Saen will follow up directly to arrange each installment's due date after you book."}
+          </p>
+        )}
       </div>
 
       <div className="rounded-xl border border-[#f0dfb8] bg-[#fff8ee] px-3 py-2.5">

@@ -6,6 +6,7 @@ import {
   summarizeByTrip,
   tripFinancialsToCsv,
   type TripFinancialRow,
+  type YearSummary,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import { DashboardCardSkeleton } from '../../components/ui/Skeleton'
@@ -14,10 +15,20 @@ import { PageError } from '../../components/ui/PageError'
 const CURRENT_YEAR = new Date().getFullYear()
 const YEAR_OPTIONS = [CURRENT_YEAR, CURRENT_YEAR - 1, CURRENT_YEAR - 2]
 
+const SOURCE_LABEL: Record<string, string> = {
+  facebook: 'Facebook',
+  website: 'Website',
+  phone: 'โทรศัพท์',
+  line: 'LINE',
+  walk_in: 'Walk-in',
+  other: 'อื่นๆ',
+}
+
 export default function TaxSummaryPage() {
   const navigate = useNavigate()
   const [year, setYear] = useState(CURRENT_YEAR)
   const [rows, setRows] = useState<TripFinancialRow[]>([])
+  const [summary, setSummary] = useState<YearSummary | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -25,7 +36,10 @@ export default function TaxSummaryPage() {
     setLoading(true)
     setError('')
     fetchYearSummary(year)
-      .then((summary) => setRows(summarizeByTrip(summary)))
+      .then((summary) => {
+        setSummary(summary)
+        setRows(summarizeByTrip(summary))
+      })
       .catch((err) => {
         if (err instanceof StaffSessionExpiredError) {
           navigate('/app')
@@ -53,6 +67,24 @@ export default function TaxSummaryPage() {
       ),
     [rows],
   )
+
+  // Which channel actually brought paying customers this year — helps decide
+  // where to spend ad budget / time (e.g. Facebook vs walk-in vs website).
+  const sourceBreakdown = useMemo(() => {
+    if (!summary) return []
+    const byCode = new Map<string, { count: number; revenue: number }>()
+    for (const b of summary.bookings) {
+      const code = (b.source || 'unknown').toLowerCase()
+      const row = byCode.get(code) ?? { count: 0, revenue: 0 }
+      row.count += 1
+      row.revenue += b.amount_paid_aud ?? 0
+      byCode.set(code, row)
+    }
+    return [...byCode.entries()]
+      .map(([code, v]) => ({ code, label: SOURCE_LABEL[code] ?? code, ...v }))
+      .sort((a, b) => b.count - a.count)
+  }, [summary])
+  const sourceTotal = sourceBreakdown.reduce((sum, s) => sum + s.count, 0)
 
   function exportCsv() {
     const csv = tripFinancialsToCsv(rows)
@@ -115,6 +147,36 @@ export default function TaxSummaryPage() {
                 </div>
               ))}
             </div>
+
+            {sourceBreakdown.length > 0 && (
+              <section>
+                <h2 className="text-sm font-medium text-cream-muted">ลูกค้ามาจากไหนมากสุด</h2>
+                <ul className="mt-2 space-y-1.5">
+                  {sourceBreakdown.map((s) => {
+                    const pct = sourceTotal > 0 ? Math.round((s.count / sourceTotal) * 100) : 0
+                    return (
+                      <li
+                        key={s.code}
+                        className="rounded-lg border border-white/8 bg-surface-card px-3 py-2 text-sm"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-cream">{s.label}</span>
+                          <span className="text-cream-muted">
+                            {s.count} จอง ({pct}%) · {formatAud(s.revenue)}
+                          </span>
+                        </div>
+                        <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10">
+                          <div
+                            className="h-full rounded-full bg-gold"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </section>
+            )}
 
             {rows.length === 0 ? (
               <p className="text-sm text-cream-muted">ไม่มีข้อมูลปี {year}</p>
