@@ -14,6 +14,15 @@ import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import { useLang } from '../../hooks/useLang'
 
+const SOURCE_LABEL: Record<string, string> = {
+  facebook: 'Facebook',
+  phone: 'โทรศัพท์',
+  line: 'LINE',
+  walk_in: 'Walk-in',
+  website: 'เว็บไซต์',
+  other: 'อื่นๆ',
+}
+
 export default function CashierPOS() {
   const { t } = useLang()
   const { toast } = useToast()
@@ -31,6 +40,7 @@ export default function CashierPOS() {
   const [email, setEmail] = useState('')
   const [amountPaid, setAmountPaid] = useState('')
   const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [source, setSource] = useState('facebook')
   const [submitting, setSubmitting] = useState(false)
 
   const load = useCallback(() => {
@@ -62,17 +72,21 @@ export default function CashierPOS() {
     if (!isValid) return
     setSubmitting(true)
     try {
-      await createBookingManual({
+      const paidAmount = amountPaid ? Number(amountPaid) : 0
+      const bookingStatus = paidAmount ? 'deposit_paid' : 'pending_payment'
+      const booking = await createBookingManual({
         trip_code: tripCode,
         first_name_en: firstName.trim(),
         last_name_en: lastName.trim(),
         phone: phone.trim(),
         email: email.trim(),
-        amount_paid_aud: amountPaid ? Number(amountPaid) : 0,
+        amount_paid_aud: paidAmount,
         payment_method: paymentMethod,
-        booking_status: amountPaid ? 'deposit_paid' : 'pending_payment',
+        booking_status: bookingStatus,
+        source,
       })
       toast('เพิ่มการจองสำเร็จ', 'success')
+      const tour = tours.find((tr) => tr.trip_code === tripCode)
       setFormOpen(false)
       setTripCode('')
       setFirstName('')
@@ -80,7 +94,23 @@ export default function CashierPOS() {
       setPhone('')
       setEmail('')
       setAmountPaid('')
+      setSource('facebook')
       load()
+      if (paidAmount > 0) {
+        navigate('/app/receipt', {
+          state: {
+            bookingReference: booking.booking_reference,
+            customerName: `${firstName.trim()} ${lastName.trim()}`,
+            tripName: tour?.name_en ?? tripCode,
+            tripCode,
+            departureDate: tour?.departure_date ?? null,
+            amountPaid: paidAmount,
+            paymentMethod,
+            bookingStatus,
+            source: SOURCE_LABEL[source] ?? source,
+          },
+        })
+      }
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) {
         navigate('/app')
@@ -109,6 +139,19 @@ export default function CashierPOS() {
       await updateBookingStatus(booking.id, status, amount)
       toast(t('toast.paymentUpdated'), 'success')
       load()
+      navigate('/app/receipt', {
+        state: {
+          bookingReference: booking.booking_reference,
+          customerName: `${booking.first_name_en} ${booking.last_name_en}`,
+          tripName: tour?.name_en ?? booking.trip_code,
+          tripCode: booking.trip_code,
+          departureDate: tour?.departure_date ?? null,
+          amountPaid: amount,
+          paymentMethod: booking.payment_method ?? 'manual',
+          bookingStatus: status,
+          source: booking.source ? SOURCE_LABEL[booking.source] ?? booking.source : null,
+        },
+      })
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) {
         navigate('/app')
@@ -199,6 +242,21 @@ export default function CashierPOS() {
               </label>
             </div>
             <p className="text-xs text-cream-muted">กรอกอย่างน้อยเบอร์โทรหรืออีเมลอย่างใดอย่างหนึ่ง</p>
+
+            <label className="block">
+              <span className="text-xs text-cream-muted">ลูกค้าติดต่อมาทาง</span>
+              <select
+                value={source}
+                onChange={(e) => setSource(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+              >
+                <option value="facebook">Facebook</option>
+                <option value="phone">โทรศัพท์</option>
+                <option value="line">LINE</option>
+                <option value="walk_in">Walk-in</option>
+                <option value="other">อื่นๆ</option>
+              </select>
+            </label>
 
             <div className="grid grid-cols-2 gap-3">
               <label className="block">

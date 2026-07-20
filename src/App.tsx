@@ -36,6 +36,7 @@ import OwnerDashboard from './pages/app/OwnerDashboard'
 import TripManagerPage from './pages/app/TripManagerPage'
 import TaxSummaryPage from './pages/app/TaxSummaryPage'
 import ExpenseEntryPage from './pages/app/ExpenseEntryPage'
+import ReceiptPage from './pages/app/ReceiptPage'
 import SystemCheckPage from './pages/app/SystemCheckPage'
 import RequireStaffRole from './components/app/RequireStaffRole'
 
@@ -119,6 +120,14 @@ export default function App() {
           element={
             <RequireStaffRole allow={['OWNER', 'MANAGER']}>
               <ExpenseEntryPage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/receipt"
+          element={
+            <RequireStaffRole allow={['CASHIER', 'OWNER', 'MANAGER']}>
+              <ReceiptPage />
             </RequireStaffRole>
           }
         />
