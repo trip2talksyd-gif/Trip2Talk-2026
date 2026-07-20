@@ -59,7 +59,7 @@ const SELLER = {
   abn: '81 951 461 769',
   address: '11a Edinburgh Rd, Forestville, Sydney NSW 2087, Australia',
   phone: '+61 452 044 382',
-  email: 'chapter99info@gmail.com',
+  email: 'trip2talksyd@gmail.com',
   logoSrc:
     'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Logo/Trip2talk%20(1).png',
 }
@@ -115,37 +115,63 @@ export default function ReceiptPage() {
 
   const isInstallment = (data?.installmentPlan ?? 1) > 1
 
-  function handleEmailReceipt() {
-    if (!data) return
-    const subject = `Trip2Talk Tax Invoice — ${data.bookingReference ?? ''}`.trim()
+  function buildEmailParts(d: ReceiptData) {
+    const subject = `Trip2Talk Tax Invoice — ${d.bookingReference ?? ''}`.trim()
     const installmentLine = isInstallment
-      ? `\nInstallment: ${data.installmentNo ?? 1} of ${data.installmentPlan}${
-          typeof data.balanceRemaining === 'number'
-            ? `\nBalance remaining: ${formatAudCents(data.balanceRemaining)}`
+      ? `\nInstallment: ${d.installmentNo ?? 1} of ${d.installmentPlan}${
+          typeof d.balanceRemaining === 'number'
+            ? `\nBalance remaining: ${formatAudCents(d.balanceRemaining)}`
             : ''
         }`
       : ''
     const body = [
-      `Hi ${data.customerName},`,
+      `Hi ${d.customerName},`,
       '',
       'Here is your tax invoice for Trip2Talk:',
       '',
-      `Invoice: ${data.bookingReference ?? '—'}`,
-      `Trip: ${data.tripName} (${data.tripCode})`,
-      data.departureDate ? `Travel Date: ${data.departureDate}` : '',
-      `Amount: ${formatAudCents(data.amountPaid)}${installmentLine}`,
+      `Invoice: ${d.bookingReference ?? '—'}`,
+      `Trip: ${d.tripName} (${d.tripCode})`,
+      d.departureDate ? `Travel Date: ${d.departureDate}` : '',
+      `Amount: ${formatAudCents(d.amountPaid)}${installmentLine}`,
       '',
-      '(Please attach the receipt image — tap "Download receipt image" above first, then attach it here.)',
+      '(Please attach the receipt image — download it above first, then attach it here.)',
       '',
       'Thank you for choosing Trip2Talk!',
       'Chapter99 · ABN 81 951 461 769',
     ]
       .filter((line) => line !== undefined)
       .join('\n')
+    return { subject, body }
+  }
 
+  // Gmail's web compose URL instead of mailto: — mailto only works if the
+  // browser/OS has a default mail app registered, which most Chrome/Windows
+  // setups don't have out of the box. This opens Gmail directly (matches
+  // trip2talksyd@gmail.com, the account used to run Trip2Talk) and works
+  // reliably as long as staff are logged into that Gmail account in the
+  // browser. authuser=<email> tells Gmail which signed-in account to compose
+  // from if more than one Google account is logged into the same browser.
+  function handleEmailReceipt() {
+    if (!data) return
+    const { subject, body } = buildEmailParts(data)
     const to = data.customerEmail ?? ''
-    const mailto = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
-    window.location.href = mailto
+    const url = `https://mail.google.com/mail/?view=cm&fs=1&authuser=${encodeURIComponent(
+      SELLER.email,
+    )}&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  // Fallback that always works regardless of mail app/login state — copies
+  // the same subject/body so staff can paste it into any email client.
+  async function handleCopyEmailText() {
+    if (!data) return
+    const { subject, body } = buildEmailParts(data)
+    try {
+      await navigator.clipboard.writeText(`Subject: ${subject}\n\n${body}`)
+      toast('คัดลอกข้อความอีเมลแล้ว', 'success')
+    } catch {
+      toast('คัดลอกไม่สำเร็จ', 'error')
+    }
   }
 
   if (!data) {
@@ -173,13 +199,28 @@ export default function ReceiptPage() {
         >
           {downloading ? 'กำลังสร้างรูป...' : '📥 ดาวน์โหลดรูปใบเสร็จ (ส่ง FB ได้เลย)'}
         </button>
-        <button
-          type="button"
-          onClick={handleEmailReceipt}
-          className="block w-full rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold"
-        >
-          📧 ส่งอีเมลใบเสร็จ{data.customerEmail ? '' : ' (ไม่มีอีเมลลูกค้าในระบบ — กรอกเองได้)'}
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={handleEmailReceipt}
+            className="flex-1 rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold"
+          >
+            📧 เปิด Gmail ส่งใบเสร็จ
+          </button>
+          <button
+            type="button"
+            onClick={handleCopyEmailText}
+            className="rounded-editorial border border-gold/40 bg-gold/10 px-3 py-3 text-center text-sm font-medium text-gold"
+            title="คัดลอกข้อความอีเมล (เผื่อ Gmail เปิดไม่ได้)"
+          >
+            📋
+          </button>
+        </div>
+        {!data.customerEmail && (
+          <p className="text-center text-xs text-cream-muted">
+            ไม่มีอีเมลลูกค้าในระบบ — Gmail จะเปิดแบบไม่กรอกผู้รับ ใส่เองได้
+          </p>
+        )}
         <button
           type="button"
           onClick={() => window.print()}
