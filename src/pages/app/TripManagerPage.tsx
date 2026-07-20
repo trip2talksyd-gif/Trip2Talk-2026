@@ -4,6 +4,7 @@ import {
   addMonthsIso,
   createTour,
   createToursBulk,
+  deleteTour,
   deriveTripCodeForDate,
   fetchToursAdmin,
   fetchWaitlist,
@@ -205,6 +206,28 @@ export default function TripManagerPage() {
       }
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  async function handleDeleteTour(t: Tour) {
+    const ok = window.confirm(
+      `ลบทริป "${t.name_en}" (${t.trip_code}) ถาวร?\n\nใช้สำหรับทริปตัวอย่าง/ทดสอบที่ยังไม่มีคนจองจริงเท่านั้น — ถ้ามีคนจองแล้วระบบจะไม่ยอมลบ (ต้องเก็บไว้ทำบัญชี/ภาษี)`,
+    )
+    if (!ok) return
+    try {
+      await deleteTour(t.id)
+      toast('ลบทริปแล้ว', 'success')
+      setTours((prev) => prev.filter((x) => x.id !== t.id))
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      const msg = err instanceof Error ? err.message : ''
+      toast(
+        msg.includes('has_bookings') ? 'ลบไม่ได้ — ทริปนี้มีคนจองแล้ว ต้องเก็บไว้ทำบัญชี' : 'ลบทริปไม่สำเร็จ',
+        'error',
+      )
     }
   }
 
@@ -422,7 +445,7 @@ export default function TripManagerPage() {
               </div>
               {!showPast && pastCount > 0 && (
                 <p className="mt-1 text-xs text-cream-muted">
-                  ทริปเก่ายังอยู่ครบสำหรับทำบัญชี/ภาษี แค่ซ่อนจากลิสต์นี้ไว้ไม่ให้รก
+                  ทริปเก่ายังอยู่ครบสำหรับทำบัญชี/ภาษี แค่ซ่อนจากลิสต์นี้ไว้ไม่ให้รก · ทริปที่ยังไม่มีคนจอง (0 pax) จะมีปุ่ม 🗑️ ให้ลบถาวรได้ ใช้กับทริปตัวอย่าง/ทดสอบเท่านั้น
                 </p>
               )}
               <ul className="mt-2 space-y-1.5">
@@ -445,8 +468,20 @@ export default function TripManagerPage() {
                           {t.trip_code} · {formatDate(t.departure_date)} · {t.status}
                         </p>
                       </div>
-                      <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
-                        {t.booked_seats}/{t.max_seats}
+                      <span className="flex shrink-0 items-center gap-1.5">
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
+                          {t.booked_seats}/{t.max_seats}
+                        </span>
+                        {t.booked_seats === 0 && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTour(t)}
+                            title="ลบทริปนี้ (เฉพาะทริปตัวอย่างที่ยังไม่มีคนจอง)"
+                            className="rounded-full p-1 text-cream-muted hover:bg-coral/20 hover:text-coral"
+                          >
+                            🗑️
+                          </button>
+                        )}
                       </span>
                     </li>
                   )

@@ -49,6 +49,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   create_booking_manual: ['OWNER', 'MANAGER', 'CASHIER'],
   mark_attendance: ['OWNER', 'MANAGER', 'GUIDE'],
   year_summary: ['OWNER', 'MANAGER'],
+  delete_tour: ['OWNER', 'MANAGER'],
 }
 
 /**
@@ -408,6 +409,7 @@ Deno.serve(async (req) => {
             booking_status: b.booking_status ?? 'pending_payment',
             amount_paid_aud: b.amount_paid_aud ?? 0,
             payment_method: b.payment_method ?? 'manual',
+            source: b.source ?? 'facebook',
             slip_url: null,
             booking_reference: bookingRef,
           })
@@ -425,6 +427,28 @@ Deno.serve(async (req) => {
         const { id, attended } = params as { id: string; attended: boolean | null }
         if (!id) return json({ error: 'invalid_params' }, 400)
         const { error } = await admin.from('tour_bookings').update({ attended }).eq('id', id)
+        if (error) throw error
+        return json({ ok: true })
+      }
+
+      case 'delete_tour': {
+        // Permanent delete — only for trips that never had a real booking
+        // (test/example rows). Anything with bookings must be kept for tax
+        // records, so we refuse rather than cascade-delete.
+        const { id } = params as { id: string }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+
+        const { data: bookingRows, error: bookingError } = await admin
+          .from('tour_bookings')
+          .select('id')
+          .eq('tour_id', id)
+          .limit(1)
+        if (bookingError) throw bookingError
+        if (bookingRows && bookingRows.length > 0) {
+          return json({ error: 'has_bookings' }, 409)
+        }
+
+        const { error } = await admin.from('tours').delete().eq('id', id)
         if (error) throw error
         return json({ ok: true })
       }

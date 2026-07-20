@@ -635,6 +635,7 @@ export type ManualBookingInput = {
   booking_status?: string
   amount_paid_aud?: number
   payment_method?: string
+  source?: string
 }
 
 /** Staff-entered booking for a phone/Facebook customer — holds a real seat via the same RPC the public flow uses. */
@@ -644,6 +645,13 @@ export async function createBookingManual(input: ManualBookingInput): Promise<To
 
 export async function markAttendance(id: string, attended: boolean | null): Promise<void> {
   await callStaffApi('mark_attendance', { id, attended })
+}
+
+/** Permanently deletes a tour — staff-api refuses (throws with "has_bookings")
+ * if any tour_bookings reference it, so this only succeeds for trips that
+ * never had a real booking (test/example rows). */
+export async function deleteTour(id: string): Promise<void> {
+  await callStaffApi('delete_tour', { id })
 }
 
 export type YearSummary = {
