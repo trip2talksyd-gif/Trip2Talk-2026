@@ -4,8 +4,19 @@
 **Project path:** `F:\Web PWA_App2026\Trip2Talk\Trip2Talk V7`  
 **Production:** `trip2-talk-2026.vercel.app`  
 **GitHub:** `trip2talksyd-gif/Trip2Talk-2026` (`main`) · Vercel team `trip2talk`  
-**Supabase (ops):** prefer linked / `.env.local` project — tours use legacy columns (`next_date`, `price_standard`, …) normalized in `normalizeTour()`  
+**Supabase (ONLY):** `trip2talk-official` · ref **`bljhnelgmkulxwuhedbi`**  
+**Do NOT use:** `xwdtjwzjkqunewxjpimm` (stale / wrong)  
 **Mockup SoT:** `../Trip2Talk-Mockup-Teal.html`
+
+---
+
+## Safety gates (mandatory)
+
+1. Never deploy Edge Functions / migrations / CLI to any Supabase ref except `bljhnelgmkulxwuhedbi`.
+2. Before `git push` to `main` or any Edge Function deploy: show change summary → wait for user confirmation.
+3. If unsure which Supabase project — ask; do not guess.
+
+**Current mismatch (2026-07-20):** CLI link + `.env.local` still point at `xwdtjwzjkqunewxjpimm`. Relink / env switch needs **explicit user OK**. A mistaken `staff-api` deploy earlier today went to the wrong project.
 
 ---
 

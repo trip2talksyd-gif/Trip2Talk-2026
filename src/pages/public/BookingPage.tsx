@@ -154,6 +154,7 @@ export default function BookingPage() {
         booking_status: 'pending_payment',
         amount_paid_aud: 0,
         payment_method: 'payid',
+        source: 'website',
         slip_url: slipUrl,
         booking_reference: bookingRef,
       })

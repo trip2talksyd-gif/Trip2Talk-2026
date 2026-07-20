@@ -53,6 +53,8 @@ export interface TourBooking {
   waiver_signed_at: string | null
   /** Day-of check-in, separate from payment status. null/undefined = not checked yet. */
   attended?: boolean | null
+  /** Where this booking came from — 'website' for public bookings, or facebook/phone/line/walk_in/other for staff-entered ones. */
+  source?: string | null
   booking_status: BookingStatus
   amount_paid_aud: number
   payment_method: string | null
