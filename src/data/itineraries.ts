@@ -843,8 +843,8 @@ export const TRIP_ITINERARIES: Record<string, TripItinerary> = {
       autumn: {
         days: NZ_AUTUMN_WINTER_DAYS,
         seasonNote: {
-          en: 'Autumn departure from $2,300 AUD per person.',
-          th: 'ทริปฤดูใบไม้ร่วง ราคา $2,300 AUD ต่อท่าน',
+          en: 'Autumn departure from $2,350 AUD per person.',
+          th: 'ทริปฤดูใบไม้ร่วง ราคา $2,350 AUD ต่อท่าน',
         },
       },
       winter: {
