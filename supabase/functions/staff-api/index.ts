@@ -143,10 +143,11 @@ Deno.serve(async (req) => {
   try {
     switch (action) {
       case 'list_pending_bookings': {
+        // Public + cashier flows use lowercase statuses (pending_payment), not PENDING.
         const { data, error } = await admin
           .from('tour_bookings')
           .select('*')
-          .eq('booking_status', 'PENDING')
+          .in('booking_status', ['pending_payment', 'PENDING'])
           .order('booked_at', { ascending: false })
         if (error) throw error
         return json({ data })
