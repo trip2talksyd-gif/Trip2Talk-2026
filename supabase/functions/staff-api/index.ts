@@ -40,6 +40,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   expenses_this_month: ['OWNER', 'MANAGER'],
   insert_expense: ['OWNER', 'MANAGER'],
   insurance_alerts: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  compliance_items: ['OWNER', 'MANAGER'],
 }
 
 Deno.serve(async (req) => {
@@ -151,6 +152,15 @@ Deno.serve(async (req) => {
           .select('*')
           .eq('is_active', true)
           .order('expiry_date', { ascending: true })
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'compliance_items': {
+        const { data, error } = await admin
+          .from('compliance_items')
+          .select('*')
+          .order('due_date', { ascending: true })
         if (error) throw error
         return json({ data })
       }
