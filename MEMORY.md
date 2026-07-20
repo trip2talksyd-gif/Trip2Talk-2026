@@ -1,44 +1,52 @@
 # Trip2Talk V7 — Session handoff
 
-**Last updated:** 2026-07-19
-**Project path:** `F:\Web PWA_App2026\Trip2Talk\Trip2Talk V7`
-**Production:** `trip2-talk-2026.vercel.app` · GitHub `trip2talksyd-gif/Trip2Talk-2026` (branch `main`) · Vercel team `trip2talk` · Supabase `bljhnelgmkulxwuhedbi`
+**Last updated:** 2026-07-20  
+**Project path:** `F:\Web PWA_App2026\Trip2Talk\Trip2Talk V7`  
+**Production:** `trip2-talk-2026.vercel.app`  
+**GitHub:** `trip2talksyd-gif/Trip2Talk-2026` (`main`) · Vercel team `trip2talk`  
+**Supabase (ops):** prefer linked / `.env.local` project — tours use legacy columns (`next_date`, `price_standard`, …) normalized in `normalizeTour()`  
 **Mockup SoT:** `../Trip2Talk-Mockup-Teal.html`
 
 ---
 
-## ✅ Done (2026-07-19) — pixel-fidelity pass
+## Product in one line
 
-Visual-only alignment to mockup `:root` / CSS. **11 commits on `main`, ahead of origin — push when ready.**
-
-| Commit | Screen | What was off |
-|---|---|---|
-| `d6bee94` | tokens/fonts | Approximated hex + incomplete Google Fonts weights |
-| `235bdbc` | Home | Hero overlay, mint-200, pill CTAs, flip-num, frosted guide banner |
-| `266c521` | Trips + dock | Card layout, chip gradients, amber dock |
-| `db7b271` | Detail effects | Slideshow dots, book-btn, price-card |
-| `5e86f2f` | Cal / Gal / Fav | White headers 17px+Thai, gal gap 5px / 78·164 heights |
-| `69f8b97` | Account | Acct-hero full-bleed, menu 11.5/9px + 28px icons |
-| `d5e2cee` | Booking success | Success check 64px + gradient, dashed ref, FB card; deposit `book-btn` |
-| `d1fdd06` | Photo Guide | Hub badges 10px/10px radius, 150px images, guide-back |
-| `6c2d851` | Pricing / About / footer | 18px tier radius, coral badge, footer → mint/ink tokens |
-| `aee0868` | Waiver | 9.5px body, flat checks, book-btn |
-
-**Not rewritten:** footer stays video+newsletter layout (product), only tokens/CTA shadow aligned — mockup’s flat `.site-footer` was not swapped in.
-
-## Next
-
-1. `git push origin main` (auto-deploys Vercel)
-2. Spot-check live vs mockup side-by-side on mobile width
-3. Older open item: staff-api 401 after fresh PIN (see below)
+Thai–AU photo-tour PWA: browse trips → waiver → PayID deposit → Facebook Page for group setup. Sydney-based day/evening trips are meetup-only (no flights/stay).
 
 ---
 
-## Older blockers (still relevant)
+## ✅ Live on production (through `3294781`)
 
-**Staff PIN / `staff-api` 401** — if Owner Dashboard still 401s after logout + fresh PIN, check `staff_sessions` row for the token. Pattern: SQL/Edge Functions in repo are **not live until manually applied**.
+| Area | Status |
+|---|---|
+| Pixel-fidelity pass (Home → footer vs teal mockup) | Done + deployed |
+| Facebook URL consolidation → `TriptoTalk` | Done |
+| ULU-4D3N content + listing | Done |
+| Split-flap airport prices (tap/hover all packages) | Done |
+| Trip Detail top CTA + mobile sticky book bar | Done |
+| Footer CTA → FB Messenger / Page (replaced email signup) | Done |
+| Sydney `SYD-*`: Thai Town / Starbucks meetup; no flights/stay; Tesla max 4 | Done |
+| Trips accordion groups (oneday / overnight / dest) | Done |
+| PayID / ABN panel on booking | Done |
+| About team avatar slots (`public/team/`) | Slots ready; drop `saen.jpg` / `ploy.jpg` when ready |
+
+---
+
+## Local ahead of origin (not pushed yet)
+
+- `5ddbaa4` — `fix(staff-api): add missing compliance_items action handler`  
+  → push when ready to deploy staff fix
+
+---
+
+## Open / watch
+
+1. **Staff PIN / `staff-api` 401** after fresh PIN — verify `staff_sessions` + Edge Function deployed; `5ddbaa4` may help once pushed  
+2. Spot-check live mobile vs mockup  
+3. Do not commit `supabase/.temp/`  
+4. Anon cannot UPDATE tours — use `npx supabase db query --linked -f …`
 
 ## Env quirks
 
-- Push via Cursor Source Control as `trip2talksyd-gif` (not GitHub Desktop / `chapter99info-cell`).
-- Vercel CLI session may only see `saenmans-projects` — prod is on `trip2talk` team.
+- Push as `trip2talksyd-gif` (not `chapter99info-cell` / wrong Vercel team)  
+- Vercel CLI may only list `saenmans-projects`; prod is **`trip2talk`** team → `trip2-talk-2026`

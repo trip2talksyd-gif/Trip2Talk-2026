@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import PublicLayout from './components/layout/PublicLayout'
+import ScrollToTop from './components/layout/ScrollToTop'
 import HomePage from './pages/public/HomePage'
 import TripsPage from './pages/public/TripsPage'
 import TripDetailPage from './pages/public/TripDetailPage'
@@ -38,6 +39,7 @@ import RequireStaffRole from './components/app/RequireStaffRole'
 export default function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route element={<PublicLayout />}>
           <Route index element={<HomePage />} />

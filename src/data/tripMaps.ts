@@ -94,3 +94,33 @@ export function staticMapUrl(cfg: TripMapConfig, size = '760x285'): string {
 export function staticMapFallback(cfg: TripMapConfig): string {
   return `https://picsum.photos/seed/${cfg.fallbackSeed}/760/285`
 }
+
+function parseMarkerPoints(markers: string): { lat: number; lng: number }[] {
+  return markers
+    .split('|')
+    .map((entry) => entry.split(','))
+    .filter(([lat, lng]) => lat !== undefined && lng !== undefined)
+    .map(([lat, lng]) => ({ lat: Number(lat), lng: Number(lng) }))
+    .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng))
+}
+
+/**
+ * Real, interactive Google Maps embed — no API key needed (uses the classic
+ * maps.google.com?output=embed iframe form, not the paid Embed API). Two
+ * markers renders an actual driving route between them; one marker (or none)
+ * just centers on the point/region.
+ */
+export function googleMapsEmbedUrl(cfg: TripMapConfig): string {
+  const points = parseMarkerPoints(cfg.markers)
+
+  if (points.length >= 2) {
+    const [start, end] = points
+    return `https://maps.google.com/maps?saddr=${start.lat},${start.lng}&daddr=${end.lat},${end.lng}&output=embed`
+  }
+
+  if (points.length === 1) {
+    return `https://maps.google.com/maps?q=${points[0].lat},${points[0].lng}&z=${cfg.zoom}&output=embed`
+  }
+
+  return `https://maps.google.com/maps?q=${cfg.center}&z=${cfg.zoom}&output=embed`
+}

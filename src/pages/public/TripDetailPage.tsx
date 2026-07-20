@@ -9,7 +9,7 @@ import { getTripDetails, listFor, textFor } from '../../data/tripDetails'
 import { getItinerary } from '../../data/itineraries'
 import { isPremiumTrip } from '../../data/tripTiers'
 import { AURORA_DISCLAIMER } from '../../data/risks'
-import { getTripMap, staticMapFallback, staticMapUrl } from '../../data/tripMaps'
+import { getTripMap, googleMapsEmbedUrl } from '../../data/tripMaps'
 import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
 import type { Tour } from '../../types/tour'
 import { Skeleton } from '../../components/ui/Skeleton'
@@ -221,21 +221,17 @@ export default function TripDetailPage() {
           {itinerary && <TripTimeline itinerary={itinerary} nextDate={tour.departure_date} />}
 
           <div className="relative overflow-hidden rounded-2xl border border-line">
-            <img
-              src={staticMapUrl(mapCfg)}
-              alt={lang === 'th' ? mapCfg.caption.th : mapCfg.caption.en}
-              className="aspect-[760/285] w-full object-cover"
+            <iframe
+              src={googleMapsEmbedUrl(mapCfg)}
+              title={lang === 'th' ? mapCfg.caption.th : mapCfg.caption.en}
+              className="aspect-[760/285] w-full border-0"
               loading="lazy"
-              onError={(e) => {
-                const img = e.currentTarget
-                img.onerror = null
-                img.src = staticMapFallback(mapCfg)
-              }}
+              referrerPolicy="no-referrer-when-downgrade"
             />
-            <span className="absolute left-3 top-3 rounded-md bg-teal-900/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-cream">
-              {lang === 'th' ? 'แผนที่จริง' : 'Real map preview'}
+            <span className="pointer-events-none absolute left-3 top-3 rounded-md bg-teal-900/85 px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-cream">
+              Google Maps
             </span>
-            <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-teal-900/90 to-transparent px-3 pb-3 pt-8 text-xs text-cream">
+            <p className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-teal-900/90 to-transparent px-3 pb-3 pt-8 text-xs text-cream">
               {lang === 'th' ? mapCfg.caption.th : mapCfg.caption.en}
             </p>
           </div>
