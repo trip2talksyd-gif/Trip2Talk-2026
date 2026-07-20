@@ -10,6 +10,7 @@ import {
   fetchWaitlist,
   formatDate,
   markWaitlistContacted,
+  updateTourStatus,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { Tour, WaitlistEntry } from '../../types/tour'
@@ -241,6 +242,40 @@ export default function TripManagerPage() {
         msg.includes('has_bookings') ? 'ลบไม่ได้ — ทริปนี้มีคนจองแล้ว ต้องเก็บไว้ทำบัญชี' : 'ลบทริปไม่สำเร็จ',
         'error',
       )
+    }
+  }
+
+  async function handleCancelTour(t: Tour) {
+    const ok = window.confirm(
+      `งดจัดทริป "${t.name_en}" (${t.trip_code})?\n\nทริปจะหายจากหน้าเว็บ, ปฏิทิน และหน้าจองทันที แต่ข้อมูลการจอง/การเงินยังอยู่ครบ กดกู้คืนได้ภายหลัง`,
+    )
+    if (!ok) return
+    try {
+      const updated = await updateTourStatus(t.id, 'cancelled')
+      toast('งดจัดทริปแล้ว', 'success')
+      setTours((prev) => prev.map((x) => (x.id === t.id ? updated : x)))
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast('งดจัดทริปไม่สำเร็จ', 'error')
+    }
+  }
+
+  async function handleRestoreTour(t: Tour) {
+    const ok = window.confirm(`เปิดทริป "${t.name_en}" (${t.trip_code}) กลับมาใหม่ (published)?`)
+    if (!ok) return
+    try {
+      const updated = await updateTourStatus(t.id, 'published')
+      toast('เปิดทริปกลับมาแล้ว', 'success')
+      setTours((prev) => prev.map((x) => (x.id === t.id ? updated : x)))
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast('กู้คืนไม่สำเร็จ', 'error')
     }
   }
 
@@ -538,6 +573,25 @@ export default function TripManagerPage() {
                         <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
                           {t.booked_seats}/{t.max_seats}
                         </span>
+                        {t.status.toLowerCase() === 'cancelled' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleRestoreTour(t)}
+                            title="เปิดทริปนี้กลับมา (published)"
+                            className="rounded-full p-1 text-cream-muted hover:bg-gold/20 hover:text-gold"
+                          >
+                            ♻️
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => handleCancelTour(t)}
+                            title="งดจัดทริปนี้ — ซ่อนจากเว็บแต่เก็บข้อมูลไว้ครบ"
+                            className="rounded-full p-1 text-cream-muted hover:bg-coral/20 hover:text-coral"
+                          >
+                            🚫
+                          </button>
+                        )}
                         {t.booked_seats === 0 && (
                           <button
                             type="button"

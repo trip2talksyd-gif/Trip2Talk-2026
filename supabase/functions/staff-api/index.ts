@@ -50,6 +50,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   mark_attendance: ['OWNER', 'MANAGER', 'GUIDE'],
   year_summary: ['OWNER', 'MANAGER'],
   delete_tour: ['OWNER', 'MANAGER'],
+  update_tour_status: ['OWNER', 'MANAGER'],
   record_payment: ['OWNER', 'MANAGER', 'CASHIER'],
   list_payments_for_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   update_booking_details: ['OWNER', 'MANAGER', 'CASHIER'],
@@ -580,6 +581,26 @@ Deno.serve(async (req) => {
         const { error } = await admin.from('tours').delete().eq('id', id)
         if (error) throw error
         return json({ ok: true })
+      }
+
+      case 'update_tour_status': {
+        // Soft-cancel/restore — keeps the row (and any bookings) intact for
+        // accounting/tax records, unlike delete_tour. Used when a trip can't
+        // run (weather, not enough people, etc.) so it should disappear from
+        // public listings and staff dropdowns without losing its history.
+        const { id, status } = params as { id: string; status: string }
+        if (!id || !status) return json({ error: 'invalid_params' }, 400)
+        const allowed = ['draft', 'published', 'confirmed', 'completed', 'cancelled']
+        if (!allowed.includes(status)) return json({ error: 'invalid_status' }, 400)
+
+        const { data, error } = await admin
+          .from('tours')
+          .update({ status })
+          .eq('id', id)
+          .select()
+          .single()
+        if (error) throw error
+        return json({ data })
       }
 
       case 'year_summary': {

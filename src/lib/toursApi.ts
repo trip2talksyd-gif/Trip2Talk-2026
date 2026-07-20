@@ -9,6 +9,7 @@ import type {
   StaffRole,
   Tour,
   TourBooking,
+  TourStatus,
   WaiverSignature,
   WaiverSignatureInsertReadback,
   WaitlistEntry,
@@ -686,6 +687,15 @@ export async function updateBookingDetails(
   fields: { first_name_en?: string; last_name_en?: string; phone?: string; email?: string },
 ): Promise<TourBooking> {
   return callStaffApi<TourBooking>('update_booking_details', { id, ...fields })
+}
+
+/** Soft-cancels or restores a tour by flipping its status — unlike
+ * deleteTour(), this keeps the row (and any bookings) intact for
+ * accounting/tax records, just hides it from public listings and staff
+ * dropdowns. Pass 'published' to undo an accidental cancel. */
+export async function updateTourStatus(id: string, status: TourStatus): Promise<Tour> {
+  const row = await callStaffApi<TourRow>('update_tour_status', { id, status })
+  return normalizeTours([row])[0]
 }
 
 export type YearSummary = {
