@@ -419,8 +419,8 @@ export const TRIP_ITINERARIES: Record<string, TripItinerary> = {
             time: '05:15',
             category: 'activity',
             description: {
-              en: 'Early wake-up for Field of Light',
-              th: 'ตื่นเช้ามืดลุย Field of Light',
+              en: 'Early wake-up for Uluru sunrise viewing',
+              th: 'ตื่นเช้ามืด ชมพระอาทิตย์ขึ้นที่ Uluru',
             },
           },
           {
@@ -437,6 +437,14 @@ export const TRIP_ITINERARIES: Record<string, TripItinerary> = {
             description: {
               en: 'Kata Tjuta sunset (bring warm layers!)',
               th: 'ชมพระอาทิตย์ตกที่ Kata Tjuta (เตรียมชุดกันหนาว)',
+            },
+          },
+          {
+            time: 'Evening',
+            category: 'activity',
+            description: {
+              en: 'Field of Light illuminated night walk',
+              th: 'เดินชมแสงไฟ Field of Light ยามค่ำคืน',
             },
           },
         ],

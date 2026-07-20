@@ -8,6 +8,7 @@ import {
 } from '../../data/risks'
 import { getPackingGuide } from '../../data/packingGuides'
 import { listFor } from '../../data/tripDetails'
+import { getTripVideoUrl } from '../../data/tripVideos'
 
 export default function TripPrepPage() {
   const { tripCode } = useParams<{ tripCode: string }>()
@@ -17,6 +18,7 @@ export default function TripPrepPage() {
   const jetstar = JETSTAR_RESTRICTIONS[lang]
   const safety = SAFETY_WARNINGS[code]
   const packing = getPackingGuide(code)
+  const videoUrl = getTripVideoUrl(code)
 
   return (
     <div className="space-y-6 pb-6">
@@ -34,6 +36,20 @@ export default function TripPrepPage() {
         </h1>
         <p className="mt-1 font-mono text-xs text-ink-soft">{code}</p>
       </header>
+
+      {/* Trip video — only renders when a video has been uploaded for this destination */}
+      {videoUrl && (
+        <video
+          key={videoUrl}
+          src={videoUrl}
+          controls
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="aspect-video w-full rounded-2xl border border-line bg-black object-cover"
+        />
+      )}
 
       {/* Baggage */}
       <section className="rounded-editorial border border-teal-600/30 bg-teal-500/10 p-4">
