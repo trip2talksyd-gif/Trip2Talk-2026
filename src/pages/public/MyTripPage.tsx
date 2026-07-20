@@ -4,9 +4,10 @@ import { MessageCircle } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import BookingJourneyTimeline from '../../components/booking/BookingJourneyTimeline'
-import { formatAud, lookupMyTrip, type MyTripLookupResult } from '../../lib/toursApi'
+import { lookupMyTrip, type MyTripLookupResult } from '../../lib/toursApi'
 import { isValidEmail } from '../../lib/validation'
 import type { BookingStatus } from '../../types/tour'
+import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
 
 const STATUS_LABEL: Record<string, { en: string; th: string }> = {
   pending_payment: { en: 'Deposit pending', th: 'รอชำระมัดจำ' },
@@ -169,26 +170,32 @@ export default function MyTripPage() {
                   {t('myTrip.paid')}
                 </dt>
                 <dd className="mt-0.5 font-medium text-teal-600">
-                  {formatAud(booking.amount_paid_aud)}
+                  <SplitFlapPrice amountAud={booking.amount_paid_aud} className="text-sm" />
                 </dd>
               </div>
               <div>
                 <dt className="text-[10px] uppercase tracking-wider text-ink-soft">
                   {t('myTrip.balance')}
                 </dt>
-                <dd className="mt-0.5 font-medium text-ink">{formatAud(balance)}</dd>
+                <dd className="mt-0.5 font-medium text-ink">
+                  <SplitFlapPrice amountAud={balance} className="text-sm" />
+                </dd>
               </div>
               <div>
                 <dt className="text-[10px] uppercase tracking-wider text-ink-soft">
                   {t('booking.deposit')}
                 </dt>
-                <dd className="mt-0.5 font-medium text-ink">{formatAud(booking.deposit_aud)}</dd>
+                <dd className="mt-0.5 font-medium text-ink">
+                  <SplitFlapPrice amountAud={booking.deposit_aud} className="text-sm" />
+                </dd>
               </div>
               <div>
                 <dt className="text-[10px] uppercase tracking-wider text-ink-soft">
                   {t('myTrip.tripTotal')}
                 </dt>
-                <dd className="mt-0.5 font-medium text-ink">{formatAud(booking.price_aud)}</dd>
+                <dd className="mt-0.5 font-medium text-ink">
+                  <SplitFlapPrice amountAud={booking.price_aud} className="text-sm" />
+                </dd>
               </div>
             </dl>
 
