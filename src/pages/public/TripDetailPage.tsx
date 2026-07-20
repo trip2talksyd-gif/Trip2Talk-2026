@@ -10,7 +10,7 @@ import { getItinerary } from '../../data/itineraries'
 import { isPremiumTrip } from '../../data/tripTiers'
 import { AURORA_DISCLAIMER } from '../../data/risks'
 import { getTripMap, googleMapsEmbedUrl } from '../../data/tripMaps'
-import { GALLERY_PHOTOS, photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
+import { getGalleryPhotosForTrip, photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
 import { getTripCoverVideoUrl } from '../../data/tripVideos'
 import type { Tour } from '../../types/tour'
 import { Skeleton } from '../../components/ui/Skeleton'
@@ -52,14 +52,13 @@ export default function TripDetailPage() {
 
   const stripPhotos = useMemo(() => {
     if (!tour) return []
-    const prefix = tour.trip_code.split('-')[0]?.toLowerCase() ?? ''
-    const matched = GALLERY_PHOTOS.filter(
-      (p) => p.id.startsWith(prefix) || p.id.includes(prefix),
-    )
-    // No unrelated fallback here on purpose — an empty strip (hidden by the
+    // Matched by category (same mapping the hero photo uses), not by id
+    // substring — an id-prefix match let an unrelated Uluru photo (id
+    // "tas-002") sneak into the Tasmania trip's thumbnail strip. No
+    // unrelated fallback here on purpose — an empty strip (hidden by the
     // `stripPhotos.length > 0` check below) beats showing photos of a
-    // different destination, e.g. NSW beach shots on the Uluru trip page.
-    return matched.slice(0, 8)
+    // different destination.
+    return getGalleryPhotosForTrip(tour.trip_code).slice(0, 8)
   }, [tour])
 
   if (loading) {
