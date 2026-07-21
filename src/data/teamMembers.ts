@@ -18,7 +18,12 @@ export const TEAM_MEMBERS: TeamMember[] = [
     nameTh: 'Saen',
     roleEn: 'Trip Leader & Photographer',
     roleTh: 'หัวหน้าทริป & ช่างภาพ',
-    photoSrcs: ['/team/saen.webp', '/team/saen.jpg', '/team/saen.png'],
+    photoSrcs: [
+      'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Team%20photos/saen.jpg',
+      '/team/saen.webp',
+      '/team/saen.jpg',
+      '/team/saen.png',
+    ],
     initial: 'S',
   },
   {
@@ -27,7 +32,12 @@ export const TEAM_MEMBERS: TeamMember[] = [
     nameTh: 'Monsicha Chayakorn (Ploy)',
     roleEn: 'Admin & Trip Staff',
     roleTh: 'แอดมิน & ทีมทริป',
-    photoSrcs: ['/team/ploy.webp', '/team/ploy.jpg', '/team/ploy.png'],
+    photoSrcs: [
+      'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Team%20photos/ploy.jpg',
+      '/team/ploy.webp',
+      '/team/ploy.jpg',
+      '/team/ploy.png',
+    ],
     initial: 'P',
   },
 ]
