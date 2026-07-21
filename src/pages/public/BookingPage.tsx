@@ -12,7 +12,7 @@ import {
   uploadPaymentSlip,
 } from '../../lib/toursApi'
 import { SeatsFullError } from '../../types/errors'
-import { tourDurationLabel, isSydneyTrip } from '../../lib/tourDisplay'
+import { tourDurationLabel, isOneDayTrip } from '../../lib/tourDisplay'
 import { isWaiverSigned, getWaiverSession } from '../../lib/waiverSession'
 import {
   getSupabaseErrorMessage,
@@ -442,10 +442,10 @@ export default function BookingPage() {
           {lang === 'th' ? 'รายการที่ไม่รวมในค่าทริป' : 'Not included in trip price'}
         </p>
         <ul className="mt-1.5 space-y-1 text-[9.5px] text-[#7a5b16]">
-          {tour && isSydneyTrip(tour.trip_code) ? (
+          {tour && isOneDayTrip(tour.trip_code) ? (
             <>
-              <li>✈️ Flights · ตั๋วเครื่องบิน (ทริปซิดนีย์ไม่รวม)</li>
-              <li>🛏 Accommodation · ที่พัก (ทริปซิดนีย์ไม่รวม)</li>
+              <li>✈️ Flights · ตั๋วเครื่องบิน (ทริปวันเดียวไม่รวม)</li>
+              <li>🛏 Accommodation · ที่พัก (ทริปวันเดียวไม่รวม)</li>
               <li>🍽 Meals · ค่าอาหาร</li>
               <li>🛡 Travel insurance · ประกันการเดินทาง</li>
             </>
@@ -457,16 +457,16 @@ export default function BookingPage() {
             </>
           )}
         </ul>
-        {tour && isSydneyTrip(tour.trip_code) && (
+        {tour && isOneDayTrip(tour.trip_code) && (
           <p className="mt-2 text-[9px] leading-relaxed text-[#7a5b16]/90">
             {lang === 'th'
-              ? 'ทริปซิดนีย์: นัดพบ Thai Town / Starbucks มีแค่รถรับ–ส่งตามเส้นทาง (เรา base ที่ซิดนีย์)'
-              : 'Sydney trips: meetup at Thai Town / Starbucks — route pickup only (we are Sydney-based).'}
+              ? 'ทริปวันเดียว: นัดพบ Thai Town / Starbucks มีแค่รถรับ–ส่งตามเส้นทาง (Tesla Model Y)'
+              : 'One-day trips: meetup at Thai Town / Starbucks — route pickup only (Tesla Model Y).'}
           </p>
         )}
       </div>
 
-      {tour && !isSydneyTrip(tour.trip_code) && (
+      {tour && !isOneDayTrip(tour.trip_code) && (
       <div className="flex items-center gap-2.5 rounded-xl border border-line bg-cream px-3 py-2.5">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-mint-100 text-sm">
           🛏

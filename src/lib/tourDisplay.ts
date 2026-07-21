@@ -153,3 +153,12 @@ export function isAuroraTrip(tour: Tour): boolean {
 export function isSydneyTrip(tripCode: string): boolean {
   return tripCode.toUpperCase().startsWith('SYD')
 }
+
+/** One-day local trips — no flights, no overnight stay: just a route pickup
+ * from Thai Town in a Tesla Model Y. Matched by trip_code pattern (not every
+ * call site has the full Tour row to check inferTripType() against). If a new
+ * one-day trip code doesn't match "...1DAY" or "...-1D", add its pattern here. */
+export function isOneDayTrip(tripCode: string): boolean {
+  const code = tripCode.toUpperCase()
+  return /1DAY$/.test(code) || /-1D$/.test(code) || code === 'SYD-MW-WIN'
+}

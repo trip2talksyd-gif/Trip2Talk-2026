@@ -607,13 +607,11 @@
   animation: priceFlip 0.16s linear;
 }
 
+/* Note: the split-flap price flip (.flip-price / .dwrap / .split-flap-digit) is
+   intentionally EXCLUDED from reduced-motion below — it only plays on explicit
+   hover/tap/focus, not automatically, so it's kept snappy even for users with
+   "reduce motion" on. */
 @media (prefers-reduced-motion: reduce) {
-  .group:hover .flip-price .fdigit.is-num .dwrap,
-  .group:active .flip-price .fdigit.is-num .dwrap,
-  .flip-price:hover .fdigit.is-num .dwrap,
-  .flip-price:active .fdigit.is-num .dwrap,
-  .flip-price.is-flipping .fdigit.is-num .dwrap,
-  .group:hover .split-flap-digit,
   .flip-cta:hover .flip-text .fchar .cwrap,
   .cta-shine,
   .cta-shine::after {

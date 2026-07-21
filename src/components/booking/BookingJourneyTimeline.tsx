@@ -1,7 +1,7 @@
 import { Camera, Car, Check, MapPin, MessageCircle, Plane, Star, Users } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
-import { isSydneyTrip } from '../../lib/tourDisplay'
+import { isOneDayTrip } from '../../lib/tourDisplay'
 import { FacebookIcon } from '../contact/contactIcons'
 import { useLang } from '../../hooks/useLang'
 import type { BookingStatus } from '../../types/tour'
@@ -104,7 +104,7 @@ export default function BookingJourneyTimeline({
   className = '',
 }: Props) {
   const { lang } = useLang()
-  const sydney = tripCode ? isSydneyTrip(tripCode) : false
+  const oneDay = tripCode ? isOneDayTrip(tripCode) : false
   const doneThrough = completedCount(bookingStatus)
   const nextIndex = Math.min(doneThrough, STEPS.length - 1)
 
@@ -119,20 +119,20 @@ export default function BookingJourneyTimeline({
           aria-hidden
         />
         {STEPS.map((step, index) => {
-          const Icon = sydney && step.id === 'tripday' ? Car : step.icon
+          const Icon = oneDay && step.id === 'tripday' ? Car : step.icon
           const done = index < doneThrough
           const current = index === nextIndex && doneThrough < STEPS.length
           let title = lang === 'th' ? step.titleTh : step.titleEn
           let body = lang === 'th' ? step.bodyTh : step.bodyEn
 
-          if (sydney && step.id === 'setup') {
+          if (oneDay && step.id === 'setup') {
             title = lang === 'th' ? 'ยืนยันจุดนัดพบ' : 'Confirm meetup point'
             body =
               lang === 'th'
                 ? 'นัดพบ Thai Town / Starbucks · รถรับ–ส่งตามเส้นทาง · ผ่อนชำระ (ไม่มีบิน/ที่พัก)'
                 : 'Meetup Thai Town / Starbucks · route pickup · installments (no flights or hotel)'
           }
-          if (sydney && step.id === 'tripday') {
+          if (oneDay && step.id === 'tripday') {
             title = lang === 'th' ? 'วันทริป' : 'Trip day'
             body =
               lang === 'th'
