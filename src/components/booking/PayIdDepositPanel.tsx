@@ -18,8 +18,16 @@ export default function PayIdDepositPanel({ variant = 'booking' }: Props) {
   const [selected, setSelected] = useState<PayIdOption>(DEFAULT_PAYID)
   const [copied, setCopied] = useState(false)
 
-  async function copyPayId(value: string) {
-    await navigator.clipboard.writeText(value)
+  /** Copies bank + PayID + account name together — not just the raw number —
+   * so staff/customers can paste one block with everything a bank transfer
+   * needs, instead of having to type the bank/name in separately. */
+  async function copyPayId(option: PayIdOption) {
+    const bank = lang === 'th' ? option.bankTh : option.bankEn
+    const text =
+      lang === 'th'
+        ? `${bank}\nPayID: ${option.payIdDisplay}\nชื่อบัญชี: ${option.accountName}`
+        : `${bank}\nPayID: ${option.payIdDisplay}\nAccount name: ${option.accountName}`
+    await navigator.clipboard.writeText(text)
     setCopied(true)
     window.setTimeout(() => setCopied(false), 2000)
   }
@@ -90,7 +98,7 @@ export default function PayIdDepositPanel({ variant = 'booking' }: Props) {
         </div>
         <button
           type="button"
-          onClick={() => copyPayId(selected.payId)}
+          onClick={() => copyPayId(selected)}
           className="inline-flex items-center gap-1.5 rounded-lg bg-teal-900 px-3 py-2 text-[11px] font-semibold text-cream"
         >
           {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
