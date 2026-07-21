@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import { tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
+import { getPreviewPhotoForTrip, photoSrc } from '../../data/galleryPhotos'
 import type { Tour } from '../../types/tour'
 
 type Props = {
@@ -33,15 +34,17 @@ export default function TripFilmstrip({ tours, labelEn, labelTh, className = '' 
         <div className="cal-filmstrip-track">
           {slides.map((tour, i) => {
             const name = lang === 'th' ? tour.name_th : tour.name_en
+            const fallbackPhoto = getPreviewPhotoForTrip(tour.trip_code)
+            const imgSrc = tour.cover_image_url || (fallbackPhoto ? photoSrc(fallbackPhoto) : null)
             return (
               <Link
                 key={`${tour.id}-${i}`}
                 to={`/trips/${tour.trip_code}`}
                 className="group relative h-full w-[112px] shrink-0 overflow-hidden rounded-[14px] shadow-[0_10px_20px_-10px_rgba(15,28,30,0.35)] transition-transform duration-300 hover:-translate-y-1.5 hover:scale-105"
               >
-                {tour.cover_image_url ? (
+                {imgSrc ? (
                   <img
-                    src={tour.cover_image_url}
+                    src={imgSrc}
                     alt={name}
                     className="h-full w-full object-cover"
                     loading="lazy"
