@@ -7,10 +7,10 @@ import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
 const TIERS = [
   {
     id: 'day',
-    popular: true,
+    popular: false,
     titleEn: 'Day Trip',
     titleTh: 'ทริปวันเดียว',
-    priceAud: 260,
+    priceAud: 150,
     descEn: 'A few hours, one professional photographer, minimal logistics.',
     descTh: 'ไม่กี่ชั่วโมง ช่างภาพมืออาชีพหนึ่งคน โลจิสติกส์น้อย',
     checksEn: [
@@ -25,7 +25,7 @@ const TIERS = [
   },
   {
     id: 'multi',
-    popular: false,
+    popular: true,
     titleEn: 'Multi-day Adventure',
     titleTh: 'ทริปหลายวัน',
     priceAud: 990,
@@ -130,7 +130,7 @@ export default function PricingPage() {
             <Link
               to="/trips"
               className={`block text-center ${
-                tier.popular ? 'book-btn flip-cta cta-shine' : 'book-btn'
+                tier.popular ? 'book-btn flip-cta cta-shine' : 'jc-join'
               }`}
             >
               {lang === 'th' ? tier.ctaTh : tier.ctaEn}

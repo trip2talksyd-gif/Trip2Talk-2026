@@ -40,12 +40,12 @@ export default function HomePage() {
 
         <div className="relative z-[2] mx-auto flex w-full max-w-[300px] flex-1 flex-col justify-end px-5 pb-4 pt-16 sm:max-w-md">
           {/* .home-badge */}
-          <p
-            className="mb-2.5 self-center rounded-full border border-white/25 bg-white/14 px-[11px] py-1 text-center text-[8.5px] leading-[1.4] text-cream backdrop-blur-[6px]"
-          >
-            Trip2Talk
+          <p className="mb-2.5 self-center rounded-full border border-white/25 bg-white/14 px-[11px] py-1 text-center text-[8.5px] leading-[1.4] text-cream backdrop-blur-[6px]">
+            {t('home.hero.badge')}
             <span className="mt-0.5 block font-thai text-[7.5px] opacity-85">
-              {lang === 'th' ? 'ทริปถ่ายภาพส่วนตัว' : 'Private photo journeys'}
+              {lang === 'th'
+                ? 'Photography trip with pro photographers'
+                : 'ทริปถ่ายภาพพร้อมช่างภาพมืออาชีพ'}
             </span>
           </p>
 
@@ -70,9 +70,9 @@ export default function HomePage() {
           {/* .home-cta pill tray */}
           <div className="mb-3 flex gap-1.5 rounded-full border border-white/20 bg-white/12 p-[5px]">
             <Link to="/trips" className="btn-embossed cta-shine">
-              {t('btn.bookNow')}
+              {t('btn.exploreTrips')}
               <span className="mt-0.5 block font-thai text-[7.5px] font-medium opacity-85">
-                {lang === 'th' ? 'จองเลย' : 'จองเลย'}
+                {lang === 'th' ? 'Explore Trips' : 'ดูทริปทั้งหมด'}
               </span>
             </Link>
             <Link to="/gallery" className="btn-embossed-ghost">
@@ -82,6 +82,27 @@ export default function HomePage() {
               </span>
             </Link>
           </div>
+        </div>
+
+        {/* .home-guide-banner — frosted glass over the hero video, above the stats bar */}
+        <div className="relative z-[2] mx-auto mb-2.5 w-full max-w-[300px] px-5 sm:max-w-md">
+          <Link
+            to="/photo-guide"
+            className="flex items-center gap-2.5 rounded-[14px] border border-white/28 bg-white/14 px-3 py-2.5 backdrop-blur-[6px]"
+          >
+            <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-[9px] bg-gradient-to-b from-teal-400 to-teal-600">
+              <Camera className="h-3.5 w-3.5 text-cream" strokeWidth={2.25} />
+            </span>
+            <span className="min-w-0 flex-1 leading-[1.3]">
+              <span className="block text-[9.5px] font-bold text-cream">
+                {t('home.promo.title')}
+              </span>
+              <span className="block font-thai text-[8px] text-[#d9f5e4]">
+                {t('home.promo.eyebrow')}
+              </span>
+            </span>
+            <ArrowRight className="h-3 w-3 shrink-0 text-cream/80" />
+          </Link>
         </div>
 
         {/* .home-stats */}
@@ -115,23 +136,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* .home-guide-banner — frosted glass, not solid teal bar */}
-      <div className="bg-teal-900 px-5 pb-4">
-        <Link
-          to="/photo-guide"
-          className="flex items-center gap-2.5 rounded-[14px] border border-white/28 bg-white/14 px-3 py-2.5 backdrop-blur-[6px]"
-        >
-          <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-[9px] bg-gradient-to-b from-teal-400 to-teal-600 text-sm">
-            <Camera className="h-3.5 w-3.5 text-cream" strokeWidth={2.25} />
-          </span>
-          <span className="min-w-0 flex-1 leading-[1.3]">
-            <span className="block text-[9.5px] font-bold text-cream">{t('home.promo.title')}</span>
-            <span className="block font-thai text-[8px] text-[#d9f5e4]">{t('home.promo.eyebrow')}</span>
-          </span>
-          <ArrowRight className="h-3 w-3 shrink-0 text-cream/80" />
-        </Link>
-      </div>
 
       <TripTypeCategories />
       <HomeHowItWorks />

@@ -54,19 +54,19 @@ export default function PosingGuidePage() {
         <h2 className="font-serif text-[15.5px] text-ink sm:text-lg">
           {lang === 'th' ? 'ท่าโพสแนะนำจากช่างภาพ' : 'Photographer-approved poses'}
         </h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {POSING_TIPS.map((p) => (
             <article
               key={p.n}
-              className="rounded-[14px] border border-line bg-card p-4 shadow-[0_8px_18px_-12px_rgba(15,28,30,0.25)]"
+              className="rounded-[14px] border border-line bg-card p-4 pb-[18px] shadow-[0_8px_18px_-12px_rgba(15,28,30,0.25)]"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-900 text-xs font-bold text-cream">
+              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-700 text-xs font-extrabold text-cream">
                 {p.n}
               </span>
-              <h3 className="mt-2 text-sm font-semibold text-ink">
+              <h3 className="mt-2.5 text-[13px] font-semibold text-ink">
                 {lang === 'th' ? p.titleTh : p.titleEn}
               </h3>
-              <p className="mt-1 text-xs leading-relaxed text-ink-soft">
+              <p className="mt-1 text-[11.5px] leading-[1.55] text-ink-soft">
                 {lang === 'th' ? p.bodyTh : p.bodyEn}
               </p>
             </article>
@@ -83,31 +83,31 @@ export default function PosingGuidePage() {
             ? 'จับคู่กับทริปจริงของ Trip2Talk ให้ชุดเข้ากับวิวที่คุณจะถ่าย'
             : 'Matched to real Trip2Talk trips, so your outfit works with the landscape you’ll shoot.'}
         </p>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
           {SEASON_CARDS.map((s) => (
             <article
               key={s.trip}
-              className={`rounded-2xl bg-gradient-to-br ${s.gradient} p-4 text-cream`}
+              className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${s.gradient} p-4 text-cream`}
             >
-              <p className="text-[10px] font-semibold uppercase tracking-wide opacity-90">
+              <p className="text-[9px] uppercase tracking-[0.05em] opacity-85">
                 {lang === 'th' ? s.monthsTh : s.monthsEn}
               </p>
-              <h3 className="mt-1 font-serif text-lg">
+              <h3 className="mb-px mt-1 font-serif text-sm">
                 {lang === 'th' ? s.titleTh : s.titleEn}
               </h3>
-              <div className="mt-2 flex gap-1.5">
+              <div className="my-2.5 flex gap-1.5">
                 {s.swatches.map((c) => (
                   <span
                     key={c}
-                    className="h-5 w-5 rounded-full ring-1 ring-white/40"
+                    className="h-5 w-5 rounded-[6px] border-2 border-white/50"
                     style={{ background: c }}
                   />
                 ))}
               </div>
-              <p className="mt-2 text-xs leading-relaxed text-cream/85">
+              <p className="text-[10px] leading-[1.5] opacity-95">
                 {lang === 'th' ? s.bodyTh : s.bodyEn}
               </p>
-              <span className="mt-3 inline-block rounded-full bg-black/25 px-2 py-0.5 text-[10px] font-bold">
+              <span className="mt-2.5 inline-block rounded-full bg-white/20 px-2 py-[3px] text-[9px] font-extrabold">
                 {s.trip}
               </span>
             </article>
@@ -115,13 +115,14 @@ export default function PosingGuidePage() {
         </div>
       </section>
 
-      <blockquote className="rounded-2xl border border-line bg-mint-100 p-5">
-        <p className="font-serif text-base italic leading-relaxed text-ink">
+      {/* .quote-box — teal-900 panel, cream italic pull-quote */}
+      <blockquote className="relative m-0 rounded-2xl bg-teal-900 px-6 py-[22px] text-[#eafcf0]">
+        <p className="m-0 mb-2.5 text-sm italic leading-[1.7]">
           {lang === 'th'
             ? '“ไม่ต้องพยายามเป็นนางแบบ — พยายามให้ดูเหมือนวันที่สนุกที่สุดของทริป นั่นคือภาพที่คนหยุดเลื่อนดู”'
             : '“Don’t try to be a model — try to look like you’re having the best day of your trip. That’s the photo people actually stop scrolling for.”'}
         </p>
-        <footer className="mt-3 text-xs text-ink-soft">
+        <footer className="text-[11.5px] font-bold not-italic opacity-90">
           — {lang === 'th' ? 'ช่างภาพหลักของ Trip2Talk' : 'Trip2Talk lead photographer'}
         </footer>
       </blockquote>

@@ -358,6 +358,30 @@
   box-shadow: 0 4px 10px -6px rgba(0, 0, 0, 0.35);
 }
 
+/* Compact black CTA — exact .jc-join (join card / secondary pricing tiers) */
+.jc-join {
+  display: block;
+  text-align: center;
+  background: #0d0d0f;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.3;
+  padding: 7px 15px;
+  border-radius: 9px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.jc-join:hover {
+  transform: translateY(-1px);
+}
+
+.jc-join:active {
+  transform: scale(0.95);
+}
+
 /* CTA shine + pulse (.cta-shine) */
 .cta-shine {
   position: relative;
@@ -408,6 +432,152 @@
   30% {
     filter: brightness(1) saturate(1);
   }
+}
+
+/* Traveling light-trace border + glow halo — mockup .ai-edge */
+.ai-edge {
+  position: relative;
+  z-index: 0;
+  isolation: isolate;
+}
+
+.ai-edge::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 70%,
+    rgba(255, 255, 255, 0.95) 84%,
+    rgba(178, 158, 255, 0.95) 92%,
+    transparent 100%
+  );
+  z-index: -1;
+  animation: aiBorderSpin 2.6s linear infinite;
+}
+
+@keyframes aiBorderSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Focused booking-flow chrome — mockup .flow-top / .flow-body bottom bar */
+.flow-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 18px 12px;
+  background: var(--card);
+  border-bottom: 1px solid var(--line);
+}
+
+.flow-top .back {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--mint-100);
+  color: var(--teal-700);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+
+.flow-bar {
+  padding: 12px 16px 18px;
+  background: var(--card);
+  border-top: 1px solid var(--line);
+}
+
+/* Timeline tip cards — mockup .tip-timeline / .tt-row / .tt-dot / .tt-card */
+.tip-timeline {
+  display: flex;
+  flex-direction: column;
+}
+
+.tt-row {
+  display: flex;
+  gap: 12px;
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.tt-row:last-child {
+  padding-bottom: 0;
+}
+
+.tt-row:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 9px;
+  top: 30px;
+  bottom: 0;
+  border-left: 2px dashed var(--line);
+}
+
+.tt-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  margin-top: 8px;
+  box-shadow: 0 0 0 4px var(--cream);
+  z-index: 1;
+}
+
+.tt-card {
+  flex: 1;
+  min-width: 0;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 18px -12px rgba(15, 28, 30, 0.28);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.tt-card .tt-ic {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  color: #fff;
+}
+
+/* Horizontal portrait example strip — mockup .mini-portrait-gallery */
+.mini-portrait-gallery {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mini-portrait-gallery img {
+  flex: 0 0 auto;
+  width: 100px;
+  height: 132px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.mini-portrait-gallery::-webkit-scrollbar,
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Airport departure-board destination rows on /trips */
@@ -614,14 +784,17 @@
 @media (prefers-reduced-motion: reduce) {
   .flip-cta:hover .flip-text .fchar .cwrap,
   .cta-shine,
-  .cta-shine::after {
+  .cta-shine::after,
+  .ai-edge::before {
     animation: none;
   }
 
   .btn-embossed:hover,
   .btn-embossed-ghost:hover,
   .book-btn:hover,
-  .nav-cta:hover {
+  .nav-cta:hover,
+  .jc-join:hover,
+  .social-tile:hover {
     transform: none;
   }
 
@@ -683,5 +856,97 @@
   width: 16px;
   border-radius: 3px;
   background: var(--teal-700);
+}
+
+/* Social buttons with folded-corner hover — mockup .social-tile / .fold */
+.social-tile {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 22px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  box-shadow: 0 10px 24px -12px rgba(20, 25, 25, 0.25);
+  overflow: hidden;
+  cursor: pointer;
+  transition:
+    background 0.32s ease,
+    transform 0.28s cubic-bezier(0.2, 0.8, 0.3, 1.3),
+    box-shadow 0.28s ease;
+}
+
+.social-tile:hover {
+  transform: translateY(-6px) scale(1.05);
+  box-shadow: 0 18px 30px -12px rgba(20, 25, 25, 0.35);
+}
+
+.social-tile .fold {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 20px 20px 0;
+  border-color: transparent rgba(0, 0, 0, 0.06) transparent transparent;
+  transition: border-color 0.32s ease;
+  z-index: 3;
+}
+
+.social-tile:hover .fold {
+  border-color: transparent #ffffff transparent transparent;
+  filter: drop-shadow(-2px 2px 3px rgba(0, 0, 0, 0.18));
+}
+
+.social-tile svg {
+  position: relative;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  transition: fill 0.3s ease;
+}
+
+.social-tile.fb svg {
+  fill: #1877f2;
+}
+
+.social-tile.fb:hover {
+  background: #1877f2;
+}
+
+.social-tile.yt svg {
+  fill: #ff0000;
+}
+
+.social-tile.yt:hover {
+  background: #ff0000;
+}
+
+.social-tile.ig svg {
+  fill: #c13584;
+}
+
+.social-tile.ig:hover {
+  background: linear-gradient(135deg, #f9ce34, #ee2a7b 45%, #6228d7);
+}
+
+.social-tile:hover svg {
+  fill: #fff;
+}
+
+/* Tile caption sits outside the tile (mockup keeps it inside, where overflow
+   clipping hides it) so it stays legible on the teal-900 footer. */
+.social-tile-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #7a9791;
+  transition: color 0.25s ease;
+}
+
+.social-tile-item:hover .social-tile-label {
+  color: #fff;
 }
 

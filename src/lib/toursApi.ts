@@ -285,11 +285,13 @@ async function insertWaiverSignatureOnce(
     WAIVER_SIGNATURES_ANON_SELECT_GRANT,
   )
 
-  console.log('[insertWaiverSignature] before Supabase call', {
-    supabaseUrl: supabaseConfig.url,
-    anonKeyPresent: supabaseConfig.anonKey.length > 0,
-    anonKeyLength: supabaseConfig.anonKey.length,
-  })
+  if (import.meta.env.DEV) {
+    console.log('[insertWaiverSignature] before Supabase call', {
+      supabaseUrl: supabaseConfig.url,
+      anonKeyPresent: supabaseConfig.anonKey.length > 0,
+      anonKeyLength: supabaseConfig.anonKey.length,
+    })
+  }
 
   try {
     const { data, error } = await supabase

@@ -81,38 +81,46 @@ export default function CameraGuidePage() {
         </p>
       </header>
 
-      <p className="text-[11px] font-bold uppercase tracking-wide text-teal-700">
-        {lang === 'th'
-          ? 'ตัวอย่างภาพจากทริปของพี่แสน'
-          : "Example shots from Saen's trips"}
-      </p>
-      <PhotoSlideshow slides={slides} />
+      <div>
+        <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.04em] text-teal-700">
+          {lang === 'th'
+            ? 'ตัวอย่างภาพจากทริปของพี่แสน'
+            : "Example shots from Saen's trips"}
+        </p>
+        <PhotoSlideshow slides={slides} />
+      </div>
 
-      <div className="-mx-4 overflow-x-auto px-4">
-        <table className="min-w-[640px] w-full border-collapse overflow-hidden rounded-[14px] border border-line bg-card text-left text-xs shadow-mockup">
+      {/* .settings-table — borderless rows, uppercase micro header */}
+      <div className="hide-scrollbar -mx-4 overflow-x-auto px-4">
+        <table className="w-full min-w-[640px] border-collapse text-left">
           <thead>
-            <tr className="bg-mint-100 text-[10px] uppercase tracking-wider text-ink-soft">
-              <th className="px-3 py-2.5 font-semibold">
-                {lang === 'th' ? 'ช่วงเวลา/ฉาก' : 'Time / scene'}
-              </th>
-              <th className="px-3 py-2.5 font-semibold">f</th>
-              <th className="px-3 py-2.5 font-semibold">Shutter</th>
-              <th className="px-3 py-2.5 font-semibold">ISO</th>
-              <th className="px-3 py-2.5 font-semibold">
-                {lang === 'th' ? 'หมายเหตุ' : 'Notes'}
-              </th>
+            <tr>
+              {[
+                lang === 'th' ? 'ช่วงเวลา/ฉาก' : 'Time / scene',
+                lang === 'th' ? 'รูรับแสง (f)' : 'Aperture (f)',
+                'Shutter',
+                'ISO',
+                lang === 'th' ? 'หมายเหตุ' : 'Notes',
+              ].map((head) => (
+                <th
+                  key={head}
+                  className="border-b-2 border-line px-3 py-2 text-[9.5px] font-semibold uppercase tracking-[0.05em] text-ink-soft"
+                >
+                  {head}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
             {CAMERA_SETTINGS.map((row) => (
-              <tr key={row.sceneEn} className="border-t border-line align-top">
-                <td className="px-3 py-2.5 font-medium text-ink">
+              <tr key={row.sceneEn} className="border-b border-line align-top last:border-b-0">
+                <td className="whitespace-nowrap px-3 py-[11px] text-[11.5px] font-bold text-ink">
                   {lang === 'th' ? row.sceneTh : row.sceneEn}
                 </td>
-                <td className="px-3 py-2.5 font-bold text-teal-800">{row.f}</td>
-                <td className="px-3 py-2.5 text-ink">{row.shutter}</td>
-                <td className="px-3 py-2.5 text-ink">{row.iso}</td>
-                <td className="px-3 py-2.5 text-ink-soft">
+                <td className="px-3 py-[11px] text-[11.5px] font-bold text-teal-700">{row.f}</td>
+                <td className="px-3 py-[11px] text-[11.5px] text-ink">{row.shutter}</td>
+                <td className="px-3 py-[11px] text-[11.5px] text-ink">{row.iso}</td>
+                <td className="px-3 py-[11px] text-[10.5px] leading-relaxed text-ink-soft">
                   {lang === 'th' ? row.noteTh : row.noteEn}
                 </td>
               </tr>
@@ -120,7 +128,7 @@ export default function CameraGuidePage() {
           </tbody>
         </table>
       </div>
-      <p className="text-[11px] text-ink-soft">
+      <p className="!mt-1.5 text-[11px] text-ink-soft">
         {lang === 'th'
           ? 'เป็นค่าเริ่มต้นเท่านั้น ปรับตามเลนส์และกล้องของแต่ละคน'
           : 'Starting points only — adjust for your specific lens and camera’s low-light performance.'}
@@ -130,16 +138,13 @@ export default function CameraGuidePage() {
         <h2 className="font-serif text-[15.5px] text-ink sm:text-lg">
           {lang === 'th' ? 'อุปกรณ์เบื้องต้นที่ควรมี' : 'Beginner gear checklist'}
         </h2>
-        <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+        <ul className="mt-3 grid gap-[11px] sm:grid-cols-2">
           {CAMERA_GEAR.map((item) => (
-            <li
-              key={item.en}
-              className="flex gap-2 rounded-[12px] border border-line bg-card px-3 py-2.5 text-sm text-ink"
-            >
-              <span className="mt-0.5 flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[6px] bg-mint-100 text-teal-700">
+            <li key={item.en} className="flex items-start gap-2 text-[12.5px] leading-[1.5]">
+              <span className="mt-px flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[6px] bg-mint-100 text-teal-700">
                 <Check className="h-3 w-3" strokeWidth={2.5} />
               </span>
-              <b className="font-semibold">{lang === 'th' ? item.th : item.en}</b>
+              <b className="font-semibold text-ink">{lang === 'th' ? item.th : item.en}</b>
             </li>
           ))}
         </ul>

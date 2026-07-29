@@ -35,7 +35,7 @@ export default function TripStickyBookBar({ tour }: Props) {
         {bookable && to ? (
           <Link
             to={to}
-            className="shrink-0 rounded-[13px] bg-[#0d0d0f] px-4 py-2 text-center text-[11px] font-bold shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_10px_22px_-8px_rgba(0,0,0,0.55)]"
+            className="ai-edge shrink-0 rounded-[13px] bg-[#0d0d0f] px-4 py-2 text-center text-[11px] font-bold shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_10px_22px_-8px_rgba(0,0,0,0.55)]"
           >
             {t('btn.bookNow')}
           </Link>

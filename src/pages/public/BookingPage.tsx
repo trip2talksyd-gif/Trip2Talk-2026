@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Check } from 'lucide-react'
+import { ArrowLeft, Check } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import BookingJourneyTimeline from '../../components/booking/BookingJourneyTimeline'
 import PayIdDepositPanel from '../../components/booking/PayIdDepositPanel'
@@ -8,6 +8,7 @@ import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import {
   fetchTourByCode,
   formatAud,
+  formatDate,
   insertBooking,
   uploadPaymentSlip,
 } from '../../lib/toursApi'
@@ -221,6 +222,32 @@ export default function BookingPage() {
           {reference}
         </p>
 
+        {/* .mini-trip — booked trip recap card */}
+        {tour && (
+          <div className="flex w-full items-center gap-2.5 rounded-xl bg-mint-100 p-2 text-left">
+            {tour.cover_image_url ? (
+              <img
+                src={tour.cover_image_url}
+                alt=""
+                className="h-11 w-11 shrink-0 rounded-[9px] object-cover"
+              />
+            ) : (
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[9px] bg-teal-800 text-[10px] text-cream">
+                T2T
+              </div>
+            )}
+            <div className="min-w-0">
+              <b className="block truncate text-[11px] font-bold text-ink">
+                {lang === 'th' ? tour.name_th : tour.name_en}
+              </b>
+              <span className="block text-[9px] text-ink-soft">
+                {tourDurationLabel(tour, lang)}
+                {tour.departure_date ? ` · ${formatDate(tour.departure_date, lang)}` : ''}
+              </span>
+            </div>
+          </div>
+        )}
+
         <a
           href={FACEBOOK_PAGE_URL}
           target="_blank"
@@ -247,6 +274,13 @@ export default function BookingPage() {
           tripCode={tripCode}
           className="mt-5 w-full text-left"
         />
+
+        <Link to="/my-trip" className="book-btn flip-cta mt-[18px] w-full">
+          {lang === 'th' ? 'ดูการจองของฉัน' : 'View My Booking'}
+        </Link>
+        <Link to="/trips" className="mt-2.5 text-[11px] font-semibold text-ink-soft">
+          {lang === 'th' ? 'กลับไปหน้าสำรวจ' : 'Back to Explore'}
+        </Link>
       </div>
     )
   }
@@ -275,9 +309,20 @@ export default function BookingPage() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 pb-4" noValidate>
-      <h1 className="font-serif text-2xl text-ink">
-        {lang === 'th' ? 'จองทริปของคุณ' : 'Book Your Trip'}
-      </h1>
+      {/* .flow-top — focused checkout header: back circle + bilingual title */}
+      <div className="flow-top -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
+        <Link to={`/trips/${tripCode}`} className="back" aria-label="Back">
+          <ArrowLeft className="h-3.5 w-3.5" />
+        </Link>
+        <div className="min-w-0">
+          <h1 className="m-0 font-serif text-[15.5px] text-ink sm:text-xl">
+            {lang === 'th' ? 'จองทริปของคุณ' : 'Book Your Trip'}
+          </h1>
+          <p className="m-0 font-thai text-[10px] text-ink-soft">
+            {lang === 'th' ? 'Book Your Trip' : 'จองทริปของคุณ'} · {tripCode}
+          </p>
+        </div>
+      </div>
 
       <div className="flex items-center gap-2.5 rounded-[14px] border border-line bg-card p-2.5 shadow-mockup">
         {tour.cover_image_url ? (
@@ -497,17 +542,20 @@ export default function BookingPage() {
         {slipFile && <p className="mt-1 text-xs text-ink">{slipFile.name}</p>}
       </label>
 
-      <button
-        type="submit"
-        disabled={submitting || !isValid}
-        className="book-btn flip-cta cta-shine w-full disabled:opacity-50"
-      >
-        {submitting
-          ? t('common.loading')
-          : lang === 'th'
-            ? `ชำระมัดจำ ${formatAud(depositDue)}`
-            : `Pay Deposit — ${formatAud(depositDue)}`}
-      </button>
+      {/* Sticky Pay Deposit bar — mockup's white bar with top hairline above the CTA */}
+      <div className="flow-bar sticky bottom-0 -mx-4 !pb-[max(18px,env(safe-area-inset-bottom))] sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
+        <button
+          type="submit"
+          disabled={submitting || !isValid}
+          className="book-btn flip-cta cta-shine w-full disabled:opacity-50"
+        >
+          {submitting
+            ? t('common.loading')
+            : lang === 'th'
+              ? `ชำระมัดจำ ${formatAud(depositDue)}`
+              : `Pay Deposit — ${formatAud(depositDue)}`}
+        </button>
+      </div>
     </form>
   )
 }

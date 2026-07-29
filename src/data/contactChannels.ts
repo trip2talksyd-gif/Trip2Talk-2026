@@ -1,13 +1,48 @@
 import type { LucideIcon } from 'lucide-react'
 import { Mail, MessageCircle, Phone } from 'lucide-react'
 import type { TranslationKey } from '../i18n/translations'
-import { FacebookIcon } from '../components/contact/contactIcons'
+import { FacebookIcon, InstagramIcon, YouTubeIcon } from '../components/contact/contactIcons'
 
 /** Canonical Trip2Talk Facebook Page — update only here. */
 export const FACEBOOK_PAGE_URL = 'https://www.facebook.com/TriptoTalk'
 
 /** Messenger deep-link for the same Page (username form). */
 export const FACEBOOK_MESSENGER_URL = 'https://m.me/TriptoTalk'
+
+export type SocialProfile = {
+  id: 'facebook' | 'youtube' | 'instagram'
+  /** Maps to the .social-tile brand modifier in index.css */
+  tile: 'fb' | 'yt' | 'ig'
+  label: string
+  href: string
+  icon: typeof FacebookIcon
+}
+
+/**
+ * Social tiles shown in the footer. YouTube / Instagram handles are placeholders
+ * until the real profiles are confirmed — tiles without an href are not rendered.
+ */
+export const SOCIAL_PROFILES: SocialProfile[] = [
+  { id: 'facebook', tile: 'fb', label: 'Facebook', href: FACEBOOK_PAGE_URL, icon: FacebookIcon },
+  {
+    id: 'youtube',
+    tile: 'yt',
+    label: 'YouTube',
+    href: 'https://www.youtube.com/@trip2talk',
+    icon: YouTubeIcon,
+  },
+  {
+    id: 'instagram',
+    tile: 'ig',
+    label: 'Instagram',
+    href: 'https://www.instagram.com/trip2talk',
+    icon: InstagramIcon,
+  },
+]
+
+export function enabledSocialProfiles(): SocialProfile[] {
+  return SOCIAL_PROFILES.filter((s) => s.href)
+}
 
 export type ContactChannelId =
   | 'facebook'

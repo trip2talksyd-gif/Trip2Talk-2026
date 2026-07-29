@@ -96,13 +96,13 @@ export default function GalleryPage() {
           {lang === 'th' ? 'ไม่มีรูปในหมวดนี้' : 'No photos in this category'}
         </div>
       ) : (
-        <>
-          <section>
-            <p className="mb-2 text-sm font-bold text-ink">
+        <section className="space-y-2.5">
+          <div>
+            <p className="mb-1.5 text-sm font-bold text-ink">
               {lang === 'th' ? 'อัลบั้มตัวอย่างจากพี่แสนและทีม' : 'Example album from Saen & team'}
             </p>
             <PhotoSlideshow slides={slides} />
-          </section>
+          </div>
 
           <div className="grid grid-cols-3 gap-[5px]">
             {items.map((photo, idx) => {
@@ -127,7 +127,7 @@ export default function GalleryPage() {
               )
             })}
           </div>
-        </>
+        </section>
       )}
 
       {lightboxIndex !== null && items.length > 0 && (

@@ -1,8 +1,29 @@
 import { Link } from 'react-router-dom'
+import {
+  Aperture,
+  Camera,
+  Crop,
+  Grid3x3,
+  LayoutGrid,
+  Moon,
+  MoveUpRight,
+  Search,
+  Sparkles,
+  Sun,
+  Sunrise,
+  UserRound,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { MOBILE_LANDSCAPE_TIPS, MOBILE_PORTRAIT_TIPS } from '../../data/photoGuideContent'
 import PhotoSlideshow, { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
 import { photoSrc } from '../../data/galleryPhotos'
+
+/* Mockup .tt-dot / .tt-ic cycle through the four brand accents */
+const DOT_COLORS = ['#20363c', '#e2734a', '#e8935a', '#2e4d53'] as const
+
+const LANDSCAPE_ICONS: LucideIcon[] = [Grid3x3, Sun, Search, Moon, MoveUpRight, Crop]
+const PORTRAIT_ICONS: LucideIcon[] = [Aperture, Sunrise, UserRound, LayoutGrid, Sparkles, Camera]
 
 export default function MobileGuidePage() {
   const { lang } = useLang()
@@ -15,7 +36,14 @@ export default function MobileGuidePage() {
     titleTh: 'อัลบั้มตัวอย่างจากพี่แสนและทีม',
     meta: photo.id,
   }))
-  const portraits = galleryByIds(['syd-015', 'nsw-006', 'nsw-007', 'syd-012']).slice(0, 4)
+  const portraits = galleryByIds([
+    'syd-015',
+    'nsw-006',
+    'nsw-007',
+    'syd-012',
+    'syd-011',
+    'nsw-008',
+  ])
 
   return (
     <div className="space-y-6 pb-4">
@@ -52,55 +80,71 @@ export default function MobileGuidePage() {
         <PhotoSlideshow slides={slides} />
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-[30px] lg:grid-cols-2">
         <section>
-          <h2 className="font-serif text-[15.5px] text-ink sm:text-lg">
+          <h2 className="flex items-center gap-2 font-serif text-sm text-ink">
             {lang === 'th' ? 'ถ่ายวิว' : 'Landscape'}
           </h2>
-          <div className="relative mt-4 space-y-3 border-l border-dashed border-line pl-5">
-            {MOBILE_LANDSCAPE_TIPS.map((tip, i) => (
-              <div key={tip.en} className="relative rounded-[12px] border border-line bg-card p-3">
-                <span className="absolute -left-[27px] top-3 flex h-4 w-4 items-center justify-center rounded-full bg-teal-800 text-[9px] font-bold text-cream">
-                  {i + 1}
-                </span>
-                <p className="text-sm font-semibold text-ink">{lang === 'th' ? tip.th : tip.en}</p>
-                <p className="mt-1 text-xs leading-relaxed text-ink-soft">
-                  {lang === 'th' ? tip.thBody : tip.enBody}
-                </p>
-              </div>
-            ))}
+          <div className="tip-timeline mt-4">
+            {MOBILE_LANDSCAPE_TIPS.map((tip, i) => {
+              const color = DOT_COLORS[i % DOT_COLORS.length]
+              const Icon = LANDSCAPE_ICONS[i % LANDSCAPE_ICONS.length]
+              return (
+                <div key={tip.en} className="tt-row">
+                  <span className="tt-dot" style={{ background: color }} aria-hidden />
+                  <div className="tt-card">
+                    <span className="tt-ic" style={{ background: color }} aria-hidden>
+                      <Icon className="h-[15px] w-[15px]" strokeWidth={2} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <b className="block text-[12.5px] font-bold leading-[1.3] text-ink">
+                        {lang === 'th' ? tip.th : tip.en}
+                      </b>
+                      <span className="mt-[3px] block text-[11px] leading-[1.5] text-ink-soft">
+                        {lang === 'th' ? tip.thBody : tip.enBody}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </section>
 
         <section>
-          <h2 className="font-serif text-[15.5px] text-ink sm:text-lg">
+          <h2 className="flex items-center gap-2 font-serif text-sm text-ink">
             {lang === 'th' ? 'ถ่ายคน' : 'Portrait / People'}
           </h2>
           {portraits.length > 0 && (
-            <div className="mt-3 grid grid-cols-4 gap-2">
+            <div className="mini-portrait-gallery mb-4 mt-2.5">
               {portraits.map((photo) => (
-                <img
-                  key={photo.id}
-                  src={photoSrc(photo)}
-                  alt=""
-                  className="aspect-[200/264] w-full rounded-[10px] object-cover"
-                  loading="lazy"
-                />
+                <img key={photo.id} src={photoSrc(photo)} alt="" loading="lazy" />
               ))}
             </div>
           )}
-          <div className="relative mt-4 space-y-3 border-l border-dashed border-coral/40 pl-5">
-            {MOBILE_PORTRAIT_TIPS.map((tip, i) => (
-              <div key={tip.en} className="relative rounded-[12px] border border-line bg-card p-3">
-                <span className="absolute -left-[27px] top-3 flex h-4 w-4 items-center justify-center rounded-full bg-coral text-[9px] font-bold text-cream">
-                  {i + 1}
-                </span>
-                <p className="text-sm font-semibold text-ink">{lang === 'th' ? tip.th : tip.en}</p>
-                <p className="mt-1 text-xs leading-relaxed text-ink-soft">
-                  {lang === 'th' ? tip.thBody : tip.enBody}
-                </p>
-              </div>
-            ))}
+          <div className="tip-timeline mt-4">
+            {MOBILE_PORTRAIT_TIPS.map((tip, i) => {
+              const color = DOT_COLORS[(i + 1) % DOT_COLORS.length]
+              const Icon = PORTRAIT_ICONS[i % PORTRAIT_ICONS.length]
+              return (
+                <div key={tip.en} className="tt-row">
+                  <span className="tt-dot" style={{ background: color }} aria-hidden />
+                  <div className="tt-card">
+                    <span className="tt-ic" style={{ background: color }} aria-hidden>
+                      <Icon className="h-[15px] w-[15px]" strokeWidth={2} />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <b className="block text-[12.5px] font-bold leading-[1.3] text-ink">
+                        {lang === 'th' ? tip.th : tip.en}
+                      </b>
+                      <span className="mt-[3px] block text-[11px] leading-[1.5] text-ink-soft">
+                        {lang === 'th' ? tip.thBody : tip.enBody}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </section>
       </div>

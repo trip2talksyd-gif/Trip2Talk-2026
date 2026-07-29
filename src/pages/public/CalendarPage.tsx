@@ -86,32 +86,32 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4 pb-4">
+      {/* .cal-top — title + month chips share the white bar */}
       <header className="-mx-4 border-b border-line bg-card px-4 pb-3 pt-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-5">
         <h1 className="font-serif text-[17px] text-ink sm:text-2xl">
           {t('nav.calendar')}
         </h1>
+        {months.length > 0 && (
+          <div className="hide-scrollbar mt-3 flex gap-2 overflow-x-auto">
+            {months.map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setActiveMonth(m)}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-[10.5px] font-bold transition-colors ${
+                  activeMonth === m
+                    ? 'bg-gradient-to-b from-teal-500 to-teal-800 text-cream'
+                    : 'bg-mint-100 text-teal-700'
+                }`}
+              >
+                {monthLabel(m)}
+              </button>
+            ))}
+          </div>
+        )}
       </header>
 
-      {months.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {months.map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => setActiveMonth(m)}
-              className={`shrink-0 rounded-full px-3 py-1.5 text-[10.5px] font-bold transition-colors ${
-                activeMonth === m
-                  ? 'bg-gradient-to-b from-teal-500 to-teal-800 text-cream'
-                  : 'bg-mint-100 text-teal-700'
-              }`}
-            >
-              {monthLabel(m)}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-br from-teal-900 to-teal-700 px-3.5 py-3 text-cream">
+      <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-br from-teal-900 to-teal-700 px-3.5 py-[13px] text-cream">
         <Camera className="h-5 w-5 shrink-0 text-teal-400" strokeWidth={2} />
         <div>
           <p className="text-[11.5px] font-bold">
@@ -148,7 +148,7 @@ export default function CalendarPage() {
                 <li key={tour.id}>
                   <Link
                     to={`/trips/${tour.trip_code}`}
-                    className="flex items-center gap-2.5 rounded-xl border border-line bg-cream px-2.5 py-2.5 transition-colors hover:border-teal-500/40"
+                    className="flex items-center gap-2.5 rounded-[14px] border border-line bg-card p-[9px] transition-colors hover:border-teal-500/40"
                   >
                     <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-[10px] bg-mint-100 text-teal-800">
                       <span className="text-sm font-bold leading-none">{parts.day}</span>

@@ -1,14 +1,19 @@
-import { Compass, Heart, Luggage, MessageCircle, Ticket } from 'lucide-react'
+import { Compass, Heart, Luggage, MessageCircle, User } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import { useLang } from '../../hooks/useLang'
+
+/** Booking / waiver / prep flows own the bottom of the screen — no dock there. */
+const FLOW_ROUTE_PREFIXES = ['/waiver', '/booking', '/trip-prep', '/waitlist']
 
 export default function BottomNav() {
   const { t } = useLang()
   const { pathname } = useLocation()
 
-  // Floating dock sits over the home hero video — hide there only.
+  // Floating dock sits over the home hero video — hide there too.
   if (pathname === '/') return null
+  if (FLOW_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return null
+  if (pathname.endsWith('/prep')) return null
 
   const iconBtn = (isActive: boolean) =>
     `flex h-6 w-6 items-center justify-center transition-colors ${
@@ -55,11 +60,11 @@ export default function BottomNav() {
         </a>
 
         <NavLink
-          to="/my-trip"
-          aria-label={t('nav.myTrip')}
+          to="/account"
+          aria-label={t('nav.account')}
           className={({ isActive }) => iconBtn(isActive)}
         >
-          <Ticket className="h-[18px] w-[18px]" strokeWidth={2.25} />
+          <User className="h-[18px] w-[18px]" strokeWidth={2.25} />
         </NavLink>
       </div>
     </nav>

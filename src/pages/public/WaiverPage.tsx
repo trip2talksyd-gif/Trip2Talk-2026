@@ -80,17 +80,16 @@ export default function WaiverPage() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 pb-4" noValidate>
-      <div className="flex items-center gap-3">
-        <Link
-          to={`/trips/${tripCode}`}
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-mint-100 text-teal-700"
-          aria-label="Back"
-        >
-          <ArrowLeft className="h-4 w-4" />
+      {/* .flow-top — focused flow header: back circle + title, full-bleed white bar */}
+      <div className="flow-top -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
+        <Link to={`/trips/${tripCode}`} className="back" aria-label="Back">
+          <ArrowLeft className="h-3.5 w-3.5" />
         </Link>
-        <div>
-          <h1 className="font-serif text-xl text-ink sm:text-2xl">{t('waiver.title')}</h1>
-          <p className="text-xs text-ink-soft">{tripCode}</p>
+        <div className="min-w-0">
+          <h1 className="m-0 font-serif text-[15.5px] text-ink sm:text-xl">{t('waiver.title')}</h1>
+          <p className="m-0 font-thai text-[10px] text-ink-soft">
+            {lang === 'th' ? 'เอกสารยินยอม' : 'Waiver & Consent'} · {tripCode}
+          </p>
         </div>
       </div>
 
@@ -155,17 +154,20 @@ export default function WaiverPage() {
         </p>
       </label>
 
-      <button
-        type="submit"
-        disabled={!isValid || submitting}
-        className="book-btn w-full disabled:opacity-40"
-      >
-        {submitting
-          ? t('common.loading')
-          : lang === 'th'
-            ? 'ส่งเอกสารยินยอม'
-            : 'Submit Waiver'}
-      </button>
+      {/* Sticky submit bar — mockup's white bar with top hairline above the CTA */}
+      <div className="flow-bar sticky bottom-0 -mx-4 !pb-[max(18px,env(safe-area-inset-bottom))] sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
+        <button
+          type="submit"
+          disabled={!isValid || submitting}
+          className="book-btn w-full disabled:opacity-40"
+        >
+          {submitting
+            ? t('common.loading')
+            : lang === 'th'
+              ? 'ส่งเอกสารยินยอม'
+              : 'Submit Waiver'}
+        </button>
+      </div>
     </form>
   )
 }

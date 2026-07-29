@@ -16,6 +16,7 @@ export type TranslationKey =
   | 'nav.photoGuide'
   | 'nav.help'
   | 'btn.bookNow'
+  | 'btn.exploreTrips'
   | 'btn.viewTrip'
   | 'btn.comingSoon'
   | 'btn.tripCancelled'
@@ -77,8 +78,12 @@ export type TranslationKey =
   | 'home.hero.subtitle'
   | 'home.promo.eyebrow'
   | 'home.promo.title'
+  | 'trips.title'
   | 'trips.subtitle'
   | 'trips.empty'
+  | 'trips.search'
+  | 'trips.search.empty'
+  | 'trips.going'
   | 'home.hero.destination.tasmania'
   | 'home.hero.destination.uluru'
   | 'home.hero.destination.sydney'
@@ -245,6 +250,7 @@ export type TranslationKey =
   | 'footer.lucky.text'
   | 'footer.nav.title1'
   | 'footer.nav.title2'
+  | 'footer.nav.title3'
   | 'footer.info.terms'
   | 'footer.info.privacy'
   | 'footer.info.cancellation'
@@ -277,6 +283,7 @@ const en: Map = {
   'nav.photoGuide': 'Photo Guide',
   'nav.help': 'Help',
   'btn.bookNow': 'Book Now',
+  'btn.exploreTrips': 'Explore Trips',
   'btn.viewTrip': 'View Trip',
   'btn.comingSoon': 'Coming soon',
   'btn.tripCancelled': 'This trip has been cancelled',
@@ -328,7 +335,7 @@ const en: Map = {
   'home.stats.tripsLabel': 'Trips',
   'home.stats.groupLabel': 'Group size',
   'home.stats.photographersLabel': 'Photographers',
-  'home.hero.badge': '13 curated trips · small groups only · pro photographer on every trip',
+  'home.hero.badge': 'Photography trip with pro photographers',
   'home.hero.title.line1': 'Photo journeys',
   'home.hero.title.line2': 'worth remembering',
   'home.hero.en.line1': 'Capture Moments',
@@ -339,8 +346,12 @@ const en: Map = {
     'From aurora hunts in Tasmania to sunrise over Uluru — private, small-group trips with a professional photographer, built for Thai travellers in Australia.',
   'home.promo.eyebrow': "Let's Learn and Practice",
   'home.promo.title': 'Photo Guide — posing, settings & mobile tips',
+  'trips.title': 'Find Your Trip',
   'trips.subtitle': 'Small groups, pro photographer on every trip.',
   'trips.empty': 'No trips in this category yet — check back soon.',
+  'trips.search': 'Search destination or trip…',
+  'trips.search.empty': 'No trips match your search.',
+  'trips.going': 'Connect with people going',
   'home.hero.destination.tasmania': 'Tasmania',
   'home.hero.destination.uluru': 'Uluru',
   'home.hero.destination.sydney': 'Sydney',
@@ -518,6 +529,7 @@ const en: Map = {
   'footer.lucky.text': 'Book now!',
   'footer.nav.title1': 'Navigation',
   'footer.nav.title2': 'Info',
+  'footer.nav.title3': 'Contact',
   'footer.info.terms': 'Terms of Service',
   'footer.info.privacy': 'Privacy Policy',
   'footer.info.cancellation': 'Cancellation Policy',
@@ -549,6 +561,7 @@ const th: Map = {
   'nav.photoGuide': 'คู่มือถ่ายภาพ',
   'nav.help': 'ช่วยเหลือ',
   'btn.bookNow': 'จองเลย',
+  'btn.exploreTrips': 'ดูทริปทั้งหมด',
   'btn.viewTrip': 'ดูทริป',
   'btn.comingSoon': 'เร็วๆ นี้',
   'btn.tripCancelled': 'ทริปนี้งดจัดแล้ว',
@@ -600,7 +613,7 @@ const th: Map = {
   'home.stats.tripsLabel': 'ทริป',
   'home.stats.groupLabel': 'ขนาดกลุ่ม',
   'home.stats.photographersLabel': 'ช่างภาพ',
-  'home.hero.badge': '13 ทริปคัดสรร · กลุ่มเล็กเท่านั้น · มีช่างภาพมืออาชีพทุกทริป',
+  'home.hero.badge': 'ทริปถ่ายภาพพร้อมช่างภาพมืออาชีพ',
   'home.hero.title.line1': 'ทริปถ่ายภาพ',
   'home.hero.title.line2': 'ที่คุณจะไม่มีวันลืม',
   'home.hero.en.line1': 'Capture Moments',
@@ -611,8 +624,12 @@ const th: Map = {
     'ตั้งแต่ล่าแสงใต้ที่แทสเมเนีย ถึงพระอาทิตย์ขึ้นที่อูลูรู — ทริปกลุ่มเล็กส่วนตัว พร้อมช่างภาพมืออาชีพ ออกแบบมาเพื่อคนไทยในออสเตรเลียโดยเฉพาะ',
   'home.promo.eyebrow': 'Learn and Practice',
   'home.promo.title': 'คู่มือถ่ายภาพ — โพสท่า ตั้งค่ากล้อง และมือถือ',
+  'trips.title': 'เลือกทริปของคุณ',
   'trips.subtitle': 'กลุ่มเล็ก มีช่างภาพมืออาชีพทุกทริป',
   'trips.empty': 'ยังไม่มีทริปในหมวดนี้ — กลับมาเช็คใหม่เร็วๆ นี้',
+  'trips.search': 'ค้นหาจุดหมายหรือชื่อทริป…',
+  'trips.search.empty': 'ไม่พบทริปที่ตรงกับคำค้นหา',
+  'trips.going': 'เจอเพื่อนร่วมทริป',
   'home.hero.destination.tasmania': 'แทสเมเนีย',
   'home.hero.destination.uluru': 'อูลูรู',
   'home.hero.destination.sydney': 'ซิดนีย์',
@@ -790,6 +807,7 @@ const th: Map = {
   'footer.lucky.text': 'จองเลย!',
   'footer.nav.title1': 'เมนู',
   'footer.nav.title2': 'ข้อมูล',
+  'footer.nav.title3': 'ติดต่อเรา',
   'footer.info.terms': 'เงื่อนไขการใช้งาน',
   'footer.info.privacy': 'นโยบายความเป็นส่วนตัว',
   'footer.info.cancellation': 'นโยบายการยกเลิก',

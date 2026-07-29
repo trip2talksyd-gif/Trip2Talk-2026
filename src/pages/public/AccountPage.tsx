@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { useFavoriteTripCodes } from '../../hooks/useFavorites'
+import { GALLERY_PHOTOS } from '../../data/galleryPhotos'
 
 const MENU = [
   { to: '/my-trip', icon: Ticket, en: 'My Trip', th: 'ทริปของฉัน', subEn: 'Look up booking status', subTh: 'ค้นหาสถานะการจอง' },
@@ -28,10 +29,18 @@ export default function AccountPage() {
   const { lang, toggleLang } = useLang()
   const favorites = useFavoriteTripCodes()
 
+  // Mockup .acct-stats — Trips / Saved / Photos. Saved + Photos are real counts;
+  // Trips has no per-device source without auth, so it stays a dash placeholder.
+  const stats = [
+    { value: '—', en: 'Trips', th: 'ทริป' },
+    { value: String(favorites.length), en: 'Saved', th: 'บันทึก' },
+    { value: String(GALLERY_PHOTOS.length), en: 'Photos', th: 'รูปภาพ' },
+  ]
+
   return (
     <div className="space-y-0 pb-4">
       <div
-        className="px-[18px] pb-5 pt-9 text-center text-cream"
+        className="-mx-4 px-[18px] pb-5 pt-9 text-center text-cream sm:-mx-6 lg:mx-0 lg:rounded-2xl"
         style={{ background: 'linear-gradient(120deg, #16262b, #2e4d53)' }}
       >
         <div className="mx-auto mb-2 flex h-[58px] w-[58px] items-center justify-center rounded-full border-[3px] border-white/30 bg-mint-200 text-[18px] font-extrabold text-teal-900">
@@ -44,22 +53,18 @@ export default function AccountPage() {
             : 'Guest booking — no account login required'}
         </span>
         <div className="mt-3 flex justify-center gap-[22px]">
-          <div>
-            <p className="m-0 text-[15px] font-extrabold">{favorites.length}</p>
-            <p className="m-0 mt-px text-[8px] uppercase tracking-[0.05em] text-mint-200">
-              {lang === 'th' ? 'บันทึก' : 'Saved'}
-            </p>
-          </div>
-          <div>
-            <p className="m-0 text-[15px] font-extrabold">EN/TH</p>
-            <p className="m-0 mt-px text-[8px] uppercase tracking-[0.05em] text-mint-200">
-              {lang === 'th' ? 'ภาษา' : 'Language'}
-            </p>
-          </div>
+          {stats.map((stat) => (
+            <div key={stat.en}>
+              <p className="m-0 text-[15px] font-extrabold">{stat.value}</p>
+              <p className="m-0 mt-px text-[8px] uppercase tracking-[0.05em] text-mint-200">
+                {lang === 'th' ? stat.th : stat.en}
+              </p>
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 px-4 pb-[70px] pt-3.5">
+      <div className="flex flex-col gap-2 pt-3.5">
         <button
           type="button"
           onClick={toggleLang}

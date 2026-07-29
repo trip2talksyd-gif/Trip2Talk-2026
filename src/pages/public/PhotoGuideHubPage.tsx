@@ -76,7 +76,8 @@ export default function PhotoGuideHubPage() {
         </p>
       </header>
 
-      <div className="grid gap-[22px] sm:grid-cols-3">
+      {/* .guide-hub-grid — 3 up on desktop, single column under the mockup's 860px */}
+      <div className="grid gap-[22px] md:grid-cols-3">
         {HUB_CARDS.map((card) => {
           const photo = GALLERY_PHOTOS.find((p) => p.id === card.photoId) ?? GALLERY_PHOTOS[0]
           return (
@@ -123,8 +124,8 @@ export default function PhotoGuideHubPage() {
             ? 'รูปคัดสรรจากทริปที่ผ่านมา — ลากหรือดูสไลด์ด้านล่าง'
             : 'Curated shots from past trips — drag or browse the slideshow below.'}
         </p>
-        <PhotoSlideshow slides={slides} className="mt-3" />
-        <p className="mt-2 text-[11px] text-ink-soft">
+        <PhotoSlideshow slides={slides} className="mt-2.5" />
+        <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-ink-soft">
           {lang === 'th' ? '↔ ลากเพื่อดูอัลบั้ม' : '↔ Drag to browse the album'}
         </p>
       </section>

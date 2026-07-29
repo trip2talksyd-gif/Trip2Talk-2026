@@ -56,8 +56,13 @@ export default function FavoritesPage() {
 
   return (
     <div className="space-y-4 pb-4">
-      <header className="-mx-4 border-b border-line bg-card px-4 pb-3 pt-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-5">
+      <header className="-mx-4 flex items-start justify-between gap-3 border-b border-line bg-card px-4 pb-3 pt-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-5">
         <h1 className="font-serif text-[17px] text-ink sm:text-2xl">{t('nav.favorites')}</h1>
+        {favoriteCodes.length > 0 && (
+          <span className="mt-1 shrink-0 rounded-full bg-mint-100 px-3 py-[5px] text-[10px] font-bold text-teal-700">
+            {lang === 'th' ? `บันทึกไว้ ${favoriteCodes.length}` : `${favoriteCodes.length} saved`}
+          </span>
+        )}
       </header>
 
       {loading && (
