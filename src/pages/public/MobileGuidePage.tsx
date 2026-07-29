@@ -81,7 +81,7 @@ export default function MobileGuidePage() {
       </section>
 
       <div className="grid gap-[30px] lg:grid-cols-2">
-        <section>
+        <section className="min-w-0">
           <h2 className="flex items-center gap-2 font-serif text-sm text-ink">
             {lang === 'th' ? 'ถ่ายวิว' : 'Landscape'}
           </h2>
@@ -111,7 +111,7 @@ export default function MobileGuidePage() {
           </div>
         </section>
 
-        <section>
+        <section className="min-w-0">
           <h2 className="flex items-center gap-2 font-serif text-sm text-ink">
             {lang === 'th' ? 'ถ่ายคน' : 'Portrait / People'}
           </h2>

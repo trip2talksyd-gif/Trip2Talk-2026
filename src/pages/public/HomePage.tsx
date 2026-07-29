@@ -78,7 +78,7 @@ export default function HomePage() {
             <Link to="/gallery" className="btn-embossed-ghost">
               {t('nav.gallery')}
               <span className="mt-0.5 block font-thai text-[7.5px] font-medium opacity-85">
-                แกลเลอรี
+                {lang === 'th' ? 'Gallery' : 'แกลเลอรี'}
               </span>
             </Link>
           </div>

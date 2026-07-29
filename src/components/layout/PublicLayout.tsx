@@ -46,16 +46,16 @@ export default function PublicLayout() {
         <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-10 lg:py-[18px]">
           <Link
             to="/"
-            className={`flex items-center gap-2.5 font-thai text-lg font-bold ${
+            className={`flex min-w-0 items-center gap-2 font-thai text-base font-bold sm:gap-2.5 sm:text-lg ${
               isHome ? 'text-cream' : 'text-teal-800'
             }`}
           >
             <img
               src={TRIP2TALK_LOGO_URL}
               alt=""
-              className="h-[34px] w-[34px] shrink-0 rounded-full object-cover"
+              className="h-[30px] w-[30px] shrink-0 rounded-full object-cover sm:h-[34px] sm:w-[34px]"
             />
-            Trip2Talk
+            <span className="truncate">Trip2Talk</span>
           </Link>
 
           <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex">
@@ -83,7 +83,7 @@ export default function PublicLayout() {
               ))}
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
             <button
               type="button"
               onClick={toggleLang}
@@ -134,12 +134,13 @@ export default function PublicLayout() {
               <User className="h-4 w-4" />
             </NavLink>
 
-            <Link
-              to="/trips"
-              className="nav-cta hidden sm:inline-block !px-5 !py-2.5 !text-[11.5px]"
-            >
-              {t('btn.bookNow')}
-            </Link>
+            {/* Wrapper owns the breakpoint: .nav-cta sets display:block outside
+                Tailwind's layers, so `hidden` on the link itself loses. */}
+            <span className="hidden sm:block">
+              <Link to="/trips" className="nav-cta !px-5 !py-2.5 !text-[11.5px]">
+                {t('btn.bookNow')}
+              </Link>
+            </span>
 
             <button
               type="button"
