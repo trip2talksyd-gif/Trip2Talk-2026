@@ -3,7 +3,9 @@ import { ArrowRight, Camera } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import CountUpStat from '../../components/ui/CountUpStat'
 import TripTypeCategories from '../../components/trips/TripTypeCategories'
+import HomeHowItWorks from '../../components/trips/HomeHowItWorks'
 import HomeFeaturesSection from '../../components/trips/HomeFeaturesSection'
+import HomeTripShowcase from '../../components/trips/HomeTripShowcase'
 import HomeCtaFaq from '../../components/trips/HomeCtaFaq'
 
 /** Trip2Talk hero reel — hosted in the main Supabase project's storage bucket */
@@ -132,7 +134,9 @@ export default function HomePage() {
       </div>
 
       <TripTypeCategories />
+      <HomeHowItWorks />
       <HomeFeaturesSection />
+      <HomeTripShowcase />
       <div className="space-y-10 bg-cream px-4 py-10 text-ink">
         <HomeCtaFaq />
       </div>

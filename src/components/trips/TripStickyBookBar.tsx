@@ -35,10 +35,9 @@ export default function TripStickyBookBar({ tour }: Props) {
         {bookable && to ? (
           <Link
             to={to}
-            className="shrink-0 rounded-[13px] bg-[#0d0d0f] px-4 py-2 text-center shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_10px_22px_-8px_rgba(0,0,0,0.55)]"
+            className="shrink-0 rounded-[13px] bg-[#0d0d0f] px-4 py-2 text-center text-[11px] font-bold shadow-[0_1px_0_rgba(255,255,255,0.12)_inset,0_10px_22px_-8px_rgba(0,0,0,0.55)]"
           >
-            <span className="block text-[11px] font-bold leading-none">{t('btn.bookNow')}</span>
-            <span className="mt-0.5 block font-thai text-[8.5px] font-medium opacity-80">จองเลย</span>
+            {t('btn.bookNow')}
           </Link>
         ) : (
           <span className="shrink-0 rounded-[13px] bg-white/10 px-4 py-2 text-[11px] font-bold text-cream/70">

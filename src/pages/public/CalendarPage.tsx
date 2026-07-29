@@ -86,12 +86,9 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4 pb-4">
-      <header className="-mx-4 border-b border-line bg-card px-4 pb-3 pt-2">
+      <header className="-mx-4 border-b border-line bg-card px-4 pb-3 pt-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-5">
         <h1 className="font-serif text-[17px] text-ink sm:text-2xl">
           {t('nav.calendar')}
-          <span className="mt-px block font-thai text-[11px] font-medium text-ink-soft">
-            {lang === 'th' ? 'ปฏิทินทริป' : 'Trip Calendar'}
-          </span>
         </h1>
       </header>
 

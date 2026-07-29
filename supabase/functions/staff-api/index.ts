@@ -54,6 +54,9 @@ const ACTION_ROLES: Record<string, Role[]> = {
   record_payment: ['OWNER', 'MANAGER', 'CASHIER'],
   list_payments_for_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   update_booking_details: ['OWNER', 'MANAGER', 'CASHIER'],
+  list_draft_content_posts: ['OWNER'],
+  update_content_post: ['OWNER'],
+  insert_content_post: ['OWNER'],
 }
 
 /**
@@ -625,6 +628,122 @@ Deno.serve(async (req) => {
         if (expensesRes.error) throw expensesRes.error
 
         return json({ data: { bookings: bookingsRes.data, expenses: expensesRes.data } })
+      }
+
+      case 'list_draft_content_posts': {
+        // Draft FB/content posts awaiting OWNER review. Make.com watches
+        // status → 'approved' via Database Webhook — do not post from here.
+        const { data, error } = await admin
+          .from('content_posts')
+          .select(
+            'id, trip_id, post_type, status, headline_options, selected_headline, caption_fb, caption_ig, caption_line, photo_urls, page_id, created_at, updated_at, tours:trip_id (id, trip_code, name_en, name_th, departure_date, max_seats, booked_seats)',
+          )
+          .eq('status', 'draft')
+          .order('created_at', { ascending: false })
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'update_content_post': {
+        // Single-row update so Make.com's Database Webhook on status change
+        // still fires exactly once. Approve carries headline/caption/photos;
+        // reject only flips status.
+        const {
+          id,
+          status,
+          selected_headline,
+          caption_fb,
+          photo_urls,
+        } = params as {
+          id: string
+          status: string
+          selected_headline?: string
+          caption_fb?: string
+          photo_urls?: string[]
+        }
+        if (!id || !status) return json({ error: 'invalid_params' }, 400)
+        if (status !== 'approved' && status !== 'rejected') {
+          return json({ error: 'invalid_status' }, 400)
+        }
+
+        const patch: Record<string, unknown> = { status }
+        if (status === 'approved') {
+          if (!selected_headline || typeof selected_headline !== 'string') {
+            return json({ error: 'invalid_params' }, 400)
+          }
+          if (typeof caption_fb !== 'string') {
+            return json({ error: 'invalid_params' }, 400)
+          }
+          if (!Array.isArray(photo_urls) || photo_urls.length < 1 || photo_urls.length > 4) {
+            return json({ error: 'invalid_params' }, 400)
+          }
+          patch.selected_headline = selected_headline
+          patch.caption_fb = caption_fb
+          patch.photo_urls = photo_urls
+        }
+
+        const { data, error } = await admin
+          .from('content_posts')
+          .update(patch)
+          .eq('id', id)
+          .eq('status', 'draft')
+          .select('id, status')
+          .maybeSingle()
+        if (error) throw error
+        if (!data) return json({ error: 'not_found' }, 404)
+        return json({ data })
+      }
+
+      case 'insert_content_post': {
+        // Quick Post / Make.com draft insert. value_content requires trip_id null.
+        const {
+          post_type,
+          trip_id,
+          photo_urls,
+          headline_options,
+          caption_fb,
+          status,
+        } = params as {
+          post_type?: string
+          trip_id?: string | null
+          photo_urls?: string[]
+          headline_options?: string[]
+          caption_fb?: string
+          status?: string
+        }
+        const postType = post_type ?? 'value_content'
+        if (postType !== 'value_content' && postType !== 'trip_promo') {
+          return json({ error: 'invalid_post_type' }, 400)
+        }
+        if (!Array.isArray(photo_urls) || photo_urls.length < 1) {
+          return json({ error: 'invalid_params' }, 400)
+        }
+        if (!Array.isArray(headline_options) || headline_options.length < 1) {
+          return json({ error: 'invalid_params' }, 400)
+        }
+        if (typeof caption_fb !== 'string') {
+          return json({ error: 'invalid_params' }, 400)
+        }
+
+        const row: Record<string, unknown> = {
+          post_type: postType,
+          trip_id: postType === 'value_content' ? null : trip_id ?? null,
+          photo_urls,
+          headline_options,
+          caption_fb,
+          status: status ?? 'draft',
+        }
+        if (postType === 'trip_promo' && !row.trip_id) {
+          return json({ error: 'trip_id_required' }, 400)
+        }
+
+        const { data, error } = await admin
+          .from('content_posts')
+          .insert(row)
+          .select('id, post_type, status, created_at')
+          .single()
+        if (error) throw error
+        return json({ data })
       }
 
       default:

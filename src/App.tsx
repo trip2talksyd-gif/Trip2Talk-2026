@@ -38,6 +38,8 @@ import TaxSummaryPage from './pages/app/TaxSummaryPage'
 import ExpenseEntryPage from './pages/app/ExpenseEntryPage'
 import ReceiptPage from './pages/app/ReceiptPage'
 import SystemCheckPage from './pages/app/SystemCheckPage'
+import ContentReview from './pages/admin/ContentReview'
+import QuickPost from './pages/admin/QuickPost'
 import RequireStaffRole from './components/app/RequireStaffRole'
 
 export default function App() {
@@ -128,6 +130,39 @@ export default function App() {
           element={
             <RequireStaffRole allow={['CASHIER', 'OWNER', 'MANAGER']}>
               <ReceiptPage />
+            </RequireStaffRole>
+          }
+        />
+
+        <Route
+          path="app/content-review"
+          element={
+            <RequireStaffRole allow={['OWNER']}>
+              <ContentReview />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="admin/content-review"
+          element={
+            <RequireStaffRole allow={['OWNER']}>
+              <ContentReview />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/quick-post"
+          element={
+            <RequireStaffRole allow={['OWNER']}>
+              <QuickPost />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="admin/quick-post"
+          element={
+            <RequireStaffRole allow={['OWNER']}>
+              <QuickPost />
             </RequireStaffRole>
           }
         />

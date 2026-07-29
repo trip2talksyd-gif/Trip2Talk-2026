@@ -37,13 +37,8 @@ export default function TripPricingCard({ tour, includes }: Props) {
 
   if (cancelled) {
     return (
-      <aside className="rounded-2xl border border-line bg-cream p-5 shadow-[0_12px_40px_rgba(22,38,43,0.1)] lg:sticky lg:top-24">
-        <p className="text-[12.5px] text-ink-soft">
-          {tourDurationLabel(tour, lang)}
-          <span className="ml-1 font-thai text-[#8aa39a]">
-            {lang === 'th' ? '' : ` · ${tourDurationLabel(tour, 'th')}`}
-          </span>
-        </p>
+      <aside className="rounded-[18px] border border-line bg-card p-[22px] shadow-mockup lg:sticky lg:top-24">
+        <p className="text-[12.5px] text-ink-soft">{tourDurationLabel(tour, lang)}</p>
         <p className="mt-1 text-[12.5px] font-bold text-ink">
           {tourDestination(tour.trip_code)} · {tour.trip_code}
         </p>
@@ -63,29 +58,23 @@ export default function TripPricingCard({ tour, includes }: Props) {
   }
 
   return (
-    <aside className="rounded-2xl border border-line bg-cream p-5 shadow-[0_12px_40px_rgba(22,38,43,0.1)] lg:sticky lg:top-24">
+    <aside className="rounded-[18px] border border-line bg-card p-[22px] shadow-mockup lg:sticky lg:top-24">
       {isPremiumTrip(tour.trip_code) && (
         <span className="mb-3 inline-block rounded-md bg-coral px-2.5 py-1 text-[9.5px] font-extrabold uppercase tracking-wide text-cream">
-          Flagship Trip
-          <span className="mt-0.5 block font-thai text-[8.5px] font-semibold normal-case opacity-90">
-            ทริปเรือธง
-          </span>
+          {lang === 'th' ? 'ทริปเรือธง' : 'Flagship Trip'}
         </span>
       )}
 
-      <p className="text-[12.5px] text-ink-soft">
-        {tourDurationLabel(tour, lang)}
-        <span className="ml-1 font-thai text-[#8aa39a]">
-          {lang === 'th' ? '' : ` · ${tourDurationLabel(tour, 'th')}`}
-        </span>
-      </p>
+      <p className="text-[12.5px] text-ink-soft">{tourDurationLabel(tour, lang)}</p>
       <p className="mt-1 text-[12.5px] font-bold text-ink">
         {tourDestination(tour.trip_code)} · {tour.trip_code}
       </p>
 
       <div className="group mt-3">
         <SplitFlapPrice amountAud={tour.price_aud} className="text-[28px] font-extrabold text-ink" board />
-        <span className="ml-1 text-xs font-semibold text-ink-soft">AUD / person</span>
+        <span className="ml-1 text-xs font-semibold text-ink-soft">
+          {lang === 'th' ? 'AUD / คน' : 'AUD / person'}
+        </span>
       </div>
       <p className="mt-1 text-[10.5px] text-ink-soft">
         {lang === 'th'
@@ -97,22 +86,21 @@ export default function TripPricingCard({ tour, includes }: Props) {
         {icons.map(({ icon: Icon, en, th }) => (
           <div key={en} className="rounded-[10px] bg-mint-100 px-1 py-2 text-center">
             <Icon className="mx-auto h-4 w-4 text-teal-800" strokeWidth={2} />
-            <span className="mt-1 block text-[9px] font-bold leading-snug text-teal-800">{en}</span>
-            <small className="block font-thai text-[7.5px] text-ink-soft">{th}</small>
+            <span className="mt-1 block text-[9px] font-bold leading-snug text-teal-800">
+              {lang === 'th' ? th : en}
+            </span>
           </div>
         ))}
       </div>
 
-      <div className="mt-4 rounded-xl border border-line bg-mint-100/60 p-3">
-        <p className="text-xs font-bold text-ink">
+      <div className="mt-4 rounded-[14px] border border-line bg-card p-3.5 shadow-[0_8px_18px_-12px_rgba(15,28,30,0.3)]">
+        <p className="text-[12.5px] font-bold text-ink">
           {lang === 'th' ? 'กลุ่มทริปนี้' : 'Join this group'}
         </p>
-        <div className="mt-2 space-y-1 text-[11px] text-ink-soft">
+        <div className="mt-2 space-y-1 text-[10.5px] text-ink-soft">
           <p>
             📅 {formatDate(tour.departure_date, lang)}
-            <span className="font-thai">
-              {lang === 'en' ? ' · meetup morning of' : ' · นัดพบเช้าวันเดินทาง'}
-            </span>
+            {lang === 'th' ? ' · นัดพบเช้าวันเดินทาง' : ' · meetup morning of'}
           </p>
           <p>
             📍{' '}
@@ -120,12 +108,9 @@ export default function TripPricingCard({ tour, includes }: Props) {
               ? lang === 'th'
                 ? 'Thai Town / Starbucks · รับ–ส่งตามเส้นทางทริป'
                 : 'Thai Town / Starbucks · pickup along the route'
-              : tourDestination(tour.trip_code)}
-            {!oneDay && (
-              <span className="font-thai">
-                {lang === 'en' ? ' · pickup details after deposit' : ' · จุดรับหลังมัดจำ'}
-              </span>
-            )}
+              : `${tourDestination(tour.trip_code)}${
+                  lang === 'th' ? ' · จุดรับหลังมัดจำ' : ' · pickup details after deposit'
+                }`}
           </p>
         </div>
         <div className="mt-3 flex items-center justify-between gap-2">

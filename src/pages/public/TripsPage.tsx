@@ -82,12 +82,9 @@ export default function TripsPage() {
 
   return (
     <div className="pb-2">
-      <header className="-mx-4 border-b border-line bg-card px-4 pb-3 pt-2">
+      <header className="-mx-4 border-b border-line bg-card px-4 pb-3 pt-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-5">
         <h1 className="font-serif text-[17px] text-ink sm:text-2xl">
           {t('nav.trips')}
-          <span className="mt-px block font-thai text-[11px] font-medium text-ink-soft">
-            {lang === 'th' ? 'สำรวจทริป' : 'Explore trips'}
-          </span>
         </h1>
         <p className="mt-1 text-[11px] text-ink-soft">{t('trips.subtitle')}</p>
       </header>

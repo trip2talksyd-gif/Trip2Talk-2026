@@ -9,6 +9,7 @@ import {
   fetchToursAdmin,
   fetchWaitlist,
   formatDate,
+  generateTripPost,
   markWaitlistContacted,
   updateTourStatus,
 } from '../../lib/toursApi'
@@ -17,6 +18,7 @@ import type { Tour, WaitlistEntry } from '../../types/tour'
 import { DashboardCardSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
+import { Loader2 } from 'lucide-react'
 
 const LOW_SEATS_RATIO = 0.8
 
@@ -58,6 +60,10 @@ export default function TripManagerPage() {
   const [repeatMonths, setRepeatMonths] = useState(1)
   const [submitting, setSubmitting] = useState(false)
   const [showPast, setShowPast] = useState(false)
+  const [generatingTripId, setGeneratingTripId] = useState<string | null>(null)
+  const [contentBanner, setContentBanner] = useState<{ tripName: string; reused: boolean } | null>(
+    null,
+  )
 
   const load = useCallback(() => {
     setLoading(true)
@@ -290,6 +296,29 @@ export default function TripManagerPage() {
     }
   }
 
+  async function handleGenerateTripPost(tour: Tour) {
+    if (generatingTripId) return
+    setGeneratingTripId(tour.id)
+    setContentBanner(null)
+    try {
+      const result = await generateTripPost(tour.id)
+      toast('สร้างโพสต์ร่างแล้ว ไปดูที่หน้ารีวิว', 'success')
+      setContentBanner({
+        tripName: tour.name_th || tour.name_en,
+        reused: result.reused,
+      })
+    } catch (err) {
+      console.error('[TripManagerPage] generate-trip-post failed:', err)
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast(err instanceof Error ? err.message : 'สร้างโพสต์ไม่สำเร็จ ลองอีกครั้ง', 'error')
+    } finally {
+      setGeneratingTripId(null)
+    }
+  }
+
   return (
     <div className="min-h-svh bg-near-black-green text-cream">
       <header className="border-b border-white/8 px-4 py-4">
@@ -306,6 +335,29 @@ export default function TripManagerPage() {
 
         {!loading && !error && (
           <>
+            {contentBanner && (
+              <div className="rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-cream">
+                <p>
+                  {contentBanner.reused
+                    ? `มีร่างของ “${contentBanner.tripName}” อยู่แล้วใน 7 วันล่าสุด`
+                    : `สร้างโพสต์ร่างสำหรับ “${contentBanner.tripName}” แล้ว`}
+                </p>
+                <Link
+                  to="/admin/content-review"
+                  className="mt-2 inline-block font-medium text-gold underline-offset-2 hover:underline"
+                >
+                  ไปดูที่หน้ารีวิว →
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => setContentBanner(null)}
+                  className="ml-3 text-xs text-cream-muted hover:text-cream"
+                >
+                  ปิด
+                </button>
+              </div>
+            )}
+
             {waitlistMatches.length > 0 && (
               <section className="rounded-editorial border-2 border-gold bg-gold/15 p-4">
                 <div className="flex items-center justify-between">
@@ -558,51 +610,72 @@ export default function TripManagerPage() {
                       : ratio >= LOW_SEATS_RATIO
                         ? 'bg-gold/80 text-near-black-green'
                         : 'bg-white/10 text-cream-muted'
+                  const isGenerating = generatingTripId === t.id
+                  const showContentBtn = isLiveStatus(t.status) && isUpcoming(t)
                   return (
                     <li
                       key={t.id}
-                      className="flex items-center justify-between rounded-lg border border-white/8 bg-surface-card px-3 py-2 text-sm"
+                      className="rounded-lg border border-white/8 bg-surface-card px-3 py-2 text-sm"
                     >
-                      <div className="min-w-0">
-                        <p className="truncate text-cream">{t.name_en}</p>
-                        <p className="truncate text-xs text-cream-muted">
-                          {t.trip_code} · {formatDate(t.departure_date)} · {t.status}
-                        </p>
-                      </div>
-                      <span className="flex shrink-0 items-center gap-1.5">
-                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
-                          {t.booked_seats}/{t.max_seats}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-cream">{t.name_en}</p>
+                          <p className="truncate text-xs text-cream-muted">
+                            {t.trip_code} · {formatDate(t.departure_date)} · {t.status}
+                          </p>
+                        </div>
+                        <span className="flex shrink-0 items-center gap-1.5">
+                          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
+                            {t.booked_seats}/{t.max_seats}
+                          </span>
+                          {t.status.toLowerCase() === 'cancelled' ? (
+                            <button
+                              type="button"
+                              onClick={() => handleRestoreTour(t)}
+                              title="เปิดทริปนี้กลับมา (published)"
+                              className="rounded-full p-1 text-cream-muted hover:bg-gold/20 hover:text-gold"
+                            >
+                              ♻️
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => handleCancelTour(t)}
+                              title="งดจัดทริปนี้ — ซ่อนจากเว็บแต่เก็บข้อมูลไว้ครบ"
+                              className="rounded-full p-1 text-cream-muted hover:bg-coral/20 hover:text-coral"
+                            >
+                              🚫
+                            </button>
+                          )}
+                          {t.booked_seats === 0 && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteTour(t)}
+                              title="ลบทริปนี้ (เฉพาะทริปตัวอย่างที่ยังไม่มีคนจอง)"
+                              className="rounded-full p-1 text-cream-muted hover:bg-coral/20 hover:text-coral"
+                            >
+                              🗑️
+                            </button>
+                          )}
                         </span>
-                        {t.status.toLowerCase() === 'cancelled' ? (
-                          <button
-                            type="button"
-                            onClick={() => handleRestoreTour(t)}
-                            title="เปิดทริปนี้กลับมา (published)"
-                            className="rounded-full p-1 text-cream-muted hover:bg-gold/20 hover:text-gold"
-                          >
-                            ♻️
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => handleCancelTour(t)}
-                            title="งดจัดทริปนี้ — ซ่อนจากเว็บแต่เก็บข้อมูลไว้ครบ"
-                            className="rounded-full p-1 text-cream-muted hover:bg-coral/20 hover:text-coral"
-                          >
-                            🚫
-                          </button>
-                        )}
-                        {t.booked_seats === 0 && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteTour(t)}
-                            title="ลบทริปนี้ (เฉพาะทริปตัวอย่างที่ยังไม่มีคนจอง)"
-                            className="rounded-full p-1 text-cream-muted hover:bg-coral/20 hover:text-coral"
-                          >
-                            🗑️
-                          </button>
-                        )}
-                      </span>
+                      </div>
+                      {showContentBtn && (
+                        <button
+                          type="button"
+                          disabled={generatingTripId !== null}
+                          onClick={() => void handleGenerateTripPost(t)}
+                          className="mt-2 flex min-h-10 w-full items-center justify-center gap-2 rounded-editorial border border-gold/40 bg-gold/10 px-3 text-xs font-medium text-gold transition-colors hover:bg-gold/15 disabled:opacity-50"
+                        >
+                          {isGenerating ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                              กำลังสร้าง…
+                            </>
+                          ) : (
+                            'สร้าง content ให้ทริปนี้'
+                          )}
+                        </button>
+                      )}
                     </li>
                   )
                 })}

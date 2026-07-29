@@ -95,9 +95,6 @@ export default function TripCard({ tour }: Props) {
         <Link to={`/trips/${tour.trip_code}`}>
           <h3 className="mt-0.5 font-thai text-[12.5px] font-bold leading-snug text-ink">
             {lang === 'th' ? nameTh : name}
-            {lang === 'en' && (
-              <span className="mt-px block text-[10px] font-medium text-ink-soft">{nameTh}</span>
-            )}
           </h3>
         </Link>
         <div className="mt-1 flex items-center justify-between gap-2 text-[10px] text-ink-soft">

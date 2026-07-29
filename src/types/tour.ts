@@ -141,3 +141,33 @@ export interface WaitlistEntry {
   contacted: boolean
   created_at: string
 }
+
+export type ContentPostStatus = 'draft' | 'approved' | 'rejected' | 'posted'
+export type ContentPostType = 'trip_promo' | 'value_content'
+
+/** Draft Facebook/content post awaiting OWNER review before Make.com posts it. */
+export interface ContentPost {
+  id: string
+  /** Null when post_type = value_content (page-growth, no trip). */
+  trip_id: string | null
+  post_type: ContentPostType | string
+  status: ContentPostStatus | string
+  headline_options: string[]
+  selected_headline: string | null
+  caption_fb: string | null
+  caption_ig?: string | null
+  caption_line?: string | null
+  photo_urls: string[] | null
+  page_id?: string | null
+  created_at: string
+  updated_at?: string | null
+  tours: {
+    id: string
+    trip_code: string
+    name_en: string
+    name_th: string
+    departure_date: string | null
+    max_seats: number
+    booked_seats: number
+  } | null
+}

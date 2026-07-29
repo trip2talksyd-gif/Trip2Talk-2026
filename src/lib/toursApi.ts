@@ -1,10 +1,11 @@
 import { supabase, supabaseConfig } from './supabase'
-import { callStaffApi } from './supabaseStaff'
+import { callStaffApi, StaffSessionExpiredError } from './supabaseStaff'
 import { SeatsFullError } from '../types/errors'
 import type {
   BookingInsertReadback,
   BookingPayment,
   ComplianceItem,
+  ContentPost,
   Expense,
   StaffRole,
   Tour,
@@ -804,6 +805,217 @@ export async function uploadPaymentSlip(file: File, bookingRef: string): Promise
       logSupabaseError(`uploadPaymentSlip (${bookingRef})`, err)
     }
     throw err
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Content Review (OWNER): draft Facebook posts → approve / reject
+// ---------------------------------------------------------------------------
+
+function normalizeHeadlineOptions(raw: unknown): string[] {
+  if (Array.isArray(raw)) return raw.filter((x): x is string => typeof x === 'string')
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw) as unknown
+      if (Array.isArray(parsed)) return parsed.filter((x): x is string => typeof x === 'string')
+    } catch {
+      /* plain string — treat as single option */
+      return raw.trim() ? [raw] : []
+    }
+  }
+  return []
+}
+
+export async function fetchDraftContentPosts(): Promise<ContentPost[]> {
+  const rows = await callStaffApi<Record<string, unknown>[]>('list_draft_content_posts')
+  return (rows ?? []).map((row) => {
+    const tourJoin = row.tours
+    const tours =
+      tourJoin && typeof tourJoin === 'object' && !Array.isArray(tourJoin)
+        ? (tourJoin as ContentPost['tours'])
+        : Array.isArray(tourJoin) && tourJoin[0]
+          ? (tourJoin[0] as ContentPost['tours'])
+          : null
+
+    return {
+      id: String(row.id),
+      trip_id: row.trip_id != null ? String(row.trip_id) : null,
+      post_type: String(row.post_type ?? (row.trip_id ? 'trip_promo' : 'value_content')),
+      status: String(row.status ?? 'draft'),
+      headline_options: normalizeHeadlineOptions(row.headline_options),
+      selected_headline: (row.selected_headline as string | null) ?? null,
+      caption_fb: (row.caption_fb as string | null) ?? null,
+      caption_ig: (row.caption_ig as string | null) ?? null,
+      caption_line: (row.caption_line as string | null) ?? null,
+      photo_urls: Array.isArray(row.photo_urls)
+        ? (row.photo_urls as string[])
+        : null,
+      page_id: (row.page_id as string | null) ?? null,
+      created_at: String(row.created_at ?? ''),
+      updated_at: (row.updated_at as string | null) ?? null,
+      tours,
+    }
+  })
+}
+
+export async function rejectContentPost(id: string): Promise<void> {
+  await callStaffApi('update_content_post', { id, status: 'rejected' })
+}
+
+export async function approveContentPost(
+  id: string,
+  payload: {
+    selected_headline: string
+    caption_fb: string
+    photo_urls: string[]
+  },
+): Promise<void> {
+  await callStaffApi('update_content_post', {
+    id,
+    status: 'approved',
+    selected_headline: payload.selected_headline,
+    caption_fb: payload.caption_fb,
+    photo_urls: payload.photo_urls,
+  })
+}
+
+export async function insertContentPostDraft(input: {
+  post_type: 'value_content' | 'trip_promo'
+  trip_id?: string | null
+  photo_urls: string[]
+  headline_options: string[]
+  caption_fb: string
+}): Promise<{ id: string }> {
+  return callStaffApi<{ id: string }>('insert_content_post', {
+    ...input,
+    status: 'draft',
+  })
+}
+
+/** Upload to public content-photos/{uuid}/… and return the public URL. */
+export async function uploadContentPhoto(file: File): Promise<string> {
+  const uuid = crypto.randomUUID()
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
+  const path = `${uuid}/${Date.now()}.${ext}`
+
+  const { error } = await supabase.storage.from('content-photos').upload(path, file, {
+    upsert: false,
+    contentType: file.type || `image/${ext}`,
+  })
+  if (error) {
+    logSupabaseError('uploadContentPhoto', error)
+    throw error
+  }
+
+  const { data } = supabase.storage.from('content-photos').getPublicUrl(path)
+  return data.publicUrl
+}
+
+export type GenerateCaptionResult = {
+  headline_options: string[]
+  caption_fb: string
+}
+
+/** Calls generate-caption Edge Function (OWNER session token required). */
+export async function generateCaption(
+  imageUrl: string,
+  postType: 'value_content' | 'trip_promo' = 'value_content',
+): Promise<GenerateCaptionResult> {
+  const token = sessionStorage.getItem('staff_token')
+  if (!token) throw new StaffSessionExpiredError()
+
+  const res = await fetch(`${supabaseConfig.url}/functions/v1/generate-caption`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseConfig.anonKey,
+    },
+    body: JSON.stringify({
+      token,
+      image_url: imageUrl,
+      post_type: postType,
+    }),
+  })
+
+  if (res.status === 401) {
+    throw new StaffSessionExpiredError()
+  }
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error(body?.error ?? `generate-caption failed: ${res.status}`)
+  }
+
+  const body = (await res.json()) as GenerateCaptionResult
+  if (!Array.isArray(body.headline_options) || typeof body.caption_fb !== 'string') {
+    throw new Error('generate-caption returned incomplete data')
+  }
+  return body
+}
+
+export type GenerateTripPostResult = {
+  data: ContentPost
+  reused: boolean
+}
+
+/** Calls generate-trip-post Edge Function — creates a trip_promo draft for a tour. */
+export async function generateTripPost(tripId: string): Promise<GenerateTripPostResult> {
+  const token = sessionStorage.getItem('staff_token')
+  if (!token) throw new StaffSessionExpiredError()
+
+  const res = await fetch(`${supabaseConfig.url}/functions/v1/generate-trip-post`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseConfig.anonKey,
+    },
+    body: JSON.stringify({ token, trip_id: tripId }),
+  })
+
+  if (res.status === 401) {
+    throw new StaffSessionExpiredError()
+  }
+
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const thai =
+      typeof body?.message === 'string' && body.message.trim()
+        ? body.message
+        : 'สร้างโพสต์ไม่สำเร็จ ลองอีกครั้ง'
+    throw new Error(thai)
+  }
+
+  if (!body?.data?.id) {
+    throw new Error('สร้างโพสต์ไม่สำเร็จ ลองอีกครั้ง')
+  }
+
+  return {
+    data: body.data as ContentPost,
+    reused: Boolean(body.reused),
+  }
+}
+
+/** Public URLs for images under trip-photos/{tripId}/ (bucket is publicly readable). */
+export async function listTripPhotoUrls(tripId: string): Promise<string[]> {
+  if (!tripId) return []
+  try {
+    const { data, error } = await supabase.storage.from('trip-photos').list(tripId, {
+      limit: 100,
+      sortBy: { column: 'name', order: 'asc' },
+    })
+    if (error) {
+      logSupabaseError(`listTripPhotoUrls (${tripId})`, error)
+      return []
+    }
+    const files = (data ?? []).filter(
+      (f) => f.name && !f.name.startsWith('.') && /\.(jpe?g|png|webp|gif)$/i.test(f.name),
+    )
+    return files.map((f) => {
+      const { data: pub } = supabase.storage.from('trip-photos').getPublicUrl(`${tripId}/${f.name}`)
+      return pub.publicUrl
+    })
+  } catch (err) {
+    logSupabaseError(`listTripPhotoUrls (${tripId})`, err)
+    return []
   }
 }
 

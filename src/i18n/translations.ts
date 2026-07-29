@@ -102,6 +102,18 @@ export type TranslationKey =
   | 'home.faq.q6'
   | 'home.faq.a6'
   | 'home.featured'
+  | 'home.how.title'
+  | 'home.how.subtitle'
+  | 'home.how.step1.title'
+  | 'home.how.step1.desc'
+  | 'home.how.step2.title'
+  | 'home.how.step2.desc'
+  | 'home.how.step3.title'
+  | 'home.how.step3.desc'
+  | 'home.how.mock.status'
+  | 'home.showcase.title'
+  | 'home.showcase.subtitle'
+  | 'home.showcase.cta'
   | 'favorites.subtitle'
   | 'favorites.empty'
   | 'favorites.stale'
@@ -358,6 +370,18 @@ const en: Map = {
   'home.faq.a6':
     'Book via PayID with a deposit to secure your seat, then pay the balance before departure. Cancellation and refund terms vary by trip and are shown on the digital waiver before you confirm.',
   'home.featured': 'Featured Trips',
+  'home.how.title': 'See Trip2Talk in action',
+  'home.how.subtitle': 'From picking a date to getting your photos back — here is the whole trip.',
+  'home.how.step1.title': 'Pick your trip & date',
+  'home.how.step1.desc': 'Browse real departure dates, check seats left, and find the destination that fits your style.',
+  'home.how.step2.title': 'Lock your seat with a deposit',
+  'home.how.step2.desc': 'Transfer the deposit via PayID — no account, no app download, just a bank transfer.',
+  'home.how.step3.title': 'Travel with your group',
+  'home.how.step3.desc': 'Meet your small group and photographer on the day. Edited photos follow after the trip.',
+  'home.how.mock.status': 'Deposit confirmed',
+  'home.showcase.title': 'Real trips, real photos',
+  'home.showcase.subtitle': 'A few trips currently open for booking.',
+  'home.showcase.cta': 'View all trips',
   'favorites.subtitle': 'Saved on this device — no account needed.',
   'favorites.empty': 'No saved trips yet. Tap the heart on any trip card to save it here.',
   'favorites.stale': 'Some saved trip codes are no longer listed. You can remove them below.',
@@ -618,6 +642,18 @@ const th: Map = {
   'home.faq.a6':
     'จองผ่าน PayID พร้อมมัดจำเพื่อล็อคที่นั่ง แล้วจ่ายส่วนที่เหลือก่อนวันเดินทาง เงื่อนไขการยกเลิก/คืนเงินแตกต่างกันไปตามทริป ดูรายละเอียดได้ในเอกสาร waiver ก่อนยืนยันการจอง',
   'home.featured': 'ทริปแนะนำ',
+  'home.how.title': 'Trip2Talk ทำงานยังไง',
+  'home.how.subtitle': 'ตั้งแต่เลือกวันเดินทาง จนได้รับรูปคืน — ครบทุกขั้นตอนที่นี่',
+  'home.how.step1.title': 'เลือกทริปและวันเดินทาง',
+  'home.how.step1.desc': 'ดูวันออกทริปจริง เช็คที่นั่งว่าง แล้วเลือกปลายทางที่ใช่สไตล์คุณ',
+  'home.how.step2.title': 'มัดจำล็อคที่นั่ง',
+  'home.how.step2.desc': 'โอนมัดจำผ่าน PayID ไม่ต้องสมัครสมาชิก ไม่ต้องโหลดแอป แค่โอนผ่านแอปธนาคาร',
+  'home.how.step3.title': 'ออกเดินทางกับกลุ่ม',
+  'home.how.step3.desc': 'พบกลุ่มเล็กและช่างภาพในวันเดินทาง รูปที่แต่งแล้วจะส่งให้หลังทริปจบ',
+  'home.how.mock.status': 'ยืนยันมัดจำแล้ว',
+  'home.showcase.title': 'ทริปจริง รูปจริง',
+  'home.showcase.subtitle': 'ตัวอย่างทริปที่เปิดจองอยู่ตอนนี้',
+  'home.showcase.cta': 'ดูทริปทั้งหมด',
   'favorites.subtitle': 'บันทึกไว้ในเครื่องนี้ — ไม่ต้องมีบัญชี',
   'favorites.empty': 'ยังไม่มีทริปที่บันทึก กดหัวใจบนการ์ดทริปเพื่อเซฟไว้ที่นี่',
   'favorites.stale': 'บางรหัสทริปที่บันทึกไว้ไม่มีในรายการแล้ว ลบออกได้ด้านล่าง',

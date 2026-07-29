@@ -1,6 +1,15 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, ChevronRight, Heart, Sparkles } from 'lucide-react'
+import {
+  ArrowLeft,
+  CalendarDays,
+  Camera,
+  ChevronRight,
+  Heart,
+  MapPin,
+  Sparkles,
+  Users,
+} from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites'
 import { fetchTourByCode, isTourBookable, seatsRemaining } from '../../lib/toursApi'
@@ -182,10 +191,10 @@ export default function TripDetailPage() {
         <TripBookButton tour={tour} variant="deep" className="!w-auto shrink-0 !px-5 !py-2.5" />
       </div>
 
-      {/* Horizontal swipeable strip — hover/focus a thumbnail to preview it in the hero above */}
+      {/* Mockup .gallery-scroll — larger on desktop */}
       {stripPhotos.length > 0 && (
-        <div className="-mx-4 overflow-x-auto px-4 pb-1">
-          <div className="flex gap-2">
+        <div className="-mx-4 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0">
+          <div className="flex gap-2.5">
             {stripPhotos.map((photo) => (
               <button
                 key={photo.id}
@@ -196,7 +205,7 @@ export default function TripDetailPage() {
                 onFocus={() => setPreviewPhoto(photo)}
                 onBlur={() => setPreviewPhoto(null)}
                 onClick={() => setPreviewPhoto(photo)}
-                className={`h-20 w-28 shrink-0 overflow-hidden rounded-lg ring-1 transition-all ${
+                className={`h-20 w-[7.5rem] shrink-0 overflow-hidden rounded-[14px] ring-1 transition-all sm:h-[170px] sm:w-[230px] ${
                   previewPhoto?.id === photo.id
                     ? 'ring-2 ring-teal-600'
                     : 'ring-line hover:ring-teal-600/60'
@@ -211,14 +220,45 @@ export default function TripDetailPage() {
               </button>
             ))}
           </div>
+          <p className="mt-1.5 text-[11px] text-ink-soft">
+            {lang === 'th' ? '↔ ปัดดูรูปเพิ่มเติม' : '↔ Swipe for more photos'}
+          </p>
         </div>
       )}
 
-      {tagline && <p className="text-sm text-ink/80">{tagline}</p>}
+      {tagline && <p className="text-sm leading-relaxed text-ink-soft">{tagline}</p>}
+
+      {/* Mockup .meta-icons */}
+      <div className="flex flex-wrap gap-x-[22px] gap-y-3 border-y border-line py-4">
+        <div className="text-[11.5px] text-ink-soft">
+          <CalendarDays className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />
+          <b className="block text-[13px] text-ink">{durationLabel}</b>
+          {lang === 'th' ? 'ระยะเวลา' : 'Duration'}
+        </div>
+        <div className="text-[11.5px] text-ink-soft">
+          <MapPin className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />
+          <b className="block text-[13px] text-ink">{tourDestination(tour.trip_code)}</b>
+          {lang === 'th' ? 'ปลายทาง' : 'Destination'}
+        </div>
+        <div className="text-[11.5px] text-ink-soft">
+          <Users className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />
+          <b className="block text-[13px] text-ink">
+            {lang === 'th' ? `สูงสุด ${tour.max_seats}` : `Max ${tour.max_seats}`}
+          </b>
+          {lang === 'th' ? 'ขนาดกลุ่ม' : 'Group size'}
+        </div>
+        <div className="text-[11.5px] text-ink-soft">
+          <Camera className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />
+          <b className="block text-[13px] text-ink">
+            {lang === 'th' ? 'รวมช่างภาพ' : 'Pro photographer'}
+          </b>
+          {lang === 'th' ? 'ทุกทริป' : 'Every trip'}
+        </div>
+      </div>
 
       {isPremiumTrip(tour.trip_code) && <PremiumTripCallout tripCode={tour.trip_code} />}
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_320px] lg:items-start">
+      <div className="grid gap-9 lg:grid-cols-[1.7fr_1fr] lg:items-start">
         <div className="order-2 space-y-6 lg:order-1">
           {isAuroraTrip(tour) && (
             <>
@@ -235,7 +275,7 @@ export default function TripDetailPage() {
 
           {highlights.length > 0 && (
             <section>
-              <h2 className="font-serif text-lg text-ink">
+              <h2 className="font-thai text-[15.5px] text-ink">
                 {lang === 'th' ? 'ไฮไลท์' : 'Highlights'}
               </h2>
               <ul className="mt-2 space-y-2">
