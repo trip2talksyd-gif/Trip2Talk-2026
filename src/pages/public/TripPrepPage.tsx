@@ -32,10 +32,32 @@ export default function TripPrepPage() {
 
       <header>
         <h1 className="font-serif text-2xl text-ink">
-          {lang === 'th' ? 'เตรียมตัวก่อนเดินทาง' : 'Trip Preparation'}
+          {lang === 'th' ? 'เตรียมตัวก่อนเที่ยว' : 'Trip Prep'}
         </h1>
         <p className="mt-1 font-mono text-xs text-ink-soft">{code}</p>
       </header>
+
+      <Link
+        to="/photo-guide"
+        className="flex items-center gap-2.5 rounded-[14px] border border-white/20 bg-gradient-to-br from-teal-900 to-teal-700 px-3.5 py-3 text-cream shadow-mockup"
+      >
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-white/14 text-lg">
+          📷
+        </span>
+        <span className="min-w-0 flex-1">
+          <b className="block text-[12px] font-bold">
+            {lang === 'th'
+              ? 'อ่านคู่มือถ่ายภาพก่อนออกเดินทาง'
+              : 'Read the Photo Guide before you go'}
+          </b>
+          <span className="mt-0.5 block text-[10px] text-mint-200">
+            {lang === 'th'
+              ? 'ท่าโพส · ตั้งค่ากล้อง · มือถือ'
+              : 'Posing · camera settings · phone tips'}
+          </span>
+        </span>
+        <span className="text-cream/70">→</span>
+      </Link>
 
       {/* Trip video — only renders when a video has been uploaded for this destination */}
       {videoUrl && (
@@ -118,7 +140,7 @@ export default function TripPrepPage() {
             return (
               <div
                 key={group.key}
-                className="rounded-editorial border border-line bg-white p-4"
+                className="rounded-[14px] border border-line bg-card p-4 shadow-[0_6px_18px_-12px_rgba(15,28,30,0.2)]"
               >
                 <h3 className="text-sm font-medium text-ink">{title}</h3>
                 <ul className="mt-2 space-y-1.5">

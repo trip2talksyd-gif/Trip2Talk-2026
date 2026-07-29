@@ -70,10 +70,10 @@ export default function AccountPage() {
           </span>
           <span className="min-w-0 flex-1">
             <b className="block text-[11.5px] font-semibold text-ink">
-              {lang === 'th' ? 'ภาษา — EN / TH' : 'Language — EN / TH'}
+              {lang === 'th' ? 'ภาษา' : 'Language'}
             </b>
-            <span className="block font-thai text-[9px] text-ink-soft">
-              {lang === 'th' ? 'แตะเพื่อสลับภาษา' : 'Tap to switch language'}
+            <span className="block text-[9px] text-ink-soft">
+              {lang === 'th' ? 'แตะเพื่อสลับเป็น English' : 'Tap to switch to Thai'}
             </span>
           </span>
           <span className="text-[12px] text-ink-soft">›</span>
@@ -94,7 +94,7 @@ export default function AccountPage() {
                 <b className="block text-[11.5px] font-semibold text-ink">
                   {lang === 'th' ? item.th : item.en}
                 </b>
-                <span className="block font-thai text-[9px] text-ink-soft">
+                <span className="block text-[9px] text-ink-soft">
                   {lang === 'th' ? item.subTh : item.subEn}
                 </span>
               </span>

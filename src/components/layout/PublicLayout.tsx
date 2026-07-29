@@ -24,8 +24,8 @@ const menuLinks = [
   { to: '/app', key: 'nav.portal' as const },
 ]
 
-// Desktop top bar — matches mockup .desktop-nav order (no Account; that is icon-only).
-const desktopNavOrder = ['/trips', '/gallery', '/calendar', '/pricing', '/about']
+// Desktop top bar — mockup order + Photo Guide hub (Guides), no Account (icon-only).
+const desktopNavOrder = ['/trips', '/gallery', '/photo-guide', '/calendar', '/pricing', '/about']
 
 export default function PublicLayout() {
   const { t, toggleLang, lang } = useLang()

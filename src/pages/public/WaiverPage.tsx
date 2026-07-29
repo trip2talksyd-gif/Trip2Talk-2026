@@ -90,13 +90,11 @@ export default function WaiverPage() {
         </Link>
         <div>
           <h1 className="font-serif text-xl text-ink sm:text-2xl">{t('waiver.title')}</h1>
-          <p className="font-thai text-xs text-ink-soft">
-            {lang === 'th' ? 'เอกสารยินยอม' : 'Waiver & Consent'} · {tripCode}
-          </p>
+          <p className="text-xs text-ink-soft">{tripCode}</p>
         </div>
       </div>
 
-      <div className="max-h-[42vh] space-y-2.5 overflow-y-auto rounded-xl border border-line bg-card p-[11px] text-[9.5px] leading-[1.6] text-ink-soft">
+      <div className="max-h-[42vh] space-y-2.5 overflow-y-auto rounded-[12px] border border-line bg-card p-[11px] text-[9.5px] leading-[1.6] text-ink-soft shadow-mockup">
         {clauses.map((clause) => (
           <div key={clause.id}>
             <p className="font-semibold text-ink">{clause.title}</p>

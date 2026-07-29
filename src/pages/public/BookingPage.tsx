@@ -216,7 +216,6 @@ export default function BookingPage() {
         <h2 className="m-0 mb-[3px] font-serif text-[18px] text-ink">
           {t('booking.confirmation')}
         </h2>
-        <p className="mb-3.5 font-thai text-[12px] text-teal-700">จองสำเร็จแล้ว!</p>
         <p className="mb-4 text-[13px] text-ink-soft">{t('booking.success')}</p>
         <p className="mb-4 rounded-xl border border-dashed border-line bg-card px-[18px] py-2.5 text-[13px] font-extrabold tracking-[0.06em] text-ink">
           {reference}
@@ -280,7 +279,7 @@ export default function BookingPage() {
         {lang === 'th' ? 'จองทริปของคุณ' : 'Book Your Trip'}
       </h1>
 
-      <div className="flex items-center gap-2.5 rounded-xl bg-mint-100 p-2">
+      <div className="flex items-center gap-2.5 rounded-[14px] border border-line bg-card p-2.5 shadow-mockup">
         {tour.cover_image_url ? (
           <img
             src={tour.cover_image_url}

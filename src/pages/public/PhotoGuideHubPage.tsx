@@ -14,8 +14,9 @@ const HUB_CARDS = [
     titleEn: 'Posing & Styling Guide',
     titleTh: 'คู่มือโพสท่า & แต่งตัว',
     bodyEn:
-      'Flattering poses our photographers use every trip, plus what colours to wear each season.',
-    bodyTh: 'ท่าโพสที่ช่างภาพใช้ทุกทริป และโทนเสื้อผ้าตามฤดูกาล',
+      'Flattering poses our photographers use every trip, plus what colors to wear each season so you pop against the landscape.',
+    bodyTh:
+      'ท่าโพสที่ช่างภาพใช้ทุกทริป และโทนเสื้อผ้าตามฤดูกาลให้ตัดกับวิว',
     photoId: 'syd-015',
   },
   {
@@ -27,7 +28,8 @@ const HUB_CARDS = [
     tagTh: 'มือใหม่กล้องใหญ่',
     titleEn: 'Camera Settings Guide',
     titleTh: 'คู่มือตั้งค่ากล้อง',
-    bodyEn: 'Aperture, shutter & ISO from morning light through stars, Milky Way and aurora.',
+    bodyEn:
+      'Aperture, shutter & ISO cheat-sheet for morning light through to stars, the Milky Way and aurora hunts.',
     bodyTh: 'รูรับแสง ชัตเตอร์ และ ISO จากแสงเช้าถึงดาว ทางช้างเผือก และแสงใต้',
     photoId: 'nz-001',
   },
@@ -40,7 +42,7 @@ const HUB_CARDS = [
     tagTh: 'ใช้มือถือ',
     titleEn: 'Mobile Photography Guide',
     titleTh: 'คู่มือถ่ายภาพด้วยมือถือ',
-    bodyEn: 'Landscape and portrait tips using just your phone — no extra gear needed.',
+    bodyEn: 'Simple landscape and portrait tips using just your phone — no extra gear needed.',
     bodyTh: 'เทคนิคทิวทัศน์และพอร์ตเทรตด้วยมือถือ ไม่ต้องมีอุปกรณ์เพิ่ม',
     photoId: 'nsw-010',
   },
@@ -53,8 +55,8 @@ export default function PhotoGuideHubPage() {
     photo,
     sceneEn: 'From the road',
     sceneTh: 'จากทริปจริง',
-    titleEn: 'Example album from Saen & team',
-    titleTh: 'อัลบั้มตัวอย่างจากพี่แสนและทีม',
+    titleEn: 'Photos from Saen',
+    titleTh: 'อัลบั้มรูปจากพี่แสน',
     meta: photo.id,
   }))
 
@@ -62,18 +64,15 @@ export default function PhotoGuideHubPage() {
     <div className="space-y-8 pb-4">
       <header className="text-center">
         <span className="mb-3.5 inline-flex items-center gap-2 rounded-full bg-mint-100 px-3.5 py-[7px] text-[11.5px] font-bold text-teal-800">
-          ✨ Let&apos;s Learn and Practice
-          <span className="font-thai text-[11px] font-semibold opacity-85">
-            มาเรียนรู้และฝึกฝนไปด้วยกัน
-          </span>
+          ✨ {lang === 'th' ? 'มาเรียนรู้และฝึกฝนไปด้วยกัน' : "Let's Learn and Practice"}
         </span>
         <h1 className="mt-2 font-serif text-[22px] text-ink sm:text-3xl">
           {lang === 'th' ? 'คลังเคล็ดลับถ่ายภาพ' : 'Photo Guide'}
         </h1>
-        <p className="mx-auto mt-1 max-w-md text-[13.5px] leading-relaxed text-ink-soft">
+        <p className="mx-auto mt-1 max-w-lg text-[13.5px] leading-relaxed text-ink-soft">
           {lang === 'th'
-            ? 'มาเรียนรู้และฝึกฝนไปด้วยกัน — ลิงก์จากหน้าแรกและหน้าเตรียมตัว'
-            : 'Tied to Trip2Talk’s tagline — linked from Home and Trip Prep.'}
+            ? 'สามคู่มือสำหรับสามสไตล์นักเดินทาง — ลิงก์จากหน้าแรกและหน้าเตรียมตัว'
+            : 'Three guides for three kinds of travelers — linked from Home and Trip Prep.'}
         </p>
       </header>
 
@@ -90,13 +89,10 @@ export default function PhotoGuideHubPage() {
                 className={`absolute left-3.5 top-3.5 z-[2] rounded-[10px] px-3 py-1.5 text-[10px] font-extrabold leading-tight text-cream shadow-[0_8px_16px_-6px_rgba(0,0,0,0.4)] ${card.badgeClass}`}
               >
                 {lang === 'th' ? card.badgeTh : card.badgeEn}
-                <span className="mt-px block font-thai text-[8px] font-semibold opacity-85">
-                  {lang === 'th' ? card.badgeEn : card.badgeTh}
-                </span>
               </span>
               <img
                 src={photoSrc(photo)}
-                alt={card.titleEn}
+                alt={lang === 'th' ? card.titleTh : card.titleEn}
                 className="h-[150px] w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="px-5 pb-[22px] pt-[18px]">
@@ -105,9 +101,6 @@ export default function PhotoGuideHubPage() {
                 </p>
                 <h2 className="mt-1.5 font-serif text-[15px] text-ink">
                   {lang === 'th' ? card.titleTh : card.titleEn}
-                  <span className="mt-px block text-[12px] font-medium text-teal-700">
-                    {lang === 'th' ? card.titleEn : card.titleTh}
-                  </span>
                 </h2>
                 <p className="mb-3.5 mt-2 text-[12px] leading-relaxed text-ink-soft">
                   {lang === 'th' ? card.bodyTh : card.bodyEn}
@@ -122,15 +115,18 @@ export default function PhotoGuideHubPage() {
       </div>
 
       <section>
-        <h2 className="font-serif text-lg text-ink">
+        <h2 className="font-serif text-[15.5px] text-ink sm:text-lg">
           {lang === 'th' ? 'อัลบั้มรูปจากพี่แสน' : 'Photos from Saen'}
         </h2>
         <p className="mt-1 text-xs text-ink-soft">
           {lang === 'th'
-            ? 'ตัวอย่างอัลบั้มจากพี่แสนและทีม — ปัดหรือดูสไลด์ด้านล่าง'
-            : 'Example album from Saen & team — auto-crossfade below'}
+            ? 'รูปคัดสรรจากทริปที่ผ่านมา — ลากหรือดูสไลด์ด้านล่าง'
+            : 'Curated shots from past trips — drag or browse the slideshow below.'}
         </p>
         <PhotoSlideshow slides={slides} className="mt-3" />
+        <p className="mt-2 text-[11px] text-ink-soft">
+          {lang === 'th' ? '↔ ลากเพื่อดูอัลบั้ม' : '↔ Drag to browse the album'}
+        </p>
       </section>
     </div>
   )
