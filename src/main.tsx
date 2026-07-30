@@ -4,6 +4,9 @@ import './index.css'
 import App from './App.tsx'
 import { LangProvider } from './hooks/useLang'
 import { ToastProvider } from './components/ui/Toast'
+import { registerPwa } from './pwa'
+
+registerPwa()
 
 class RootErrorBoundary extends Component<{ children: ReactNode }, { error: Error | null }> {
   state = { error: null as Error | null }

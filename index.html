@@ -50,27 +50,28 @@
       rel="stylesheet"
     />
     <script>
-      // Recover from a stale service worker that pins a broken white-screen build.
+      // One-shot force-clear for ALL previously installed PWAs (not only white-screen).
+      // Marks localStorage first so the post-clear reload cannot loop.
       (function () {
-        var KEY = 't2t_sw_recovery_v2'
+        var KEY = 't2t_sw_force_clear_v3'
         if (!('serviceWorker' in navigator)) return
-        window.addEventListener('load', function () {
-          setTimeout(function () {
-            var root = document.getElementById('root')
-            if (root && root.childNodes.length > 0) return
-            if (sessionStorage.getItem(KEY)) return
-            sessionStorage.setItem(KEY, '1')
-            Promise.all([
-              navigator.serviceWorker.getRegistrations().then(function (regs) {
-                return Promise.all(regs.map(function (r) { return r.unregister() }))
-              }),
-              caches.keys().then(function (keys) {
-                return Promise.all(keys.map(function (k) { return caches.delete(k) }))
-              }),
-            ]).then(function () {
-              location.reload()
-            })
-          }, 2500)
+        try {
+          if (localStorage.getItem(KEY) === '1') return
+          localStorage.setItem(KEY, '1')
+        } catch (e) {
+          return
+        }
+        Promise.all([
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            return Promise.all(regs.map(function (r) { return r.unregister() }))
+          }),
+          caches.keys().then(function (keys) {
+            return Promise.all(keys.map(function (k) { return caches.delete(k) }))
+          }),
+        ]).then(function () {
+          location.reload()
+        }).catch(function () {
+          location.reload()
         })
       })()
     </script>

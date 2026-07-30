@@ -8,6 +8,8 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Registration lives in src/pwa.ts via virtual:pwa-register (reload + update checks).
+      injectRegister: null,
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
         name: 'Trip2Talk - Thai Photo Tours Australia',
@@ -29,13 +31,14 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Never precache HTML — stale index.html pins old JS hashes and causes a white screen.
+        // Never precache HTML — a pinned index.html keeps old hashed JS forever.
         globPatterns: ['**/*.{js,css,ico,png,svg,jpg,jpeg,webp}'],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
-        navigateFallback: '/index.html',
-        navigateFallbackDenylist: [/^\/assets\//, /^\/api\//],
+        // Override vite-plugin-pwa default navigateFallback:'index.html' (empty = disabled).
+        // Navigations use NetworkFirst pages-cache below so clients can fetch a fresh shell.
+        navigateFallback: '',
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.mode === 'navigate',
@@ -47,7 +50,8 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^https:\/\/xwdtjwzjkqunewxjpimm\.supabase\.co\/.*/i,
+            // Canonical Supabase project: trip2talk-official (bljhnelgmkulxwuhedbi)
+            urlPattern: /^https:\/\/bljhnelgmkulxwuhedbi\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'supabase-cache',
