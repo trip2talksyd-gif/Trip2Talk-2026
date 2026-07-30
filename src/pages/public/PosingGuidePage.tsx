@@ -1,19 +1,12 @@
 import { Link } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import { POSING_TIPS, SEASON_CARDS } from '../../data/photoGuideContent'
-import PhotoSlideshow, { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
+import { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
+import { photoSrc } from '../../data/galleryPhotos'
 
 export default function PosingGuidePage() {
   const { lang } = useLang()
   const album = galleryByIds(['syd-009', 'syd-011', 'syd-012', 'syd-015', 'nsw-006', 'nsw-007'])
-  const slides = album.map((photo) => ({
-    photo,
-    sceneEn: 'Posing',
-    sceneTh: 'โพสท่า',
-    titleEn: 'Example album from Saen & team',
-    titleTh: 'อัลบั้มตัวอย่างจากพี่แสนและทีม',
-    meta: photo.id,
-  }))
 
   return (
     <div className="space-y-6 pb-4">
@@ -38,17 +31,36 @@ export default function PosingGuidePage() {
         </p>
       </header>
 
-      <section>
-        <div className="mb-2 flex items-baseline justify-between gap-2">
-          <p className="text-sm font-bold text-ink">
-            {lang === 'th' ? 'อัลบั้มตัวอย่างจากพี่แสนและทีม' : 'Example album from Saen & team'}
-          </p>
-          <small className="text-[10.5px] text-ink-soft">
-            {lang === 'th' ? 'ปัดเพื่อดูเพิ่ม →' : 'Swipe for more →'}
-          </small>
+      {/* Mockup posing guide: horizontal album strip (not a hero slideshow) */}
+      <div className="old-album-wrap">
+        <div className="oa-label">
+          <div>
+            <b>
+              {lang === 'th'
+                ? 'อัลบั้มตัวอย่างจากพี่แสนและทีม'
+                : 'Example album from Saen & team'}
+            </b>
+            <span className="oa-sub">
+              {lang === 'th'
+                ? 'Example album from Saen & team'
+                : 'อัลบั้มตัวอย่างจากพี่แสนและทีม'}
+            </span>
+          </div>
+          <small>{lang === 'th' ? 'ปัดเพื่อดูเพิ่ม →' : 'Swipe for more →'}</small>
         </div>
-        <PhotoSlideshow slides={slides} />
-      </section>
+        <div className="gallery-scroll-wrap">
+          <div className="gallery-scroll">
+            {album.map((photo) => (
+              <img
+                key={photo.id}
+                src={photoSrc(photo)}
+                alt={lang === 'th' ? photo.caption_th : photo.caption_en}
+                loading="lazy"
+              />
+            ))}
+          </div>
+        </div>
+      </div>
 
       <section>
         <h2 className="font-serif text-[15.5px] text-ink sm:text-lg">
