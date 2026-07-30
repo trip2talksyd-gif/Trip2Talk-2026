@@ -39,7 +39,7 @@ export default function PayIdDepositPanel({ variant = 'booking' }: Props) {
       className={
         isPage
           ? 'space-y-4'
-          : 'rounded-xl border border-line bg-cream p-4'
+          : 'rounded-xl border border-line bg-white p-4'
       }
     >
       <div className={isPage ? '' : ''}>

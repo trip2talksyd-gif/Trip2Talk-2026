@@ -79,7 +79,7 @@ export default function WaiverPage() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 pb-4" noValidate>
+    <form onSubmit={handleSubmit} className="space-y-3.5 pb-4" noValidate>
       {/* .flow-top — focused flow header: back circle + title, full-bleed white bar */}
       <div className="flow-top -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
         <Link to={`/trips/${tripCode}`} className="back" aria-label="Back">
@@ -93,7 +93,8 @@ export default function WaiverPage() {
         </div>
       </div>
 
-      <div className="max-h-[42vh] space-y-2.5 overflow-y-auto rounded-[12px] border border-line bg-card p-[11px] text-[9.5px] leading-[1.6] text-ink-soft shadow-mockup">
+      {/* .waiver-text */}
+      <div className="max-h-[42vh] space-y-2.5 overflow-y-auto rounded-[12px] border border-line bg-white p-[11px] text-[9.5px] leading-[1.6] text-ink-soft shadow-mockup">
         {clauses.map((clause) => (
           <div key={clause.id}>
             <p className="font-semibold text-ink">{clause.title}</p>
@@ -102,22 +103,19 @@ export default function WaiverPage() {
         ))}
       </div>
 
-      <div className="space-y-2">
+      {/* .waiver-check — compact white rows (one per clause; logic unchanged) */}
+      <div className="flex flex-col gap-2">
         {clauses.map((clause) => (
-          <label
-            key={`check-${clause.id}`}
-            className="flex items-start gap-2 text-[10px] text-ink-soft"
-          >
+          <label key={`check-${clause.id}`} className="waiver-check-row">
             <input
               type="checkbox"
               checked={!!checked[clause.id]}
               onChange={(e) => setChecked((prev) => ({ ...prev, [clause.id]: e.target.checked }))}
-              className="mt-0.5 accent-teal-700"
             />
-            <span>
-              <span className="font-semibold text-ink">{clause.title}</span>
-              <span className="mt-0.5 block font-thai">
-                {lang === 'th' ? 'ฉันได้อ่านและยอมรับ' : 'I have read and agree'}
+            <span className="min-w-0 leading-[1.4]">
+              <span className="block font-semibold text-ink">{clause.title}</span>
+              <span className="mt-0.5 block font-thai text-[9.5px]">
+                {lang === 'th' ? 'ฉันได้อ่านและยอมรับเงื่อนไขข้างต้น' : 'I have read and agree to the terms above'}
               </span>
             </span>
           </label>
@@ -125,34 +123,31 @@ export default function WaiverPage() {
       </div>
 
       {errors.clauses && (
-        <p className="text-sm text-coral" role="alert">
+        <p className="text-[10.5px] text-coral" role="alert">
           {errors.clauses}
         </p>
       )}
 
-      <label className="block">
-        <span className="text-xs font-bold uppercase tracking-wide text-ink-soft">
-          {t('waiver.signName')} <span className="text-coral">*</span>
+      {/* .sign-box */}
+      <div className="flow-field">
+        <span>
+          {t('waiver.signName')} <span className="normal-case text-coral">*</span>
         </span>
-        <div
-          className={`mt-1 flex min-h-[64px] items-center justify-center rounded-xl border-2 border-dashed px-3 ${
-            errors.name ? 'border-coral' : 'border-line'
-          } bg-cream`}
-        >
+        <div className={`sign-box ${errors.name ? 'sign-box-error' : ''}`}>
           <input
             value={signedName}
             onChange={(e) => setSignedName(e.target.value)}
             onBlur={() => setTouched(true)}
-            placeholder={lang === 'th' ? '✍️ เซ็นชื่อที่นี่' : '✍️ Sign here'}
-            className="w-full bg-transparent text-center font-hand text-xl text-ink outline-none placeholder:text-ink-soft"
+            placeholder={lang === 'th' ? '✍️ Sign here / เซ็นชื่อที่นี่' : '✍️ Sign here'}
+            aria-label={t('waiver.signName')}
           />
         </div>
-        {errors.name && <p className="mt-1 text-xs text-coral">{errors.name}</p>}
-        <p className="mt-1 text-xs text-ink-soft">
+        {errors.name && <p className="text-[10px] text-coral">{errors.name}</p>}
+        <p className="text-[9.5px] font-normal normal-case tracking-normal text-ink-soft">
           {lang === 'th' ? 'บันทึกเวลา: ' : 'Timestamp: '}
           {new Date().toLocaleString('en-AU')}
         </p>
-      </label>
+      </div>
 
       {/* Sticky submit bar — mockup's white bar with top hairline above the CTA */}
       <div className="flow-bar sticky bottom-0 -mx-4 !pb-[max(18px,env(safe-area-inset-bottom))] sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">

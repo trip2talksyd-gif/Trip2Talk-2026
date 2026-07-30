@@ -308,7 +308,7 @@ export default function BookingPage() {
   const depositDue = tour.deposit_aud
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 pb-4" noValidate>
+    <form onSubmit={handleSubmit} className="space-y-3.5 pb-4" noValidate>
       {/* .flow-top — focused checkout header: back circle + bilingual title */}
       <div className="flow-top -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
         <Link to={`/trips/${tripCode}`} className="back" aria-label="Back">
@@ -324,7 +324,8 @@ export default function BookingPage() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2.5 rounded-[14px] border border-line bg-card p-2.5 shadow-mockup">
+      {/* .mini-trip */}
+      <div className="flex items-center gap-[9px] rounded-[12px] bg-mint-100 p-2">
         {tour.cover_image_url ? (
           <img
             src={tour.cover_image_url}
@@ -342,36 +343,34 @@ export default function BookingPage() {
         </div>
       </div>
 
+      {/* .field — white inputs, radius 10, pad 9×11 */}
       <div className="grid gap-3 sm:grid-cols-2">
         {fields.map(({ key, label, type, required }) => (
-          <label key={key} className="block">
-            <span className="text-[9.5px] font-bold uppercase tracking-wide text-ink-soft">
+          <label key={key} className="flow-field">
+            <span>
               {label}
-              {required && <span className="text-coral"> *</span>}
+              {required && <span className="normal-case text-coral"> *</span>}
             </span>
             <input
               type={type ?? 'text'}
               value={form[key]}
               onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
               onBlur={() => setTouched(true)}
-              className={`mt-1 w-full rounded-[10px] border bg-cream px-3 py-2.5 text-[11.5px] text-ink ${
-                fieldErrors[key] ? 'border-coral' : 'border-line'
-              }`}
+              className={fieldErrors[key] ? 'flow-field-error' : undefined}
             />
             {fieldErrors[key] && (
-              <p className="mt-1 text-xs text-coral">{fieldErrors[key]}</p>
+              <p className="text-[10px] font-normal normal-case tracking-normal text-coral">
+                {fieldErrors[key]}
+              </p>
             )}
           </label>
         ))}
-        <label className="block">
-          <span className="text-[9.5px] font-bold uppercase tracking-wide text-ink-soft">
-            {t('form.oshcExpiry')}
-          </span>
+        <label className="flow-field">
+          <span>{t('form.oshcExpiry')}</span>
           <input
             type="date"
             value={form.oshc_expiry}
             onChange={(e) => setForm((f) => ({ ...f, oshc_expiry: e.target.value }))}
-            className="mt-1 w-full rounded-[10px] border border-line bg-cream px-3 py-2.5 text-[11.5px] text-ink"
           />
         </label>
       </div>
@@ -435,7 +434,7 @@ export default function BookingPage() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-line bg-cream px-3 py-2.5">
+      <div className="flex flex-col gap-2 rounded-[12px] border border-line bg-white px-[11px] py-[9px]">
         <div className="flex gap-2">
           <span className="text-sm leading-none" aria-hidden>
             💳
@@ -450,7 +449,7 @@ export default function BookingPage() {
             </p>
           </div>
         </div>
-        <div className="mt-2.5 grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-3 gap-1.5">
           {([1, 2, 4] as const).map((plan) => (
             <button
               key={plan}
@@ -511,7 +510,7 @@ export default function BookingPage() {
       </div>
 
       {tour && !isOneDayTrip(tour.trip_code) && (
-      <div className="flex items-center gap-2.5 rounded-xl border border-line bg-cream px-3 py-2.5">
+      <div className="flex items-center gap-[9px] rounded-[12px] border border-line bg-white px-[11px] py-[9px]">
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-mint-100 text-sm">
           🛏
         </span>
@@ -531,7 +530,7 @@ export default function BookingPage() {
 
       <PayIdDepositPanel variant="booking" />
 
-      <label className="mt-1 block cursor-pointer rounded-lg border-2 border-dashed border-line bg-cream p-4 text-center text-sm text-ink-soft">
+      <label className="mt-1 block cursor-pointer rounded-[12px] border-[1.5px] border-dashed border-line bg-white p-4 text-center text-[11.5px] text-ink-soft">
         {t('booking.uploadSlip')}
         <input
           type="file"
@@ -539,7 +538,7 @@ export default function BookingPage() {
           className="sr-only"
           onChange={(e) => setSlipFile(e.target.files?.[0] ?? null)}
         />
-        {slipFile && <p className="mt-1 text-xs text-ink">{slipFile.name}</p>}
+        {slipFile && <p className="mt-1 text-[10.5px] text-ink">{slipFile.name}</p>}
       </label>
 
       {/* Sticky Pay Deposit bar — mockup's white bar with top hairline above the CTA */}
