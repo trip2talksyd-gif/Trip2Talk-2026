@@ -2,7 +2,6 @@ import { supabase, supabaseConfig } from './supabase'
 import { callStaffApi, StaffSessionExpiredError } from './supabaseStaff'
 import { SeatsFullError } from '../types/errors'
 import type {
-  BookingInsertReadback,
   BookingPayment,
   ComplianceItem,
   ContentPost,
@@ -12,18 +11,11 @@ import type {
   TourBooking,
   TourStatus,
   WaiverSignature,
-  WaiverSignatureInsertReadback,
   WaitlistEntry,
 } from '../types/tour'
 
 /** Featured trip codes pinned to the top of home + /trips (in this order). */
 export const TRIPS_LISTING_PRIORITY = ['TAS-3D2N', 'ULU-4D3N', 'NZ-6D5N'] as const
-
-/** Anon column grant — must match migration grant + insertBooking() .select(). */
-export const TOUR_BOOKINGS_ANON_SELECT_GRANT = 'id, trip_code, booked_at'
-
-/** Anon column grant — must match migration grant + insertWaiverSignature() .select(). */
-export const WAIVER_SIGNATURES_ANON_SELECT_GRANT = 'id, trip_code, signed_at'
 
 export { SeatsFullError } from '../types/errors'
 
@@ -278,13 +270,7 @@ function isFailedToFetchError(err: unknown): boolean {
 
 async function insertWaiverSignatureOnce(
   signature: Omit<WaiverSignature, 'id' | 'created_at'>,
-): Promise<WaiverSignatureInsertReadback> {
-  logSelectColumns(
-    'insertWaiverSignature (readback after insert)',
-    'waiver_signatures',
-    WAIVER_SIGNATURES_ANON_SELECT_GRANT,
-  )
-
+): Promise<void> {
   if (import.meta.env.DEV) {
     console.log('[insertWaiverSignature] before Supabase call', {
       supabaseUrl: supabaseConfig.url,
@@ -294,17 +280,13 @@ async function insertWaiverSignatureOnce(
   }
 
   try {
-    const { data, error } = await supabase
-      .from('waiver_signatures')
-      .insert(signature)
-      .select(WAIVER_SIGNATURES_ANON_SELECT_GRANT)
-      .single()
+    // Prefer return=minimal — no anon SELECT (RLS Option C).
+    const { error } = await supabase.from('waiver_signatures').insert(signature)
 
     if (error) {
       logSupabaseError('insertWaiverSignature', error)
       throw error
     }
-    return data as WaiverSignatureInsertReadback
   } catch (err) {
     if (!(err && typeof err === 'object' && 'code' in err)) {
       logSupabaseError('insertWaiverSignature', err)
@@ -316,16 +298,16 @@ async function insertWaiverSignatureOnce(
 /** Inserts a waiver signature; retries once after 1s on "Failed to fetch" (paused Supabase wake-up). */
 export async function insertWaiverSignature(
   signature: Omit<WaiverSignature, 'id' | 'created_at'>,
-): Promise<WaiverSignatureInsertReadback> {
+): Promise<void> {
   try {
-    return await insertWaiverSignatureOnce(signature)
+    await insertWaiverSignatureOnce(signature)
   } catch (err) {
     if (!isFailedToFetchError(err)) throw err
     console.warn(
       '[insertWaiverSignature] Failed to fetch — retrying once after 1s (Supabase project may be waking from pause)',
     )
     await new Promise((resolve) => setTimeout(resolve, 1000))
-    return await insertWaiverSignatureOnce(signature)
+    await insertWaiverSignatureOnce(signature)
   }
 }
 
@@ -413,7 +395,7 @@ export async function insertBooking(
   tourId: string,
   bookingData: BookingInsertPayload,
   seatsRequested = 1,
-): Promise<BookingInsertReadback> {
+): Promise<void> {
   let seatReserved = false
 
   try {
@@ -434,25 +416,17 @@ export async function insertBooking(
     throw new SeatsFullError('ที่นั่งเต็มแล้วครับ กรุณาเลือกทริปอื่น')
   }
 
-  logSelectColumns(
-    'insertBooking (readback after insert)',
-    'tour_bookings',
-    TOUR_BOOKINGS_ANON_SELECT_GRANT,
-  )
-
   try {
-    const { data, error } = await supabase
+    // Prefer return=minimal — no anon SELECT (RLS Option C).
+    const { error } = await supabase
       .from('tour_bookings')
       .insert({ ...bookingData, tour_id: tourId })
-      .select(TOUR_BOOKINGS_ANON_SELECT_GRANT)
-      .single()
 
     if (error) {
       logSupabaseError('insertBooking', error)
       if (seatReserved) await releaseSeat(tourId, seatsRequested)
       throw error
     }
-    return data as BookingInsertReadback
   } catch (err) {
     if (!(err && typeof err === 'object' && 'code' in err)) {
       logSupabaseError('insertBooking', err)

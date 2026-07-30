@@ -116,14 +116,14 @@ export interface WaiverSignature {
   created_at: string
 }
 
-/** Anon-safe columns returned after public tour_bookings insert. */
+/** @deprecated Public inserts no longer return rows (anon SELECT revoked). */
 export interface BookingInsertReadback {
   id: string
   trip_code: string
   booked_at: string
 }
 
-/** Anon-safe columns returned after public waiver_signatures insert. */
+/** @deprecated Public inserts no longer return rows (anon SELECT revoked). */
 export interface WaiverSignatureInsertReadback {
   id: string
   trip_code: string
