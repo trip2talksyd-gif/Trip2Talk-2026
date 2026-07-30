@@ -74,6 +74,7 @@ export default function TaxSummaryPage() {
     if (!summary) return []
     const byCode = new Map<string, { count: number; revenue: number }>()
     for (const b of summary.bookings) {
+      if (b.cancelled_at || b.booking_status === 'cancelled') continue
       const code = (b.source || 'unknown').toLowerCase()
       const row = byCode.get(code) ?? { count: 0, revenue: 0 }
       row.count += 1

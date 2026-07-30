@@ -5,6 +5,8 @@ import {
   fetchPendingBookings,
   fetchToursAdmin,
   recordPayment,
+  cancelBooking,
+  isBookingCancelled,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { Tour, TourBooking } from '../../types/tour'
@@ -12,6 +14,7 @@ import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import { useLang } from '../../hooks/useLang'
+import CancelBookingDialog from '../../components/app/CancelBookingDialog'
 
 export default function CashierPOS() {
   const { t } = useLang()
@@ -40,6 +43,9 @@ export default function CashierPOS() {
   const [payAmount, setPayAmount] = useState('')
   const [payMethod, setPayMethod] = useState('cash')
   const [payingSubmitting, setPayingSubmitting] = useState(false)
+
+  const [cancelling, setCancelling] = useState<TourBooking | null>(null)
+  const [cancelSubmitting, setCancelSubmitting] = useState(false)
 
   const load = useCallback(() => {
     setLoading(true)
@@ -147,6 +153,26 @@ export default function CashierPOS() {
     setPayingId(null)
     setPayAmount('')
     setPayMethod('cash')
+  }
+
+  async function confirmCancel(reason: string) {
+    if (!cancelling) return
+    setCancelSubmitting(true)
+    try {
+      await cancelBooking(cancelling.id, reason)
+      setBookings((prev) => prev.filter((b) => b.id !== cancelling.id))
+      setCancelling(null)
+      if (payingId === cancelling.id) closePaymentRow()
+      toast('ยกเลิกการจองแล้ว', 'success')
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast('ยกเลิกไม่สำเร็จ', 'error')
+    } finally {
+      setCancelSubmitting(false)
+    }
   }
 
   async function submitPayment(booking: TourBooking) {
@@ -348,11 +374,24 @@ export default function CashierPOS() {
               const plan = b.payment_plan_installments ?? 1
               const remaining = tour ? Math.max(0, tour.price_aud - b.amount_paid_aud) : null
               const isPaying = payingId === b.id
+              const cancelled = isBookingCancelled(b)
 
               return (
-                <li key={b.id} className="rounded-editorial border border-white/8 bg-surface-card p-4">
+                <li
+                  key={b.id}
+                  className={`rounded-editorial border p-4 ${
+                    cancelled
+                      ? 'border-white/5 bg-surface-card/40 opacity-60'
+                      : 'border-white/8 bg-surface-card'
+                  }`}
+                >
                   <p className="font-medium text-cream">
                     {b.first_name_en} {b.last_name_en}
+                    {cancelled && (
+                      <span className="ml-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-cream-muted">
+                        Cancelled
+                      </span>
+                    )}
                   </p>
                   <p className="text-xs text-cream-muted">
                     {b.trip_code} · {b.email}
@@ -364,14 +403,21 @@ export default function CashierPOS() {
                     {remaining !== null && remaining > 0 ? ` · เหลือ ${remaining.toLocaleString()} AUD` : ''}
                   </p>
 
-                  {!isPaying ? (
-                    <div className="mt-3">
+                  {cancelled ? null : !isPaying ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
                       <button
                         type="button"
                         onClick={() => openPaymentRow(b)}
                         className="rounded-editorial bg-gold px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-gold-dark transition-transform active:scale-95"
                       >
                         + บันทึกการชำระ
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setCancelling(b)}
+                        className="rounded-editorial border border-coral/40 bg-coral/10 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-coral transition-transform active:scale-95"
+                      >
+                        Cancel booking
                       </button>
                     </div>
                   ) : (
@@ -447,6 +493,15 @@ export default function CashierPOS() {
           </ul>
         )}
       </main>
+
+      {cancelling && (
+        <CancelBookingDialog
+          booking={cancelling}
+          submitting={cancelSubmitting}
+          onConfirm={confirmCancel}
+          onClose={() => !cancelSubmitting && setCancelling(null)}
+        />
+      )}
     </div>
   )
 }

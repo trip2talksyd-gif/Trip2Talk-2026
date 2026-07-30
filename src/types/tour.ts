@@ -63,6 +63,12 @@ export interface TourBooking {
   slip_url: string | null
   booking_reference: string | null
   booked_at: string
+  /** Soft-cancel timestamp — row is kept for tax/audit; null = active. */
+  cancelled_at?: string | null
+  /** Staff name or id who cancelled. */
+  cancelled_by?: string | null
+  /** Optional reason entered at cancel time. */
+  cancel_reason?: string | null
 }
 
 /** One recorded payment against a booking — lets a booking be paid off in several installments, each with its own receipt. */

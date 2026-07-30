@@ -5,6 +5,7 @@ import {
   fetchComplianceItems,
   fetchExpensesThisMonth,
   formatAud,
+  isBookingCancelled,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { ComplianceItem, TourBooking } from '../../types/tour'
@@ -52,9 +53,13 @@ export default function OwnerDashboard() {
     load()
   }, [load])
 
-  const revenue = useMemo(
-    () => bookings.reduce((sum, b) => sum + (b.amount_paid_aud ?? 0), 0),
+  const activeBookings = useMemo(
+    () => bookings.filter((b) => !isBookingCancelled(b)),
     [bookings],
+  )
+  const revenue = useMemo(
+    () => activeBookings.reduce((sum, b) => sum + (b.amount_paid_aud ?? 0), 0),
+    [activeBookings],
   )
   const expenseTotal = useMemo(
     () => expenses.reduce((sum, e) => sum + (e.amount_aud ?? 0), 0),
@@ -113,7 +118,7 @@ export default function OwnerDashboard() {
 
             <div className="grid grid-cols-2 divide-x divide-white/8 overflow-hidden rounded-editorial border border-white/8 bg-surface-card">
               {[
-                { label: 'Bookings (month)', value: String(bookings.length) },
+                { label: 'Bookings (month)', value: String(activeBookings.length) },
                 { label: 'Revenue', value: formatAud(revenue) },
                 { label: 'Expenses', value: formatAud(expenseTotal) },
                 { label: 'Net profit', value: formatAud(revenue - expenseTotal) },

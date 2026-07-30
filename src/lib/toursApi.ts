@@ -666,6 +666,20 @@ export async function updateBookingDetails(
   return callStaffApi<TourBooking>('update_booking_details', { id, ...fields })
 }
 
+/** Soft-cancels a booking (keeps the row). Sets cancelled_at / cancelled_by /
+ * cancel_reason and booking_status=cancelled; staff-api also releases one seat. */
+export async function cancelBooking(id: string, reason?: string): Promise<TourBooking> {
+  return callStaffApi<TourBooking>('cancel_booking', {
+    id,
+    ...(reason?.trim() ? { reason: reason.trim() } : {}),
+  })
+}
+
+/** True when soft-cancelled via cancelled_at or legacy booking_status. */
+export function isBookingCancelled(b: Pick<TourBooking, 'cancelled_at' | 'booking_status'>): boolean {
+  return Boolean(b.cancelled_at) || b.booking_status === 'cancelled'
+}
+
 /** Soft-cancels or restores a tour by flipping its status — unlike
  * deleteTour(), this keeps the row (and any bookings) intact for
  * accounting/tax records, just hides it from public listings and staff
@@ -706,6 +720,7 @@ export function summarizeByTrip(summary: YearSummary): TripFinancialRow[] {
   }
 
   for (const b of summary.bookings) {
+    if (isBookingCancelled(b)) continue
     const row = ensure(b.trip_code)
     row.revenue_aud += b.amount_paid_aud ?? 0
     row.bookings_count += 1

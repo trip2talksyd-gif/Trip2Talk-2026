@@ -54,6 +54,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   record_payment: ['OWNER', 'MANAGER', 'CASHIER'],
   list_payments_for_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   update_booking_details: ['OWNER', 'MANAGER', 'CASHIER'],
+  cancel_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   list_draft_content_posts: ['OWNER'],
   update_content_post: ['OWNER'],
   insert_content_post: ['OWNER'],
@@ -132,7 +133,7 @@ Deno.serve(async (req) => {
 
   const { data: session, error: sessionError } = await admin
     .from('staff_sessions')
-    .select('role, expires_at')
+    .select('role, expires_at, full_name, staff_id')
     .eq('token', token)
     .maybeSingle()
 
@@ -549,6 +550,62 @@ Deno.serve(async (req) => {
           .select()
           .single()
         if (error) throw error
+        return json({ data })
+      }
+
+      case 'cancel_booking': {
+        // Soft-cancel only — never deletes the row. Sets cancelled_at / by /
+        // reason, flips booking_status to cancelled, and releases one seat so
+        // the trip inventory stays accurate. Idempotent if already cancelled.
+        const { id, reason } = params as { id: string; reason?: string }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+
+        const { data: booking, error: bookingError } = await admin
+          .from('tour_bookings')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle()
+        if (bookingError) throw bookingError
+        if (!booking) return json({ error: 'booking_not_found' }, 404)
+
+        if (booking.cancelled_at || booking.booking_status === 'cancelled') {
+          return json({ data: booking })
+        }
+
+        const cancelledBy =
+          (typeof session.full_name === 'string' && session.full_name.trim()) ||
+          (typeof session.staff_id === 'string' && session.staff_id) ||
+          'staff'
+        const cancelReason =
+          typeof reason === 'string' && reason.trim() ? reason.trim().slice(0, 500) : null
+
+        const { data, error } = await admin
+          .from('tour_bookings')
+          .update({
+            cancelled_at: new Date().toISOString(),
+            cancelled_by: cancelledBy,
+            cancel_reason: cancelReason,
+            booking_status: 'cancelled',
+          })
+          .eq('id', id)
+          .is('cancelled_at', null)
+          .select()
+          .maybeSingle()
+        if (error) throw error
+
+        // If a concurrent cancel won the race, re-fetch and return that row.
+        const cancelled = data ?? booking
+        if (data && booking.tour_id) {
+          await admin.rpc('release_seat', {
+            p_tour_id: booking.tour_id,
+            p_seats_to_release: 1,
+          })
+        }
+
+        if (!data) {
+          const { data: again } = await admin.from('tour_bookings').select('*').eq('id', id).maybeSingle()
+          return json({ data: again ?? cancelled })
+        }
         return json({ data })
       }
 
