@@ -742,6 +742,448 @@
   font-size: 1.25rem;
 }
 
+/* ---------- 1c. Booking Success — mockup .success-screen ---------- */
+.success-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 30px 22px 22px;
+  background: var(--cream);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.success-screen::-webkit-scrollbar {
+  display: none;
+}
+
+.success-check {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--teal-500), var(--teal-800));
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  margin-bottom: 14px;
+  box-shadow: 0 12px 24px -10px rgba(20, 50, 45, 0.45);
+  flex: 0 0 auto;
+}
+
+.success-screen > h2 {
+  font-size: 18px;
+  margin: 0 0 3px;
+  color: var(--ink);
+}
+
+.success-screen .th-sub {
+  font-size: 12px;
+  color: var(--teal-700);
+  font-family: var(--font-th);
+  margin: 0 0 14px;
+}
+
+.success-ref {
+  background: #fff;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.success-screen .ghost-link {
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.mini-trip {
+  display: flex;
+  gap: 9px;
+  background: var(--mint-100);
+  border-radius: 12px;
+  padding: 8px;
+  align-items: center;
+  text-align: left;
+}
+
+.mini-trip img,
+.mini-trip .mini-trip-fallback {
+  width: 44px;
+  height: 44px;
+  border-radius: 9px;
+  object-fit: cover;
+  flex: 0 0 auto;
+}
+
+.mini-trip .mini-trip-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--teal-800);
+  color: #fff;
+  font-size: 10px;
+}
+
+.mini-trip b {
+  font-size: 11px;
+  color: var(--ink);
+  display: block;
+}
+
+.mini-trip span {
+  font-size: 9px;
+  color: var(--ink-soft);
+}
+
+.fb-next-card {
+  width: 100%;
+  background: #eaf2ff;
+  border: 1px solid #cfe0fb;
+  border-radius: 14px;
+  padding: 12px 13px;
+  margin-top: 16px;
+  text-align: left;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  text-decoration: none;
+}
+
+.fb-next-card .fb-ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: #1877f2;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex: 0 0 auto;
+}
+
+.fb-next-card b {
+  display: block;
+  font-size: 11px;
+  color: var(--ink);
+}
+
+.fb-next-card span {
+  display: block;
+  font-size: 9.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin-top: 2px;
+}
+
+.fb-next-card span.th {
+  font-family: var(--font-th);
+}
+
+.journey-wrap {
+  width: 100%;
+  margin-top: 20px;
+  text-align: left;
+}
+
+.journey-wrap .jw-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.journey-wrap .jw-title .th {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: none;
+  color: var(--ink-soft);
+  font-family: var(--font-th);
+  margin-top: 1px;
+}
+
+.journey-steps {
+  display: flex;
+  flex-direction: column;
+  margin-top: 12px;
+}
+
+.j-step {
+  display: flex;
+  gap: 10px;
+  position: relative;
+  padding-bottom: 16px;
+}
+
+.j-step:last-child {
+  padding-bottom: 0;
+}
+
+.j-step:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 24px;
+  bottom: 0;
+  width: 2px;
+  background: var(--line);
+}
+
+.j-step .jn {
+  width: 23px;
+  height: 23px;
+  border-radius: 50%;
+  background: var(--mint-100);
+  color: var(--teal-700);
+  font-size: 10px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  z-index: 1;
+}
+
+.j-step.done .jn {
+  background: var(--teal-700);
+  color: #fff;
+}
+
+.j-step.current .jn {
+  background: #1877f2;
+  color: #fff;
+}
+
+.j-step .jtxt b {
+  display: block;
+  font-size: 10.5px;
+  color: var(--ink);
+}
+
+.j-step.done .jtxt b,
+.j-step.done .jtxt span {
+  opacity: 0.6;
+}
+
+.j-step .jtxt span {
+  display: block;
+  font-size: 9px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+  margin-top: 1px;
+}
+
+.j-step .jtxt span.th {
+  font-family: var(--font-th);
+}
+
+/* ---------- 1c. Waiver — mockup .waiver-body / .waiver-text / .waiver-check ---------- */
+.waiver-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.waiver-body {
+  flex: 1;
+  padding: 14px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.waiver-text {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 42vh;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 11px;
+  font-size: 9.5px;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+
+.waiver-text b {
+  color: var(--ink);
+}
+
+.waiver-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.waiver-check input {
+  margin-top: 2px;
+  width: 14px;
+  height: 14px;
+  flex: 0 0 auto;
+  accent-color: var(--teal-700);
+}
+
+/* ---------- 1c. Trip Prep — mockup .prep-body / .weather-card / .prep-item ---------- */
+.prep-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 0 14px;
+}
+
+.prep-guide-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--mint-100);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-decoration: none;
+}
+
+.prep-guide-banner .pgb-ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex: 0 0 auto;
+  box-shadow: 0 4px 10px -4px rgba(15, 28, 30, 0.25);
+}
+
+.prep-guide-banner .pgb-txt {
+  flex: 1;
+  line-height: 1.3;
+  min-width: 0;
+}
+
+.prep-guide-banner .pgb-txt b {
+  display: block;
+  font-size: 10.5px;
+  color: var(--ink);
+}
+
+.prep-guide-banner .pgb-txt span {
+  display: block;
+  font-size: 9px;
+  color: var(--ink-soft);
+  font-family: var(--font-th);
+}
+
+.prep-guide-banner .pgb-arrow {
+  font-size: 12px;
+  color: var(--teal-700);
+}
+
+.prep-progress {
+  background: var(--mint-100);
+  border-radius: 999px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.prep-progress > span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--teal-500), var(--teal-800));
+  transition: width 0.3s ease;
+}
+
+.weather-card {
+  background: linear-gradient(120deg, var(--teal-900), var(--teal-700));
+  border-radius: 14px;
+  padding: 12px 14px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.weather-card b {
+  font-size: 16px;
+  display: block;
+}
+
+.weather-card span {
+  font-size: 9.5px;
+  color: var(--mint-200);
+}
+
+.weather-card .weather-ic {
+  font-size: 22px;
+  flex: 0 0 auto;
+  line-height: 1;
+}
+
+.prep-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 9px 11px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.prep-item .cb {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  flex: 0 0 auto;
+}
+
+.prep-item.done .cb {
+  background: var(--teal-700);
+  border-color: var(--teal-700);
+}
+
+.prep-item.done b {
+  text-decoration: line-through;
+  color: var(--ink-soft);
+}
+
+.prep-item b {
+  font-size: 11px;
+  color: var(--ink);
+  font-weight: 600;
+  display: block;
+}
+
+.prep-item span {
+  font-size: 9px;
+  color: var(--ink-soft);
+  display: block;
+}
+
 /* Timeline tip cards — mockup .tip-timeline / .tt-row / .tt-dot / .tt-card */
 .tip-timeline {
   display: flex;

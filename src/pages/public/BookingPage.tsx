@@ -204,45 +204,28 @@ export default function BookingPage() {
 
   if (reference) {
     return (
-      <div className="flex flex-col items-center px-[22px] pb-[22px] pt-[30px] text-center">
-        <div
-          className="mb-3.5 flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-[28px] text-cream"
-          style={{
-            background: 'linear-gradient(180deg, #efa565, #20363c)',
-            boxShadow: '0 12px 24px -10px rgba(20,50,45,.45)',
-          }}
-        >
+      <div className="success-screen -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl">
+        <div className="success-check" aria-hidden>
           <Check className="h-7 w-7" strokeWidth={2.5} />
         </div>
-        <h2 className="m-0 mb-[3px] font-serif text-[18px] text-ink">
-          {t('booking.confirmation')}
-        </h2>
-        <p className="mb-4 text-[13px] text-ink-soft">{t('booking.success')}</p>
-        <p className="mb-4 rounded-xl border border-dashed border-line bg-card px-[18px] py-2.5 text-[13px] font-extrabold tracking-[0.06em] text-ink">
-          {reference}
-        </p>
+        <h2>{lang === 'th' ? 'จองสำเร็จแล้ว!' : 'Booking Confirmed!'}</h2>
+        <p className="th-sub">{lang === 'th' ? 'Booking Confirmed!' : 'จองสำเร็จแล้ว!'}</p>
+        <div className="success-ref">{reference}</div>
 
         {/* .mini-trip — booked trip recap card */}
         {tour && (
-          <div className="flex w-full items-center gap-2.5 rounded-xl bg-mint-100 p-2 text-left">
+          <div className="mini-trip w-full">
             {tour.cover_image_url ? (
-              <img
-                src={tour.cover_image_url}
-                alt=""
-                className="h-11 w-11 shrink-0 rounded-[9px] object-cover"
-              />
+              <img src={tour.cover_image_url} alt="" />
             ) : (
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[9px] bg-teal-800 text-[10px] text-cream">
-                T2T
-              </div>
+              <div className="mini-trip-fallback">T2T</div>
             )}
             <div className="min-w-0">
-              <b className="block truncate text-[11px] font-bold text-ink">
-                {lang === 'th' ? tour.name_th : tour.name_en}
-              </b>
-              <span className="block text-[9px] text-ink-soft">
+              <b className="truncate">{lang === 'th' ? tour.name_th : tour.name_en}</b>
+              <span>
                 {tourDurationLabel(tour, lang)}
                 {tour.departure_date ? ` · ${formatDate(tour.departure_date, lang)}` : ''}
+                {` · ${lang === 'th' ? '1 คน' : '1 traveler'}`}
               </span>
             </div>
           </div>
@@ -252,34 +235,42 @@ export default function BookingPage() {
           href={FACEBOOK_PAGE_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-4 flex w-full gap-2.5 rounded-[14px] border border-[#cfe0fb] bg-[#eaf2ff] px-3.5 py-3 text-left"
+          className="fb-next-card"
         >
-          <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-[9px] bg-[#1877F2] text-[14px] font-bold text-cream">
-            f
+          <span className="fb-ic" aria-hidden>
+            ✉
           </span>
-          <span>
-            <b className="block text-[11px] font-bold text-ink">
+          <div>
+            <b>
               {lang === 'th'
                 ? 'ขั้นต่อไป: Inbox หาเราทาง Facebook'
                 : 'Next: message us on Facebook'}
+              <span className="th" style={{ display: 'block', fontWeight: 500 }}>
+                {lang === 'th'
+                  ? 'Next: message us on Facebook'
+                  : 'ขั้นต่อไป: Inbox หาเราทาง Facebook'}
+              </span>
             </b>
-            <span className="mt-0.5 block text-[9.5px] leading-relaxed text-ink-soft">
-              {t('myTrip.messageUs')}
+            <span>
+              Screenshot this confirmation and send it to our Facebook Page inbox — we&apos;ll
+              create your trip group chat there.
             </span>
-          </span>
+            <span className="th">
+              แคปหน้าจอนี้ส่งเข้า Inbox เพจ Facebook ของเรา ทีมงานจะสร้างกลุ่มแชททริปให้ในนั้น
+            </span>
+          </div>
         </a>
 
-        <BookingJourneyTimeline
-          bookingStatus="pending_payment"
-          tripCode={tripCode}
-          className="mt-5 w-full text-left"
-        />
+        <BookingJourneyTimeline bookingStatus="pending_payment" tripCode={tripCode} />
 
-        <Link to="/my-trip" className="book-btn flip-cta mt-[18px] w-full">
+        <Link to="/my-trip" className="book-btn flip-cta mt-[18px] block w-full">
           {lang === 'th' ? 'ดูการจองของฉัน' : 'View My Booking'}
         </Link>
-        <Link to="/trips" className="mt-2.5 text-[11px] font-semibold text-ink-soft">
+        <Link to="/trips" className="ghost-link">
           {lang === 'th' ? 'กลับไปหน้าสำรวจ' : 'Back to Explore'}
+          <span className="th" style={{ display: 'block', fontFamily: 'var(--font-th)' }}>
+            {lang === 'th' ? 'Back to Explore' : 'กลับไปหน้าสำรวจ'}
+          </span>
         </Link>
       </div>
     )
@@ -325,21 +316,15 @@ export default function BookingPage() {
       </div>
 
       {/* .mini-trip */}
-      <div className="flex items-center gap-[9px] rounded-[12px] bg-mint-100 p-2">
+      <div className="mini-trip">
         {tour.cover_image_url ? (
-          <img
-            src={tour.cover_image_url}
-            alt=""
-            className="h-11 w-11 rounded-[9px] object-cover"
-          />
+          <img src={tour.cover_image_url} alt="" />
         ) : (
-          <div className="flex h-11 w-11 items-center justify-center rounded-[9px] bg-teal-800 text-[10px] text-cream">
-            T2T
-          </div>
+          <div className="mini-trip-fallback">T2T</div>
         )}
         <div className="min-w-0">
-          <p className="truncate text-[11px] font-bold text-ink">{name}</p>
-          <p className="text-[9px] text-ink-soft">{tourDurationLabel(tour, lang)}</p>
+          <b className="truncate">{name}</b>
+          <span>{tourDurationLabel(tour, lang)}</span>
         </div>
       </div>
 

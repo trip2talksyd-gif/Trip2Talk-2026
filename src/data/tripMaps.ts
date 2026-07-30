@@ -81,6 +81,35 @@ export function getTripMap(tripCode: string): TripMapConfig {
   )
 }
 
+/**
+ * Hub city for Trip Prep weather widget — the real arrival / start point,
+ * never a generic country name and never Christchurch for NZ (flights land
+ * in Queenstown only).
+ */
+const WEATHER_HUB: Record<string, { en: string; th: string }> = {
+  NZ: { en: 'Queenstown', th: 'ควีนส์ทาวน์' },
+  TAS: { en: 'Hobart', th: 'โฮบาร์ต' },
+  ULU: { en: 'Uluru', th: 'อูลูรู' },
+  SYD: { en: 'Sydney', th: 'ซิดนีย์' },
+  MEL: { en: 'Melbourne', th: 'เมลเบิร์น' },
+  BER: { en: 'Bermagui', th: 'เบอร์มากุย' },
+  CAN: { en: 'Canola Country', th: 'ทุ่งคาโนลา' },
+  KIA: { en: 'Kiama', th: 'เคียมา' },
+  PSP: { en: 'Palm Beach', th: 'ปาล์มบีช' },
+  LAV: { en: 'La Perouse', th: 'ลาเปอรูส' },
+}
+
+export function getTripWeatherHub(tripCode: string, lang: 'en' | 'th' = 'en'): string {
+  const prefix = tripCode.split('-')[0]?.toUpperCase() ?? ''
+  const hub = WEATHER_HUB[prefix]
+  if (hub) return lang === 'th' ? hub.th : hub.en
+
+  // Fallback: first place name in the map caption (before → or ·)
+  const caption = getTripMap(tripCode).caption[lang]
+  const start = caption.split(/[→·]/)[0]?.trim()
+  return start || caption
+}
+
 export function staticMapUrl(cfg: TripMapConfig, size = '760x285'): string {
   const params = new URLSearchParams({
     center: cfg.center,

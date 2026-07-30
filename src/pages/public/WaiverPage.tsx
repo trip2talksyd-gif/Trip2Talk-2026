@@ -33,6 +33,12 @@ export default function WaiverPage() {
 
   const isValid = allChecked && nameValid
 
+  function toggleAll(next: boolean) {
+    const map: Record<string, boolean> = {}
+    for (const clause of clauses) map[clause.id] = next
+    setChecked(map)
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setTouched(true)
@@ -79,60 +85,52 @@ export default function WaiverPage() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3.5 pb-4" noValidate>
-      {/* .flow-top — focused flow header: back circle + title, full-bleed white bar */}
+    <form onSubmit={handleSubmit} className="waiver-shell pb-4" noValidate>
+      {/* .flow-top — back circle + bilingual title */}
       <div className="flow-top -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
         <Link to={`/trips/${tripCode}`} className="back" aria-label="Back">
           <ArrowLeft className="h-3.5 w-3.5" />
         </Link>
-        <div className="min-w-0">
-          <h1 className="m-0 font-serif text-[15.5px] text-ink sm:text-xl">{t('waiver.title')}</h1>
-          <p className="m-0 font-thai text-[10px] text-ink-soft">
-            {lang === 'th' ? 'เอกสารยินยอม' : 'Waiver & Consent'} · {tripCode}
-          </p>
+        <h1 className="m-0 font-serif text-[15.5px] text-ink sm:text-xl">
+          {lang === 'th' ? 'เอกสารยินยอม' : 'Waiver & Consent'}
+          <span className="mt-0.5 block font-thai text-[10px] font-medium text-ink-soft">
+            {lang === 'th' ? 'Waiver & Consent' : 'เอกสารยินยอม'}
+          </span>
+        </h1>
+      </div>
+
+      <div className="waiver-body">
+        {/* .waiver-text — sections in one white card */}
+        <div className="waiver-text">
+          {clauses.map((clause, i) => (
+            <p key={clause.id} className={i > 0 ? 'mt-3' : undefined}>
+              <b>{clause.title}</b> — {clause.text}
+            </p>
+          ))}
         </div>
-      </div>
 
-      {/* .waiver-text */}
-      <div className="max-h-[42vh] space-y-2.5 overflow-y-auto rounded-[12px] border border-line bg-white p-[11px] text-[9.5px] leading-[1.6] text-ink-soft shadow-mockup">
-        {clauses.map((clause) => (
-          <div key={clause.id}>
-            <p className="font-semibold text-ink">{clause.title}</p>
-            <p className="mt-1">{clause.text}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* .waiver-check — compact white rows (one per clause; logic unchanged) */}
-      <div className="flex flex-col gap-2">
-        {clauses.map((clause) => (
-          <label key={`check-${clause.id}`} className="waiver-check-row">
-            <input
-              type="checkbox"
-              checked={!!checked[clause.id]}
-              onChange={(e) => setChecked((prev) => ({ ...prev, [clause.id]: e.target.checked }))}
-            />
-            <span className="min-w-0 leading-[1.4]">
-              <span className="block font-semibold text-ink">{clause.title}</span>
-              <span className="mt-0.5 block font-thai text-[9.5px]">
-                {lang === 'th' ? 'ฉันได้อ่านและยอมรับเงื่อนไขข้างต้น' : 'I have read and agree to the terms above'}
-              </span>
+        {/* Single compact agree checkbox — still marks every clause id for submit */}
+        <label className="waiver-check">
+          <input
+            type="checkbox"
+            checked={allChecked}
+            onChange={(e) => toggleAll(e.target.checked)}
+          />
+          <span>
+            I have read and agree to the terms above
+            <span className="th" style={{ display: 'block', fontFamily: 'var(--font-th)' }}>
+              ฉันได้อ่านและยอมรับเงื่อนไขข้างต้น
             </span>
-          </label>
-        ))}
-      </div>
+          </span>
+        </label>
 
-      {errors.clauses && (
-        <p className="text-[10.5px] text-coral" role="alert">
-          {errors.clauses}
-        </p>
-      )}
+        {errors.clauses && (
+          <p className="text-[10.5px] text-coral" role="alert">
+            {errors.clauses}
+          </p>
+        )}
 
-      {/* .sign-box */}
-      <div className="flow-field">
-        <span>
-          {t('waiver.signName')} <span className="normal-case text-coral">*</span>
-        </span>
+        {/* .sign-box */}
         <div className={`sign-box ${errors.name ? 'sign-box-error' : ''}`}>
           <input
             value={signedName}
@@ -143,13 +141,9 @@ export default function WaiverPage() {
           />
         </div>
         {errors.name && <p className="text-[10px] text-coral">{errors.name}</p>}
-        <p className="text-[9.5px] font-normal normal-case tracking-normal text-ink-soft">
-          {lang === 'th' ? 'บันทึกเวลา: ' : 'Timestamp: '}
-          {new Date().toLocaleString('en-AU')}
-        </p>
       </div>
 
-      {/* Sticky submit bar — mockup's white bar with top hairline above the CTA */}
+      {/* Sticky submit bar */}
       <div className="flow-bar sticky bottom-0 -mx-4 !pb-[max(18px,env(safe-area-inset-bottom))] sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
         <button
           type="submit"
