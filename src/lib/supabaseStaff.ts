@@ -45,11 +45,13 @@ export async function callStaffApi<T = unknown>(
   if (!token) throw new StaffSessionExpiredError()
 
   const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/staff-api`
+  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
   const res = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+      apikey: anonKey,
+      Authorization: `Bearer ${anonKey}`,
     },
     body: JSON.stringify({ token, action, params }),
   })

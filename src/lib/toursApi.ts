@@ -344,6 +344,7 @@ export async function lookupMyTrip(params: {
       headers: {
         'Content-Type': 'application/json',
         apikey: supabaseConfig.anonKey,
+        Authorization: `Bearer ${supabaseConfig.anonKey}`,
       },
       body: JSON.stringify({
         trip_code_or_reference: params.tripCodeOrReference.trim(),
@@ -456,6 +457,7 @@ export async function verifyStaffPin(pin: string): Promise<StaffAuthResult | nul
       headers: {
         'Content-Type': 'application/json',
         apikey: supabaseConfig.anonKey,
+        Authorization: `Bearer ${supabaseConfig.anonKey}`,
       },
       body: JSON.stringify({ pin }),
     })
@@ -920,6 +922,7 @@ export async function generateCaption(
     headers: {
       'Content-Type': 'application/json',
       apikey: supabaseConfig.anonKey,
+      Authorization: `Bearer ${supabaseConfig.anonKey}`,
     },
     body: JSON.stringify({
       token,
@@ -958,6 +961,7 @@ export async function generateTripPost(tripId: string): Promise<GenerateTripPost
     headers: {
       'Content-Type': 'application/json',
       apikey: supabaseConfig.anonKey,
+      Authorization: `Bearer ${supabaseConfig.anonKey}`,
     },
     body: JSON.stringify({ token, trip_id: tripId }),
   })
