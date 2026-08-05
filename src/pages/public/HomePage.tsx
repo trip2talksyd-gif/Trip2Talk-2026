@@ -123,7 +123,7 @@ export default function HomePage() {
           </Link>
         </div>
 
-        <div className="relative z-[2] grid grid-cols-3 gap-0 bg-black/28 px-1 pb-16 pt-2 text-center">
+        <div className="relative z-[2] grid grid-cols-3 gap-0 border-t border-white/10 bg-teal-900/75 px-1 pb-8 pt-2.5 text-center backdrop-blur-[2px]">
           <div>
             <p className="m-0 text-[13px] font-bold text-mint-200 sm:text-[18px]">
               <CountUpStat end={13} />

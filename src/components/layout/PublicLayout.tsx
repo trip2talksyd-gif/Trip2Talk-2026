@@ -191,7 +191,7 @@ export default function PublicLayout() {
       <main
         className={`mx-auto w-full flex-1 px-4 pt-4 sm:px-6 ${
           isHome
-            ? 'max-w-2xl pb-4 text-cream'
+            ? 'max-w-[1280px] pb-4 text-cream lg:px-10'
             : 'max-w-[1280px] pb-24 text-ink lg:px-10'
         }`}
       >

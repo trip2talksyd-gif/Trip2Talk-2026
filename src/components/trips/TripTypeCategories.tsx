@@ -27,21 +27,18 @@ function CategoryCard({ category }: { category: (typeof CATEGORIES)[number] }) {
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
       )}
-      <div className="absolute inset-0 bg-black/10 transition-colors duration-500 group-hover:bg-black/20" />
+      <div className="absolute inset-0 bg-gradient-to-t from-teal-900/70 via-teal-900/15 to-teal-900/25 transition-colors duration-500 group-hover:from-teal-900/80" />
 
       <h2
-        className="relative z-10 whitespace-nowrap font-medium text-3xl text-white transition-transform duration-500 group-hover:-translate-y-2 sm:text-5xl md:text-6xl lg:text-7xl"
+        className="relative z-10 whitespace-nowrap font-serif text-3xl font-medium text-cream transition-transform duration-500 group-hover:-translate-y-2 sm:text-5xl md:text-6xl lg:text-7xl"
         style={{ writingMode: 'vertical-lr', transform: 'rotate(180deg)' }}
       >
         {label}
       </h2>
 
-      <button
-        type="button"
-        className="btn-primary relative z-10 mt-auto rounded-full bg-white px-8 py-3 text-sm text-black"
-      >
+      <span className="btn-embossed relative z-10 mt-auto !flex-none rounded-full px-8 py-3 text-sm">
         {t('home.category.viewPrefix')} {label}
-      </button>
+      </span>
     </Link>
   )
 }
