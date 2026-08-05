@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -13,25 +13,37 @@ import {
 } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites'
-import { fetchTourByCode, formatAud, isTourBookable, seatsRemaining } from '../../lib/toursApi'
+import {
+  fetchFeaturedTours,
+  fetchTourByCode,
+  formatAud,
+  isTourBookable,
+  seatsRemaining,
+} from '../../lib/toursApi'
 import {
   isAuroraTrip,
   tourDestination,
   tourDestinationLabel,
   tourDurationLabel,
 } from '../../lib/tourDisplay'
-import { getTripDetails, listFor, textFor } from '../../data/tripDetails'
+import { getTripDetails } from '../../data/tripDetails'
 import { getItinerary } from '../../data/itineraries'
 import { isPremiumTrip } from '../../data/tripTiers'
 import { AURORA_DISCLAIMER } from '../../data/risks'
 import { getTripMap, googleMapsEmbedUrl } from '../../data/tripMaps'
-import { getGalleryPhotosForTrip, photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
+import {
+  getGalleryPhotosForTrip,
+  getPreviewPhotoForTrip,
+  photoSrc,
+  type GalleryPhoto,
+} from '../../data/galleryPhotos'
 import { getTripCoverVideoUrl } from '../../data/tripVideos'
 import { getTestimonialsForTrip } from '../../data/testimonials'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import type { Tour } from '../../types/tour'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
+import BiText from '../../components/ui/BiText'
 import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
 import TripPhotoHero from '../../components/trips/TripPhotoHero'
 import TripPricingCard from '../../components/trips/TripPricingCard'
@@ -41,13 +53,20 @@ import AuroraTracker from '../../components/trips/AuroraTracker'
 import TripTimeline from '../../components/trips/TripTimeline'
 import PremiumTripCallout from '../../components/trips/PremiumTripCallout'
 import TestimonialSection from '../../components/trips/TestimonialSection'
+import type { TranslationKey } from '../../i18n/translations'
 
 /** Mobile-only tabs (mockup .tab-row). On md+ every pane is shown at once. */
 type DetailTab = 'details' | 'itinerary' | 'reviews'
 
+const TAB_KEYS: { id: DetailTab; key: TranslationKey }[] = [
+  { id: 'details', key: 'detail.tab.details' },
+  { id: 'itinerary', key: 'detail.tab.itinerary' },
+  { id: 'reviews', key: 'detail.tab.reviews' },
+]
+
 export default function TripDetailPage() {
   const { tripCode } = useParams<{ tripCode: string }>()
-  const { lang, t } = useLang()
+  const { tt } = useLang()
   const [tour, setTour] = useState<Tour | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -55,32 +74,44 @@ export default function TripDetailPage() {
   const toggleFavorite = useToggleFavorite()
   const [previewPhoto, setPreviewPhoto] = useState<GalleryPhoto | null>(null)
   const [tab, setTab] = useState<DetailTab>('details')
+  const [moreTrips, setMoreTrips] = useState<Tour[]>([])
+
+  const errorBi = tt('common.error')
 
   useEffect(() => {
     if (!tripCode) {
       setLoading(false)
       return
     }
+    setLoading(true)
     fetchTourByCode(tripCode)
       .then(setTour)
-      .catch(() => setError(t('common.error')))
+      .catch(() => setError(errorBi.en))
       .finally(() => setLoading(false))
-  }, [tripCode, t])
+  }, [tripCode, errorBi.en])
 
-  // Reset the hover preview whenever the trip changes so it doesn't carry over.
   useEffect(() => {
     setPreviewPhoto(null)
     setTab('details')
   }, [tripCode])
 
+  useEffect(() => {
+    let cancelled = false
+    fetchFeaturedTours(6)
+      .then((tours) => {
+        if (cancelled) return
+        setMoreTrips(tours.filter((t) => t.trip_code !== tripCode).slice(0, 3))
+      })
+      .catch(() => {
+        if (!cancelled) setMoreTrips([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [tripCode])
+
   const stripPhotos = useMemo(() => {
     if (!tour) return []
-    // Matched by category (same mapping the hero photo uses), not by id
-    // substring — an id-prefix match let an unrelated Uluru photo (id
-    // "tas-002") sneak into the Tasmania trip's thumbnail strip. No
-    // unrelated fallback here on purpose — an empty strip (hidden by the
-    // `stripPhotos.length > 0` check below) beats showing photos of a
-    // different destination.
     return getGalleryPhotosForTrip(tour.trip_code).slice(0, 8)
   }, [tour])
 
@@ -95,61 +126,65 @@ export default function TripDetailPage() {
   }
 
   if (error || !tour) {
-    return <PageError message={error || t('common.error')} />
+    return <PageError message={error || errorBi.en} />
   }
 
   const details = getTripDetails(tour.trip_code)
-  const name = lang === 'th' ? tour.name_th : tour.name_en
-  const altName = lang === 'th' ? tour.name_en : tour.name_th
-  const highlights = details ? listFor(details.highlights, lang) : []
-  const includes = details ? listFor(details.includes, lang) : []
-  const excludes = details ? listFor(details.excludes, lang) : []
-  const tagline = details ? textFor(details.tagline, lang) : ''
-  const accommodationNote = details?.accommodationNote
-    ? textFor(details.accommodationNote, lang)
-    : ''
-  const durationLabel = tourDurationLabel(tour, lang)
-  const itinerary = getItinerary(tour.trip_code, details?.highlights, durationLabel)
+  const durationEn = tourDurationLabel(tour, 'en')
+  const durationTh = tourDurationLabel(tour, 'th')
+  const itinerary = getItinerary(tour.trip_code, details?.highlights, durationEn)
   const mapCfg = getTripMap(tour.trip_code)
   const coverVideoUrl = getTripCoverVideoUrl(tour.trip_code)
   const bookable = isTourBookable(tour)
   const remaining = seatsRemaining(tour)
   const testimonials = getTestimonialsForTrip(tour.trip_code)
-  // Urgency badge once seats are genuinely scarce — not from the very first
-  // booking, so it doesn't cry wolf on a trip that just opened.
-  const lowSeats = bookable && tour.max_seats > 0 && remaining <= Math.max(2, Math.ceil(tour.max_seats * 0.34))
+  const lowSeats =
+    bookable && tour.max_seats > 0 && remaining <= Math.max(2, Math.ceil(tour.max_seats * 0.34))
 
-  /** Hidden on mobile unless its tab is active; always visible from md up. */
   const pane = (id: DetailTab) => (tab === id ? '' : 'hidden md:block')
 
-  const tabs: { id: DetailTab; label: string }[] = [
-    { id: 'details', label: lang === 'th' ? 'รายละเอียด' : 'Details' },
-    { id: 'itinerary', label: lang === 'th' ? 'เส้นทาง' : 'Itinerary' },
-    { id: 'reviews', label: lang === 'th' ? 'รีวิว' : 'Reviews' },
-  ]
+  const navTrips = tt('nav.trips')
+  const favAdd = tt('favorites.add')
+  const favRemove = tt('favorites.remove')
+  const swipe = tt('detail.swipePhotos')
+  const highlightsBi = tt('detail.highlights')
+  const includesBi = tt('detail.includes')
+  const excludesBi = tt('detail.excludes')
+  const accomBi = tt('detail.accommodation')
+  const prepBi = tt('detail.prep')
+  const guideBi = tt('detail.photoGuide')
+  const moreBi = tt('detail.moreTrips')
+  const auroraBi = tt('common.aurora')
+  const fromBi = tt('detail.fromPrice')
 
-  const statChips: { value: string; label: string }[] = [
-    { value: durationLabel, label: lang === 'th' ? 'ระยะเวลา' : 'Duration' },
+  const seatsValue = bookable
+    ? { en: `${remaining} left`, th: `เหลือ ${remaining}` }
+    : { en: `Max ${tour.max_seats}`, th: `สูงสุด ${tour.max_seats}` }
+
+  const statChips = [
     {
-      value: bookable
-        ? lang === 'th'
-          ? `เหลือ ${remaining}`
-          : `${remaining} left`
-        : lang === 'th'
-          ? `สูงสุด ${tour.max_seats}`
-          : `Max ${tour.max_seats}`,
-      label: lang === 'th' ? 'ที่นั่ง' : 'Seats',
+      value: durationEn,
+      label: tt('detail.stat.duration'),
     },
-    { value: formatAud(tour.price_aud), label: lang === 'th' ? 'ต่อคน' : 'Per person' },
+    {
+      value: seatsValue.en,
+      label: tt('detail.stat.seats'),
+    },
+    {
+      value: formatAud(tour.price_aud),
+      label: tt('detail.stat.perPerson'),
+    },
   ]
 
   return (
     <div className="space-y-6 pb-28 md:pb-4">
-      {/* Desktop back / favourite row — on mobile these live on the hero as circle buttons */}
       <div className="hidden items-center justify-between gap-3 md:flex">
         <Link to="/trips" className="inline-flex items-center gap-1 text-sm text-teal-700">
           <ArrowLeft className="h-4 w-4" />
-          {t('nav.trips')}
+          <span>
+            {navTrips.en}
+            <span className="ml-1 font-thai text-[11px] opacity-80">{navTrips.th}</span>
+          </span>
         </Link>
         <button
           type="button"
@@ -161,11 +196,10 @@ export default function TripDetailPage() {
             className={`h-4 w-4 ${favorited ? 'fill-coral text-coral' : 'text-ink/50'}`}
             strokeWidth={2}
           />
-          {favorited ? t('favorites.remove') : t('favorites.add')}
+          {favorited ? `${favRemove.en} / ${favRemove.th}` : `${favAdd.en} / ${favAdd.th}`}
         </button>
       </div>
 
-      {/* Mockup .detail-hero (mobile ~42% tall) / .video-frame 21:9 (desktop) */}
       <div className="-mx-4 overflow-hidden sm:-mx-6 md:mx-0 md:rounded-2xl">
         <div className="relative">
           {coverVideoUrl && !previewPhoto ? (
@@ -181,18 +215,17 @@ export default function TripDetailPage() {
           ) : (
             <TripPhotoHero
               tripCode={tour.trip_code}
-              alt={name}
+              alt={tour.name_en}
               className="aspect-[6/5] w-full transition-opacity duration-150 md:aspect-[21/9]"
               overridePhoto={previewPhoto}
             />
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-teal-900/85 via-teal-900/20 to-transparent" />
 
-          {/* Mockup .detail-hero .top-row — circle back + heart (mobile only) */}
           <div className="absolute inset-x-3.5 top-3 flex items-center justify-between md:hidden">
             <Link
               to="/trips"
-              aria-label={t('nav.trips')}
+              aria-label={`${navTrips.en} / ${navTrips.th}`}
               className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 text-ink shadow-[0_2px_8px_-2px_rgba(0,0,0,0.35)]"
             >
               <ArrowLeft className="h-4 w-4" strokeWidth={2.25} />
@@ -201,7 +234,9 @@ export default function TripDetailPage() {
               type="button"
               onClick={() => toggleFavorite(tour.trip_code)}
               aria-pressed={favorited}
-              aria-label={favorited ? t('favorites.remove') : t('favorites.add')}
+              aria-label={
+                favorited ? `${favRemove.en} / ${favRemove.th}` : `${favAdd.en} / ${favAdd.th}`
+              }
               className="flex h-8 w-8 items-center justify-center rounded-full bg-white/90 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.35)]"
             >
               <Heart
@@ -213,50 +248,56 @@ export default function TripDetailPage() {
 
           {lowSeats && (
             <span className="absolute bottom-3 left-4 animate-pulse rounded-full bg-coral px-2.5 py-1 text-[10.5px] font-bold uppercase tracking-wide text-white shadow-[0_4px_12px_-4px_rgba(0,0,0,0.5)] md:bottom-auto md:left-auto md:right-3 md:top-3">
-              {lang === 'th'
-                ? `🔥 เหลือ ${remaining} ที่นั่ง`
-                : `🔥 Only ${remaining} seat${remaining === 1 ? '' : 's'} left`}
+              🔥 {remaining} left · เหลือ {remaining}
             </span>
           )}
 
           <div className="absolute bottom-0 hidden p-4 md:block sm:p-5">
             <p className="text-[10px] uppercase tracking-wider text-cream/65">{tour.trip_code}</p>
-            <h1 className="font-serif text-2xl text-cream sm:text-3xl">{name}</h1>
+            <h1 className="font-serif text-2xl text-cream sm:text-3xl">{tour.name_en}</h1>
+            <p className="mt-1 font-thai text-sm text-cream/80">{tour.name_th}</p>
             <p className="mt-1 text-xs text-cream/65">
-              {tourDestination(tour.trip_code)} · {durationLabel}
+              {tourDestination(tour.trip_code)} · {durationEn} / {durationTh}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Mockup .detail-body head + .stat-row (mobile) */}
       <div className="md:hidden">
         <p className="text-[9.5px] font-bold uppercase tracking-[0.04em] text-teal-600">
-          {tourDestinationLabel(tour.trip_code, lang)} · {tour.trip_code}
+          {tourDestinationLabel(tour.trip_code, 'en')} · {tour.trip_code}
+          <span className="ml-1 font-thai text-[8px] font-medium normal-case tracking-normal opacity-80">
+            {tourDestinationLabel(tour.trip_code, 'th')}
+          </span>
         </p>
-        <h1 className="mt-[3px] font-thai text-[17px] font-bold leading-snug text-ink">{name}</h1>
-        <p className="mt-px font-thai text-[11.5px] font-medium text-ink-soft">{altName}</p>
+        <h1 className="mt-[3px] font-thai text-[17px] font-bold leading-snug text-ink">
+          {tour.name_en}
+          <span className="mt-px block text-[11.5px] font-medium text-ink-soft">{tour.name_th}</span>
+        </h1>
 
         <div className="mt-2.5 flex gap-2">
           {statChips.map((chip) => (
-            <div key={chip.label} className="flex-1 rounded-xl bg-mint-100 px-1 py-[7px] text-center">
+            <div key={chip.label.en} className="flex-1 rounded-xl bg-mint-100 px-1 py-[7px] text-center">
               <b className="block text-[11.5px] text-teal-800">{chip.value}</b>
               <span className="text-[8.5px] uppercase leading-[1.4] text-ink-soft">
-                {chip.label}
+                {chip.label.en}
+                <span className="block font-thai text-[7.5px] normal-case opacity-85">
+                  {chip.label.th}
+                </span>
               </span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Mockup .tab-row — mobile only; md+ shows every pane stacked */}
       <div
         className="-mt-2 flex gap-3.5 border-b border-line md:hidden"
         role="tablist"
-        aria-label={name}
+        aria-label={tour.name_en}
       >
-        {tabs.map((item) => {
+        {TAB_KEYS.map((item) => {
           const active = tab === item.id
+          const label = tt(item.key)
           return (
             <button
               key={item.id}
@@ -268,16 +309,17 @@ export default function TripDetailPage() {
                 active ? 'border-b-2 border-teal-700 text-teal-700' : 'text-ink-soft'
               }`}
             >
-              {item.label}
+              {label.en}
+              <span className="font-thai font-medium opacity-85"> · {label.th}</span>
             </button>
           )
         })}
       </div>
 
-      {/* Top CTA — desktop only; mobile keeps TripStickyBookBar at the bottom */}
       <div className="hidden items-center gap-3 rounded-2xl border border-line bg-card p-3 shadow-[0_8px_22px_-14px_rgba(15,28,30,0.35)] md:flex">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-1.5">
+            <span className="text-[10px] font-semibold text-ink-soft">{fromBi.en}</span>
             <SplitFlapPrice
               amountAud={tour.price_aud}
               board
@@ -287,18 +329,13 @@ export default function TripDetailPage() {
           </div>
           <p className="mt-0.5 truncate text-[10px] text-ink-soft">
             {bookable && lowSeats
-              ? lang === 'th'
-                ? `เหลือ ${remaining} ที่นั่ง · มัดจำล็อคที่นั่ง`
-                : `${remaining} seat${remaining === 1 ? '' : 's'} left · deposit locks your seat`
-              : lang === 'th'
-                ? 'ต่อคน · มัดจำล็อคที่นั่ง'
-                : 'per person · deposit locks your seat'}
+              ? `${remaining} seats left · deposit locks your seat / เหลือ ${remaining} · มัดจำล็อคที่นั่ง`
+              : 'per person · deposit locks your seat / ต่อคน · มัดจำล็อคที่นั่ง'}
           </p>
         </div>
         <TripBookButton tour={tour} variant="deep" className="!w-auto shrink-0 !px-5 !py-2.5" />
       </div>
 
-      {/* Mockup .gallery-scroll — larger on desktop */}
       {stripPhotos.length > 0 && (
         <div
           className={`-mx-4 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6 lg:mx-0 lg:px-0 ${pane('details')}`}
@@ -308,7 +345,7 @@ export default function TripDetailPage() {
               <button
                 key={photo.id}
                 type="button"
-                aria-label={lang === 'th' ? 'ดูรูปนี้' : 'Preview this photo'}
+                aria-label={swipe.en}
                 onMouseEnter={() => setPreviewPhoto(photo)}
                 onMouseLeave={() => setPreviewPhoto(null)}
                 onFocus={() => setPreviewPhoto(photo)}
@@ -322,51 +359,53 @@ export default function TripDetailPage() {
               >
                 <img
                   src={photoSrc(photo)}
-                  alt={name}
+                  alt={tour.name_en}
                   className="h-full w-full object-cover"
                   loading="lazy"
                 />
               </button>
             ))}
           </div>
-          <p className="mt-1.5 text-[11px] text-ink-soft">
-            {lang === 'th' ? '↔ ปัดดูรูปเพิ่มเติม' : '↔ Swipe for more photos'}
-          </p>
+          <BiText
+            as="p"
+            en={swipe.en}
+            th={swipe.th}
+            className="mt-1.5 text-[11px] text-ink-soft"
+            thClassName="mt-px block font-thai text-[10px] text-ink-soft/85"
+          />
         </div>
       )}
 
-      {tagline && (
-        <p className={`text-[13px] leading-relaxed text-ink-soft sm:text-sm ${pane('details')}`}>
-          {tagline}
-        </p>
+      {details?.tagline && (
+        <div
+          className={`space-y-1.5 text-[13px] leading-relaxed text-ink-soft sm:text-sm ${pane('details')}`}
+        >
+          <p>{details.tagline.en}</p>
+          <p className="font-thai text-[12px] sm:text-[13px]">{details.tagline.th}</p>
+        </div>
       )}
 
-      {/* Mockup .meta-icons — desktop only; mobile uses the stat chips above */}
       <div className="hidden flex-wrap gap-x-[22px] gap-y-3 border-y border-line py-4 md:flex">
-        <div className="text-[11.5px] text-ink-soft">
-          <CalendarDays className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />
-          <b className="block text-[13px] text-ink">{durationLabel}</b>
-          {lang === 'th' ? 'ระยะเวลา' : 'Duration'}
-        </div>
-        <div className="text-[11.5px] text-ink-soft">
-          <MapPin className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />
-          <b className="block text-[13px] text-ink">{tourDestination(tour.trip_code)}</b>
-          {lang === 'th' ? 'ปลายทาง' : 'Destination'}
-        </div>
-        <div className="text-[11.5px] text-ink-soft">
-          <Users className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />
-          <b className="block text-[13px] text-ink">
-            {lang === 'th' ? `สูงสุด ${tour.max_seats}` : `Max ${tour.max_seats}`}
-          </b>
-          {lang === 'th' ? 'ขนาดกลุ่ม' : 'Group size'}
-        </div>
-        <div className="text-[11.5px] text-ink-soft">
-          <Camera className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />
-          <b className="block text-[13px] text-ink">
-            {lang === 'th' ? 'รวมช่างภาพ' : 'Pro photographer'}
-          </b>
-          {lang === 'th' ? 'ทุกทริป' : 'Every trip'}
-        </div>
+        <MetaIcon
+          icon={<CalendarDays className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />}
+          value={durationEn}
+          label={tt('detail.stat.duration')}
+        />
+        <MetaIcon
+          icon={<MapPin className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />}
+          value={tourDestination(tour.trip_code)}
+          label={tt('detail.stat.destination')}
+        />
+        <MetaIcon
+          icon={<Users className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />}
+          value={`Max ${tour.max_seats}`}
+          label={tt('detail.stat.group')}
+        />
+        <MetaIcon
+          icon={<Camera className="mb-1 h-4 w-4 text-teal-700" strokeWidth={2} />}
+          value={tt('detail.stat.photographer').en}
+          label={tt('detail.stat.photographerSub')}
+        />
       </div>
 
       {isPremiumTrip(tour.trip_code) && (
@@ -383,23 +422,41 @@ export default function TripDetailPage() {
               <div className="flex gap-2 rounded-editorial border border-teal-900/15 bg-mint-100 p-4">
                 <Sparkles className="h-5 w-5 shrink-0 text-teal-600" />
                 <div>
-                  <p className="text-sm font-medium text-teal-900">{t('common.aurora')}</p>
-                  <p className="mt-1 text-xs text-ink/70">{AURORA_DISCLAIMER[lang]}</p>
+                  <BiText
+                    as="p"
+                    en={auroraBi.en}
+                    th={auroraBi.th}
+                    className="text-sm font-medium text-teal-900"
+                    thClassName="mt-0.5 block font-thai text-xs font-medium text-teal-800"
+                  />
+                  <p className="mt-1 text-xs text-ink/70">{AURORA_DISCLAIMER.en}</p>
+                  <p className="mt-0.5 font-thai text-xs text-ink/60">{AURORA_DISCLAIMER.th}</p>
                 </div>
               </div>
             </div>
           )}
 
-          {highlights.length > 0 && (
+          {details && details.highlights.en.length > 0 && (
             <section className={pane('details')}>
-              <h2 className="font-thai text-[15.5px] text-ink">
-                {lang === 'th' ? 'ไฮไลท์' : 'Highlights'}
-              </h2>
+              <BiText
+                as="h2"
+                en={highlightsBi.en}
+                th={highlightsBi.th}
+                className="font-thai text-[15.5px] text-ink"
+                thClassName="mt-0.5 block text-[12px] font-medium text-ink-soft"
+              />
               <ul className="mt-2 space-y-2">
-                {highlights.map((h) => (
+                {details.highlights.en.map((h, i) => (
                   <li key={h} className="flex gap-2 text-sm text-ink/80">
                     <span className="text-teal-600">·</span>
-                    {h}
+                    <span>
+                      {h}
+                      {details.highlights.th[i] && (
+                        <span className="mt-0.5 block font-thai text-[12px] text-ink-soft">
+                          {details.highlights.th[i]}
+                        </span>
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -412,40 +469,71 @@ export default function TripDetailPage() {
           </div>
 
           <div className={`grid gap-4 sm:grid-cols-2 ${pane('details')}`}>
-            {includes.length > 0 && (
+            {details && details.includes.en.length > 0 && (
               <section className="rounded-editorial border border-line bg-cream p-4">
-                <h2 className="text-sm font-medium text-ink">
-                  {lang === 'th' ? 'รวมในราคา' : "What's included"}
-                </h2>
-                <ul className="mt-2 space-y-1 text-sm text-ink/70">
-                  {includes.map((item) => (
-                    <li key={item}>✓ {item}</li>
+                <BiText
+                  as="h2"
+                  en={includesBi.en}
+                  th={includesBi.th}
+                  className="text-sm font-medium text-ink"
+                  thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+                />
+                <ul className="mt-2 space-y-1.5 text-sm text-ink/70">
+                  {details.includes.en.map((item, i) => (
+                    <li key={item}>
+                      ✓ <b>{item}</b>
+                      {details.includes.th[i] && (
+                        <em className="mt-0.5 block font-thai text-[11px] not-italic text-ink-soft">
+                          {details.includes.th[i]}
+                        </em>
+                      )}
+                    </li>
                   ))}
                 </ul>
               </section>
             )}
-            {excludes.length > 0 && (
+            {details && details.excludes.en.length > 0 && (
               <section className="rounded-editorial border border-line bg-cream p-4">
-                <h2 className="text-sm font-medium text-ink">
-                  {lang === 'th' ? 'ไม่รวม' : 'Not included'}
-                </h2>
-                <ul className="mt-2 space-y-1 text-sm text-ink/70">
-                  {excludes.map((item) => (
-                    <li key={item}>✗ {item}</li>
+                <BiText
+                  as="h2"
+                  en={excludesBi.en}
+                  th={excludesBi.th}
+                  className="text-sm font-medium text-ink"
+                  thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+                />
+                <ul className="mt-2 space-y-1.5 text-sm text-ink/70">
+                  {details.excludes.en.map((item, i) => (
+                    <li key={item}>
+                      ✗ {item}
+                      {details.excludes.th[i] && (
+                        <em className="mt-0.5 block font-thai text-[11px] not-italic text-ink-soft">
+                          {details.excludes.th[i]}
+                        </em>
+                      )}
+                    </li>
                   ))}
                 </ul>
               </section>
             )}
           </div>
 
-          {accommodationNote && (
+          {details?.accommodationNote && (
             <section
               className={`rounded-editorial border border-line bg-mint-100/80 p-4 ${pane('details')}`}
             >
-              <h2 className="text-sm font-medium text-ink">
-                {lang === 'th' ? 'ที่พัก' : 'Accommodation'}
-              </h2>
-              <p className="mt-2 text-sm leading-relaxed text-ink/80">{accommodationNote}</p>
+              <BiText
+                as="h2"
+                en={accomBi.en}
+                th={accomBi.th}
+                className="text-sm font-medium text-ink"
+                thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+              />
+              <p className="mt-2 text-sm leading-relaxed text-ink/80">
+                {details.accommodationNote.en}
+              </p>
+              <p className="mt-1 font-thai text-[12px] leading-relaxed text-ink/70">
+                {details.accommodationNote.th}
+              </p>
             </section>
           )}
 
@@ -458,7 +546,7 @@ export default function TripDetailPage() {
           <div className={`relative overflow-hidden rounded-2xl border border-line ${pane('details')}`}>
             <iframe
               src={googleMapsEmbedUrl(mapCfg)}
-              title={lang === 'th' ? mapCfg.caption.th : mapCfg.caption.en}
+              title={mapCfg.caption.en}
               className="aspect-[760/285] w-full border-0"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -467,7 +555,10 @@ export default function TripDetailPage() {
               Google Maps
             </span>
             <p className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-teal-900/90 to-transparent px-3 pb-3 pt-8 text-xs text-cream">
-              {lang === 'th' ? mapCfg.caption.th : mapCfg.caption.en}
+              {mapCfg.caption.en}
+              <span className="mt-0.5 block font-thai text-[11px] text-cream/85">
+                {mapCfg.caption.th}
+              </span>
             </p>
           </div>
 
@@ -475,50 +566,139 @@ export default function TripDetailPage() {
             to={`/trips/${tour.trip_code}/prep`}
             className={`flex items-center justify-between rounded-editorial border border-line bg-cream px-4 py-3 text-sm text-ink transition-colors hover:border-teal-500/40 ${pane('details')}`}
           >
-            <span>{lang === 'th' ? 'เตรียมตัวก่อนเดินทาง' : 'Trip Preparation'}</span>
-            <ChevronRight className="h-4 w-4 text-teal-600" />
+            <BiText
+              en={prepBi.en}
+              th={prepBi.th}
+              thClassName="mt-0.5 block font-thai text-[11px] text-ink-soft"
+            />
+            <ChevronRight className="h-4 w-4 shrink-0 text-teal-600" />
           </Link>
 
           <Link
             to="/photo-guide"
             className={`flex items-center gap-3 rounded-editorial border border-line bg-mint-100 px-4 py-3 ${pane('details')}`}
           >
-            <span className="text-sm font-medium text-ink">
-              {lang === 'th'
-                ? 'อ่านคู่มือถ่ายภาพก่อนออกเดินทาง'
-                : 'Read the Photo Guide before you go'}
-            </span>
-            <ChevronRight className="ml-auto h-4 w-4 text-teal-600" />
+            <BiText
+              en={guideBi.en}
+              th={guideBi.th}
+              className="text-sm font-medium text-ink"
+              thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+            />
+            <ChevronRight className="ml-auto h-4 w-4 shrink-0 text-teal-600" />
           </Link>
         </div>
 
         <div className={`order-1 lg:order-2 ${pane('details')}`}>
-          <TripPricingCard tour={tour} includes={includes} />
+          <TripPricingCard tour={tour} includes={details?.includes.en ?? []} />
         </div>
       </div>
+
+      {moreTrips.length > 0 && (
+        <section className="border-t border-line pt-6">
+          <BiText
+            as="h2"
+            en={moreBi.en}
+            th={moreBi.th}
+            serif
+            className="text-lg text-ink sm:text-xl"
+            thClassName="mt-0.5 block font-thai text-sm font-medium text-ink-soft"
+          />
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {moreTrips.map((rec) => {
+              const preview = getPreviewPhotoForTrip(rec.trip_code)
+              const img = rec.cover_image_url || (preview ? photoSrc(preview) : '')
+              return (
+                <Link
+                  key={rec.id}
+                  to={`/trips/${rec.trip_code}`}
+                  className="overflow-hidden rounded-2xl border border-line bg-card shadow-[0_6px_18px_-12px_rgba(10,61,58,0.25)]"
+                >
+                  {img ? (
+                    <img
+                      src={img}
+                      alt={rec.name_en}
+                      className="aspect-[5/3.6] w-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <TripPhotoHero
+                      tripCode={rec.trip_code}
+                      alt={rec.name_en}
+                      className="aspect-[5/3.6] w-full object-cover"
+                    />
+                  )}
+                  <div className="p-3">
+                    <p className="text-[9px] font-bold uppercase tracking-wide text-teal-600">
+                      {tourDestinationLabel(rec.trip_code, 'en')}
+                    </p>
+                    <p className="mt-0.5 text-[12.5px] font-bold text-ink">
+                      {rec.name_en}
+                      <span className="mt-0.5 block font-thai text-[10px] font-medium text-ink-soft">
+                        {rec.name_th}
+                      </span>
+                    </p>
+                    <p className="mt-1 text-[12px] font-extrabold text-coral">
+                      {formatAud(rec.price_aud)} AUD
+                    </p>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
+      )}
 
       <TripStickyBookBar tour={tour} />
     </div>
   )
 }
 
+function MetaIcon({
+  icon,
+  value,
+  label,
+}: {
+  icon: ReactNode
+  value: string
+  label: { en: string; th: string }
+}) {
+  return (
+    <div className="text-[11.5px] text-ink-soft">
+      {icon}
+      <b className="block text-[13px] text-ink">{value}</b>
+      {label.en}
+      <span className="block font-thai text-[10px] opacity-85">{label.th}</span>
+    </div>
+  )
+}
+
 /**
- * Mockup .rev-summary chrome, but with no invented scores or counts —
- * real quotes land in src/data/testimonials.ts and render above this.
+ * Mockup .rev-summary chrome without invented scores —
+ * real quotes live in testimonials.ts; otherwise Facebook CTA.
  */
 function ReviewsPlaceholder() {
-  const { lang } = useLang()
+  const { tt } = useLang()
+  const title = tt('detail.reviews.title')
+  const body = tt('detail.reviews.body')
+  const cta = tt('detail.reviews.cta')
 
   return (
     <section className="rounded-2xl border border-line bg-card p-4">
-      <h2 className="font-serif text-lg text-ink">
-        {lang === 'th' ? 'รีวิวจากลูกทริป' : 'Guest reviews'}
-      </h2>
-      <p className="mt-1.5 text-[11.5px] leading-relaxed text-ink-soft">
-        {lang === 'th'
-          ? 'เรายังไม่ลงรีวิวในเว็บ — อ่านคอมเมนต์และรูปจากลูกทริปจริงได้ที่เพจ Facebook ของเรา'
-          : "We don't publish review scores here yet — read real comments and guest photos on our Facebook Page."}
-      </p>
+      <BiText
+        as="h2"
+        en={title.en}
+        th={title.th}
+        serif
+        className="text-lg text-ink"
+        thClassName="mt-0.5 block font-thai text-sm font-medium text-ink-soft"
+      />
+      <BiText
+        as="p"
+        en={body.en}
+        th={body.th}
+        className="mt-1.5 text-[11.5px] leading-relaxed text-ink-soft"
+        thClassName="mt-1 block font-thai text-[11px] text-ink-soft/85"
+      />
       <a
         href={FACEBOOK_PAGE_URL}
         target="_blank"
@@ -526,7 +706,8 @@ function ReviewsPlaceholder() {
         className="mt-3 inline-flex items-center gap-2 rounded-[11px] bg-mint-100 px-3.5 py-2 text-[11px] font-bold text-teal-700"
       >
         <MessageCircle className="h-3.5 w-3.5" strokeWidth={2.25} />
-        {lang === 'th' ? 'ดูรีวิวบน Facebook' : 'See reviews on Facebook'}
+        {cta.en}
+        <span className="font-thai font-medium opacity-85"> · {cta.th}</span>
       </a>
     </section>
   )

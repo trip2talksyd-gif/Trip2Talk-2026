@@ -47,8 +47,30 @@ export interface TourBooking {
   emergency_contact_phone: string | null
   dietary_requirements: string | null
   medical_conditions: string | null
+  /** Free-text allergies for guides (trip-day quick view). */
+  allergies?: string | null
+  /** oshc | travel_insurance | none — default oshc for Thai student-visa base. */
+  insurance_type?: 'oshc' | 'travel_insurance' | 'none' | null
+  oshc_membership_number?: string | null
+  oshc_risk_acknowledged?: boolean | null
+  /** Legacy / alias travel insurance fields. */
+  insurance_provider?: string | null
+  insurance_policy_number?: string | null
+  travel_insurance_provider?: string | null
+  travel_insurance_policy_number?: string | null
+  /** Catch-all notes: swim/mobility/heights/etc. */
+  other_notes?: string | null
   oshc_provider: string | null
   oshc_expiry: string | null
+  /** Opt-in: Trip2Talk books flights on customer's behalf. */
+  flight_booking_requested?: boolean | null
+  flight_legal_first_name?: string | null
+  flight_legal_last_name?: string | null
+  flight_date_of_birth?: string | null
+  /** SENSITIVE — NZ flights; staff-api only after insert (same as passport). */
+  flight_passport_number?: string | null
+  flight_nationality?: string | null
+  flight_frequent_flyer_number?: string | null
   waiver_signed: boolean
   waiver_signed_at: string | null
   /** Day-of check-in, separate from payment status. null/undefined = not checked yet. */
@@ -69,15 +91,31 @@ export interface TourBooking {
   cancelled_by?: string | null
   /** Optional reason entered at cancel time. */
   cancel_reason?: string | null
+  photos_delivered?: boolean | null
+  photos_delivered_at?: string | null
+  gallery_link?: string | null
+  reminder_7d_sent_at?: string | null
+  reminder_1d_sent_at?: string | null
+  review_requested_at?: string | null
+  /** Optional referral: another booking that referred this guest. */
+  referred_by_booking_id?: string | null
 }
 
-/** One recorded payment against a booking — lets a booking be paid off in several installments, each with its own receipt. */
+/** One recorded payment against a booking — lets a booking be paid off in several installments, each with its own receipt.
+ * installment_no = sequence (1 = deposit). Extends 20260720040000 + 20260805140000. */
 export interface BookingPayment {
   id: string
   booking_id: string
   amount_aud: number
   payment_method: string | null
+  /** Sequence: 1 = deposit, 2/3/4 = later installments. */
   installment_no: number
+  label?: string | null
+  status?: 'pending' | 'paid' | 'overdue' | null
+  due_date?: string | null
+  paid_at?: string | null
+  receipt_invoice_number?: string | null
+  recorded_by_staff_id?: string | null
   created_at: string
 }
 
@@ -120,6 +158,14 @@ export interface WaiverSignature {
   clauses: string[] | Record<string, unknown>
   locale: 'en' | 'th'
   created_at: string
+  /** Staff filled waiver on customer's explicit request */
+  filled_by_staff?: boolean
+  staff_fill_staff_id?: string | null
+  staff_fill_authorized_at?: string | null
+  staff_fill_authorization_note?: string | null
+  staff_fill_evidence_url?: string | null
+  staff_fill_staff_name?: string | null
+  booking_id?: string | null
 }
 
 /** @deprecated Public inserts no longer return rows (anon SELECT revoked). */
@@ -145,13 +191,61 @@ export interface WaitlistEntry {
   email: string | null
   note: string | null
   contacted: boolean
+  /** Set when a seat-open notification was enqueued (Phase I). */
+  notified_at?: string | null
   created_at: string
 }
 
-export type ContentPostStatus = 'draft' | 'approved' | 'rejected' | 'posted'
-export type ContentPostType = 'trip_promo' | 'value_content'
+export type OutboundKind =
+  | 'trip_reminder_7d'
+  | 'trip_reminder_1d'
+  | 'review_request'
+  | 'waitlist_spot'
 
-/** Draft Facebook/content post awaiting OWNER review before Make.com posts it. */
+export interface StaffOutboundItem {
+  id: string
+  kind: OutboundKind
+  booking_id: string | null
+  waitlist_id: string | null
+  trip_code: string | null
+  customer_name: string | null
+  customer_email: string | null
+  customer_phone: string | null
+  subject: string
+  body_en: string
+  body_th: string | null
+  deep_link: string | null
+  messenger_url: string | null
+  gmail_url: string | null
+  status: 'pending' | 'done' | 'skipped'
+  created_at: string
+  completed_at: string | null
+  completed_by: string | null
+}
+
+export interface StaffLoginRow {
+  staff_id: string
+  role: string
+  full_name: string
+  created_at: string
+  expires_at: string
+  ip_address: string | null
+  user_agent: string | null
+}
+
+export type ContentPostStatus =
+  | 'draft'
+  | 'approved'
+  | 'approved_pending_manual_post'
+  | 'rejected'
+  | 'posted'
+export type ContentPostType = 'trip_promo' | 'value_content'
+export type ContentTargetAccount =
+  | 'trip2talk_page'
+  | 'chapter99_page'
+  | 'group_thaiaus'
+
+/** Draft Facebook/content post awaiting OWNER review. */
 export interface ContentPost {
   id: string
   /** Null when post_type = value_content (page-growth, no trip). */
@@ -165,6 +259,12 @@ export interface ContentPost {
   caption_line?: string | null
   photo_urls: string[] | null
   page_id?: string | null
+  /** Required before review — routes Graph vs manual publish */
+  target_account?: ContentTargetAccount | string | null
+  group_id?: string | null
+  posted_at?: string | null
+  facebook_post_id?: string | null
+  facebook_post_url?: string | null
   created_at: string
   updated_at?: string | null
   tours: {

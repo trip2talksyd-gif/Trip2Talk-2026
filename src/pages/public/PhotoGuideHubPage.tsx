@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
 import PhotoSlideshow, { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
+import BiText from '../../components/ui/BiText'
 
 const HUB_CARDS = [
   {
@@ -49,34 +50,50 @@ const HUB_CARDS = [
 ] as const
 
 export default function PhotoGuideHubPage() {
-  const { lang } = useLang()
+  const { tt } = useLang()
+  const badgeBi = tt('photoGuide.hub.badge')
+  const titleBi = tt('photoGuide.hub.title')
+  const subBi = tt('photoGuide.hub.subtitle')
+  const readBi = tt('photoGuide.readGuide')
+  const albumTitleBi = tt('photoGuide.hub.albumTitle')
+  const albumSubBi = tt('photoGuide.hub.albumSub')
+  const dragBi = tt('photoGuide.hub.dragHint')
+  const fromRoadBi = tt('photoGuide.fromTheRoad')
+
   const album = galleryByIds(['nz-001', 'nz-013', 'nz-014', 'tas-002', 'tas-003', 'syd-009', 'syd-011'])
   const slides = album.slice(0, 6).map((photo) => ({
     photo,
-    sceneEn: 'From the road',
-    sceneTh: 'จากทริปจริง',
-    titleEn: 'Photos from Saen',
-    titleTh: 'อัลบั้มรูปจากพี่แสน',
+    sceneEn: fromRoadBi.en,
+    sceneTh: fromRoadBi.th,
+    titleEn: albumTitleBi.en,
+    titleTh: albumTitleBi.th,
     meta: photo.id,
   }))
 
   return (
     <div className="space-y-8 pb-4">
       <header className="text-center">
-        <span className="mb-3.5 inline-flex items-center gap-2 rounded-full bg-mint-100 px-3.5 py-[7px] text-[11.5px] font-bold text-teal-800">
-          ✨ {lang === 'th' ? 'มาเรียนรู้และฝึกฝนไปด้วยกัน' : "Let's Learn and Practice"}
+        <span className="mb-3.5 inline-flex flex-col items-center gap-0.5 rounded-full bg-mint-100 px-3.5 py-[7px] text-[11.5px] font-bold text-teal-800">
+          <span>✨ {badgeBi.en}</span>
+          <span className="font-thai text-[10px] font-medium opacity-85">{badgeBi.th}</span>
         </span>
-        <h1 className="mt-2 font-serif text-[22px] text-ink sm:text-3xl">
-          {lang === 'th' ? 'คลังเคล็ดลับถ่ายภาพ' : 'Photo Guide'}
-        </h1>
-        <p className="mx-auto mt-1 max-w-lg text-[13.5px] leading-relaxed text-ink-soft">
-          {lang === 'th'
-            ? 'สามคู่มือสำหรับสามสไตล์นักเดินทาง — ลิงก์จากหน้าแรกและหน้าเตรียมตัว'
-            : 'Three guides for three kinds of travelers — linked from Home and Trip Prep.'}
-        </p>
+        <BiText
+          as="h1"
+          en={titleBi.en}
+          th={titleBi.th}
+          serif
+          className="mt-2 text-[22px] text-ink sm:text-3xl"
+          thClassName="mt-1 block font-thai text-[13px] font-medium text-ink-soft sm:text-[15px]"
+        />
+        <BiText
+          as="p"
+          en={subBi.en}
+          th={subBi.th}
+          className="mx-auto mt-1 max-w-lg text-[13.5px] leading-relaxed text-ink-soft"
+          thClassName="mt-1 block font-thai text-[12px] font-medium text-ink-soft/90"
+        />
       </header>
 
-      {/* .guide-hub-grid — 3 up on desktop, single column under the mockup's 860px */}
       <div className="grid gap-[22px] md:grid-cols-3">
         {HUB_CARDS.map((card) => {
           const photo = GALLERY_PHOTOS.find((p) => p.id === card.photoId) ?? GALLERY_PHOTOS[0]
@@ -87,27 +104,41 @@ export default function PhotoGuideHubPage() {
               className="group relative block overflow-hidden rounded-[18px] border border-line bg-card text-inherit shadow-mockup transition-[transform,box-shadow] duration-[180ms] ease-out hover:-translate-y-[5px] hover:shadow-[0_26px_50px_-20px_rgba(15,28,30,0.45)]"
             >
               <span
-                className={`absolute left-3.5 top-3.5 z-[2] rounded-[10px] px-3 py-1.5 text-[10px] font-extrabold leading-tight text-cream shadow-[0_8px_16px_-6px_rgba(0,0,0,0.4)] ${card.badgeClass}`}
+                className={`absolute left-3.5 top-3.5 z-[2] flex flex-col rounded-[10px] px-3 py-1.5 text-[10px] font-extrabold leading-tight text-cream shadow-[0_8px_16px_-6px_rgba(0,0,0,0.4)] ${card.badgeClass}`}
               >
-                {lang === 'th' ? card.badgeTh : card.badgeEn}
+                <span>{card.badgeEn}</span>
+                <span className="font-thai text-[9px] font-medium opacity-90">{card.badgeTh}</span>
               </span>
               <img
                 src={photoSrc(photo)}
-                alt={lang === 'th' ? card.titleTh : card.titleEn}
+                alt={`${card.titleEn} / ${card.titleTh}`}
                 className="h-[150px] w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
               <div className="px-5 pb-[22px] pt-[18px]">
                 <p className="text-[9.5px] font-extrabold uppercase tracking-[0.05em] text-teal-600">
-                  {lang === 'th' ? card.tagTh : card.tagEn}
+                  {card.tagEn}
+                  <span className="ml-1.5 font-thai normal-case tracking-normal opacity-85">
+                    {card.tagTh}
+                  </span>
                 </p>
-                <h2 className="mt-1.5 font-serif text-[15px] text-ink">
-                  {lang === 'th' ? card.titleTh : card.titleEn}
-                </h2>
-                <p className="mb-3.5 mt-2 text-[12px] leading-relaxed text-ink-soft">
-                  {lang === 'th' ? card.bodyTh : card.bodyEn}
-                </p>
-                <span className="inline-flex items-center gap-1 text-[11.5px] font-bold text-ink">
-                  {lang === 'th' ? 'อ่านคู่มือ →' : 'Read guide →'}
+                <BiText
+                  as="h2"
+                  en={card.titleEn}
+                  th={card.titleTh}
+                  serif
+                  className="mt-1.5 text-[15px] text-ink"
+                  thClassName="mt-0.5 block font-thai text-[12px] font-medium text-ink-soft"
+                />
+                <BiText
+                  as="p"
+                  en={card.bodyEn}
+                  th={card.bodyTh}
+                  className="mb-3.5 mt-2 text-[12px] leading-relaxed text-ink-soft"
+                  thClassName="mt-1 block font-thai text-[11px] font-medium text-ink-soft/90"
+                />
+                <span className="inline-flex flex-col text-[11.5px] font-bold text-ink">
+                  <span>{readBi.en}</span>
+                  <span className="font-thai text-[10px] font-medium opacity-85">{readBi.th}</span>
                 </span>
               </div>
             </Link>
@@ -116,17 +147,25 @@ export default function PhotoGuideHubPage() {
       </div>
 
       <section>
-        <h2 className="font-serif text-[15.5px] text-ink sm:text-lg">
-          {lang === 'th' ? 'อัลบั้มรูปจากพี่แสน' : 'Photos from Saen'}
-        </h2>
-        <p className="mt-1 text-xs text-ink-soft">
-          {lang === 'th'
-            ? 'รูปคัดสรรจากทริปที่ผ่านมา — ลากหรือดูสไลด์ด้านล่าง'
-            : 'Curated shots from past trips — drag or browse the slideshow below.'}
-        </p>
+        <BiText
+          as="h2"
+          en={albumTitleBi.en}
+          th={albumTitleBi.th}
+          serif
+          className="text-[15.5px] text-ink sm:text-lg"
+          thClassName="mt-0.5 block font-thai text-[12px] font-medium text-ink-soft"
+        />
+        <BiText
+          as="p"
+          en={albumSubBi.en}
+          th={albumSubBi.th}
+          className="mt-1 text-xs text-ink-soft"
+          thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft/90"
+        />
         <PhotoSlideshow slides={slides} className="mt-2.5" />
-        <p className="mt-1.5 flex items-center gap-1.5 text-[11px] text-ink-soft">
-          {lang === 'th' ? '↔ ลากเพื่อดูอัลบั้ม' : '↔ Drag to browse the album'}
+        <p className="mt-1.5 flex flex-col gap-0.5 text-[11px] text-ink-soft">
+          <span>{dragBi.en}</span>
+          <span className="font-thai text-[10px] font-medium opacity-85">{dragBi.th}</span>
         </p>
       </section>
     </div>

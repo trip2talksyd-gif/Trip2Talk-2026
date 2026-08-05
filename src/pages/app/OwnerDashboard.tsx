@@ -153,10 +153,22 @@ export default function OwnerDashboard() {
                 💳 Cashier POS
               </Link>
               <Link
+                to="/app/payments"
+                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+              >
+                💰 Customer payments / งวดชำระ
+              </Link>
+              <Link
                 to="/app/staff"
                 className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
               >
                 📋 Staff Dashboard
+              </Link>
+              <Link
+                to="/app/waiver-assist"
+                className="block rounded-editorial border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-center text-sm font-medium text-amber-200 transition-colors hover:bg-amber-500/15"
+              >
+                ✍️ Waiver assist / กรอกแทนลูกค้า
               </Link>
             </div>
 
@@ -165,6 +177,20 @@ export default function OwnerDashboard() {
               className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
             >
               📊 Tax Summary (รายทริป + Export)
+            </Link>
+
+            <Link
+              to="/app/income"
+              className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+            >
+              💵 Income — paid installments (AU tax year)
+            </Link>
+
+            <Link
+              to="/app/logins"
+              className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+            >
+              🔐 Recent staff logins
             </Link>
 
             <Link

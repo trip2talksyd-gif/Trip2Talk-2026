@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
-import { useLang } from '../../hooks/useLang'
-import { tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
+import { tourDestinationLabel, tourDurationLabel } from '../../lib/tourDisplay'
 import { getPreviewPhotoForTrip, photoSrc } from '../../data/galleryPhotos'
 import type { Tour } from '../../types/tour'
 
@@ -12,7 +11,6 @@ type Props = {
 }
 
 export default function TripFilmstrip({ tours, labelEn, labelTh, className = '' }: Props) {
-  const { lang } = useLang()
   if (tours.length === 0) return null
 
   // Duplicate set for seamless infinite CSS loop
@@ -21,10 +19,8 @@ export default function TripFilmstrip({ tours, labelEn, labelTh, className = '' 
   return (
     <div className={className}>
       <div className="mb-2 flex items-baseline gap-2">
-        <p className="text-[11px] font-bold text-ink">{lang === 'th' ? labelTh : labelEn}</p>
-        {lang === 'en' && (
-          <span className="font-thai text-[10px] text-ink-soft">{labelTh}</span>
-        )}
+        <p className="text-[11px] font-bold text-ink">{labelEn}</p>
+        <span className="font-thai text-[10px] text-ink-soft">{labelTh}</span>
       </div>
       <div className="cal-filmstrip-viewport">
         <span
@@ -33,9 +29,10 @@ export default function TripFilmstrip({ tours, labelEn, labelTh, className = '' 
         />
         <div className="cal-filmstrip-track">
           {slides.map((tour, i) => {
-            const name = lang === 'th' ? tour.name_th : tour.name_en
             const fallbackPhoto = getPreviewPhotoForTrip(tour.trip_code)
             const imgSrc = tour.cover_image_url || (fallbackPhoto ? photoSrc(fallbackPhoto) : null)
+            const destEn = tourDestinationLabel(tour.trip_code, 'en')
+            const destTh = tourDestinationLabel(tour.trip_code, 'th')
             return (
               <Link
                 key={`${tour.id}-${i}`}
@@ -45,7 +42,7 @@ export default function TripFilmstrip({ tours, labelEn, labelTh, className = '' 
                 {imgSrc ? (
                   <img
                     src={imgSrc}
-                    alt={name}
+                    alt={`${tour.name_en} / ${tour.name_th}`}
                     className="h-full w-full object-cover"
                     loading="lazy"
                   />
@@ -59,9 +56,15 @@ export default function TripFilmstrip({ tours, labelEn, labelTh, className = '' 
                   {tour.trip_code}
                 </span>
                 <span className="absolute inset-x-2 bottom-1.5 text-cream">
-                  <span className="block text-[9.5px] font-bold leading-tight">{name}</span>
-                  <span className="mt-0.5 block text-[7.5px] opacity-85">
-                    {tourDurationLabel(tour, lang)} · {tourDestination(tour.trip_code)}
+                  <span className="block text-[9.5px] font-bold leading-tight">
+                    {tour.name_en}
+                    <span className="mt-0.5 block font-thai text-[8px] font-medium opacity-85">
+                      {tour.name_th}
+                    </span>
+                  </span>
+                  <span className="mt-1 block text-[7px] opacity-85">
+                    {tourDurationLabel(tour, 'en')} · {destEn}
+                    <span className="font-thai"> · {tourDurationLabel(tour, 'th')} · {destTh}</span>
                   </span>
                 </span>
               </Link>

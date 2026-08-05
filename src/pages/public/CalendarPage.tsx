@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom'
 import { Camera } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { fetchConfirmedTours, formatDate, seatsRemaining } from '../../lib/toursApi'
-import { tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
+import { tourDestinationLabel, tourDurationLabel } from '../../lib/tourDisplay'
 import type { Tour } from '../../types/tour'
 import { PageError } from '../../components/ui/PageError'
+import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import TripFilmstrip from '../../components/trips/TripFilmstrip'
+import BiText from '../../components/ui/BiText'
 
 function monthKey(iso: string | null | undefined): string | null {
   if (!iso) return null
@@ -35,7 +37,7 @@ function dayParts(iso: string | null | undefined) {
 }
 
 export default function CalendarPage() {
-  const { lang, t } = useLang()
+  const { tt, t } = useLang()
   const [tours, setTours] = useState<Tour[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -84,13 +86,26 @@ export default function CalendarPage() {
     return upcomingTours.filter((tour) => monthKey(tour.departure_date) === activeMonth)
   }, [upcomingTours, activeMonth])
 
+  const title = tt('nav.calendar')
+  const bannerTitle = tt('calendar.banner.title')
+  const bannerSub = tt('calendar.banner.sub')
+  const emptyBi = tt('calendar.empty')
+  const moreDestBi = tt('calendar.moreDestinations')
+  const seatsLeftBi = tt('trips.seatsLeft')
+  const seatsFullBi = tt('trips.seatsFull')
+
   return (
     <div className="space-y-4 pb-4">
       {/* .cal-top — title + month chips share the white bar */}
       <header className="-mx-4 border-b border-line bg-card px-4 pb-3 pt-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-5">
-        <h1 className="font-serif text-[17px] text-ink sm:text-2xl">
-          {t('nav.calendar')}
-        </h1>
+        <BiText
+          as="h1"
+          en={title.en}
+          th={title.th}
+          serif
+          className="text-[17px] text-ink sm:text-2xl"
+          thClassName="mt-px block font-thai text-[11px] font-medium text-ink-soft sm:text-[13px]"
+        />
         {months.length > 0 && (
           <div className="hide-scrollbar mt-3 flex gap-2 overflow-x-auto">
             {months.map((m) => (
@@ -115,25 +130,19 @@ export default function CalendarPage() {
         <Camera className="h-5 w-5 shrink-0 text-teal-400" strokeWidth={2} />
         <div>
           <p className="text-[11.5px] font-bold">
-            {lang === 'th'
-              ? 'ทุกทริปมีช่างภาพ · พร้อมทีมสไตล์ลิ่ง'
-              : 'Every trip includes a photographer'}
+            {bannerTitle.en}
+            <span className="mt-0.5 block font-thai text-[9.5px] font-medium text-cream/80">
+              {bannerTitle.th}
+            </span>
           </p>
-          <p className="mt-0.5 font-thai text-[9.5px] text-cream/70">
-            {lang === 'th'
-              ? 'พร้อมทีมสไตล์ลิ่ง/wardrobe ดูแลตลอดทริป'
-              : 'Styling / wardrobe support throughout the trip'}
+          <p className="mt-1 font-thai text-[9.5px] text-cream/70">
+            {bannerSub.en}
+            <span className="mt-0.5 block text-[8.5px] opacity-90">{bannerSub.th}</span>
           </p>
         </div>
       </div>
 
-      {loading && (
-        <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-16 animate-pulse rounded-xl bg-mint-100" />
-          ))}
-        </div>
-      )}
+      {loading && <ListRowSkeleton count={3} />}
 
       {error && !loading && <PageError message={error} onRetry={load} />}
 
@@ -142,8 +151,9 @@ export default function CalendarPage() {
           <ul className="space-y-2.5">
             {filtered.map((tour) => {
               const seats = seatsRemaining(tour)
-              const name = lang === 'th' ? tour.name_th : tour.name_en
               const parts = dayParts(tour.departure_date)
+              const destEn = tourDestinationLabel(tour.trip_code, 'en')
+              const destTh = tourDestinationLabel(tour.trip_code, 'th')
               return (
                 <li key={tour.id}>
                   <Link
@@ -155,24 +165,26 @@ export default function CalendarPage() {
                       <span className="text-[7.5px] font-bold uppercase">{parts.mon}</span>
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-semibold text-ink">{name}</p>
+                      <p className="truncate text-xs font-semibold text-ink">
+                        {tour.name_en}
+                        <span className="ml-1 font-thai text-[10px] font-medium text-ink-soft">
+                          {tour.name_th}
+                        </span>
+                      </p>
                       <p className="truncate text-[9.5px] text-ink-soft">
-                        {tourDurationLabel(tour, lang)} · {tourDestination(tour.trip_code)}
-                        {tour.departure_date ? ` · ${formatDate(tour.departure_date, lang)}` : ''}
+                        {tourDurationLabel(tour, 'en')} · {destEn}
+                        {tour.departure_date ? ` · ${formatDate(tour.departure_date, 'en')}` : ''}
+                      </p>
+                      <p className="truncate font-thai text-[8.5px] text-ink-soft/80">
+                        {tourDurationLabel(tour, 'th')} · {destTh}
+                        {tour.departure_date ? ` · ${formatDate(tour.departure_date, 'th')}` : ''}
                       </p>
                     </div>
-                    <span
-                      className={`shrink-0 text-[9px] font-bold ${
-                        seats === 0 ? 'text-coral' : 'text-coral'
-                      }`}
-                    >
-                      {seats === 0
-                        ? lang === 'th'
-                          ? 'เต็ม'
-                          : 'Full'
-                        : lang === 'th'
-                          ? `เหลือ ${seats}`
-                          : `${seats} left`}
+                    <span className="shrink-0 text-right text-[9px] font-bold text-coral">
+                      {seats === 0 ? seatsFullBi.en : `${seats} ${seatsLeftBi.en}`}
+                      <span className="mt-0.5 block font-thai text-[8px] font-medium opacity-85">
+                        {seats === 0 ? seatsFullBi.th : `${seatsLeftBi.th} ${seats}`}
+                      </span>
                     </span>
                   </Link>
                 </li>
@@ -180,15 +192,18 @@ export default function CalendarPage() {
             })}
             {filtered.length === 0 && (
               <p className="py-6 text-center text-sm text-ink-soft">
-                {lang === 'th' ? 'ไม่มีทริปในเดือนนี้' : 'No trips in this month'}
+                {emptyBi.en}
+                <span className="mt-0.5 block font-thai text-xs text-ink-soft/85">
+                  {emptyBi.th}
+                </span>
               </p>
             )}
           </ul>
 
           <TripFilmstrip
             tours={upcomingTours}
-            labelEn="More destinations"
-            labelTh="ทริปอื่นๆ ที่น่าสนใจ"
+            labelEn={moreDestBi.en}
+            labelTh={moreDestBi.th}
             className="mt-4"
           />
         </>

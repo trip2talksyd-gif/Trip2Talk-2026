@@ -10,28 +10,84 @@ export function TermsPage() {
   const { lang } = useLang()
   return (
     <ContentPage
-      title={lang === 'th' ? 'เงื่อนไขการใช้งาน' : 'Terms of Service'}
+      title={lang === 'th' ? 'ข้อกำหนดและเงื่อนไข' : 'Terms & Conditions'}
       subtitle={
         lang === 'th'
-          ? 'สรุปเงื่อนไขการใช้เว็บไซต์และบริการ Trip2Talk — รายละเอียดเต็มอยู่ในเอกสาร waiver ก่อนจอง'
-          : 'Summary of how Trip2Talk services work. Full trip terms appear in the digital waiver before booking.'
+          ? 'เงื่อนไขการใช้เว็บไซต์และการจองทริป Trip2Talk — รายละเอียดเพิ่มอยู่ใน waiver ก่อนจอง'
+          : 'Website and booking terms for Trip2Talk. Full trip acknowledgements also appear in the digital waiver before booking.'
       }
     >
-      <p>
-        By using trip2talk.com.au and related booking tools you agree to book as a guest with accurate
-        contact details, pay the required deposit to secure a seat, and complete the balance with our
-        team before departure.
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">1. Booking & payment</h2>
+        <p>
+          By using trip2talk.com.au and related booking tools you agree to provide accurate contact
+          details, pay the required deposit to secure a seat, and complete the balance with our team
+          before departure (PayID / agreed installments). Seats are not confirmed until deposit is
+          received and acknowledged by Trip2Talk staff.
+        </p>
+        <p className="font-thai text-ink-soft">
+          การจองถือว่าคุณยืนยันข้อมูลติดต่อถูกต้อง ชำระมัดจำเพื่อล็อคที่นั่ง และชำระส่วนที่เหลือกับทีมก่อนวันเดินทาง
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">2. Trip participation & waiver</h2>
+        <p>
+          Guests must complete the digital waiver (liability release, OSHC acknowledgment for student
+          visa holders where applicable, medical emergency authorization, and photo/video consent)
+          before booking. Force majeure and aurora-viewing trips have additional disclaimers shown in
+          the waiver.
+        </p>
+        <p className="font-thai text-ink-soft">
+          ผู้เดินทางต้องลงนาม waiver อิเล็กทรอนิกส์ก่อนจอง รวมถึงการสละสิทธิ์ความรับผิด การยืนยัน OSHC (ถ้าใช้วีซ่านักเรียน)
+          การอนุญาตรักษาฉุกเฉิน และความยินยอมใช้รูป/วิดีโอ
+        </p>
+        <Link to="/waiver" className="inline-block text-teal-700 underline">
+          {lang === 'th' ? 'อ่าน waiver / เงื่อนไขทริป →' : 'Read the trip waiver →'}
+        </Link>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">3. Cancellation</h2>
+        <p>
+          Cancellation outcomes depend on how many days before departure you cancel. See our
+          cancellation policy for deposit/credit rules.
+        </p>
+        <Link to="/cancellation" className="inline-block text-teal-700 underline">
+          {lang === 'th' ? 'นโยบายยกเลิก →' : 'Cancellation policy →'}
+        </Link>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">4. Photos & content</h2>
+        <p>
+          Photos and trip content are owned by Trip2Talk and our photographers unless otherwise
+          agreed in writing. Do not republish trip materials for commercial use without permission.
+        </p>
+        <p className="font-thai text-ink-soft">
+          รูปและคอนเทนต์ทริปเป็นของ Trip2Talk และช่างภาพ ห้ามนำไปใช้เชิงพาณิชย์โดยไม่ได้รับอนุญาต
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">5. Operator</h2>
+        <p>
+          Services are provided by Chapter99 trading as Trip2Talk (Saard Saenmuang), ABN 81 951 461
+          769, Sydney NSW, Australia. Contact:{' '}
+          <a href="mailto:trip2talksyd@gmail.com" className="text-teal-700 underline">
+            trip2talksyd@gmail.com
+          </a>
+          .
+        </p>
+      </section>
+
+      <p className="rounded-xl border border-amber-500/40 bg-amber-50 px-3 py-2 text-[11px] text-ink-soft">
+        Draft for business review — not legal advice. Have an Australian legal professional review
+        before treating as final.
+        <span className="mt-1 block font-thai">
+          ฉบับร่างสำหรับเจ้าของธุรกิจตรวจ — ไม่ใช่คำแนะนำทางกฎหมาย ควรให้ผู้เชี่ยวชาญตรวจก่อนใช้จริง
+        </span>
       </p>
-      <p>
-        Photos and trip content are owned by Trip2Talk and our photographers unless otherwise agreed.
-        Do not republish trip materials for commercial use without written permission.
-      </p>
-      <p className="font-thai text-ink-soft">
-        การจองถือว่าคุณยืนยันข้อมูลติดต่อถูกต้อง ชำระมัดจำเพื่อล็อคที่นั่ง และชำระส่วนที่เหลือกับทีมก่อนวันเดินทาง
-      </p>
-      <Link to="/waiver" className="inline-block text-teal-700 underline">
-        {lang === 'th' ? 'อ่าน waiver / เงื่อนไขทริป →' : 'Read the trip waiver →'}
-      </Link>
     </ContentPage>
   )
 }
@@ -43,22 +99,99 @@ export function PrivacyPage() {
       title={lang === 'th' ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy'}
       subtitle={
         lang === 'th'
-          ? 'เราเก็บเฉพาะข้อมูลที่จำเป็นต่อการจองและติดต่อทริป'
-          : 'We only collect what we need to run your booking and trip communications.'
+          ? 'ข้อมูลที่เราเก็บ เก็บอย่างไร และใช้ทำอะไร'
+          : 'What we collect, where it is stored, and how we use it.'
       }
     >
-      <p>
-        We store your name, email, phone, and trip preferences to process bookings, deposits, and
-        group coordination (usually via our Facebook Page inbox). Payment slips may be stored
-        securely for reconciliation.
-      </p>
-      <p>
-        We do not sell your data. Staff access booking details only to deliver the trip. You can ask
-        us to update or delete personal data that is no longer required for legal or accounting
-        records.
-      </p>
-      <p className="font-thai text-ink-soft">
-        เราไม่ขายข้อมูลของคุณ พนักงานเข้าถึงข้อมูลการจองเท่าที่จำเป็นต่อการจัดทริป
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">1. Who we are</h2>
+        <p>
+          Trip2Talk (Chapter99 / Saard Saenmuang, ABN 81 951 461 769) operates trip2talk.com.au from
+          Sydney, Australia. Contact:{' '}
+          <a href="mailto:trip2talksyd@gmail.com" className="text-teal-700 underline">
+            trip2talksyd@gmail.com
+          </a>
+          .
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">2. What we collect</h2>
+        <ul className="list-disc space-y-1 pl-5 text-ink">
+          <li>Booking details: name, email, phone, trip selection, dates of birth when provided</li>
+          <li>
+            Safety info: emergency contact, allergies, medical notes, insurance type/membership
+            (optional free text)
+          </li>
+          <li>
+            Flight-assist fields when you opt in (legal name, DOB, passport number, nationality) —
+            treated as sensitive
+          </li>
+          <li>Payment records: amounts, method, slips, tax invoice metadata</li>
+          <li>Waiver signatures and staff-assisted authorization notes when applicable</li>
+          <li>Waitlist name/phone/email if a trip is full</li>
+        </ul>
+        <p className="font-thai text-ink-soft">
+          เราเก็บข้อมูลการจอง ข้อมูลความปลอดภัย (ถ้ากรอก) ข้อมูลช่วยจองตั๋วบินเมื่อคุณเปิดใช้ ประวัติการชำระ และลายเซ็น waiver
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">3. How we use data</h2>
+        <p>
+          To process bookings and deposits, coordinate trips (usually via our Facebook Page inbox),
+          keep guides informed of emergency/allergy notes on trip day, issue tax invoices, and
+          improve operations. We do not sell your personal data.
+        </p>
+        <p className="font-thai text-ink-soft">
+          ใช้เพื่อจองทริป ประสานงาน (มักผ่าน Facebook) ให้ไกด์ดูข้อมูลฉุกเฉินวันทริป และออกใบกำกับภาษี — เราไม่ขายข้อมูล
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">4. Storage & security</h2>
+        <p>
+          Data is stored in Supabase (PostgreSQL) with row-level security; staff tools access
+          bookings via authenticated Edge Functions. Hosting for the website is on Vercel. We aim to
+          keep project infrastructure in regions suitable for Australian operations; confirm the live
+          Supabase project region in the dashboard. Sensitive fields (passport, medical, emergency
+          contact) follow the same restricted staff-access pattern as other compliance documents in
+          this app.
+        </p>
+        <p className="font-thai text-ink-soft">
+          เก็บใน Supabase พร้อม RLS; พนักงานเข้าถึงผ่าน Edge Function เว็บโฮสต์บน Vercel ข้อมูลอ่อนไหวจำกัดเฉพาะพนักงานที่ล็อกอิน
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">5. Cookies & analytics</h2>
+        <p>
+          This site does not currently load third-party analytics or advertising cookies. We may use
+          essential browser storage for language preference, waiver session state, and staff session
+          tokens. If analytics are added later, a consent banner will be introduced.
+        </p>
+        <p className="font-thai text-ink-soft">
+          ขณะนี้ไม่มีคุกกี้วิเคราะห์จากบุคคลที่สาม — ใช้ที่เก็บในเบราว์เซอร์เท่าที่จำเป็นต่อการใช้งาน
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">6. Your rights</h2>
+        <p>
+          You may ask us to update or delete personal data that is no longer required for legal,
+          tax, or safety records. Accounting records may need to be retained for Australian tax
+          obligations.
+        </p>
+      </section>
+
+      <p className="rounded-xl border border-amber-500/40 bg-amber-50 px-3 py-2 text-[11px] text-ink-soft">
+        <strong>Owner / legal review required.</strong> This is a draft privacy notice for Trip2Talk
+        operations. Accuracy has compliance implications under the Australian Privacy Principles —
+        have the business owner (and ideally a legal professional) review before treating as final.
+        <span className="mt-1 block font-thai">
+          <strong>ต้องให้เจ้าของธุรกิจ (และ ideally ที่ปรึกษากฎหมาย) ตรวจก่อนใช้จริง</strong> —
+          นโยบายความเป็นส่วนตัวมีผลด้านกฎหมายในออสเตรเลีย
+        </span>
       </p>
     </ContentPage>
   )
@@ -279,20 +412,39 @@ export function WriteReviewPage() {
       title={lang === 'th' ? 'เขียนรีวิว' : 'Write a Review'}
       subtitle={
         lang === 'th'
-          ? 'ระบบรีวิวในแอปยังไม่เปิด — ยังไม่มีตาราง reviews ในฐานข้อมูล'
-          : 'In-app reviews are not live yet — no reviews table exists in the database.'
+          ? 'ช่วยแชร์ประสบการณ์ทริป — ตอนนี้รีวิวผ่าน Facebook Page ของเรา'
+          : 'Share your trip experience — we collect reviews on our Facebook Page.'
       }
     >
-      <div className="rounded-2xl border border-dashed border-teal-600/40 bg-mint-100 p-6 text-center">
-        <p className="font-serif text-lg text-ink">Coming soon</p>
+      <div className="rounded-2xl border border-teal-600/30 bg-mint-100 p-6 text-center">
+        <p className="font-serif text-lg text-ink">
+          {lang === 'th' ? 'รีวิวบน Facebook' : 'Review us on Facebook'}
+        </p>
         <p className="mt-2 text-sm text-ink-soft">
           {lang === 'th'
-            ? 'ระหว่างนี้ ทักเพจ Facebook หรือ Google Reviews ได้เลยหลังทริป'
-            : 'For now, message our Facebook Page or leave a Google review after your trip.'}
+            ? 'กดลิงก์ด้านล่าง แล้วเขียนรีวิวสั้นๆ บนเพจ Trip2Talk — ช่วยให้นักเรียนคนอื่นเจอเรา'
+            : 'Open our Page and leave a short review — it helps other Thai students find us.'}
         </p>
-        <Link to="/help" className="mt-4 inline-block text-sm font-semibold text-teal-700">
-          {lang === 'th' ? 'ไปหน้าช่วยเหลือ →' : 'Help & Support →'}
-        </Link>
+        <a
+          href={FACEBOOK_PAGE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-block rounded-xl bg-[#1877F2] px-5 py-3 text-sm font-bold text-white"
+        >
+          {lang === 'th' ? 'เปิดเพจ Facebook' : 'Open Facebook Page'}
+        </a>
+        <a
+          href={FACEBOOK_MESSENGER_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 block text-sm font-semibold text-teal-700 underline"
+        >
+          {lang === 'th' ? 'หรือทัก Messenger' : 'Or message us on Messenger'}
+        </a>
+        <p className="mt-4 text-[11px] text-ink-soft">
+          Google Reviews link is not configured yet (contact.googleReviews is disabled).
+          <span className="mt-0.5 block font-thai">ลิงก์ Google Reviews ยังไม่ได้ตั้งค่า</span>
+        </p>
       </div>
     </ContentPage>
   )

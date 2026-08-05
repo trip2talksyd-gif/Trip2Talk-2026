@@ -32,12 +32,19 @@ import {
 import PinGatePage from './pages/app/PinGatePage'
 import StaffDashboard from './pages/app/StaffDashboard'
 import CashierPOS from './pages/app/CashierPOS'
+import StaffWaiverAssistPage from './pages/app/StaffWaiverAssistPage'
 import OwnerDashboard from './pages/app/OwnerDashboard'
 import TripManagerPage from './pages/app/TripManagerPage'
 import TaxSummaryPage from './pages/app/TaxSummaryPage'
 import ExpenseEntryPage from './pages/app/ExpenseEntryPage'
 import ReceiptPage from './pages/app/ReceiptPage'
+import StaffPaymentsPage from './pages/app/StaffPaymentsPage'
+import InstallmentIncomePage from './pages/app/InstallmentIncomePage'
+import OutboundQueuePage from './pages/app/OutboundQueuePage'
+import PhotosDeliveryPage from './pages/app/PhotosDeliveryPage'
+import RecentLoginsPage from './pages/app/RecentLoginsPage'
 import SystemCheckPage from './pages/app/SystemCheckPage'
+import ConfirmationSummaryPage from './pages/public/ConfirmationSummaryPage'
 import ContentReview from './pages/admin/ContentReview'
 import QuickPost from './pages/admin/QuickPost'
 import RequireStaffRole from './components/app/RequireStaffRole'
@@ -58,6 +65,7 @@ export default function App() {
           <Route path="about" element={<AboutPage />} />
           <Route path="waiver" element={<WaiverPage />} />
           <Route path="booking" element={<BookingPage />} />
+          <Route path="booking/confirmation" element={<ConfirmationSummaryPage />} />
           <Route path="waitlist" element={<WaitlistPage />} />
           <Route path="favorites" element={<FavoritesPage />} />
           <Route path="my-trip" element={<MyTripPage />} />
@@ -90,6 +98,14 @@ export default function App() {
           element={
             <RequireStaffRole allow={['CASHIER', 'OWNER', 'MANAGER']}>
               <CashierPOS />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/waiver-assist"
+          element={
+            <RequireStaffRole allow={['OWNER', 'MANAGER', 'GUIDE', 'CASHIER']}>
+              <StaffWaiverAssistPage />
             </RequireStaffRole>
           }
         />
@@ -130,6 +146,46 @@ export default function App() {
           element={
             <RequireStaffRole allow={['CASHIER', 'OWNER', 'MANAGER']}>
               <ReceiptPage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/payments"
+          element={
+            <RequireStaffRole allow={['CASHIER', 'OWNER', 'MANAGER']}>
+              <StaffPaymentsPage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/income"
+          element={
+            <RequireStaffRole allow={['OWNER']}>
+              <InstallmentIncomePage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/outbound"
+          element={
+            <RequireStaffRole allow={['OWNER', 'MANAGER', 'GUIDE', 'CASHIER']}>
+              <OutboundQueuePage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/photos"
+          element={
+            <RequireStaffRole allow={['OWNER', 'MANAGER', 'GUIDE']}>
+              <PhotosDeliveryPage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/logins"
+          element={
+            <RequireStaffRole allow={['OWNER']}>
+              <RecentLoginsPage />
             </RequireStaffRole>
           }
         />

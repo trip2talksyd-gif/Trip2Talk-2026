@@ -24,8 +24,10 @@ import { FacebookIcon } from '../../components/contact/contactIcons'
 import type { Tour, TripType } from '../../types/tour'
 import TripCard from '../../components/trips/TripCard'
 import DestinationBoardRow from '../../components/trips/DestinationBoardRow'
+import BiText from '../../components/ui/BiText'
 import { TripCardSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
+import type { TranslationKey } from '../../i18n/translations'
 
 type Filter = 'all' | TripType
 
@@ -38,8 +40,15 @@ const FILTER_ICON: Record<Filter, LucideIcon> = {
   multiday: CalendarDays,
 }
 
+const FILTER_KEYS: { id: Filter; key: TranslationKey }[] = [
+  { id: 'all', key: 'common.all' },
+  { id: 'oneday', key: 'common.oneday' },
+  { id: 'overnight', key: 'common.overnight' },
+  { id: 'multiday', key: 'common.multiday' },
+]
+
 export default function TripsPage() {
-  const { t, lang } = useLang()
+  const { tt } = useLang()
   const [searchParams] = useSearchParams()
   const typeParam = searchParams.get('type')
   const initialFilter: Filter =
@@ -52,15 +61,16 @@ export default function TripsPage() {
   const [error, setError] = useState('')
   const [openDest, setOpenDest] = useState<string | null>(null)
 
+  const errorMsg = tt('common.error')
   const load = useCallback(() => {
     setLoading(true)
     setError('')
     fetchAllTours()
       .then(sortToursForListing)
       .then(setTours)
-      .catch(() => setError(t('common.error')))
+      .catch(() => setError(errorMsg.en))
       .finally(() => setLoading(false))
-  }, [t])
+  }, [errorMsg.en])
 
   useEffect(() => {
     load()
@@ -73,6 +83,14 @@ export default function TripsPage() {
   }, [typeParam])
 
   const searching = query.trim().length > 0
+  const searchBi = tt('trips.search')
+  const titleBi = tt('trips.title')
+  const subtitleBi = tt('trips.subtitle')
+  const goingBi = tt('trips.going')
+  const goingNote = tt('trips.going.note')
+  const clearBi = tt('common.clearSearch')
+  const emptyBi = tt('trips.empty')
+  const searchEmptyBi = tt('trips.search.empty')
 
   const filtered = useMemo(() => {
     const byType =
@@ -106,40 +124,46 @@ export default function TripsPage() {
     })
   }, [groups])
 
-  const tabs: { id: Filter; label: string }[] = [
-    { id: 'all', label: t('common.all') },
-    { id: 'oneday', label: t('common.oneday') },
-    { id: 'overnight', label: t('common.overnight') },
-    { id: 'multiday', label: t('common.multiday') },
-  ]
-
   function toggleGroup(destination: string) {
     setOpenDest((prev) => (prev === destination ? null : destination))
   }
 
   return (
     <div className="pb-2">
-      {/* Mockup .explore-top — header + search + trip-type dock share one white panel */}
+      {/* Mockup .explore-top */}
       <header className="-mx-4 border-b border-line bg-card px-4 pb-3 pt-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-5">
-        <h1 className="font-serif text-[17px] text-ink sm:text-2xl">{t('trips.title')}</h1>
-        <p className="mt-px text-[11px] text-ink-soft">{t('trips.subtitle')}</p>
+        <BiText
+          as="h1"
+          en={titleBi.en}
+          th={titleBi.th}
+          serif
+          className="text-[17px] text-ink sm:text-2xl"
+          thClassName="mt-px block font-thai text-[11px] font-medium text-ink-soft sm:text-[13px]"
+        />
+        <BiText
+          as="p"
+          en={subtitleBi.en}
+          th={subtitleBi.th}
+          className="mt-1 text-[11px] text-ink-soft"
+          thClassName="mt-px block font-thai text-[10px] text-ink-soft/85"
+        />
 
-        {/* Mockup .search-bar */}
+        {/* Mockup .search-bar — bilingual placeholder */}
         <div className="mt-2.5 flex items-center gap-2 rounded-[14px] bg-mint-100 px-3 py-[10px]">
           <Search className="h-3.5 w-3.5 shrink-0 text-ink-soft" strokeWidth={2.25} />
           <input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder={t('trips.search')}
-            aria-label={t('trips.search')}
+            placeholder={`${searchBi.en} / ${searchBi.th}`}
+            aria-label={`${searchBi.en} / ${searchBi.th}`}
             className="min-w-0 flex-1 bg-transparent text-[11px] text-ink outline-none placeholder:text-ink-soft"
           />
           {searching && (
             <button
               type="button"
               onClick={() => setQuery('')}
-              aria-label={lang === 'th' ? 'ล้างคำค้นหา' : 'Clear search'}
+              aria-label={`${clearBi.en} / ${clearBi.th}`}
               className="shrink-0 text-ink-soft hover:text-ink"
             >
               <X className="h-3.5 w-3.5" strokeWidth={2.25} />
@@ -151,11 +175,12 @@ export default function TripsPage() {
         <div
           className="mt-3 flex justify-between gap-0.5 rounded-[18px] bg-ink px-1.5 pb-[7px] pt-2.5 shadow-[0_10px_22px_-12px_rgba(0,0,0,0.45)]"
           role="tablist"
-          aria-label={t('nav.trips')}
+          aria-label={`${tt('nav.trips').en} / ${tt('nav.trips').th}`}
         >
-          {tabs.map((tab) => {
+          {FILTER_KEYS.map((tab) => {
             const active = filter === tab.id
             const Icon = FILTER_ICON[tab.id]
+            const label = tt(tab.key)
             return (
               <button
                 key={tab.id}
@@ -189,11 +214,14 @@ export default function TripsPage() {
                   />
                 </span>
                 <span
-                  className={`text-[9px] font-bold leading-[1.3] ${
+                  className={`text-center text-[7.5px] font-bold leading-[1.3] ${
                     active ? 'text-white' : 'text-white/50'
                   }`}
                 >
-                  {tab.label}
+                  {label.en}
+                  <span className="block font-thai text-[6.5px] font-medium opacity-85">
+                    {label.th}
+                  </span>
                 </span>
               </button>
             )
@@ -216,20 +244,21 @@ export default function TripsPage() {
       )}
 
       {!loading && !error && filtered.length === 0 && (
-        <p className="mt-10 text-center text-sm text-ink-soft">
-          {searching ? t('trips.search.empty') : t('trips.empty')}
-        </p>
+        <BiText
+          as="p"
+          en={searching ? searchEmptyBi.en : emptyBi.en}
+          th={searching ? searchEmptyBi.th : emptyBi.th}
+          className="mt-10 text-center text-sm text-ink-soft"
+          thClassName="mt-1 block font-thai text-xs text-ink-soft/85"
+        />
       )}
 
-      {/* Mockup .explore-list — flat trip cards. Primary list on mobile, and on
-          every breakpoint while searching (the destination accordion would hide
-          matches behind collapsed groups). */}
       {!loading && !error && filtered.length > 0 && (
         <div className={`mt-3.5 flex flex-col gap-3 ${searching ? '' : 'md:hidden'}`}>
           {filtered.map((tour) => (
             <TripCard key={tour.id} tour={tour} />
           ))}
-          <GoingRow label={t('trips.going')} />
+          <GoingRow en={goingBi.en} th={goingBi.th} noteEn={goingNote.en} noteTh={goingNote.th} />
         </div>
       )}
 
@@ -239,7 +268,8 @@ export default function TripsPage() {
             const open = openDest === destination
             const cover = groupCover(groupTours)
             const fromPrice = Math.min(...groupTours.map((t) => t.price_aud))
-            const label = tourDestinationLabel(destination, lang)
+            const labelEn = tourDestinationLabel(destination, 'en')
+            const labelTh = tourDestinationLabel(destination, 'th')
 
             return (
               <section
@@ -247,7 +277,7 @@ export default function TripsPage() {
                 className="flight-board-shell overflow-hidden rounded-2xl border border-line bg-card shadow-[0_6px_18px_-12px_rgba(10,61,58,0.28)]"
               >
                 <DestinationBoardRow
-                  label={label}
+                  label={`${labelEn} / ${labelTh}`}
                   tripCount={groupTours.length}
                   fromPrice={fromPrice}
                   coverSrc={cover}
@@ -271,10 +301,20 @@ export default function TripsPage() {
   )
 }
 
-/** Mockup .going-row — decorative avatar stack linking to the Facebook Page,
- *  where trip groups are actually set up. Avatars are placeholders, not people. */
-function GoingRow({ label }: { label: string }) {
+/** Stub avatar stack — no public “who’s going” API yet; links to Facebook Page. */
+function GoingRow({
+  en,
+  th,
+  noteEn,
+  noteTh,
+}: {
+  en: string
+  th: string
+  noteEn: string
+  noteTh: string
+}) {
   const avatarBg = ['bg-teal-700', 'bg-coral', 'bg-teal-600', 'bg-teal-800']
+  const initials = ['J', 'M', 'A', 'K']
 
   return (
     <a
@@ -283,23 +323,39 @@ function GoingRow({ label }: { label: string }) {
       rel="noreferrer"
       className="px-0.5 pb-0.5 pt-1.5"
     >
-      <p className="mb-2 text-[10.5px] font-bold text-ink-soft">{label}</p>
-      <div className="flex items-center">
+      <BiText
+        as="p"
+        en={en}
+        th={th}
+        className="mb-1 text-[10.5px] font-bold text-ink-soft"
+        thClassName="mt-px block font-thai text-[9px] font-medium text-ink-soft/85"
+      />
+      <div className="mb-2 flex items-center">
         {avatarBg.map((bg, i) => (
           <span
             key={bg}
             aria-hidden
-            className={`flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-white text-cream shadow-[0_2px_6px_-2px_rgba(0,0,0,0.3)] ${bg} ${
+            className={`flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-white text-[10.5px] font-bold text-cream shadow-[0_2px_6px_-2px_rgba(0,0,0,0.3)] ${bg} ${
               i === 0 ? '' : '-ml-2.5'
             }`}
           >
-            <User className="h-3.5 w-3.5" strokeWidth={2.25} />
+            {initials[i] ?? <User className="h-3.5 w-3.5" strokeWidth={2.25} />}
           </span>
         ))}
+        <span className="-ml-2.5 flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-white bg-mint-100 text-[10px] font-bold text-teal-700 shadow-[0_2px_6px_-2px_rgba(0,0,0,0.3)]">
+          +9
+        </span>
         <span className="-ml-2.5 flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-white bg-mint-100 text-teal-700 shadow-[0_2px_6px_-2px_rgba(0,0,0,0.3)]">
           <FacebookIcon className="h-3.5 w-3.5" />
         </span>
       </div>
+      <BiText
+        as="p"
+        en={noteEn}
+        th={noteTh}
+        className="text-[9px] italic text-ink-soft/80"
+        thClassName="mt-px block font-thai text-[8px] not-italic text-ink-soft/70"
+      />
     </a>
   )
 }

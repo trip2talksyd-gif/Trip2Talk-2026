@@ -7,6 +7,10 @@ import {
   uploadContentPhoto,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
+import {
+  CONTENT_TARGET_ACCOUNTS,
+  type ContentTargetAccount,
+} from '../../data/facebookDestinations'
 import { useToast } from '../../components/ui/Toast'
 
 type Phase = 'idle' | 'uploading' | 'generating' | 'saving' | 'done'
@@ -17,6 +21,7 @@ export default function QuickPost() {
   const inputRef = useRef<HTMLInputElement>(null)
   const [phase, setPhase] = useState<Phase>('idle')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
+  const [targetAccount, setTargetAccount] = useState<ContentTargetAccount | ''>('')
 
   const busy = phase === 'uploading' || phase === 'generating' || phase === 'saving'
 
@@ -24,6 +29,11 @@ export default function QuickPost() {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return
+
+    if (!targetAccount) {
+      toast('เลือกปลายทางโพสต์ก่อนอัปโหลด', 'error')
+      return
+    }
 
     if (!file.type.startsWith('image/')) {
       toast('กรุณาเลือกรูปภาพ', 'error')
@@ -69,6 +79,8 @@ export default function QuickPost() {
           photo_urls: [imageUrl],
           headline_options: generated.headline_options,
           caption_fb: generated.caption_fb,
+          target_account: targetAccount,
+          group_id: targetAccount === 'group_thaiaus' ? '1631889741218502' : null,
         })
       } catch (err) {
         console.error('[QuickPost] insert draft failed:', err)
@@ -116,7 +128,7 @@ export default function QuickPost() {
         </Link>
         <h1 className="mt-2 font-serif text-lg text-cream">Quick Post</h1>
         <p className="mt-1 text-sm text-cream-muted">
-          อัปโหลดรูป → AI ร่างแคปชัน → ไปรีวิวทีหลัง
+          เลือกปลายทาง → อัปโหลดรูป → AI ร่างแคปชัน → ไปรีวิว
         </p>
       </header>
 
@@ -136,7 +148,7 @@ export default function QuickPost() {
             )}
             <p className="text-base text-cream">โพสต์ร่างแล้ว ไปดูที่หน้ารีวิว</p>
             <Link
-              to="/admin/content-review"
+              to="/app/content-review"
               className="inline-flex min-h-14 w-full items-center justify-center rounded-editorial border border-gold/40 bg-gold/15 px-4 text-base font-medium text-gold"
             >
               ไปหน้ารีวิว
@@ -151,6 +163,35 @@ export default function QuickPost() {
           </div>
         ) : (
           <>
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium text-cream-muted">
+                ปลายทางโพสต์ <span className="text-coral">*</span>
+              </legend>
+              <ul className="space-y-2">
+                {CONTENT_TARGET_ACCOUNTS.map((opt) => (
+                  <li key={opt.id}>
+                    <label className="flex cursor-pointer items-start gap-3 rounded-editorial border border-white/8 bg-surface-card/40 px-3 py-2.5 has-[:checked]:border-gold/50 has-[:checked]:bg-gold/10">
+                      <input
+                        type="radio"
+                        name="target_account"
+                        value={opt.id}
+                        checked={targetAccount === opt.id}
+                        disabled={busy}
+                        onChange={() => setTargetAccount(opt.id)}
+                        className="mt-1 accent-[var(--color-gold,#D4A853)]"
+                      />
+                      <span>
+                        <span className="block text-sm text-cream">{opt.label}</span>
+                        <span className="block text-xs text-cream-muted">
+                          {opt.mode === 'graph' ? 'Graph auto-publish' : 'Manual copy/post'}
+                        </span>
+                      </span>
+                    </label>
+                  </li>
+                ))}
+              </ul>
+            </fieldset>
+
             {previewUrl && (
               <img
                 src={previewUrl}
@@ -165,14 +206,20 @@ export default function QuickPost() {
               accept="image/*"
               capture="environment"
               className="sr-only"
-              disabled={busy}
+              disabled={busy || !targetAccount}
               onChange={(e) => void handleFile(e)}
             />
 
             <button
               type="button"
-              disabled={busy}
-              onClick={() => inputRef.current?.click()}
+              disabled={busy || !targetAccount}
+              onClick={() => {
+                if (!targetAccount) {
+                  toast('เลือกปลายทางโพสต์ก่อน', 'error')
+                  return
+                }
+                inputRef.current?.click()
+              }}
               className="flex min-h-16 w-full items-center justify-center gap-3 rounded-editorial border border-gold/40 bg-gold/15 px-4 text-lg font-medium text-gold transition-colors hover:bg-gold/25 disabled:opacity-60"
             >
               {busy ? (
@@ -183,7 +230,7 @@ export default function QuickPost() {
               ) : (
                 <>
                   <Camera className="h-6 w-6" aria-hidden />
-                  อัปโหลดรูป
+                  {targetAccount ? 'อัปโหลดรูป' : 'เลือกปลายทางก่อน'}
                 </>
               )}
             </button>
@@ -202,7 +249,7 @@ export default function QuickPost() {
 
             {!busy && !previewUrl && (
               <p className="text-center text-sm text-cream-muted">
-                แตะปุ่มด้านบนเพื่อถ่ายหรือเลือกรูปจากเครื่อง
+                เลือกปลายทาง แล้วแตะปุ่มเพื่อถ่ายหรือเลือกรูป
               </p>
             )}
           </>

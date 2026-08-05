@@ -6,6 +6,8 @@ import type {
   ComplianceItem,
   ContentPost,
   Expense,
+  StaffLoginRow,
+  StaffOutboundItem,
   StaffRole,
   Tour,
   TourBooking,
@@ -308,6 +310,55 @@ export async function insertWaiverSignature(
     )
     await new Promise((resolve) => setTimeout(resolve, 1000))
     await insertWaiverSignatureOnce(signature)
+  }
+}
+
+export type StaffAssistedWaiverInput = {
+  trip_code: string
+  signed_name: string
+  clauses: string[]
+  locale: 'en' | 'th'
+  authorization_note: string
+  evidence_url?: string | null
+  booking_id?: string | null
+  confirmed_customer_request: true
+}
+
+/** PIN-gated: staff records a customer-authorized waiver on their behalf. */
+export async function createWaiverStaffAssisted(
+  input: StaffAssistedWaiverInput,
+): Promise<WaiverSignature> {
+  return callStaffApi<WaiverSignature>('create_waiver_staff_assisted', input)
+}
+
+export async function listWaiversForTour(tripCode: string): Promise<WaiverSignature[]> {
+  return callStaffApi<WaiverSignature[]>('list_waivers_for_tour', { tripCode })
+}
+
+/** Evidence screenshot for staff-assisted waiver — same payment-slips bucket pattern. */
+export async function uploadWaiverAuthEvidence(file: File, tripCode: string): Promise<string> {
+  const ext = file.name.split('.').pop() ?? 'jpg'
+  const safeCode = tripCode.replace(/[^a-zA-Z0-9_-]/g, '')
+  const path = `waiver-auth/${safeCode}-${Date.now()}.${ext}`
+
+  try {
+    const { error: uploadError } = await supabase.storage
+      .from('payment-slips')
+      .upload(path, file, { upsert: false })
+
+    if (uploadError) {
+      logSupabaseError(`uploadWaiverAuthEvidence (${tripCode})`, uploadError)
+      throw uploadError
+    }
+
+    const { data } = supabase.storage.from('payment-slips').getPublicUrl(path)
+    // Prefer public URL when bucket is public; otherwise store the path for staff lookup.
+    return data?.publicUrl || path
+  } catch (err) {
+    if (!(err && typeof err === 'object' && 'code' in err)) {
+      logSupabaseError(`uploadWaiverAuthEvidence (${tripCode})`, err)
+    }
+    throw err
   }
 }
 
@@ -659,6 +710,131 @@ export async function fetchPaymentsForBooking(bookingId: string): Promise<Bookin
   return callStaffApi<BookingPayment[]>('list_payments_for_booking', { bookingId })
 }
 
+export type CustomerPaymentSearchRow = {
+  booking: TourBooking
+  payments: BookingPayment[]
+}
+
+export async function searchCustomerPayments(query: string): Promise<CustomerPaymentSearchRow[]> {
+  return callStaffApi<CustomerPaymentSearchRow[]>('search_customer_payments', { query })
+}
+
+export async function addPendingInstallment(
+  bookingId: string,
+  amount: number,
+  label?: string,
+  dueDate?: string | null,
+): Promise<BookingPayment> {
+  return callStaffApi<BookingPayment>('add_pending_installment', {
+    bookingId,
+    amount,
+    label,
+    dueDate,
+  })
+}
+
+export async function updateInstallment(params: {
+  paymentId: string
+  amount?: number
+  label?: string
+  status?: 'pending' | 'paid' | 'overdue'
+  dueDate?: string | null
+  paymentMethod?: string | null
+  markPaid?: boolean
+}): Promise<BookingPayment> {
+  return callStaffApi<BookingPayment>('update_installment', params)
+}
+
+export type InstallmentIncomeSummary = {
+  total_aud: number
+  count: number
+  by_trip: { trip_code: string; amount_aud: number }[]
+  payments: BookingPayment[]
+  range: {
+    start: string
+    end: string
+    mode: string
+    year: number
+    month?: number
+  }
+}
+
+export async function fetchInstallmentIncomeSummary(params: {
+  mode?: 'month' | 'trip' | 'tax_year'
+  year?: number
+  month?: number
+  tripCode?: string
+}): Promise<InstallmentIncomeSummary> {
+  return callStaffApi<InstallmentIncomeSummary>('installment_income_summary', params)
+}
+
+export async function fetchOutboundQueue(
+  status: 'pending' | 'done' | 'skipped' | 'all' = 'pending',
+): Promise<StaffOutboundItem[]> {
+  return callStaffApi<StaffOutboundItem[]>('list_outbound_queue', {
+    status: status === 'all' ? undefined : status,
+  })
+}
+
+export async function completeOutbound(
+  id: string,
+  status: 'done' | 'skipped' = 'done',
+): Promise<StaffOutboundItem> {
+  return callStaffApi<StaffOutboundItem>('complete_outbound', { id, status })
+}
+
+export type PhotosPendingRow = TourBooking & {
+  tour?: { trip_code?: string; name_en?: string; end_date?: string } | null
+}
+
+export async function fetchPhotosPending(): Promise<PhotosPendingRow[]> {
+  return callStaffApi<PhotosPendingRow[]>('list_photos_pending')
+}
+
+export async function markPhotosDelivered(params: {
+  bookingId?: string
+  tripCode?: string
+  galleryLink?: string
+  allOnTrip?: boolean
+}): Promise<unknown> {
+  return callStaffApi('mark_photos_delivered', params)
+}
+
+export type CustomerLoyalty = {
+  trips_count: number
+  bookings_count: number
+  total_spend_aud: number
+  bookings: TourBooking[]
+}
+
+export async function fetchCustomerLoyalty(params: {
+  email?: string
+  phone?: string
+}): Promise<CustomerLoyalty> {
+  return callStaffApi<CustomerLoyalty>('customer_loyalty', params)
+}
+
+export async function fetchRecentLogins(): Promise<StaffLoginRow[]> {
+  return callStaffApi<StaffLoginRow[]>('list_recent_logins')
+}
+
+export type OwnerOpsMetrics = {
+  profit_per_trip: {
+    trip_code: string
+    revenue_aud: number
+    expense_aud: number
+    profit_aud: number
+  }[]
+  expenses_linked_to_trips: boolean
+  repeat_customer_rate: number
+  repeat_bookings: number
+  active_bookings: number
+}
+
+export async function fetchOwnerOpsMetrics(): Promise<OwnerOpsMetrics> {
+  return callStaffApi<OwnerOpsMetrics>('owner_ops_metrics')
+}
+
 /** Fixes a typo'd name/phone/email on an existing booking. Does not touch
  * payment amounts, status, or seat counts. Pass only the fields to change. */
 export async function updateBookingDetails(
@@ -819,36 +995,50 @@ function normalizeHeadlineOptions(raw: unknown): string[] {
   return []
 }
 
+function mapContentPostRow(row: Record<string, unknown>): ContentPost {
+  const tourJoin = row.tours
+  const tours =
+    tourJoin && typeof tourJoin === 'object' && !Array.isArray(tourJoin)
+      ? (tourJoin as ContentPost['tours'])
+      : Array.isArray(tourJoin) && tourJoin[0]
+        ? (tourJoin[0] as ContentPost['tours'])
+        : null
+
+  return {
+    id: String(row.id),
+    trip_id: row.trip_id != null ? String(row.trip_id) : null,
+    post_type: String(row.post_type ?? (row.trip_id ? 'trip_promo' : 'value_content')),
+    status: String(row.status ?? 'draft'),
+    headline_options: normalizeHeadlineOptions(row.headline_options),
+    selected_headline: (row.selected_headline as string | null) ?? null,
+    caption_fb: (row.caption_fb as string | null) ?? null,
+    caption_ig: (row.caption_ig as string | null) ?? null,
+    caption_line: (row.caption_line as string | null) ?? null,
+    photo_urls: Array.isArray(row.photo_urls)
+      ? (row.photo_urls as string[])
+      : null,
+    page_id: (row.page_id as string | null) ?? null,
+    target_account: (row.target_account as string | null) ?? null,
+    group_id: (row.group_id as string | null) ?? null,
+    posted_at: (row.posted_at as string | null) ?? null,
+    facebook_post_id: (row.facebook_post_id as string | null) ?? null,
+    facebook_post_url: (row.facebook_post_url as string | null) ?? null,
+    created_at: String(row.created_at ?? ''),
+    updated_at: (row.updated_at as string | null) ?? null,
+    tours,
+  }
+}
+
 export async function fetchDraftContentPosts(): Promise<ContentPost[]> {
   const rows = await callStaffApi<Record<string, unknown>[]>('list_draft_content_posts')
-  return (rows ?? []).map((row) => {
-    const tourJoin = row.tours
-    const tours =
-      tourJoin && typeof tourJoin === 'object' && !Array.isArray(tourJoin)
-        ? (tourJoin as ContentPost['tours'])
-        : Array.isArray(tourJoin) && tourJoin[0]
-          ? (tourJoin[0] as ContentPost['tours'])
-          : null
+  return (rows ?? []).map(mapContentPostRow)
+}
 
-    return {
-      id: String(row.id),
-      trip_id: row.trip_id != null ? String(row.trip_id) : null,
-      post_type: String(row.post_type ?? (row.trip_id ? 'trip_promo' : 'value_content')),
-      status: String(row.status ?? 'draft'),
-      headline_options: normalizeHeadlineOptions(row.headline_options),
-      selected_headline: (row.selected_headline as string | null) ?? null,
-      caption_fb: (row.caption_fb as string | null) ?? null,
-      caption_ig: (row.caption_ig as string | null) ?? null,
-      caption_line: (row.caption_line as string | null) ?? null,
-      photo_urls: Array.isArray(row.photo_urls)
-        ? (row.photo_urls as string[])
-        : null,
-      page_id: (row.page_id as string | null) ?? null,
-      created_at: String(row.created_at ?? ''),
-      updated_at: (row.updated_at as string | null) ?? null,
-      tours,
-    }
-  })
+export async function fetchManualPendingContentPosts(): Promise<ContentPost[]> {
+  const rows = await callStaffApi<Record<string, unknown>[]>(
+    'list_manual_pending_content_posts',
+  )
+  return (rows ?? []).map(mapContentPostRow)
 }
 
 export async function rejectContentPost(id: string): Promise<void> {
@@ -862,8 +1052,13 @@ export async function approveContentPost(
     caption_fb: string
     photo_urls: string[]
   },
-): Promise<void> {
-  await callStaffApi('update_content_post', {
+): Promise<{
+  status: string
+  target_account?: string
+  facebook_post_id?: string
+  facebook_post_url?: string
+}> {
+  return callStaffApi('update_content_post', {
     id,
     status: 'approved',
     selected_headline: payload.selected_headline,
@@ -872,13 +1067,23 @@ export async function approveContentPost(
   })
 }
 
+export async function markContentPostPosted(id: string): Promise<void> {
+  await callStaffApi('mark_content_post_posted', { id })
+}
+
 export async function insertContentPostDraft(input: {
   post_type: 'value_content' | 'trip_promo'
   trip_id?: string | null
   photo_urls: string[]
   headline_options: string[]
   caption_fb: string
+  /** Required — routes Graph vs manual on approve */
+  target_account: NonNullable<ContentPost['target_account']>
+  group_id?: string | null
 }): Promise<{ id: string }> {
+  if (!input.target_account) {
+    throw new Error('target_account is required')
+  }
   return callStaffApi<{ id: string }>('insert_content_post', {
     ...input,
     status: 'draft',

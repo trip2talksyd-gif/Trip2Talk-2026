@@ -221,6 +221,18 @@ export default function CashierPOS() {
           ← PIN
         </Link>
         <h1 className="mt-2 font-serif text-lg text-cream">Cashier POS</h1>
+        <Link
+          to="/app/waiver-assist"
+          className="mt-2 inline-block text-xs font-medium text-amber-200/90 underline"
+        >
+          Waiver assist / กรอกแทนลูกค้า →
+        </Link>
+        <Link
+          to="/app/payments"
+          className="mt-1 ml-3 inline-block text-xs font-medium text-gold/90 underline"
+        >
+          Customer payments / งวดชำระ →
+        </Link>
       </header>
 
       <main className="mx-auto max-w-2xl space-y-5 px-4 py-6">

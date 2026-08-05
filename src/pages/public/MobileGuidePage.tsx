@@ -4,8 +4,8 @@ import { enabledSocialProfiles } from '../../data/contactChannels'
 import { MOBILE_LANDSCAPE_TIPS, MOBILE_PORTRAIT_TIPS } from '../../data/photoGuideContent'
 import PhotoSlideshow, { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
 import { photoSrc } from '../../data/galleryPhotos'
+import BiText from '../../components/ui/BiText'
 
-/* Mockup tip-timeline accent cycle */
 const DOT_COLORS = ['#20363c', '#e2734a', '#e8935a', '#2e4d53'] as const
 
 const LANDSCAPE_ICONS = ['▦', '☀', '🔍', '🌙', '↗', '📐'] as const
@@ -22,24 +22,52 @@ const ALBUM_IDS = [
 ] as const
 
 const HERO_SLIDE_META = [
-  { sceneEn: 'Landscape', sceneTh: 'ทิวทัศน์', tipEn: 'Grid lines + leading lines', tipTh: 'เส้นกริด + เส้นนำสายตา' },
-  { sceneEn: 'Portrait', sceneTh: 'พอร์ตเทรต', tipEn: 'Golden hour + Portrait mode', tipTh: 'แสงทอง + โหมดบุคคล' },
-  { sceneEn: 'Landscape', sceneTh: 'ทิวทัศน์', tipEn: 'HDR mode + low angle', tipTh: 'HDR + มุมต่ำ' },
-  { sceneEn: 'Portrait', sceneTh: 'พอร์ตเทรต', tipEn: 'Burst mode + natural framing', tipTh: 'ถ่ายต่อเนื่อง + จัดเฟรม' },
-  { sceneEn: 'Landscape', sceneTh: 'ทิวทัศน์', tipEn: 'Tap-to-focus + exposure lock', tipTh: 'แตะโฟกัส + ล็อกแสง' },
-  { sceneEn: 'Portrait', sceneTh: 'พอร์ตเทรต', tipEn: 'Burst mode + off-centre framing', tipTh: 'ถ่ายต่อเนื่อง + นอกกลางเฟรม' },
+  {
+    sceneEn: 'Landscape',
+    sceneTh: 'ทิวทัศน์',
+    tipEn: 'Grid lines + leading lines',
+    tipTh: 'เส้นกริด + เส้นนำสายตา',
+  },
+  {
+    sceneEn: 'Portrait',
+    sceneTh: 'พอร์ตเทรต',
+    tipEn: 'Golden hour + Portrait mode',
+    tipTh: 'แสงทอง + โหมดบุคคล',
+  },
+  {
+    sceneEn: 'Landscape',
+    sceneTh: 'ทิวทัศน์',
+    tipEn: 'HDR mode + low angle',
+    tipTh: 'HDR + มุมต่ำ',
+  },
+  {
+    sceneEn: 'Portrait',
+    sceneTh: 'พอร์ตเทรต',
+    tipEn: 'Burst mode + natural framing',
+    tipTh: 'ถ่ายต่อเนื่อง + จัดเฟรม',
+  },
+  {
+    sceneEn: 'Landscape',
+    sceneTh: 'ทิวทัศน์',
+    tipEn: 'Tap-to-focus + exposure lock',
+    tipTh: 'แตะโฟกัส + ล็อกแสง',
+  },
+  {
+    sceneEn: 'Portrait',
+    sceneTh: 'พอร์ตเทรต',
+    tipEn: 'Burst mode + off-centre framing',
+    tipTh: 'ถ่ายต่อเนื่อง + นอกกลางเฟรม',
+  },
 ] as const
 
 function TipTimeline({
   tips,
   icons,
   colorOffset = 0,
-  lang,
 }: {
   tips: typeof MOBILE_LANDSCAPE_TIPS | typeof MOBILE_PORTRAIT_TIPS
   icons: readonly string[]
   colorOffset?: number
-  lang: 'en' | 'th'
 }) {
   return (
     <div className="tip-timeline">
@@ -53,8 +81,18 @@ function TipTimeline({
                 {icons[i % icons.length]}
               </span>
               <div className="tt-txt">
-                <b>{lang === 'th' ? tip.th : tip.en}</b>
-                <span>{lang === 'th' ? tip.thBody : tip.enBody}</span>
+                <b>
+                  {tip.en}
+                  <span className="mt-0.5 block font-thai text-[10.5px] font-medium text-ink-soft">
+                    {tip.th}
+                  </span>
+                </b>
+                <span>
+                  {tip.enBody}
+                  <span className="mt-0.5 block font-thai text-[10px] font-medium text-ink-soft/90">
+                    {tip.thBody}
+                  </span>
+                </span>
               </div>
             </div>
           </div>
@@ -65,15 +103,16 @@ function TipTimeline({
 }
 
 function GuideFollowSocial() {
-  const { lang } = useLang()
+  const { tt } = useLang()
+  const followBi = tt('photoGuide.follow')
   const socials = enabledSocialProfiles()
   if (socials.length === 0) return null
 
   return (
     <section className="guide-follow" aria-label="Follow Trip2Talk">
       <h3>
-        Follow Trip2Talk
-        <span className="th">{lang === 'th' ? 'ติดตามเรา' : 'ติดตามเรา'}</span>
+        {followBi.en}
+        <span className="th">{followBi.th}</span>
       </h3>
       <div className="social-row">
         {socials.map((social) => {
@@ -99,7 +138,16 @@ function GuideFollowSocial() {
 }
 
 export default function MobileGuidePage() {
-  const { lang } = useLang()
+  const { tt } = useLang()
+  const backBi = tt('photoGuide.back')
+  const eyebrowBi = tt('photoGuide.mobile.eyebrow')
+  const titleBi = tt('photoGuide.mobile.title')
+  const subBi = tt('photoGuide.mobile.sub')
+  const albumBi = tt('gallery.exampleAlbum')
+  const swipeBi = tt('photoGuide.swipeMore')
+  const landscapeBi = tt('photoGuide.mobile.landscape')
+  const portraitBi = tt('photoGuide.mobile.portrait')
+
   const album = galleryByIds([...ALBUM_IDS])
   const portraits = galleryByIds([
     'syd-015',
@@ -118,7 +166,7 @@ export default function MobileGuidePage() {
       sceneTh: meta.sceneTh,
       titleEn: photo.caption_en,
       titleTh: photo.caption_th,
-      meta: `${photo.location} · ${lang === 'th' ? meta.tipTh : meta.tipEn}`,
+      meta: `${photo.location} · ${meta.tipEn} / ${meta.tipTh}`,
     }
   })
 
@@ -126,44 +174,48 @@ export default function MobileGuidePage() {
     <div className="space-y-0 pb-4">
       <Link
         to="/photo-guide"
-        className="mb-4 inline-flex items-center gap-1.5 text-[11.5px] font-bold text-teal-700 no-underline"
+        className="mb-4 inline-flex flex-col text-[11.5px] font-bold text-teal-700 no-underline"
       >
-        ← {lang === 'th' ? 'กลับไปหน้าคลังเคล็ดลับ' : 'Back to Photo Guide'}
-        <span className="font-thai text-[10px] font-medium opacity-85">
-          {lang === 'en' ? ' · กลับไปหน้าคลังเคล็ดลับ' : ''}
-        </span>
+        <span>← {backBi.en}</span>
+        <span className="font-thai text-[10px] font-medium opacity-85">{backBi.th}</span>
       </Link>
 
       <header className="mb-6">
         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-teal-600">
-          {lang === 'th' ? 'คลังเคล็ดลับ · มือถือ' : 'Photo Guide · Mobile Photography'}
+          {eyebrowBi.en}
+          <span className="ml-1.5 font-thai normal-case tracking-normal opacity-85">
+            {eyebrowBi.th}
+          </span>
         </p>
-        <h1 className="mt-1.5 font-serif text-[22px] text-ink sm:text-3xl">
-          {lang === 'th' ? 'คู่มือถ่ายภาพด้วยมือถือ' : 'Mobile Photography Guide'}
-        </h1>
-        <p className="mt-2 max-w-2xl text-[13.5px] leading-relaxed text-ink-soft">
-          {lang === 'th'
-            ? 'ไม่ต้องมีอุปกรณ์เพิ่ม — เทคนิคทิวทัศน์และพอร์ตเทรตที่ลูกทริปใช้ได้แค่ด้วยมือถือ'
-            : 'No extra gear needed — simple landscape and portrait techniques any trip customer can use with just their phone.'}
-        </p>
+        <BiText
+          as="h1"
+          en={titleBi.en}
+          th={titleBi.th}
+          serif
+          className="mt-1.5 text-[22px] text-ink sm:text-3xl"
+          thClassName="mt-1 block font-thai text-[15px] font-medium text-ink-soft sm:text-lg"
+        />
+        <BiText
+          as="p"
+          en={subBi.en}
+          th={subBi.th}
+          className="mt-2 max-w-2xl text-[13.5px] leading-relaxed text-ink-soft"
+          thClassName="mt-1.5 block font-thai text-[12.5px] font-medium text-ink-soft/90"
+        />
       </header>
 
-      {/* 1. Horizontal example album */}
       <div className="old-album-wrap">
         <div className="oa-label">
           <div>
             <b>
-              {lang === 'th'
-                ? 'อัลบั้มตัวอย่างจากพี่แสนและทีม'
-                : 'Example album from Saen & team'}
+              {albumBi.en}
+              <span className="oa-sub">{albumBi.th}</span>
             </b>
-            <span className="oa-sub">
-              {lang === 'th'
-                ? 'Example album from Saen & team'
-                : 'อัลบั้มตัวอย่างจากพี่แสนและทีม'}
-            </span>
           </div>
-          <small>{lang === 'th' ? 'ปัดเพื่อดูเพิ่ม →' : 'Swipe for more →'}</small>
+          <small>
+            {swipeBi.en}
+            <span className="block font-thai text-[9px] font-medium opacity-85">{swipeBi.th}</span>
+          </small>
         </div>
         <div className="gallery-scroll-wrap">
           <div className="gallery-scroll">
@@ -171,7 +223,7 @@ export default function MobileGuidePage() {
               <img
                 key={photo.id}
                 src={photoSrc(photo)}
-                alt={lang === 'th' ? photo.caption_th : photo.caption_en}
+                alt={`${photo.caption_en} / ${photo.caption_th}`}
                 loading="lazy"
               />
             ))}
@@ -179,30 +231,24 @@ export default function MobileGuidePage() {
         </div>
       </div>
 
-      {/* 2. Large hero landscape slideshow + caption overlay */}
       <PhotoSlideshow slides={slides} className="mb-1" />
 
-      {/* 3. Two-column tip lists */}
       <div className="mt-4 grid gap-[30px] lg:grid-cols-2">
         <section className="min-w-0">
-          <h2 className="m-0 flex flex-wrap items-baseline gap-2 font-serif text-sm text-ink">
-            {lang === 'th' ? 'ถ่ายวิว' : 'Landscape'}
-            <span className="text-[11px] font-medium text-teal-700">
-              {lang === 'th' ? 'Landscape' : 'ถ่ายวิว'}
+          <h2 className="m-0 font-serif text-sm text-ink">
+            {landscapeBi.en}
+            <span className="mt-0.5 block font-thai text-[11px] font-medium text-teal-700">
+              {landscapeBi.th}
             </span>
           </h2>
-          <TipTimeline
-            tips={MOBILE_LANDSCAPE_TIPS}
-            icons={LANDSCAPE_ICONS}
-            lang={lang}
-          />
+          <TipTimeline tips={MOBILE_LANDSCAPE_TIPS} icons={LANDSCAPE_ICONS} />
         </section>
 
         <section className="min-w-0">
-          <h2 className="m-0 flex flex-wrap items-baseline gap-2 font-serif text-sm text-ink">
-            {lang === 'th' ? 'ถ่ายคน' : 'Portrait / People'}
-            <span className="text-[11px] font-medium text-teal-700">
-              {lang === 'th' ? 'Portrait / People' : 'ถ่ายคน'}
+          <h2 className="m-0 font-serif text-sm text-ink">
+            {portraitBi.en}
+            <span className="mt-0.5 block font-thai text-[11px] font-medium text-teal-700">
+              {portraitBi.th}
             </span>
           </h2>
           {portraits.length > 0 && (
@@ -211,7 +257,7 @@ export default function MobileGuidePage() {
                 <img
                   key={photo.id}
                   src={photoSrc(photo)}
-                  alt={lang === 'th' ? photo.caption_th : photo.caption_en}
+                  alt={`${photo.caption_en} / ${photo.caption_th}`}
                   loading="lazy"
                 />
               ))}
@@ -221,12 +267,10 @@ export default function MobileGuidePage() {
             tips={MOBILE_PORTRAIT_TIPS}
             icons={PORTRAIT_ICONS}
             colorOffset={1}
-            lang={lang}
           />
         </section>
       </div>
 
-      {/* 4. Follow Trip2Talk */}
       <GuideFollowSocial />
     </div>
   )

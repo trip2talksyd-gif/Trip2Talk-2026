@@ -1,0 +1,255 @@
+import { useMemo, useRef, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { Check, Circle } from 'lucide-react'
+import { useLang } from '../../hooks/useLang'
+import { getConfirmationSummary } from '../../lib/waiverSession'
+import { formatDate } from '../../lib/toursApi'
+import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
+import BiText from '../../components/ui/BiText'
+import { useToast } from '../../components/ui/Toast'
+
+const LOGO =
+  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Logo/Trip2talk%20(1).png'
+
+/**
+ * Customer Confirmation Summary — DISTINCT from Tax Invoice.
+ * Never includes passport, medical, emergency contact, or other sensitive fields.
+ */
+export default function ConfirmationSummaryPage() {
+  const { tt, lang } = useLang()
+  const { toast } = useToast()
+  const [params] = useSearchParams()
+  const ref = params.get('ref') ?? undefined
+  const data = useMemo(() => getConfirmationSummary(ref), [ref])
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [downloading, setDownloading] = useState(false)
+
+  const title = tt('confirm.title')
+  const subtitle = tt('confirm.subtitle')
+  const noInvoice = tt('confirm.noInvoice')
+  const nextTitle = tt('confirm.nextTitle')
+  const downloadBi = tt('confirm.download')
+  const emailBi = tt('confirm.email')
+
+  async function handleDownload() {
+    if (!cardRef.current || !data) return
+    setDownloading(true)
+    try {
+      const { default: html2canvas } = await import('html2canvas')
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: '#ffffff',
+        scale: 2,
+        useCORS: true,
+      })
+      const a = document.createElement('a')
+      a.href = canvas.toDataURL('image/png')
+      a.download = `trip2talk-confirmation-${data.bookingReference}.png`
+      a.click()
+    } catch {
+      toast('Download failed', 'error')
+    } finally {
+      setDownloading(false)
+    }
+  }
+
+  function handleGmail() {
+    if (!data) return
+    const subject = `Trip2Talk Confirmation — ${data.bookingReference}`
+    const body = [
+      'Hi Trip2Talk,',
+      '',
+      `Here is my booking confirmation summary: ${data.bookingReference}`,
+      `Trip: ${data.tripNameEn} (${data.tripCode})`,
+      data.departureDate ? `Date: ${data.departureDate}` : '',
+      '',
+      '(Please attach the PNG summary — download it first, then attach here.)',
+      '',
+      'Note: this is NOT a tax invoice — invoices are sent separately per payment.',
+    ]
+      .filter(Boolean)
+      .join('\n')
+    const url = `https://mail.google.com/mail/?view=cm&fs=1&authuser=${encodeURIComponent(
+      'trip2talksyd@gmail.com',
+    )}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
+  if (!data) {
+    return (
+      <div className="rounded-2xl border border-line bg-card p-5 text-center">
+        <BiText
+          en="No confirmation found in this browser session."
+          th="ไม่พบสรุปการยืนยันในเซสชันนี้"
+          className="text-sm text-ink"
+          thClassName="mt-1 block font-thai text-ink-soft"
+        />
+        <Link to="/trips" className="mt-3 inline-block text-teal-700 underline">
+          Explore trips
+        </Link>
+      </div>
+    )
+  }
+
+  const checks: { done: boolean; en: string; th: string; pendingLabel?: boolean }[] = [
+    {
+      done: data.depositPaid,
+      en: tt('confirm.check.deposit').en,
+      th: tt('confirm.check.deposit').th,
+    },
+    {
+      done: data.waiverSigned,
+      en: tt('confirm.check.waiver').en,
+      th: tt('confirm.check.waiver').th,
+    },
+    {
+      done: data.safetyInfoOnFile,
+      en: tt('confirm.check.safety').en,
+      th: tt('confirm.check.safety').th,
+    },
+    {
+      done: !data.facebookMessagePending,
+      en: tt('confirm.check.facebook').en,
+      th: tt('confirm.check.facebook').th,
+      pendingLabel: true,
+    },
+  ]
+
+  return (
+    <div className="mx-auto max-w-lg space-y-3 pb-8">
+      <div className="flex flex-wrap gap-2 print:hidden">
+        <button
+          type="button"
+          onClick={handleDownload}
+          disabled={downloading}
+          className="flex-1 rounded-xl bg-teal-700 px-4 py-3 text-sm font-bold text-white disabled:opacity-60"
+        >
+          {downloading ? '…' : downloadBi.en}
+          <span className="mt-0.5 block font-thai text-[10px] font-medium opacity-90">
+            {downloadBi.th}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={handleGmail}
+          className="flex-1 rounded-xl border border-teal-700/40 bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-800"
+        >
+          {emailBi.en}
+          <span className="mt-0.5 block font-thai text-[10px] font-medium opacity-90">
+            {emailBi.th}
+          </span>
+        </button>
+      </div>
+
+      <div
+        ref={cardRef}
+        className="rounded-2xl border border-line bg-white p-5 text-ink shadow-sm"
+      >
+        <div className="flex items-center gap-3 border-b border-line pb-4">
+          <img src={LOGO} alt="Trip2Talk" className="h-12 w-12 object-contain" />
+          <div>
+            <BiText
+              as="h1"
+              en={title.en}
+              th={title.th}
+              className="font-serif text-lg font-bold text-ink"
+              thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+            />
+            <BiText
+              as="p"
+              en={subtitle.en}
+              th={subtitle.th}
+              className="text-[11px] text-ink-soft"
+              thClassName="mt-0.5 block font-thai text-[10px]"
+            />
+          </div>
+        </div>
+
+        <p className="mt-4 rounded-xl bg-mint-100/70 px-3 py-2 font-mono text-sm font-bold tracking-wide text-teal-900">
+          {data.bookingReference}
+        </p>
+
+        <div className="mt-4 flex gap-3 rounded-xl border border-line bg-mint-50/50 p-3">
+          {data.coverImageUrl ? (
+            <img
+              src={data.coverImageUrl}
+              alt=""
+              className="h-16 w-16 shrink-0 rounded-lg object-cover"
+            />
+          ) : (
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-teal-700/15 text-xs font-bold text-teal-800">
+              T2T
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-ink">{data.tripNameEn}</p>
+            <p className="truncate font-thai text-[11px] text-ink-soft">{data.tripNameTh}</p>
+            <p className="mt-1 text-[11px] text-ink-soft">
+              {data.durationLabel}
+              {data.departureDate
+                ? ` · ${formatDate(data.departureDate, lang)}`
+                : ''}
+            </p>
+          </div>
+        </div>
+
+        <ul className="mt-5 space-y-2.5">
+          {checks.map((c, i) => (
+            <li
+              key={c.en}
+              className={`flex items-start gap-2.5 rounded-xl px-3 py-2.5 ${
+                c.done ? 'bg-teal-50' : 'bg-amber-50'
+              }`}
+            >
+              {c.done ? (
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-teal-700" strokeWidth={3} />
+              ) : (
+                <Circle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+              )}
+              <span className="text-[12px] font-semibold text-ink">
+                {c.done ? `✓ ${c.en}` : `${i + 1}. ${c.en}${c.pendingLabel ? ' — pending' : ''}`}
+                <span className="mt-0.5 block font-thai text-[10px] font-medium text-ink-soft">
+                  {c.done ? `✓ ${c.th}` : `${i + 1}. ${c.th}${c.pendingLabel ? ' — รอดำเนินการ' : ''}`}
+                </span>
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-5">
+          <BiText
+            as="h2"
+            en={nextTitle.en}
+            th={nextTitle.th}
+            className="text-[13px] font-bold text-ink"
+            thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+          />
+          <ol className="mt-2 list-decimal space-y-2 pl-4 text-[12px] text-ink">
+            {[tt('confirm.next.1'), tt('confirm.next.2'), tt('confirm.next.3')].map((bi, i) => (
+              <li key={i}>
+                {bi.en}
+                <span className="mt-0.5 block font-thai text-[10px] text-ink-soft">{bi.th}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <p className="mt-5 rounded-xl border border-dashed border-line px-3 py-2 text-[11px] text-ink-soft">
+          {noInvoice.en}
+          <span className="mt-0.5 block font-thai text-[10px]">{noInvoice.th}</span>
+        </p>
+
+        <a
+          href={FACEBOOK_PAGE_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 block rounded-xl bg-[#1877F2] px-4 py-3 text-center text-sm font-bold text-white"
+        >
+          Message us on Facebook
+          <span className="mt-0.5 block font-thai text-[10px] font-medium opacity-90">
+            ทัก Facebook หาเรา
+          </span>
+        </a>
+      </div>
+    </div>
+  )
+}

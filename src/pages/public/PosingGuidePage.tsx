@@ -3,50 +3,70 @@ import { useLang } from '../../hooks/useLang'
 import { POSING_TIPS, SEASON_CARDS } from '../../data/photoGuideContent'
 import { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
 import { photoSrc } from '../../data/galleryPhotos'
+import BiText from '../../components/ui/BiText'
 
 export default function PosingGuidePage() {
-  const { lang } = useLang()
+  const { tt } = useLang()
+  const backBi = tt('photoGuide.back')
+  const eyebrowBi = tt('photoGuide.posing.eyebrow')
+  const titleBi = tt('photoGuide.posing.title')
+  const subBi = tt('photoGuide.posing.sub')
+  const albumBi = tt('gallery.exampleAlbum')
+  const swipeBi = tt('photoGuide.swipeMore')
+  const posesBi = tt('photoGuide.posing.posesTitle')
+  const seasonTitleBi = tt('photoGuide.posing.seasonTitle')
+  const seasonSubBi = tt('photoGuide.posing.seasonSub')
+  const quoteBi = tt('photoGuide.posing.quote')
+  const quoteByBi = tt('photoGuide.posing.quoteBy')
+
   const album = galleryByIds(['syd-009', 'syd-011', 'syd-012', 'syd-015', 'nsw-006', 'nsw-007'])
 
   return (
     <div className="space-y-6 pb-4">
       <Link
         to="/photo-guide"
-        className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-teal-700 no-underline"
+        className="inline-flex flex-col text-[11.5px] font-bold text-teal-700 no-underline"
       >
-        ← {lang === 'th' ? 'กลับไปหน้าคลังเคล็ดลับ' : 'Back to Photo Guide'}
+        <span>← {backBi.en}</span>
+        <span className="font-thai text-[10px] font-medium opacity-85">{backBi.th}</span>
       </Link>
 
       <header>
         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-teal-600">
-          {lang === 'th' ? 'คลังเคล็ดลับ · โพสท่า' : 'Photo Guide · Posing & Styling'}
+          {eyebrowBi.en}
+          <span className="ml-1.5 font-thai normal-case tracking-normal opacity-85">
+            {eyebrowBi.th}
+          </span>
         </p>
-        <h1 className="mt-1 font-serif text-2xl text-ink sm:text-3xl">
-          {lang === 'th' ? 'คู่มือโพสท่า & แต่งตัว' : 'Posing & Styling Guide'}
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft">
-          {lang === 'th'
-            ? 'สำหรับลูกทริปที่ชอบอยู่หน้ากล้อง — ดูอัลบั้มตัวอย่างก่อน แล้วตามด้วยท่าโพสและโทนเสื้อผ้าตามฤดูกาล'
-            : 'For trip customers who love being in front of the camera. Browse the album, then try our photographers’ favorite poses and seasonal color guide.'}
-        </p>
+        <BiText
+          as="h1"
+          en={titleBi.en}
+          th={titleBi.th}
+          serif
+          className="mt-1 text-2xl text-ink sm:text-3xl"
+          thClassName="mt-1 block font-thai text-[15px] font-medium text-ink-soft sm:text-lg"
+        />
+        <BiText
+          as="p"
+          en={subBi.en}
+          th={subBi.th}
+          className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft"
+          thClassName="mt-1.5 block font-thai text-[12.5px] font-medium text-ink-soft/90"
+        />
       </header>
 
-      {/* Mockup posing guide: horizontal album strip (not a hero slideshow) */}
       <div className="old-album-wrap">
         <div className="oa-label">
           <div>
             <b>
-              {lang === 'th'
-                ? 'อัลบั้มตัวอย่างจากพี่แสนและทีม'
-                : 'Example album from Saen & team'}
+              {albumBi.en}
+              <span className="oa-sub">{albumBi.th}</span>
             </b>
-            <span className="oa-sub">
-              {lang === 'th'
-                ? 'Example album from Saen & team'
-                : 'อัลบั้มตัวอย่างจากพี่แสนและทีม'}
-            </span>
           </div>
-          <small>{lang === 'th' ? 'ปัดเพื่อดูเพิ่ม →' : 'Swipe for more →'}</small>
+          <small>
+            {swipeBi.en}
+            <span className="block font-thai text-[9px] font-medium opacity-85">{swipeBi.th}</span>
+          </small>
         </div>
         <div className="gallery-scroll-wrap">
           <div className="gallery-scroll">
@@ -54,7 +74,7 @@ export default function PosingGuidePage() {
               <img
                 key={photo.id}
                 src={photoSrc(photo)}
-                alt={lang === 'th' ? photo.caption_th : photo.caption_en}
+                alt={`${photo.caption_en} / ${photo.caption_th}`}
                 loading="lazy"
               />
             ))}
@@ -63,9 +83,14 @@ export default function PosingGuidePage() {
       </div>
 
       <section>
-        <h2 className="font-serif text-[15.5px] text-ink sm:text-lg">
-          {lang === 'th' ? 'ท่าโพสแนะนำจากช่างภาพ' : 'Photographer-approved poses'}
-        </h2>
+        <BiText
+          as="h2"
+          en={posesBi.en}
+          th={posesBi.th}
+          serif
+          className="text-[15.5px] text-ink sm:text-lg"
+          thClassName="mt-0.5 block font-thai text-[12px] font-medium text-ink-soft"
+        />
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {POSING_TIPS.map((p) => (
             <article
@@ -75,26 +100,41 @@ export default function PosingGuidePage() {
               <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-700 text-xs font-extrabold text-cream">
                 {p.n}
               </span>
-              <h3 className="mt-2.5 text-[13px] font-semibold text-ink">
-                {lang === 'th' ? p.titleTh : p.titleEn}
-              </h3>
-              <p className="mt-1 text-[11.5px] leading-[1.55] text-ink-soft">
-                {lang === 'th' ? p.bodyTh : p.bodyEn}
-              </p>
+              <BiText
+                as="h3"
+                en={p.titleEn}
+                th={p.titleTh}
+                className="mt-2.5 text-[13px] font-semibold text-ink"
+                thClassName="mt-0.5 block font-thai text-[11.5px] font-medium text-ink-soft"
+              />
+              <BiText
+                as="p"
+                en={p.bodyEn}
+                th={p.bodyTh}
+                className="mt-1 text-[11.5px] leading-[1.55] text-ink-soft"
+                thClassName="mt-1 block font-thai text-[10.5px] font-medium text-ink-soft/90"
+              />
             </article>
           ))}
         </div>
       </section>
 
       <section>
-        <h2 className="font-serif text-[15.5px] text-ink sm:text-lg">
-          {lang === 'th' ? 'โทนเสื้อผ้าตามฤดูกาล' : 'What to wear, by season'}
-        </h2>
-        <p className="mt-1 text-xs text-ink-soft">
-          {lang === 'th'
-            ? 'จับคู่กับทริปจริงของ Trip2Talk ให้ชุดเข้ากับวิวที่คุณจะถ่าย'
-            : 'Matched to real Trip2Talk trips, so your outfit works with the landscape you’ll shoot.'}
-        </p>
+        <BiText
+          as="h2"
+          en={seasonTitleBi.en}
+          th={seasonTitleBi.th}
+          serif
+          className="text-[15.5px] text-ink sm:text-lg"
+          thClassName="mt-0.5 block font-thai text-[12px] font-medium text-ink-soft"
+        />
+        <BiText
+          as="p"
+          en={seasonSubBi.en}
+          th={seasonSubBi.th}
+          className="mt-1 text-xs text-ink-soft"
+          thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft/90"
+        />
         <div className="mt-4 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
           {SEASON_CARDS.map((s) => (
             <article
@@ -102,11 +142,19 @@ export default function PosingGuidePage() {
               className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${s.gradient} p-4 text-cream`}
             >
               <p className="text-[9px] uppercase tracking-[0.05em] opacity-85">
-                {lang === 'th' ? s.monthsTh : s.monthsEn}
+                {s.monthsEn}
+                <span className="mt-0.5 block font-thai normal-case tracking-normal opacity-90">
+                  {s.monthsTh}
+                </span>
               </p>
-              <h3 className="mb-px mt-1 font-serif text-sm">
-                {lang === 'th' ? s.titleTh : s.titleEn}
-              </h3>
+              <BiText
+                as="h3"
+                en={s.titleEn}
+                th={s.titleTh}
+                serif
+                className="mb-px mt-1 text-sm"
+                thClassName="mt-0.5 block font-thai text-[11px] font-medium opacity-95"
+              />
               <div className="my-2.5 flex gap-1.5">
                 {s.swatches.map((c) => (
                   <span
@@ -116,9 +164,13 @@ export default function PosingGuidePage() {
                   />
                 ))}
               </div>
-              <p className="text-[10px] leading-[1.5] opacity-95">
-                {lang === 'th' ? s.bodyTh : s.bodyEn}
-              </p>
+              <BiText
+                as="p"
+                en={s.bodyEn}
+                th={s.bodyTh}
+                className="text-[10px] leading-[1.5] opacity-95"
+                thClassName="mt-1 block font-thai text-[9.5px] font-medium opacity-90"
+              />
               <span className="mt-2.5 inline-block rounded-full bg-white/20 px-2 py-[3px] text-[9px] font-extrabold">
                 {s.trip}
               </span>
@@ -127,15 +179,19 @@ export default function PosingGuidePage() {
         </div>
       </section>
 
-      {/* .quote-box — teal-900 panel, cream italic pull-quote */}
       <blockquote className="relative m-0 rounded-2xl bg-teal-900 px-6 py-[22px] text-[#eafcf0]">
-        <p className="m-0 mb-2.5 text-sm italic leading-[1.7]">
-          {lang === 'th'
-            ? '“ไม่ต้องพยายามเป็นนางแบบ — พยายามให้ดูเหมือนวันที่สนุกที่สุดของทริป นั่นคือภาพที่คนหยุดเลื่อนดู”'
-            : '“Don’t try to be a model — try to look like you’re having the best day of your trip. That’s the photo people actually stop scrolling for.”'}
-        </p>
+        <BiText
+          as="p"
+          en={quoteBi.en}
+          th={quoteBi.th}
+          className="m-0 mb-2.5 text-sm italic leading-[1.7]"
+          thClassName="mt-2 block font-thai text-[12px] font-medium not-italic opacity-95"
+        />
         <footer className="text-[11.5px] font-bold not-italic opacity-90">
-          — {lang === 'th' ? 'ช่างภาพหลักของ Trip2Talk' : 'Trip2Talk lead photographer'}
+          — {quoteByBi.en}
+          <span className="mt-0.5 block font-thai text-[10.5px] font-medium opacity-85">
+            {quoteByBi.th}
+          </span>
         </footer>
       </blockquote>
     </div>

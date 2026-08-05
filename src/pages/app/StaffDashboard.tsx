@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   fetchConfirmedTours,
   fetchBookingsForTour,
+  listWaiversForTour,
   markAttendance,
   seatsRemaining,
   updateBookingDetails,
@@ -10,11 +11,13 @@ import {
   isBookingCancelled,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
-import type { Tour, TourBooking } from '../../types/tour'
+import type { Tour, TourBooking, WaiverSignature } from '../../types/tour'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import CancelBookingDialog from '../../components/app/CancelBookingDialog'
+import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
+import TripDaySafetyQuickView from '../../components/app/TripDaySafetyQuickView'
 
 type ManifestFilter = 'active' | 'cancelled' | 'all'
 
@@ -26,6 +29,7 @@ export default function StaffDashboard() {
   const [tours, setTours] = useState<Tour[]>([])
   const [selected, setSelected] = useState<Tour | null>(null)
   const [manifest, setManifest] = useState<TourBooking[]>([])
+  const [waivers, setWaivers] = useState<WaiverSignature[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<ManifestFilter>('active')
@@ -125,17 +129,35 @@ export default function StaffDashboard() {
   }, [load])
 
   useEffect(() => {
-    if (!selected) return
-    fetchBookingsForTour(selected.id)
-      .then(setManifest)
+    if (!selected) {
+      setWaivers([])
+      return
+    }
+    Promise.all([fetchBookingsForTour(selected.id), listWaiversForTour(selected.trip_code)])
+      .then(([bookings, w]) => {
+        setManifest(bookings)
+        setWaivers(w)
+      })
       .catch((err) => {
         if (err instanceof StaffSessionExpiredError) {
           navigate('/app')
           return
         }
         setManifest([])
+        setWaivers([])
       })
   }, [selected, navigate])
+
+  function staffWaiverForBooking(booking: TourBooking): WaiverSignature | undefined {
+    return waivers.find(
+      (w) =>
+        w.filled_by_staff &&
+        (w.booking_id === booking.id ||
+          (!w.booking_id &&
+            w.signed_name.toLowerCase() ===
+              `${booking.first_name_en} ${booking.last_name_en}`.trim().toLowerCase())),
+    )
+  }
 
   const today = new Date().toISOString().slice(0, 10)
   const upcoming = tours.filter((t) => t.departure_date && t.departure_date >= today)
@@ -157,14 +179,34 @@ export default function StaffDashboard() {
         </Link>
         <h1 className="mt-2 font-serif text-lg text-cream">Staff Dashboard</h1>
         <p className="text-sm text-cream-muted">{staffName}</p>
-        {staffRole === 'MANAGER' && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {staffRole === 'MANAGER' && (
+            <Link
+              to="/app/cashier"
+              className="inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
+            >
+              💳 Cashier POS
+            </Link>
+          )}
           <Link
-            to="/app/cashier"
-            className="mt-3 inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
+            to="/app/waiver-assist"
+            className="inline-block rounded-editorial border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200"
           >
-            💳 Cashier POS
+            ✍️ Waiver assist / กรอกแทนลูกค้า
           </Link>
-        )}
+          <Link
+            to="/app/outbound"
+            className="inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
+          >
+            📨 Outbound queue
+          </Link>
+          <Link
+            to="/app/photos"
+            className="inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
+          >
+            📷 Photo delivery
+          </Link>
+        </div>
       </header>
 
       <main className="mx-auto max-w-2xl space-y-6 px-4 py-6">
@@ -223,6 +265,17 @@ export default function StaffDashboard() {
                     {tab.label}
                   </button>
                 ))}
+              </div>
+            </div>
+            <div className="mt-4 rounded-editorial border border-amber-500/30 bg-amber-500/5 p-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-amber-200">
+                Trip-day safety
+                <span className="mt-0.5 block font-thai text-[10px] font-medium normal-case tracking-normal text-amber-200/80">
+                  ข้อมูลฉุกเฉินวันทริป
+                </span>
+              </h3>
+              <div className="mt-2.5">
+                <TripDaySafetyQuickView bookings={manifest.filter((b) => !isBookingCancelled(b))} />
               </div>
             </div>
             {filteredManifest.length === 0 ? (
@@ -314,6 +367,18 @@ export default function StaffDashboard() {
                         ) : (
                           <span className="text-cream-muted"> · {b.booking_status}</span>
                         )}
+                        {(() => {
+                          const sw = staffWaiverForBooking(b)
+                          return sw ? (
+                            <span className="mt-1 block">
+                              <StaffFilledWaiverBadge
+                                staffName={sw.staff_fill_staff_name}
+                                authorizedAt={sw.staff_fill_authorized_at ?? sw.signed_at}
+                                note={sw.staff_fill_authorization_note}
+                              />
+                            </span>
+                          ) : null
+                        })()}
                       </span>
                       {!cancelled && (
                         <span className="flex shrink-0 gap-1.5">

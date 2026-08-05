@@ -116,6 +116,47 @@ export function groupToursByDestination(tours: Tour[]): { destination: string; t
     )
 }
 
+/** Unique geographic destinations from live tours (home hero copy). */
+export function uniqueTourDestinations(tours: Tour[]): string[] {
+  const seen = new Set<string>()
+  const dests: string[] = []
+  for (const tour of tours) {
+    const dest = tourDestination(tour.trip_code)
+    if (seen.has(dest)) continue
+    seen.add(dest)
+    dests.push(dest)
+  }
+  return dests.sort(
+    (a, b) =>
+      destinationSortIndex(a) - destinationSortIndex(b) || a.localeCompare(b),
+  )
+}
+
+/** Short EN name for hero destination lists (e.g. New Zealand → NZ). */
+export function heroDestinationShortEn(destination: string): string {
+  if (destination === 'New Zealand') return 'NZ'
+  return destination
+}
+
+/** Bilingual home-hero supporting lines built from live destination names. */
+export function heroDestinationBlurbs(destinations: string[]): { en: string; th: string } | null {
+  if (destinations.length === 0) return null
+
+  const enNames = destinations.map(heroDestinationShortEn)
+  const thNames = destinations.map((d) => DESTINATION_TH[d] ?? d)
+
+  const enList =
+    enNames.length === 1
+      ? enNames[0]
+      : `${enNames.slice(0, -1).join(', ')} & ${enNames[enNames.length - 1]}`
+  const thList = thNames.join(' · ')
+
+  return {
+    en: `Photo trips to ${enList} — fully arranged, with a photographer & styling team the whole way.`,
+    th: `ทริปถ่ายภาพ ${thList} จองครบ จบทุกขั้นตอน มีช่างภาพและทีมสไตล์ลิ่งดูแลตลอดทริป`,
+  }
+}
+
 export function tourDurationLabel(tour: Tour, lang: 'en' | 'th'): string {
   const days = tour.duration_days
   const nights = tour.duration_nights

@@ -3,9 +3,23 @@ import { Check } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { CAMERA_GEAR, CAMERA_SETTINGS } from '../../data/photoGuideContent'
 import PhotoSlideshow, { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
+import BiText from '../../components/ui/BiText'
 
 export default function CameraGuidePage() {
-  const { lang } = useLang()
+  const { tt } = useLang()
+  const backBi = tt('photoGuide.back')
+  const eyebrowBi = tt('photoGuide.camera.eyebrow')
+  const titleBi = tt('photoGuide.camera.title')
+  const subBi = tt('photoGuide.camera.sub')
+  const examplesBi = tt('photoGuide.camera.examples')
+  const disclaimerBi = tt('photoGuide.camera.disclaimer')
+  const gearBi = tt('photoGuide.camera.gear')
+  const colScene = tt('photoGuide.camera.table.scene')
+  const colAperture = tt('photoGuide.camera.table.aperture')
+  const colShutter = tt('photoGuide.camera.table.shutter')
+  const colIso = tt('photoGuide.camera.table.iso')
+  const colNotes = tt('photoGuide.camera.table.notes')
+
   const album = galleryByIds(['nz-001', 'tas-002', 'nz-013', 'nz-014', 'syd-009', 'tas-003'])
   const slides = [
     {
@@ -58,55 +72,71 @@ export default function CameraGuidePage() {
     },
   ].filter((s) => s.photo)
 
+  const tableHeads = [
+    { en: colScene.en, th: colScene.th },
+    { en: colAperture.en, th: colAperture.th },
+    { en: colShutter.en, th: colShutter.th },
+    { en: colIso.en, th: colIso.th },
+    { en: colNotes.en, th: colNotes.th },
+  ]
+
   return (
     <div className="space-y-6 pb-4">
       <Link
         to="/photo-guide"
-        className="inline-flex items-center gap-1.5 text-[11.5px] font-bold text-teal-700 no-underline"
+        className="inline-flex flex-col text-[11.5px] font-bold text-teal-700 no-underline"
       >
-        ← {lang === 'th' ? 'กลับไปหน้าคลังเคล็ดลับ' : 'Back to Photo Guide'}
+        <span>← {backBi.en}</span>
+        <span className="font-thai text-[10px] font-medium opacity-85">{backBi.th}</span>
       </Link>
 
       <header>
         <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-teal-600">
-          {lang === 'th' ? 'คลังเคล็ดลับ · ตั้งค่ากล้อง' : 'Photo Guide · Camera Settings'}
+          {eyebrowBi.en}
+          <span className="ml-1.5 font-thai normal-case tracking-normal opacity-85">
+            {eyebrowBi.th}
+          </span>
         </p>
-        <h1 className="mt-1 font-serif text-2xl text-ink sm:text-3xl">
-          {lang === 'th' ? 'คู่มือตั้งค่ากล้อง' : 'Camera Settings Guide'}
-        </h1>
-        <p className="mt-2 max-w-2xl text-sm text-ink-soft">
-          {lang === 'th'
-            ? 'ค่าเริ่มต้นสำหรับมือใหม่พก DSLR/mirrorless — จากแสงเช้าถึงดาว ทางช้างเผือก และแสงใต้ในทริป NZ & แทสเมเนีย'
-            : 'A starting-point cheat-sheet for beginners with a DSLR or mirrorless — morning light through stars, Milky Way and aurora on our NZ & Tasmania trips.'}
-        </p>
+        <BiText
+          as="h1"
+          en={titleBi.en}
+          th={titleBi.th}
+          serif
+          className="mt-1 text-2xl text-ink sm:text-3xl"
+          thClassName="mt-1 block font-thai text-[15px] font-medium text-ink-soft sm:text-lg"
+        />
+        <BiText
+          as="p"
+          en={subBi.en}
+          th={subBi.th}
+          className="mt-2 max-w-2xl text-sm text-ink-soft"
+          thClassName="mt-1.5 block font-thai text-[12.5px] font-medium text-ink-soft/90"
+        />
       </header>
 
       <div>
         <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.04em] text-teal-700">
-          {lang === 'th'
-            ? 'ตัวอย่างภาพจากทริปของพี่แสน'
-            : "Example shots from Saen's trips"}
+          {examplesBi.en}
+          <span className="mt-0.5 block font-thai text-[10px] font-medium normal-case tracking-normal opacity-85">
+            {examplesBi.th}
+          </span>
         </p>
         <PhotoSlideshow slides={slides} />
       </div>
 
-      {/* .settings-table — borderless rows, uppercase micro header */}
       <div className="hide-scrollbar -mx-4 overflow-x-auto px-4">
         <table className="w-full min-w-[640px] border-collapse text-left">
           <thead>
             <tr>
-              {[
-                lang === 'th' ? 'ช่วงเวลา/ฉาก' : 'Time / scene',
-                lang === 'th' ? 'รูรับแสง (f)' : 'Aperture (f)',
-                'Shutter',
-                'ISO',
-                lang === 'th' ? 'หมายเหตุ' : 'Notes',
-              ].map((head) => (
+              {tableHeads.map((head) => (
                 <th
-                  key={head}
+                  key={head.en}
                   className="border-b-2 border-line px-3 py-2 text-[9.5px] font-semibold uppercase tracking-[0.05em] text-ink-soft"
                 >
-                  {head}
+                  {head.en}
+                  <span className="mt-0.5 block font-thai text-[9px] font-medium normal-case tracking-normal opacity-85">
+                    {head.th}
+                  </span>
                 </th>
               ))}
             </tr>
@@ -115,36 +145,54 @@ export default function CameraGuidePage() {
             {CAMERA_SETTINGS.map((row) => (
               <tr key={row.sceneEn} className="border-b border-line align-top last:border-b-0">
                 <td className="whitespace-nowrap px-3 py-[11px] text-[11.5px] font-bold text-ink">
-                  {lang === 'th' ? row.sceneTh : row.sceneEn}
+                  {row.sceneEn}
+                  <span className="mt-0.5 block font-thai text-[10.5px] font-medium text-ink-soft">
+                    {row.sceneTh}
+                  </span>
                 </td>
                 <td className="px-3 py-[11px] text-[11.5px] font-bold text-teal-700">{row.f}</td>
                 <td className="px-3 py-[11px] text-[11.5px] text-ink">{row.shutter}</td>
                 <td className="px-3 py-[11px] text-[11.5px] text-ink">{row.iso}</td>
                 <td className="px-3 py-[11px] text-[10.5px] leading-relaxed text-ink-soft">
-                  {lang === 'th' ? row.noteTh : row.noteEn}
+                  {row.noteEn}
+                  <span className="mt-1 block font-thai text-[10px] font-medium text-ink-soft/90">
+                    {row.noteTh}
+                  </span>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-      <p className="!mt-1.5 text-[11px] text-ink-soft">
-        {lang === 'th'
-          ? 'เป็นค่าเริ่มต้นเท่านั้น ปรับตามเลนส์และกล้องของแต่ละคน'
-          : 'Starting points only — adjust for your specific lens and camera’s low-light performance.'}
-      </p>
+      <BiText
+        as="p"
+        en={disclaimerBi.en}
+        th={disclaimerBi.th}
+        className="!mt-1.5 text-[11px] text-ink-soft"
+        thClassName="mt-0.5 block font-thai text-[10px] font-medium text-ink-soft/90"
+      />
 
       <section>
-        <h2 className="font-serif text-[15.5px] text-ink sm:text-lg">
-          {lang === 'th' ? 'อุปกรณ์เบื้องต้นที่ควรมี' : 'Beginner gear checklist'}
-        </h2>
+        <BiText
+          as="h2"
+          en={gearBi.en}
+          th={gearBi.th}
+          serif
+          className="text-[15.5px] text-ink sm:text-lg"
+          thClassName="mt-0.5 block font-thai text-[12px] font-medium text-ink-soft"
+        />
         <ul className="mt-3 grid gap-[11px] sm:grid-cols-2">
           {CAMERA_GEAR.map((item) => (
             <li key={item.en} className="flex items-start gap-2 text-[12.5px] leading-[1.5]">
               <span className="mt-px flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[6px] bg-mint-100 text-teal-700">
                 <Check className="h-3 w-3" strokeWidth={2.5} />
               </span>
-              <b className="font-semibold text-ink">{lang === 'th' ? item.th : item.en}</b>
+              <BiText
+                en={item.en}
+                th={item.th}
+                className="font-semibold text-ink"
+                thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+              />
             </li>
           ))}
         </ul>

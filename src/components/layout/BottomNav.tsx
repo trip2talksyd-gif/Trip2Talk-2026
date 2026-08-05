@@ -1,24 +1,30 @@
 import { Compass, Heart, Luggage, MessageCircle, User } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
-import { useLang } from '../../hooks/useLang'
 
 /** Booking / waiver / prep flows own the bottom of the screen — no dock there. */
 const FLOW_ROUTE_PREFIXES = ['/waiver', '/booking', '/trip-prep', '/waitlist']
 
+const ITEMS = [
+  { to: '/', end: true, icon: Compass, en: 'Explore', th: 'สำรวจ' },
+  { to: '/trips', end: false, icon: Luggage, en: 'Trips', th: 'ทริป' },
+  { to: '/favorites', end: false, icon: Heart, en: 'Favorites', th: 'รายการโปรด' },
+  {
+    href: FACEBOOK_PAGE_URL,
+    icon: MessageCircle,
+    en: 'Messages',
+    th: 'ข้อความ',
+  },
+  { to: '/account', end: false, icon: User, en: 'Profile', th: 'โปรไฟล์' },
+] as const
+
 export default function BottomNav() {
-  const { t } = useLang()
   const { pathname } = useLocation()
 
-  // Floating dock sits over the home hero video — hide there too.
+  // Hidden on Home — would sit on top of the hero video (matches mockup `.home-screen .bottom-nav`).
   if (pathname === '/') return null
   if (FLOW_ROUTE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return null
   if (pathname.endsWith('/prep')) return null
-
-  const iconBtn = (isActive: boolean) =>
-    `flex h-6 w-6 items-center justify-center transition-colors ${
-      isActive ? 'text-cream' : 'text-cream/68'
-    }`
 
   return (
     <nav
@@ -26,46 +32,53 @@ export default function BottomNav() {
       aria-label="Primary"
     >
       <div
-        className="pointer-events-auto flex h-[46px] items-center justify-center gap-4 rounded-[23px] px-[18px]"
+        className="pointer-events-auto flex items-end justify-center gap-3 rounded-[23px] px-3.5 pb-1.5 pt-1.5"
         style={{
           background: 'linear-gradient(135deg, var(--teal-400), var(--teal-600))',
           boxShadow:
             '0 12px 22px -10px rgba(15,28,30,.5), 0 1px 0 rgba(255,255,255,.2) inset',
         }}
       >
-        <NavLink to="/" end aria-label={t('nav.explore')} className={({ isActive }) => iconBtn(isActive)}>
-          <Compass className="h-[18px] w-[18px]" strokeWidth={2.25} />
-        </NavLink>
+        {ITEMS.map((item) => {
+          const Icon = item.icon
+          const label = (
+            <span className="mt-0.5 block max-w-[52px] truncate text-center text-[7px] font-bold leading-[1.15]">
+              {item.en}
+              <span className="block font-thai text-[6px] font-medium opacity-85">{item.th}</span>
+            </span>
+          )
 
-        <NavLink to="/trips" aria-label={t('nav.trips')} className={({ isActive }) => iconBtn(isActive)}>
-          <Luggage className="h-[18px] w-[18px]" strokeWidth={2.25} />
-        </NavLink>
+          if ('href' in item) {
+            return (
+              <a
+                key={item.en}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`${item.en} / ${item.th}`}
+                className="flex flex-col items-center text-cream/68"
+              >
+                <Icon className="h-[15px] w-[15px]" strokeWidth={2.25} />
+                {label}
+              </a>
+            )
+          }
 
-        <NavLink
-          to="/favorites"
-          aria-label={t('nav.favorites')}
-          className={({ isActive }) => iconBtn(isActive)}
-        >
-          <Heart className="h-[18px] w-[18px]" strokeWidth={2.25} />
-        </NavLink>
-
-        <a
-          href={FACEBOOK_PAGE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={t('nav.messages')}
-          className={iconBtn(false)}
-        >
-          <MessageCircle className="h-[18px] w-[18px]" strokeWidth={2.25} />
-        </a>
-
-        <NavLink
-          to="/account"
-          aria-label={t('nav.account')}
-          className={({ isActive }) => iconBtn(isActive)}
-        >
-          <User className="h-[18px] w-[18px]" strokeWidth={2.25} />
-        </NavLink>
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              aria-label={`${item.en} / ${item.th}`}
+              className={({ isActive }) =>
+                `flex flex-col items-center ${isActive ? 'text-cream' : 'text-cream/68'}`
+              }
+            >
+              <Icon className="h-[15px] w-[15px]" strokeWidth={2.25} />
+              {label}
+            </NavLink>
+          )
+        })}
       </div>
     </nav>
   )

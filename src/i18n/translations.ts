@@ -84,6 +84,37 @@ export type TranslationKey =
   | 'trips.search'
   | 'trips.search.empty'
   | 'trips.going'
+  | 'trips.going.note'
+  | 'trips.cat.popular'
+  | 'trips.cat.desert'
+  | 'trips.cat.flagship'
+  | 'trips.cat.aurora'
+  | 'trips.cat.influencer'
+  | 'trips.seatsLeft'
+  | 'trips.seatsFull'
+  | 'common.clearSearch'
+  | 'detail.tab.details'
+  | 'detail.tab.itinerary'
+  | 'detail.tab.reviews'
+  | 'detail.stat.duration'
+  | 'detail.stat.seats'
+  | 'detail.stat.perPerson'
+  | 'detail.stat.destination'
+  | 'detail.stat.group'
+  | 'detail.stat.photographer'
+  | 'detail.stat.photographerSub'
+  | 'detail.highlights'
+  | 'detail.includes'
+  | 'detail.excludes'
+  | 'detail.accommodation'
+  | 'detail.prep'
+  | 'detail.photoGuide'
+  | 'detail.swipePhotos'
+  | 'detail.moreTrips'
+  | 'detail.reviews.title'
+  | 'detail.reviews.body'
+  | 'detail.reviews.cta'
+  | 'detail.fromPrice'
   | 'home.hero.destination.tasmania'
   | 'home.hero.destination.uluru'
   | 'home.hero.destination.sydney'
@@ -175,6 +206,45 @@ export type TranslationKey =
   | 'pricing.private.check.2'
   | 'pricing.private.check.3'
   | 'pricing.private.cta'
+  | 'pricing.page.subtitle'
+  | 'pricing.mostPopular'
+  | 'pricing.audPerPerson'
+  | 'pricing.priceHint'
+  | 'pricing.tier.day.title'
+  | 'pricing.tier.day.desc'
+  | 'pricing.tier.day.check.1'
+  | 'pricing.tier.day.check.2'
+  | 'pricing.tier.day.check.3'
+  | 'pricing.tier.day.check.4'
+  | 'pricing.tier.day.cta'
+  | 'pricing.tier.multi.title'
+  | 'pricing.tier.multi.desc'
+  | 'pricing.tier.multi.check.1'
+  | 'pricing.tier.multi.check.2'
+  | 'pricing.tier.multi.check.3'
+  | 'pricing.tier.multi.check.4'
+  | 'pricing.tier.multi.cta'
+  | 'pricing.tier.flagship.title'
+  | 'pricing.tier.flagship.desc'
+  | 'pricing.tier.flagship.check.1'
+  | 'pricing.tier.flagship.check.2'
+  | 'pricing.tier.flagship.check.3'
+  | 'pricing.tier.flagship.check.4'
+  | 'pricing.tier.flagship.cta'
+  | 'pricing.cancel.title'
+  | 'pricing.cancel.intro'
+  | 'pricing.cancel.col.condition'
+  | 'pricing.cancel.col.outcome'
+  | 'pricing.cancel.rule.1.condition'
+  | 'pricing.cancel.rule.1.outcome'
+  | 'pricing.cancel.rule.2.condition'
+  | 'pricing.cancel.rule.2.outcome'
+  | 'pricing.cancel.rule.3.condition'
+  | 'pricing.cancel.rule.3.outcome'
+  | 'pricing.cancel.rule.4.condition'
+  | 'pricing.cancel.rule.4.outcome'
+  | 'pricing.cancel.rule.5.condition'
+  | 'pricing.cancel.rule.5.outcome'
   | 'calendar.value.badge'
   | 'calendar.value.heading.line1'
   | 'calendar.value.heading.line2'
@@ -199,7 +269,70 @@ export type TranslationKey =
   | 'calendar.photo.feature.3.title'
   | 'calendar.photo.feature.3.desc'
   | 'calendar.trips.badge'
+  | 'calendar.banner.title'
+  | 'calendar.banner.sub'
+  | 'calendar.empty'
+  | 'calendar.moreDestinations'
+  | 'gallery.empty'
+  | 'gallery.emptyCategory'
+  | 'gallery.exampleAlbum'
+  | 'gallery.inspiration'
+  | 'photoGuide.back'
+  | 'photoGuide.hub.badge'
+  | 'photoGuide.hub.title'
+  | 'photoGuide.hub.subtitle'
+  | 'photoGuide.readGuide'
+  | 'photoGuide.hub.albumTitle'
+  | 'photoGuide.hub.albumSub'
+  | 'photoGuide.hub.dragHint'
+  | 'photoGuide.swipeMore'
+  | 'photoGuide.fromTheRoad'
+  | 'photoGuide.posing.eyebrow'
+  | 'photoGuide.posing.title'
+  | 'photoGuide.posing.sub'
+  | 'photoGuide.posing.posesTitle'
+  | 'photoGuide.posing.seasonTitle'
+  | 'photoGuide.posing.seasonSub'
+  | 'photoGuide.posing.quote'
+  | 'photoGuide.posing.quoteBy'
+  | 'photoGuide.camera.eyebrow'
+  | 'photoGuide.camera.title'
+  | 'photoGuide.camera.sub'
+  | 'photoGuide.camera.examples'
+  | 'photoGuide.camera.table.scene'
+  | 'photoGuide.camera.table.aperture'
+  | 'photoGuide.camera.table.shutter'
+  | 'photoGuide.camera.table.iso'
+  | 'photoGuide.camera.table.notes'
+  | 'photoGuide.camera.disclaimer'
+  | 'photoGuide.camera.gear'
+  | 'photoGuide.mobile.eyebrow'
+  | 'photoGuide.mobile.title'
+  | 'photoGuide.mobile.sub'
+  | 'photoGuide.mobile.landscape'
+  | 'photoGuide.mobile.portrait'
+  | 'photoGuide.follow'
+  | 'favorites.saved'
+  | 'favorites.savedTripsLabel'
+  | 'trips.suggested'
+  | 'account.guestBadge'
+  | 'account.guestSub'
+  | 'account.language'
   | 'about.positioning'
+  | 'about.page.eyebrow'
+  | 'about.page.title'
+  | 'about.hero.heading'
+  | 'about.hero.story'
+  | 'about.hero.stat.trips'
+  | 'about.hero.stat.photographers'
+  | 'about.hero.stat.travelers'
+  | 'about.saen.bio'
+  | 'about.ploy.bio'
+  | 'about.whatToKnow.title'
+  | 'about.whatToKnow.body'
+  | 'about.contact.studio'
+  | 'about.contact.hours'
+  | 'about.contact.footer'
   | 'about.stats.heading.line1'
   | 'about.stats.heading.line2'
   | 'about.stats.intro'
@@ -216,6 +349,60 @@ export type TranslationKey =
   | 'about.tips'
   | 'waiver.title'
   | 'waiver.signName'
+  | 'safety.title'
+  | 'safety.subtitle'
+  | 'safety.emergencyName'
+  | 'safety.emergencyPhone'
+  | 'safety.allergies'
+  | 'safety.allergies.ph'
+  | 'safety.medical'
+  | 'safety.medical.ph'
+  | 'safety.insuranceProvider'
+  | 'safety.insuranceProvider.ph'
+  | 'safety.insurancePolicy'
+  | 'safety.insurancePolicy.ph'
+  | 'safety.otherNotes'
+  | 'safety.otherNotes.ph'
+  | 'safety.emergencyRequired'
+  | 'safety.insuranceType'
+  | 'safety.oshcMembership'
+  | 'safety.oshcRiskRequired'
+  | 'safety.travelProvider'
+  | 'safety.travelPolicy'
+  | 'safety.flightToggle'
+  | 'safety.flightNzNote'
+  | 'safety.flightFirst'
+  | 'safety.flightLast'
+  | 'safety.flightDob'
+  | 'safety.flightPassport'
+  | 'safety.flightNationality'
+  | 'safety.flightFf'
+  | 'confirm.title'
+  | 'confirm.subtitle'
+  | 'confirm.noInvoice'
+  | 'confirm.nextTitle'
+  | 'confirm.next.1'
+  | 'confirm.next.2'
+  | 'confirm.next.3'
+  | 'confirm.check.deposit'
+  | 'confirm.check.waiver'
+  | 'confirm.check.safety'
+  | 'confirm.check.facebook'
+  | 'confirm.download'
+  | 'confirm.email'
+  | 'confirm.open'
+  | 'staff.safety.quickView'
+  | 'staff.safety.none'
+  | 'staff.safety.allergies'
+  | 'staff.safety.medical'
+  | 'staff.safety.insurance'
+  | 'staff.safety.notes'
+  | 'staff.payments.title'
+  | 'staff.payments.search'
+  | 'staff.payments.progress'
+  | 'staff.payments.add'
+  | 'staff.payments.markPaid'
+  | 'staff.income.title'
   | 'lang.toggle'
   | 'validation.email'
   | 'validation.phone'
@@ -329,6 +516,7 @@ const en: Map = {
   'common.oneday': 'One Day',
   'common.overnight': 'Overnight',
   'common.multiday': 'Multi-day',
+  'common.clearSearch': 'Clear search',
   'home.stats.trips': '13 Trips',
   'home.stats.group': '100% Small Group',
   'home.stats.photographers': 'Local Photographers',
@@ -340,18 +528,49 @@ const en: Map = {
   'home.hero.title.line2': 'worth remembering',
   'home.hero.en.line1': 'Capture Moments',
   'home.hero.en.line2': 'Worth Showing Off',
-  'home.hero.th.line1': 'จับภาพโมเมนต์',
-  'home.hero.th.line2': 'ที่อยากอวด',
+  'home.hero.th.line1': 'ออกไปเก็บภาพ',
+  'home.hero.th.line2': 'ที่ทุกคนอยากดู',
   'home.hero.subtitle':
-    'From aurora hunts in Tasmania to sunrise over Uluru — private, small-group trips with a professional photographer, built for Thai travellers in Australia.',
+    'Photo trips across Australia & New Zealand — fully arranged, with a photographer & styling team the whole way.',
   'home.promo.eyebrow': "Let's Learn and Practice",
-  'home.promo.title': 'Photo Guide — posing, settings & mobile tips',
+  'home.promo.title': 'New: Photo Guide — poses, camera & phone tips',
   'trips.title': 'Find Your Trip',
   'trips.subtitle': 'Small groups, pro photographer on every trip.',
   'trips.empty': 'No trips in this category yet — check back soon.',
-  'trips.search': 'Search destination or trip…',
+  'trips.search': 'Search destination...',
   'trips.search.empty': 'No trips match your search.',
   'trips.going': 'Connect with people going',
+  'trips.going.note': 'Join the Facebook group chat — live traveler list coming later.',
+  'trips.cat.popular': 'Popular',
+  'trips.cat.desert': 'Desert',
+  'trips.cat.flagship': 'Flagship',
+  'trips.cat.aurora': 'Aurora',
+  'trips.cat.influencer': 'Influencer',
+  'trips.seatsLeft': 'left',
+  'trips.seatsFull': 'Full',
+  'detail.tab.details': 'Details',
+  'detail.tab.itinerary': 'Itinerary',
+  'detail.tab.reviews': 'Reviews',
+  'detail.stat.duration': 'Duration',
+  'detail.stat.seats': 'Seats',
+  'detail.stat.perPerson': 'Per person',
+  'detail.stat.destination': 'Destination',
+  'detail.stat.group': 'Group size',
+  'detail.stat.photographer': 'Pro photographer',
+  'detail.stat.photographerSub': 'Every trip',
+  'detail.highlights': 'Highlights',
+  'detail.includes': "What's included",
+  'detail.excludes': 'Not included',
+  'detail.accommodation': 'Accommodation',
+  'detail.prep': 'Trip Preparation',
+  'detail.photoGuide': 'Read the Photo Guide before you go',
+  'detail.swipePhotos': '↔ Swipe for more photos',
+  'detail.moreTrips': 'More Trips For You',
+  'detail.reviews.title': 'Guest reviews',
+  'detail.reviews.body':
+    "We don't publish review scores here yet — read real comments and guest photos on our Facebook Page.",
+  'detail.reviews.cta': 'See reviews on Facebook',
+  'detail.fromPrice': 'From',
   'home.hero.destination.tasmania': 'Tasmania',
   'home.hero.destination.uluru': 'Uluru',
   'home.hero.destination.sydney': 'Sydney',
@@ -452,6 +671,46 @@ const en: Map = {
   'pricing.private.check.2': 'Choose your own travel dates',
   'pricing.private.check.3': 'Full privacy throughout the trip',
   'pricing.private.cta': 'Book a private trip',
+  'pricing.page.subtitle': 'Sample figures — live trip pages show exact AUD pricing',
+  'pricing.mostPopular': 'Most popular',
+  'pricing.audPerPerson': 'AUD / person',
+  'pricing.priceHint': 'Tap or hover the price to see the flip animation',
+  'pricing.tier.day.title': 'One-day trips',
+  'pricing.tier.day.desc': 'A few hours with one professional photographer — light logistics',
+  'pricing.tier.day.check.1': '3-hour photo session',
+  'pricing.tier.day.check.2': 'Local professional photographer',
+  'pricing.tier.day.check.3': 'Unlimited edited photos',
+  'pricing.tier.day.check.4': 'Online album delivery',
+  'pricing.tier.day.cta': 'Book a one-day trip',
+  'pricing.tier.multi.title': 'Multi-day trips',
+  'pricing.tier.multi.desc': '3–4 days with vehicle + driver and lodging support',
+  'pricing.tier.multi.check.1': 'Everything in a one-day trip',
+  'pricing.tier.multi.check.2': 'SUV and driver included',
+  'pricing.tier.multi.check.3': 'Accommodation booking help',
+  'pricing.tier.multi.check.4': 'Park fees and permits',
+  'pricing.tier.multi.cta': 'Book a multi-day trip',
+  'pricing.tier.flagship.title': 'Flagship trips',
+  'pricing.tier.flagship.desc': '6 days with flight coordination — our fullest itinerary',
+  'pricing.tier.flagship.check.1': 'Everything in a multi-day trip',
+  'pricing.tier.flagship.check.2': 'Flight booking assistance',
+  'pricing.tier.flagship.check.3': '5+ nights accommodation',
+  'pricing.tier.flagship.check.4': 'Priority photographer team',
+  'pricing.tier.flagship.cta': 'Book a flagship trip',
+  'pricing.cancel.title': 'Cancellation & refund policy',
+  'pricing.cancel.intro':
+    'Trip2Talk takes PayID (AUD) deposits before travel. All amounts are in Australian dollars.',
+  'pricing.cancel.col.condition': 'Condition',
+  'pricing.cancel.col.outcome': 'Outcome',
+  'pricing.cancel.rule.1.condition': 'Cancel 10+ days before departure',
+  'pricing.cancel.rule.1.outcome': 'Reschedule or hold credit for a later trip',
+  'pricing.cancel.rule.2.condition': 'Cancel 3–9 days before departure',
+  'pricing.cancel.rule.2.outcome': 'Transfer to another traveller only — no cash refund',
+  'pricing.cancel.rule.3.condition': 'Cancel 0–2 days before departure',
+  'pricing.cancel.rule.3.outcome': 'No refund in any case, including deposit',
+  'pricing.cancel.rule.4.condition': 'Weather / force majeure',
+  'pricing.cancel.rule.4.outcome': 'Full credit for a future trip — no cash refund',
+  'pricing.cancel.rule.5.condition': 'Minimum group size not met',
+  'pricing.cancel.rule.5.outcome': 'Trip may be rescheduled or credited — we notify by SMS/email',
   'calendar.value.badge': 'Book with confidence',
   'calendar.value.heading.line1': 'Stop guessing travel dates.',
   'calendar.value.heading.line2': 'Book with confidence.',
@@ -477,7 +736,81 @@ const en: Map = {
   'calendar.photo.feature.3.title': 'High-res photos to keep',
   'calendar.photo.feature.3.desc': 'Full-resolution files, ready to post the same trip',
   'calendar.trips.badge': 'Open for booking',
+  'calendar.banner.title': 'Every trip includes a photographer',
+  'calendar.banner.sub': 'Styling / wardrobe support throughout the trip',
+  'calendar.empty': 'No trips in this month',
+  'calendar.moreDestinations': 'More destinations',
+  'gallery.empty': 'No gallery photos yet',
+  'gallery.emptyCategory': 'No photos in this category',
+  'gallery.exampleAlbum': 'Example album from Saen & team',
+  'gallery.inspiration': 'Inspiration',
+  'photoGuide.back': 'Back to Photo Guide',
+  'photoGuide.hub.badge': "Let's Learn and Practice",
+  'photoGuide.hub.title': 'Photo Guide',
+  'photoGuide.hub.subtitle':
+    'Three guides for three kinds of travelers — linked from Home and Trip Prep.',
+  'photoGuide.readGuide': 'Read guide →',
+  'photoGuide.hub.albumTitle': 'Photos from Saen',
+  'photoGuide.hub.albumSub': 'Curated shots from past trips — drag or browse the slideshow below.',
+  'photoGuide.hub.dragHint': '↔ Drag to browse the album',
+  'photoGuide.swipeMore': 'Swipe for more →',
+  'photoGuide.fromTheRoad': 'From the road',
+  'photoGuide.posing.eyebrow': 'Photo Guide · Posing & Styling',
+  'photoGuide.posing.title': 'Posing & Styling Guide',
+  'photoGuide.posing.sub':
+    'For trip customers who love being in front of the camera. Browse the album, then try our photographers’ favorite poses and seasonal color guide.',
+  'photoGuide.posing.posesTitle': 'Photographer-approved poses',
+  'photoGuide.posing.seasonTitle': 'What to wear, by season',
+  'photoGuide.posing.seasonSub':
+    'Matched to real Trip2Talk trips, so your outfit works with the landscape you’ll shoot.',
+  'photoGuide.posing.quote':
+    '“Don’t try to be a model — try to look like you’re having the best day of your trip. That’s the photo people actually stop scrolling for.”',
+  'photoGuide.posing.quoteBy': 'Trip2Talk lead photographer',
+  'photoGuide.camera.eyebrow': 'Photo Guide · Camera Settings',
+  'photoGuide.camera.title': 'Camera Settings Guide',
+  'photoGuide.camera.sub':
+    'A starting-point cheat-sheet for beginners with a DSLR or mirrorless — morning light through stars, Milky Way and aurora on our NZ & Tasmania trips.',
+  'photoGuide.camera.examples': "Example shots from Saen's trips",
+  'photoGuide.camera.table.scene': 'Time / scene',
+  'photoGuide.camera.table.aperture': 'Aperture (f)',
+  'photoGuide.camera.table.shutter': 'Shutter',
+  'photoGuide.camera.table.iso': 'ISO',
+  'photoGuide.camera.table.notes': 'Notes',
+  'photoGuide.camera.disclaimer':
+    'Starting points only — adjust for your specific lens and camera’s low-light performance.',
+  'photoGuide.camera.gear': 'Beginner gear checklist',
+  'photoGuide.mobile.eyebrow': 'Photo Guide · Mobile Photography',
+  'photoGuide.mobile.title': 'Mobile Photography Guide',
+  'photoGuide.mobile.sub':
+    'No extra gear needed — simple landscape and portrait techniques any trip customer can use with just their phone.',
+  'photoGuide.mobile.landscape': 'Landscape',
+  'photoGuide.mobile.portrait': 'Portrait / People',
+  'photoGuide.follow': 'Follow Trip2Talk',
+  'favorites.saved': 'saved',
+  'favorites.savedTripsLabel': 'saved trips',
+  'trips.suggested': 'You might also like',
+  'account.guestBadge': 'Trip2Talk Guest',
+  'account.guestSub': 'Guest booking — no account login required',
+  'account.language': 'Language',
   'about.positioning': 'Who we are',
+  'about.page.eyebrow': 'About Trip2Talk',
+  'about.page.title': 'About Trip2Talk',
+  'about.hero.heading': 'Photo trips, handled end-to-end',
+  'about.hero.story':
+    "Trip2Talk started with one idea: travelers shouldn't have to choose between exploring and getting great photos of themselves doing it. Every trip pairs a small group (max 6) with a professional photographer and styling support, so you can focus on the moment.",
+  'about.hero.stat.trips': 'Trips',
+  'about.hero.stat.photographers': 'Photographers',
+  'about.hero.stat.travelers': 'Travelers',
+  'about.saen.bio':
+    "Hello — I'm Saen, a photographer captivated by nature and light. I taught myself the craft and, through that passion, connected with Thai communities in Sydney who shared the same love for exploring and photographing this city.\n\nOver the past 10 years I've honed landscape photography. For me, photography isn't just recording a scene — it's preserving a story, a feeling, and the experience of that moment in time.",
+  'about.ploy.bio':
+    'Monsicha Chayakorn (Ploy) — Admin & Trip Staff. She coordinates bookings and makes sure every guest is prepared before departure.',
+  'about.whatToKnow.title': 'What you should know',
+  'about.whatToKnow.body':
+    "We're not a traditional tour company — Trip2Talk is a Photo Trip service focused on photography-led travel. Accommodation is typically hostel, backpacker, or motel standard — clean and safe. Private room upgrades are available on request. Meals are not included.",
+  'about.contact.studio': 'Studio',
+  'about.contact.hours': 'Monday–Friday 10am–5pm',
+  'about.contact.footer': 'ABN 81 951 461 769 · Chapter 99 Photography',
   'about.stats.heading.line1': 'About',
   'about.stats.heading.line2': 'our team',
   'about.stats.intro':
@@ -495,6 +828,62 @@ const en: Map = {
   'about.tips': 'Insider Tips — Aurora Hunting',
   'waiver.title': 'Waiver & Consent',
   'waiver.signName': 'Type your full name as digital signature',
+  'safety.title': 'Safety Info',
+  'safety.subtitle': 'For your guide in an emergency — keep it short.',
+  'safety.emergencyName': 'Emergency contact name',
+  'safety.emergencyPhone': 'Emergency contact phone',
+  'safety.allergies': 'Allergies',
+  'safety.allergies.ph': 'e.g. peanuts, none',
+  'safety.medical': 'Medical conditions',
+  'safety.medical.ph': 'e.g. asthma, none',
+  'safety.insuranceProvider': 'Travel insurance provider',
+  'safety.insuranceProvider.ph': 'Company name',
+  'safety.insurancePolicy': 'Policy number',
+  'safety.insurancePolicy.ph': 'Policy / member no.',
+  'safety.otherNotes': 'Anything else we should know',
+  'safety.otherNotes.ph': 'e.g. cannot swim, fear of heights, mobility needs',
+  'safety.emergencyRequired': 'Emergency contact name and phone are required',
+  'safety.insuranceType': 'Insurance type',
+  'safety.oshcMembership': 'OSHC membership number',
+  'safety.oshcRiskRequired': 'Please acknowledge the OSHC repatriation risk',
+  'safety.travelProvider': 'Travel insurance provider',
+  'safety.travelPolicy': 'Travel insurance policy number',
+  'safety.flightToggle': 'Book flights on my behalf',
+  'safety.flightNzNote':
+    'Passport & nationality required for NZ flights only — not needed for AU domestic.',
+  'safety.flightFirst': 'Legal first name (passport)',
+  'safety.flightLast': 'Legal last name (passport)',
+  'safety.flightDob': 'Date of birth',
+  'safety.flightPassport': 'Passport number',
+  'safety.flightNationality': 'Nationality',
+  'safety.flightFf': 'Frequent flyer number (optional)',
+  'confirm.title': 'Confirmation Summary',
+  'confirm.subtitle': 'Your booking checklist — no tax invoice here.',
+  'confirm.noInvoice':
+    'No tax invoice included here — sent separately per payment.',
+  'confirm.nextTitle': 'What happens next',
+  'confirm.next.1': 'Transfer your deposit via PayID and send the slip on Facebook.',
+  'confirm.next.2': 'We confirm your seat and add you to the trip group chat.',
+  'confirm.next.3': 'Before departure, check Trip Prep for packing and meeting point.',
+  'confirm.check.deposit': 'Deposit paid',
+  'confirm.check.waiver': 'Waiver signed',
+  'confirm.check.safety': 'Safety info on file',
+  'confirm.check.facebook': 'Message us on Facebook',
+  'confirm.download': 'Download summary (PNG)',
+  'confirm.email': 'Open Gmail to share',
+  'confirm.open': 'Open confirmation summary',
+  'staff.safety.quickView': 'Trip-day safety',
+  'staff.safety.none': 'No safety notes',
+  'staff.safety.allergies': 'Allergies',
+  'staff.safety.medical': 'Medical',
+  'staff.safety.insurance': 'Insurance',
+  'staff.safety.notes': 'Notes',
+  'staff.payments.title': 'Customer payments',
+  'staff.payments.search': 'Search by customer name',
+  'staff.payments.progress': 'Installment progress',
+  'staff.payments.add': 'Add installment',
+  'staff.payments.markPaid': 'Mark paid',
+  'staff.income.title': 'Income (paid installments)',
   'lang.toggle': 'ไทย',
   'validation.email': 'Enter a valid email address',
   'validation.phone': 'Use Australian mobile format: 04XX XXX XXX',
@@ -607,6 +996,7 @@ const th: Map = {
   'common.oneday': 'วันเดียว',
   'common.overnight': 'ค้างคืน',
   'common.multiday': 'หลายวัน',
+  'common.clearSearch': 'ล้างคำค้นหา',
   'home.stats.trips': '13 ทริป',
   'home.stats.group': 'กลุ่มเล็ก 100%',
   'home.stats.photographers': 'ช่างภาพท้องถิ่น',
@@ -618,18 +1008,49 @@ const th: Map = {
   'home.hero.title.line2': 'ที่คุณจะไม่มีวันลืม',
   'home.hero.en.line1': 'Capture Moments',
   'home.hero.en.line2': 'Worth Showing Off',
-  'home.hero.th.line1': 'จับภาพโมเมนต์',
-  'home.hero.th.line2': 'ที่อยากอวด',
+  'home.hero.th.line1': 'ออกไปเก็บภาพ',
+  'home.hero.th.line2': 'ที่ทุกคนอยากดู',
   'home.hero.subtitle':
-    'ตั้งแต่ล่าแสงใต้ที่แทสเมเนีย ถึงพระอาทิตย์ขึ้นที่อูลูรู — ทริปกลุ่มเล็กส่วนตัว พร้อมช่างภาพมืออาชีพ ออกแบบมาเพื่อคนไทยในออสเตรเลียโดยเฉพาะ',
+    'ทริปถ่ายภาพทั่วออสเตรเลียและนิวซีแลนด์ จองครบ จบทุกขั้นตอน มีช่างภาพและทีมสไตล์ลิ่งดูแลตลอดทริป',
   'home.promo.eyebrow': 'Learn and Practice',
-  'home.promo.title': 'คู่มือถ่ายภาพ — โพสท่า ตั้งค่ากล้อง และมือถือ',
+  'home.promo.title': 'ใหม่! คู่มือถ่ายภาพ — ท่าโพส กล้อง และมือถือ',
   'trips.title': 'เลือกทริปของคุณ',
   'trips.subtitle': 'กลุ่มเล็ก มีช่างภาพมืออาชีพทุกทริป',
   'trips.empty': 'ยังไม่มีทริปในหมวดนี้ — กลับมาเช็คใหม่เร็วๆ นี้',
-  'trips.search': 'ค้นหาจุดหมายหรือชื่อทริป…',
+  'trips.search': 'ค้นหาจุดหมาย',
   'trips.search.empty': 'ไม่พบทริปที่ตรงกับคำค้นหา',
   'trips.going': 'เจอเพื่อนร่วมทริป',
+  'trips.going.note': 'เข้ากลุ่มแชท Facebook — รายชื่อผู้ร่วมทริปจริงจะมาทีหลัง',
+  'trips.cat.popular': 'ยอดนิยม',
+  'trips.cat.desert': 'ทะเลทราย',
+  'trips.cat.flagship': 'เรือธง',
+  'trips.cat.aurora': 'ล่าแสงใต้',
+  'trips.cat.influencer': 'อินฟลู',
+  'trips.seatsLeft': 'เหลือ',
+  'trips.seatsFull': 'เต็ม',
+  'detail.tab.details': 'รายละเอียด',
+  'detail.tab.itinerary': 'เส้นทาง',
+  'detail.tab.reviews': 'รีวิว',
+  'detail.stat.duration': 'ระยะเวลา',
+  'detail.stat.seats': 'ที่นั่ง',
+  'detail.stat.perPerson': 'ต่อคน',
+  'detail.stat.destination': 'ปลายทาง',
+  'detail.stat.group': 'ขนาดกลุ่ม',
+  'detail.stat.photographer': 'ช่างภาพมืออาชีพ',
+  'detail.stat.photographerSub': 'ทุกทริป',
+  'detail.highlights': 'ไฮไลท์',
+  'detail.includes': 'รวมในราคา',
+  'detail.excludes': 'ไม่รวม',
+  'detail.accommodation': 'ที่พัก',
+  'detail.prep': 'เตรียมตัวก่อนเดินทาง',
+  'detail.photoGuide': 'อ่านคู่มือถ่ายภาพก่อนออกเดินทาง',
+  'detail.swipePhotos': '↔ ปัดดูรูปเพิ่มเติม',
+  'detail.moreTrips': 'ทริปแนะนำเพิ่มเติม',
+  'detail.reviews.title': 'รีวิวจากลูกทริป',
+  'detail.reviews.body':
+    'เรายังไม่ลงรีวิวในเว็บ — อ่านคอมเมนต์และรูปจากลูกทริปจริงได้ที่เพจ Facebook ของเรา',
+  'detail.reviews.cta': 'ดูรีวิวบน Facebook',
+  'detail.fromPrice': 'เริ่มต้น',
   'home.hero.destination.tasmania': 'แทสเมเนีย',
   'home.hero.destination.uluru': 'อูลูรู',
   'home.hero.destination.sydney': 'ซิดนีย์',
@@ -730,6 +1151,46 @@ const th: Map = {
   'pricing.private.check.2': 'เลือกวันเดินทางเองได้',
   'pricing.private.check.3': 'ความเป็นส่วนตัวเต็มที่',
   'pricing.private.cta': 'จองทริปส่วนตัว',
+  'pricing.page.subtitle': 'ตัวเลขเป็นตัวอย่าง — ราคาจริงดูได้ในแต่ละทริป',
+  'pricing.mostPopular': 'ยอดนิยม',
+  'pricing.audPerPerson': 'AUD / คน',
+  'pricing.priceHint': 'จิ้มหรือโฮเวอร์ตัวเลขดูแอนิเมชัน',
+  'pricing.tier.day.title': 'ทริปวันเดียว',
+  'pricing.tier.day.desc': 'ไม่กี่ชั่วโมง ช่างภาพมืออาชีพหนึ่งคน โลจิสติกส์น้อย',
+  'pricing.tier.day.check.1': 'เซสชันถ่ายภาพ 3 ชม.',
+  'pricing.tier.day.check.2': 'ช่างภาพมืออาชีพท้องถิ่น',
+  'pricing.tier.day.check.3': 'รูปแก้ไม่จำกัด',
+  'pricing.tier.day.check.4': 'ส่งอัลบั้มออนไลน์',
+  'pricing.tier.day.cta': 'จองทริปวันเดียว',
+  'pricing.tier.multi.title': 'ทริปหลายวัน',
+  'pricing.tier.multi.desc': '3–4 วัน รวมรถและคนขับ ช่วยจัดการที่พัก',
+  'pricing.tier.multi.check.1': 'ทุกอย่างในทริปวันเดียว',
+  'pricing.tier.multi.check.2': 'รวมรถ SUV และคนขับ',
+  'pricing.tier.multi.check.3': 'ช่วยจองที่พัก',
+  'pricing.tier.multi.check.4': 'ค่าเข้าอุทยานและใบอนุญาต',
+  'pricing.tier.multi.cta': 'จองทริปหลายวัน',
+  'pricing.tier.flagship.title': 'ทริปเรือธง',
+  'pricing.tier.flagship.desc': '6 วัน ช่วยประสานตั๋วบิน ทริปเข้มข้นที่สุด',
+  'pricing.tier.flagship.check.1': 'ทุกอย่างในทริปหลายวัน',
+  'pricing.tier.flagship.check.2': 'ช่วยจองตั๋วเครื่องบิน',
+  'pricing.tier.flagship.check.3': 'ที่พัก 5+ คืน',
+  'pricing.tier.flagship.check.4': 'ทีมช่างภาพลำดับแรก',
+  'pricing.tier.flagship.cta': 'จองทริปเรือธง',
+  'pricing.cancel.title': 'นโยบายการยกเลิกและคืนเงิน',
+  'pricing.cancel.intro':
+    'Trip2Talk รับชำระผ่าน PayID (AUD) โดยมัดจำก่อนเดินทาง ราคาทั้งหมดเป็นดอลลาร์ออสเตรเลีย',
+  'pricing.cancel.col.condition': 'เงื่อนไข',
+  'pricing.cancel.col.outcome': 'ผลลัพธ์',
+  'pricing.cancel.rule.1.condition': 'ยกเลิกล่วงหน้า 10 วันขึ้นไป',
+  'pricing.cancel.rule.1.outcome': 'เลื่อนทริปหรือเก็บเครดิตสำหรับทริปถัดไป',
+  'pricing.cancel.rule.2.condition': 'ยกเลิกล่วงหน้า 3–9 วัน',
+  'pricing.cancel.rule.2.outcome': 'โอนสิทธิ์ให้ผู้อื่นเดินทางแทนเท่านั้น — ไม่คืนเงินสด',
+  'pricing.cancel.rule.3.condition': 'ยกเลิกล่วงหน้า 0–2 วัน',
+  'pricing.cancel.rule.3.outcome': 'ไม่คืนเงินทุกกรณี รวมมัดจำ',
+  'pricing.cancel.rule.4.condition': 'สภาพอากาศ / เหตุสุดวิสัย',
+  'pricing.cancel.rule.4.outcome': 'ออกเครดิตเต็มจำนวนสำหรับจองทริปครั้งถัดไป ไม่คืนเป็นเงินสด',
+  'pricing.cancel.rule.5.condition': 'จำนวนผู้ร่วมทริปไม่ถึงขั้นต่ำ',
+  'pricing.cancel.rule.5.outcome': 'อาจเลื่อนทริปหรือออกเครดิต — Trip2Talk จะแจ้งทาง SMS/อีเมล',
   'calendar.value.badge': 'จองมั่นใจ',
   'calendar.value.heading.line1': 'เลิกเดาสุ่มวันเดินทาง',
   'calendar.value.heading.line2': 'จองแบบมั่นใจ',
@@ -755,7 +1216,81 @@ const th: Map = {
   'calendar.photo.feature.3.title': 'ได้ไฟล์ภาพความละเอียดสูง',
   'calendar.photo.feature.3.desc': 'รูปไฟล์เต็ม พร้อมโพสต์ตั้งแต่ทริปยังไม่จบ',
   'calendar.trips.badge': 'เปิดจองแล้ว',
+  'calendar.banner.title': 'ทุกทริปมีช่างภาพ · พร้อมทีมสไตล์ลิ่ง',
+  'calendar.banner.sub': 'พร้อมทีมสไตล์ลิ่ง/wardrobe ดูแลตลอดทริป',
+  'calendar.empty': 'ไม่มีทริปในเดือนนี้',
+  'calendar.moreDestinations': 'ทริปอื่นๆ ที่น่าสนใจ',
+  'gallery.empty': 'ยังไม่มีรูปในแกลเลอรี',
+  'gallery.emptyCategory': 'ไม่มีรูปในหมวดนี้',
+  'gallery.exampleAlbum': 'อัลบั้มตัวอย่างจากพี่แสนและทีม',
+  'gallery.inspiration': 'แรงบันดาลใจ',
+  'photoGuide.back': 'กลับไปหน้าคลังเคล็ดลับ',
+  'photoGuide.hub.badge': 'มาเรียนรู้และฝึกฝนไปด้วยกัน',
+  'photoGuide.hub.title': 'คลังเคล็ดลับถ่ายภาพ',
+  'photoGuide.hub.subtitle':
+    'สามคู่มือสำหรับสามสไตล์นักเดินทาง — ลิงก์จากหน้าแรกและหน้าเตรียมตัว',
+  'photoGuide.readGuide': 'อ่านคู่มือ →',
+  'photoGuide.hub.albumTitle': 'อัลบั้มรูปจากพี่แสน',
+  'photoGuide.hub.albumSub': 'รูปคัดสรรจากทริปที่ผ่านมา — ลากหรือดูสไลด์ด้านล่าง',
+  'photoGuide.hub.dragHint': '↔ ลากเพื่อดูอัลบั้ม',
+  'photoGuide.swipeMore': 'ปัดเพื่อดูเพิ่ม →',
+  'photoGuide.fromTheRoad': 'จากทริปจริง',
+  'photoGuide.posing.eyebrow': 'คลังเคล็ดลับ · โพสท่า',
+  'photoGuide.posing.title': 'คู่มือโพสท่า & แต่งตัว',
+  'photoGuide.posing.sub':
+    'สำหรับลูกทริปที่ชอบอยู่หน้ากล้อง — ดูอัลบั้มตัวอย่างก่อน แล้วตามด้วยท่าโพสและโทนเสื้อผ้าตามฤดูกาล',
+  'photoGuide.posing.posesTitle': 'ท่าโพสแนะนำจากช่างภาพ',
+  'photoGuide.posing.seasonTitle': 'โทนเสื้อผ้าตามฤดูกาล',
+  'photoGuide.posing.seasonSub':
+    'จับคู่กับทริปจริงของ Trip2Talk ให้ชุดเข้ากับวิวที่คุณจะถ่าย',
+  'photoGuide.posing.quote':
+    '“ไม่ต้องพยายามเป็นนางแบบ — พยายามให้ดูเหมือนวันที่สนุกที่สุดของทริป นั่นคือภาพที่คนหยุดเลื่อนดู”',
+  'photoGuide.posing.quoteBy': 'ช่างภาพหลักของ Trip2Talk',
+  'photoGuide.camera.eyebrow': 'คลังเคล็ดลับ · ตั้งค่ากล้อง',
+  'photoGuide.camera.title': 'คู่มือตั้งค่ากล้อง',
+  'photoGuide.camera.sub':
+    'ค่าเริ่มต้นสำหรับมือใหม่พก DSLR/mirrorless — จากแสงเช้าถึงดาว ทางช้างเผือก และแสงใต้ในทริป NZ & แทสเมเนีย',
+  'photoGuide.camera.examples': 'ตัวอย่างภาพจากทริปของพี่แสน',
+  'photoGuide.camera.table.scene': 'ช่วงเวลา/ฉาก',
+  'photoGuide.camera.table.aperture': 'รูรับแสง (f)',
+  'photoGuide.camera.table.shutter': 'ชัตเตอร์',
+  'photoGuide.camera.table.iso': 'ISO',
+  'photoGuide.camera.table.notes': 'หมายเหตุ',
+  'photoGuide.camera.disclaimer':
+    'เป็นค่าเริ่มต้นเท่านั้น ปรับตามเลนส์และกล้องของแต่ละคน',
+  'photoGuide.camera.gear': 'อุปกรณ์เบื้องต้นที่ควรมี',
+  'photoGuide.mobile.eyebrow': 'คลังเคล็ดลับ · มือถือ',
+  'photoGuide.mobile.title': 'คู่มือถ่ายภาพด้วยมือถือ',
+  'photoGuide.mobile.sub':
+    'ไม่ต้องมีอุปกรณ์เพิ่ม — เทคนิคทิวทัศน์และพอร์ตเทรตที่ลูกทริปใช้ได้แค่ด้วยมือถือ',
+  'photoGuide.mobile.landscape': 'ถ่ายวิว',
+  'photoGuide.mobile.portrait': 'ถ่ายคน',
+  'photoGuide.follow': 'ติดตามเรา',
+  'favorites.saved': 'บันทึกไว้',
+  'favorites.savedTripsLabel': 'ทริป',
+  'trips.suggested': 'ทริปที่คุณอาจสนใจ',
+  'account.guestBadge': 'บัญชีผู้เยี่ยมชม Trip2Talk',
+  'account.guestSub': 'จองแบบแขก — ไม่ต้องล็อกอิน',
+  'account.language': 'ภาษา',
   'about.positioning': 'เราคือใคร',
+  'about.page.eyebrow': 'เกี่ยวกับ Trip2Talk',
+  'about.page.title': 'เกี่ยวกับ Trip2Talk',
+  'about.hero.heading': 'ทริปถ่ายภาพ ที่จัดการให้ครบทุกขั้นตอน',
+  'about.hero.story':
+    'Trip2Talk เริ่มจากไอเดียง่ายๆ ว่านักเดินทางไม่ควรต้องเลือกระหว่างการไปเที่ยวกับการได้ภาพสวยๆ ทุกทริปมีกลุ่มเล็ก (สูงสุด 6 คน) พร้อมช่างภาพมืออาชีพและทีมสไตล์ลิ่งดูแล คุณแค่โฟกัสกับช่วงเวลานั้น',
+  'about.hero.stat.trips': 'ทริป',
+  'about.hero.stat.photographers': 'ช่างภาพ',
+  'about.hero.stat.travelers': 'นักเดินทาง',
+  'about.saen.bio':
+    'สวัสดีครับ ผม Saen ช่างภาพผู้หลงใหลในความงามของธรรมชาติและแสงสี ผมเริ่มต้นการเดินทางบนเส้นทางสายการถ่ายภาพด้วยการเรียนรู้ด้วยตนเอง และด้วยความรักในการถ่ายภาพ ผมได้พบกับกลุ่มคนไทยในซิดนีย์ที่มีความสนใจในสิ่งเดียวกัน\n\nตลอด 10 ปีที่ผ่านมา ผมได้พัฒนาทักษะการถ่ายภาพทิวทัศน์อย่างต่อเนื่อง — ผมเชื่อว่าการถ่ายภาพไม่ใช่แค่การบันทึกภาพ แต่เป็นการบันทึกเรื่องราว ความรู้สึก และประสบการณ์',
+  'about.ploy.bio':
+    'Monsicha Chayakorn (พลอย) — Admin & Trip Staff ดูแลการประสานงานคิวจอง และดูแลลูกทริปให้พร้อมก่อนออกเดินทาง',
+  'about.whatToKnow.title': 'สิ่งที่ควรรู้',
+  'about.whatToKnow.body':
+    'เราไม่ใช่บริษัททัวร์ บริการของเราคือ Photo Trip — เน้นการเดินทางเพื่อถ่ายภาพเป็นหลัก ที่พักเป็นแบบ Hostel/Backpacker/Motel เน้นสะอาดปลอดภัย หากต้องการอัปเกรดห้องพักส่วนตัวสามารถแจ้งและจ่ายเพิ่มได้ อาหารไม่รวมในแพ็กเกจ',
+  'about.contact.studio': 'สตูดิโอ',
+  'about.contact.hours': 'จันทร์–ศุกร์ 10:00–17:00',
+  'about.contact.footer': 'ABN 81 951 461 769 · Chapter 99 Photography',
   'about.stats.heading.line1': 'เกี่ยวกับ',
   'about.stats.heading.line2': 'ทีมงานของเรา',
   'about.stats.intro':
@@ -773,6 +1308,62 @@ const th: Map = {
   'about.tips': 'เคล็ดลับ — ล่าแสงออโรร่า',
   'waiver.title': 'เอกสารยินยอม',
   'waiver.signName': 'พิมพ์ชื่อ-นามสกุลเป็นลายเซ็นดิจิทัล',
+  'safety.title': 'ข้อมูลเพื่อความปลอดภัย',
+  'safety.subtitle': 'สำหรับไกด์ใช้ตอนฉุกเฉิน — กรอกสั้นๆ พอ',
+  'safety.emergencyName': 'ชื่อผู้ติดต่อฉุกเฉิน',
+  'safety.emergencyPhone': 'เบอร์ผู้ติดต่อฉุกเฉิน',
+  'safety.allergies': 'แพ้อาหาร / สาร',
+  'safety.allergies.ph': 'เช่น ถั่วลิสง หรือ none',
+  'safety.medical': 'โรคประจำตัว',
+  'safety.medical.ph': 'เช่น หอบหืด หรือ none',
+  'safety.insuranceProvider': 'บริษัทประกันการเดินทาง',
+  'safety.insuranceProvider.ph': 'ชื่อบริษัท',
+  'safety.insurancePolicy': 'เลขกรมธรรม์',
+  'safety.insurancePolicy.ph': 'เลขกรมธรรม์ / สมาชิก',
+  'safety.otherNotes': 'อื่นๆ ที่ควรรู้',
+  'safety.otherNotes.ph': 'เช่น ว่ายน้ำไม่ได้ กลัวความสูง มีข้อจำกัดการเคลื่อนไหว',
+  'safety.emergencyRequired': 'ต้องกรอกชื่อและเบอร์ผู้ติดต่อฉุกเฉิน',
+  'safety.insuranceType': 'ประเภทประกัน',
+  'safety.oshcMembership': 'เลขสมาชิก OSHC',
+  'safety.oshcRiskRequired': 'กรุณายืนยันการรับทราบความเสี่ยง OSHC',
+  'safety.travelProvider': 'บริษัทประกันการเดินทาง',
+  'safety.travelPolicy': 'เลขกรมธรรม์ประกันเดินทาง',
+  'safety.flightToggle': 'ให้ทีมจองตั๋วบินให้',
+  'safety.flightNzNote':
+    'หนังสือเดินทางและสัญชาติจำเป็นสำหรับเที่ยวบิน NZ เท่านั้น — ไม่ต้องใช้สำหรับบินในออสฯ',
+  'safety.flightFirst': 'ชื่อจริงตามพาสปอร์ต',
+  'safety.flightLast': 'นามสกุลตามพาสปอร์ต',
+  'safety.flightDob': 'วันเกิด',
+  'safety.flightPassport': 'เลขหนังสือเดินทาง',
+  'safety.flightNationality': 'สัญชาติ',
+  'safety.flightFf': 'เลขสมาชิกสายการบิน (ถ้ามี)',
+  'confirm.title': 'สรุปการยืนยันการจอง',
+  'confirm.subtitle': 'เช็กลิสต์การจอง — ไม่รวมใบกำกับภาษี',
+  'confirm.noInvoice':
+    'ไม่มีใบกำกับภาษีในหน้านี้ — ส่งแยกตามแต่ละครั้งที่ชำระ',
+  'confirm.nextTitle': 'ขั้นตอนถัดไป',
+  'confirm.next.1': 'โอนมัดจำผ่าน PayID แล้วส่งสลิปทาง Facebook',
+  'confirm.next.2': 'เรายืนยันที่นั่งและเชิญเข้ากลุ่มแชททริป',
+  'confirm.next.3': 'ก่อนเดินทาง ดู Trip Prep สำหรับของที่ต้องเตรียมและจุดนัดพบ',
+  'confirm.check.deposit': 'ชำระมัดจำแล้ว',
+  'confirm.check.waiver': 'ลงนาม waiver แล้ว',
+  'confirm.check.safety': 'มีข้อมูลความปลอดภัยแล้ว',
+  'confirm.check.facebook': 'ทัก Facebook หาเรา',
+  'confirm.download': 'ดาวน์โหลดสรุป (PNG)',
+  'confirm.email': 'เปิด Gmail เพื่อแชร์',
+  'confirm.open': 'เปิดสรุปการยืนยัน',
+  'staff.safety.quickView': 'ข้อมูลฉุกเฉินวันทริป',
+  'staff.safety.none': 'ไม่มีบันทึกความปลอดภัย',
+  'staff.safety.allergies': 'แพ้',
+  'staff.safety.medical': 'สุขภาพ',
+  'staff.safety.insurance': 'ประกัน',
+  'staff.safety.notes': 'หมายเหตุ',
+  'staff.payments.title': 'การชำระของลูกค้า',
+  'staff.payments.search': 'ค้นหาด้วยชื่อลูกค้า',
+  'staff.payments.progress': 'ความคืบหน้างวด',
+  'staff.payments.add': 'เพิ่มงวด',
+  'staff.payments.markPaid': 'บันทึกว่าจ่ายแล้ว',
+  'staff.income.title': 'รายได้ (งวดที่จ่ายแล้ว)',
   'lang.toggle': 'EN',
   'validation.email': 'กรุณากรอกอีเมลที่ถูกต้อง',
   'validation.phone': 'ใช้รูปแบบมือถือออสเตรเลีย: 04XX XXX XXX',

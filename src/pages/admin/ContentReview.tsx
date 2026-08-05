@@ -1,15 +1,22 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Loader2 } from 'lucide-react'
+import { Download, ExternalLink, Loader2 } from 'lucide-react'
 import {
   approveContentPost,
   fetchDraftContentPosts,
+  fetchManualPendingContentPosts,
   formatDate,
   listTripPhotoUrls,
+  markContentPostPosted,
   rejectContentPost,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { ContentPost } from '../../types/tour'
+import {
+  isManualTargetAccount,
+  targetAccountLabel,
+  targetAccountOpenUrl,
+} from '../../data/facebookDestinations'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { useToast } from '../../components/ui/Toast'
 
@@ -24,6 +31,13 @@ type CardDraft = {
   busy: boolean
 }
 
+function fullCaption(post: ContentPost, draftCaption?: string): string {
+  const headline = (post.selected_headline || '').trim()
+  const body = (draftCaption ?? post.caption_fb ?? '').trim()
+  if (headline && body) return `${headline}\n\n${body}`
+  return headline || body
+}
+
 function initialDraft(post: ContentPost): CardDraft {
   const options = post.headline_options
   const selectedHeadline =
@@ -32,7 +46,6 @@ function initialDraft(post: ContentPost): CardDraft {
       : (options[0] ?? '')
   const seedPhotos = (post.photo_urls ?? []).slice(0, MAX_PHOTOS)
   const noTrip = !post.trip_id
-  // trip_promo AI drafts often ship with photo_urls=[] — always load Storage picker
   const needsStoragePicker = !noTrip
   return {
     selectedHeadline,
@@ -44,23 +57,165 @@ function initialDraft(post: ContentPost): CardDraft {
   }
 }
 
+async function downloadImagesIndividually(urls: string[]) {
+  for (let i = 0; i < urls.length; i++) {
+    const url = urls[i]
+    try {
+      const res = await fetch(url)
+      const blob = await res.blob()
+      const ext = blob.type.split('/')[1] || 'jpg'
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = `fb-group-${i + 1}.${ext}`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(a.href)
+      // Brief gap so browsers don't coalesce downloads
+      await new Promise((r) => setTimeout(r, 250))
+    } catch (err) {
+      console.error('[ContentReview] download failed', url, err)
+    }
+  }
+}
+
+/** Approved Group post — manual tools only (no Graph API). */
+function ManualGroupCard({
+  post,
+  onPosted,
+}: {
+  post: ContentPost
+  onPosted: () => void
+}) {
+  const navigate = useNavigate()
+  const { toast } = useToast()
+  const [busy, setBusy] = useState(false)
+  const caption = fullCaption(post)
+  const photos = post.photo_urls ?? []
+  const openUrl = targetAccountOpenUrl(post.target_account, post.group_id)
+  const openLabel = 'Open Group'
+
+  async function copyCaption() {
+    try {
+      await navigator.clipboard.writeText(caption)
+      toast('คัดลอกแคปชันแล้ว', 'success')
+    } catch {
+      toast('คัดลอกไม่สำเร็จ', 'error')
+    }
+  }
+
+  async function downloadImages() {
+    if (!photos.length) {
+      toast('ไม่มีรูปให้ดาวน์โหลด', 'info')
+      return
+    }
+    toast(`กำลังดาวน์โหลด ${photos.length} รูป…`, 'info')
+    await downloadImagesIndividually(photos)
+  }
+
+  async function handleMarkPosted() {
+    setBusy(true)
+    try {
+      await markContentPostPosted(post.id)
+      toast('บันทึกว่าโพสต์แล้ว', 'success')
+      onPosted()
+    } catch (err) {
+      console.error('[ContentReview] mark posted failed:', err)
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast('บันทึกไม่สำเร็จ ลองอีกครั้ง', 'error')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <article className="space-y-4 rounded-editorial border border-gold/30 bg-gold/5 p-4">
+      <header className="flex flex-wrap items-center gap-2">
+        <span className="inline-block rounded-editorial border border-gold/40 bg-gold/15 px-2.5 py-1 text-xs font-medium text-gold">
+          Manual · {targetAccountLabel(post.target_account)}
+        </span>
+        <span className="text-xs text-cream-muted">approved_pending_manual_post</span>
+      </header>
+
+      {post.selected_headline ? (
+        <h2 className="font-serif text-base text-cream">{post.selected_headline}</h2>
+      ) : null}
+
+      <pre className="max-h-48 overflow-y-auto whitespace-pre-wrap rounded-editorial border border-white/8 bg-near-black-green/50 px-3 py-2 text-sm text-cream">
+        {caption || '—'}
+      </pre>
+
+      {photos.length > 0 ? (
+        <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {photos.map((url) => (
+            <li key={url} className="overflow-hidden rounded-editorial border border-white/8">
+              <img src={url} alt="" className="aspect-square w-full object-cover" loading="lazy" />
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <button
+          type="button"
+          onClick={() => void copyCaption()}
+          className="rounded-editorial border border-white/15 bg-near-black-green px-4 py-2.5 text-sm font-medium text-cream hover:border-gold/40"
+        >
+          Copy Caption
+        </button>
+        <button
+          type="button"
+          onClick={() => void downloadImages()}
+          className="inline-flex items-center justify-center gap-2 rounded-editorial border border-white/15 bg-near-black-green px-4 py-2.5 text-sm font-medium text-cream hover:border-gold/40"
+        >
+          <Download className="h-4 w-4" aria-hidden />
+          Download Images
+        </button>
+        <a
+          href={openUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center gap-2 rounded-editorial border border-[#1877F2]/40 bg-[#1877F2]/15 px-4 py-2.5 text-sm font-medium text-[#8AB4F8] no-underline hover:bg-[#1877F2]/25"
+        >
+          <ExternalLink className="h-4 w-4" aria-hidden />
+          {openLabel}
+        </a>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => void handleMarkPosted()}
+          className="rounded-editorial border border-gold/40 bg-gold/15 px-4 py-2.5 text-sm font-medium text-gold hover:bg-gold/25 disabled:opacity-50 sm:ml-auto"
+        >
+          {busy ? 'กำลังบันทึก…' : 'Mark as Posted'}
+        </button>
+      </div>
+    </article>
+  )
+}
+
 function ReviewCard({
   post,
   draft,
   onDraftChange,
   onDismiss,
   onRestore,
+  onManualApproved,
 }: {
   post: ContentPost
   draft: CardDraft
   onDraftChange: (next: Partial<CardDraft>) => void
   onDismiss: () => void
   onRestore: () => void
+  onManualApproved: (post: ContentPost) => void
 }) {
   const navigate = useNavigate()
   const { toast } = useToast()
   const tour = post.tours
   const noTrip = !post.trip_id
+  const isManual = isManualTargetAccount(post.target_account)
 
   useEffect(() => {
     if (noTrip || !post.trip_id) {
@@ -143,12 +298,27 @@ function ReviewCard({
     onDraftChange({ busy: true })
     onDismiss()
     try {
-      await approveContentPost(post.id, {
+      const result = await approveContentPost(post.id, {
         selected_headline: draft.selectedHeadline.trim(),
         caption_fb: draft.caption,
         photo_urls: draft.selectedUrls,
       })
-      toast('อนุมัติแล้ว — Make.com จะโพสต์ให้', 'success')
+
+      if (isManualTargetAccount(result.target_account ?? post.target_account)) {
+        toast('อนุมัติแล้ว — โพสต์ด้วยมือ (ไม่ยิง Graph API)', 'success')
+        onManualApproved({
+          ...post,
+          status: 'approved_pending_manual_post',
+          selected_headline: draft.selectedHeadline.trim(),
+          caption_fb: draft.caption,
+          photo_urls: draft.selectedUrls,
+          target_account: result.target_account ?? post.target_account,
+        })
+      } else if (result.status === 'posted') {
+        toast('โพสต์ขึ้นเพจแล้วผ่าน Graph API', 'success')
+      } else {
+        toast('อนุมัติแล้ว', 'success')
+      }
     } catch (err) {
       console.error('[ContentReview] approve failed:', err)
       if (err instanceof StaffSessionExpiredError) {
@@ -163,7 +333,20 @@ function ReviewCard({
 
   return (
     <article className="space-y-4 rounded-editorial border border-white/8 bg-surface-card p-4">
-      <header>
+      <header className="space-y-2">
+        {isManual ? (
+          <span className="inline-block rounded-editorial border border-coral/40 bg-coral/10 px-2.5 py-1 text-xs font-medium text-coral">
+            {targetAccountLabel(post.target_account)} · Manual post only
+          </span>
+        ) : post.target_account ? (
+          <span className="inline-block rounded-editorial border border-gold/40 bg-gold/15 px-2.5 py-1 text-xs font-medium text-gold">
+            {targetAccountLabel(post.target_account)} · Graph auto
+          </span>
+        ) : (
+          <span className="inline-block rounded-editorial border border-coral/40 bg-coral/10 px-2.5 py-1 text-xs font-medium text-coral">
+            Missing target_account
+          </span>
+        )}
         {noTrip ? (
           <span className="inline-block rounded-editorial border border-gold/40 bg-gold/15 px-2.5 py-1 text-xs font-medium text-gold">
             Value content
@@ -295,7 +478,7 @@ function ReviewCard({
           onClick={handleApprove}
           className="rounded-editorial border border-gold/40 bg-gold/15 px-4 py-2.5 text-sm font-medium text-gold transition-colors hover:bg-gold/25 disabled:opacity-50"
         >
-          อนุมัติและโพสต์
+          {isManual ? 'Approve (manual post)' : 'Approve & publish to Page'}
         </button>
       </div>
     </article>
@@ -306,15 +489,20 @@ export default function ContentReview() {
   const navigate = useNavigate()
   const { toast } = useToast()
   const [posts, setPosts] = useState<ContentPost[]>([])
+  const [manualPosts, setManualPosts] = useState<ContentPost[]>([])
   const [drafts, setDrafts] = useState<Record<string, CardDraft>>({})
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const rows = await fetchDraftContentPosts()
-      setPosts(rows)
-      setDrafts(Object.fromEntries(rows.map((p) => [p.id, initialDraft(p)])))
+      const [draftRows, manualRows] = await Promise.all([
+        fetchDraftContentPosts(),
+        fetchManualPendingContentPosts(),
+      ])
+      setPosts(draftRows)
+      setManualPosts(manualRows)
+      setDrafts(Object.fromEntries(draftRows.map((p) => [p.id, initialDraft(p)])))
     } catch (err) {
       console.error('[ContentReview] load failed:', err)
       if (err instanceof StaffSessionExpiredError) {
@@ -322,6 +510,7 @@ export default function ContentReview() {
         return
       }
       setPosts([])
+      setManualPosts([])
       setDrafts({})
       toast('โหลดโพสต์ร่างไม่สำเร็จ ลองอีกครั้ง', 'error')
     } finally {
@@ -354,6 +543,13 @@ export default function ContentReview() {
     })
   }
 
+  function addManual(post: ContentPost) {
+    setManualPosts((prev) => {
+      if (prev.some((p) => p.id === post.id)) return prev
+      return [post, ...prev]
+    })
+  }
+
   return (
     <div className="min-h-svh bg-near-black-green text-cream">
       <header className="border-b border-white/8 px-4 py-4">
@@ -362,11 +558,11 @@ export default function ContentReview() {
         </Link>
         <h1 className="mt-2 font-serif text-lg text-cream">รีวิวคอนเทนต์</h1>
         <p className="mt-1 text-sm text-cream-muted">
-          อนุมัติโพสต์ร่างก่อน Make.com โพสต์ขึ้น Facebook
+          Page → Graph auto-publish · Thai-Aus Group → คัดลอกแล้วโพสต์มือ
         </p>
       </header>
 
-      <main className="mx-auto max-w-2xl space-y-6 px-4 py-6">
+      <main className="mx-auto max-w-2xl space-y-8 px-4 py-6">
         {loading && (
           <div role="status" aria-live="polite" aria-busy="true">
             <p className="mb-3 flex items-center gap-2 text-sm text-cream-muted">
@@ -377,7 +573,22 @@ export default function ContentReview() {
           </div>
         )}
 
-        {!loading && posts.length === 0 && (
+        {!loading && manualPosts.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="font-serif text-base text-cream">รอโพสต์กลุ่ม Thai-Aus (Manual)</h2>
+            {manualPosts.map((post) => (
+              <ManualGroupCard
+                key={post.id}
+                post={post}
+                onPosted={() =>
+                  setManualPosts((prev) => prev.filter((p) => p.id !== post.id))
+                }
+              />
+            ))}
+          </section>
+        )}
+
+        {!loading && posts.length === 0 && manualPosts.length === 0 && (
           <div className="rounded-editorial border border-white/8 bg-surface-card/50 px-4 py-10 text-center">
             <p className="text-base text-cream">ยังไม่มีโพสต์ร่างให้รีวิว</p>
             <p className="mt-2 text-sm text-cream-muted">
@@ -401,21 +612,26 @@ export default function ContentReview() {
           </div>
         )}
 
-        {!loading &&
-          posts.map((post) => {
-            const draft = drafts[post.id]
-            if (!draft) return null
-            return (
-              <ReviewCard
-                key={post.id}
-                post={post}
-                draft={draft}
-                onDraftChange={(next) => patchDraft(post.id, next)}
-                onDismiss={() => dismissCard(post.id)}
-                onRestore={() => restoreCard(post)}
-              />
-            )
-          })}
+        {!loading && posts.length > 0 && (
+          <section className="space-y-4">
+            <h2 className="font-serif text-base text-cream">ร่างรออนุมัติ</h2>
+            {posts.map((post) => {
+              const draft = drafts[post.id]
+              if (!draft) return null
+              return (
+                <ReviewCard
+                  key={post.id}
+                  post={post}
+                  draft={draft}
+                  onDraftChange={(next) => patchDraft(post.id, next)}
+                  onDismiss={() => dismissCard(post.id)}
+                  onRestore={() => restoreCard(post)}
+                  onManualApproved={addManual}
+                />
+              )
+            })}
+          </section>
+        )}
       </main>
     </div>
   )

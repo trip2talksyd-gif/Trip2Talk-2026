@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
-import { useLang } from '../../hooks/useLang'
 import type { GalleryPhoto } from '../../data/galleryPhotos'
 import { photoSrc } from '../../data/galleryPhotos'
 
@@ -11,7 +10,6 @@ type Props = {
 }
 
 export default function GalleryLightbox({ photos, initialIndex, onClose }: Props) {
-  const { lang } = useLang()
   const [index, setIndex] = useState(initialIndex)
 
   const photo = photos[index]
@@ -43,7 +41,7 @@ export default function GalleryLightbox({ photos, initialIndex, onClose }: Props
 
   if (!photo) return null
 
-  const caption = lang === 'th' ? photo.caption_th : photo.caption_en
+  const caption = `${photo.caption_en} / ${photo.caption_th}`
 
   return (
     <div
@@ -93,7 +91,12 @@ export default function GalleryLightbox({ photos, initialIndex, onClose }: Props
       </div>
 
       <div className="px-4 pb-8 pt-2 text-center">
-        <p className="text-base font-medium text-white">{caption}</p>
+        <p className="text-base font-medium text-white">
+          {photo.caption_en}
+          <span className="mt-0.5 block font-thai text-sm font-normal text-white/75">
+            {photo.caption_th}
+          </span>
+        </p>
         <p className="mt-1 text-sm text-white/60">{photo.location}</p>
       </div>
     </div>
