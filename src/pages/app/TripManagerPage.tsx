@@ -18,6 +18,7 @@ import type { Tour, WaitlistEntry } from '../../types/tour'
 import { DashboardCardSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
+import TripItineraryEditor from '../../components/app/TripItineraryEditor'
 import { Loader2 } from 'lucide-react'
 
 const LOW_SEATS_RATIO = 0.8
@@ -676,6 +677,14 @@ export default function TripManagerPage() {
                           )}
                         </button>
                       )}
+                      <TripItineraryEditor
+                        tour={t}
+                        onSaved={(updated) =>
+                          setTours((prev) => prev.map((x) => (x.id === updated.id ? updated : x)))
+                        }
+                        onSessionExpired={() => navigate('/app')}
+                        onToast={(msg, tone) => toast(msg, tone ?? 'success')}
+                      />
                     </li>
                   )
                 })}

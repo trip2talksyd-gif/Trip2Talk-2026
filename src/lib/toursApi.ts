@@ -74,6 +74,24 @@ function strOrNull(value: unknown): string | null {
   return s.length ? s : null
 }
 
+function parseTourItinerary(value: unknown): Tour['itinerary'] {
+  if (!Array.isArray(value) || value.length === 0) return null
+  const days: NonNullable<Tour['itinerary']> = []
+  for (const raw of value) {
+    if (!raw || typeof raw !== 'object') continue
+    const row = raw as Record<string, unknown>
+    const day = Number(row.day)
+    const title_en = strOrNull(row.title_en) ?? ''
+    const title_th = strOrNull(row.title_th) ?? ''
+    const description_en = strOrNull(row.description_en) ?? ''
+    const description_th = strOrNull(row.description_th) ?? ''
+    if (!Number.isFinite(day) || day < 1) continue
+    if (!title_en && !title_th && !description_en && !description_th) continue
+    days.push({ day, title_en, title_th, description_en, description_th })
+  }
+  return days.length > 0 ? days.sort((a, b) => a.day - b.day) : null
+}
+
 export function normalizeTour(row: TourRow): Tour {
   const departure =
     strOrNull(row.departure_date) ?? strOrNull(row.next_date) ?? null
@@ -103,6 +121,7 @@ export function normalizeTour(row: TourRow): Tour {
     booked_seats: num(row.booked_seats ?? row.current_pax),
     status: String(row.status ?? 'draft'),
     cover_image_url: strOrNull(row.cover_image_url),
+    itinerary: parseTourItinerary(row.itinerary),
     created_at: String(row.created_at ?? ''),
     updated_at: String(row.updated_at ?? row.created_at ?? ''),
   }
@@ -864,6 +883,18 @@ export function isBookingCancelled(b: Pick<TourBooking, 'cancelled_at' | 'bookin
  * dropdowns. Pass 'published' to undo an accidental cancel. */
 export async function updateTourStatus(id: string, status: TourStatus): Promise<Tour> {
   const row = await callStaffApi<TourRow>('update_tour_status', { id, status })
+  return normalizeTours([row])[0]
+}
+
+/** Save / clear day-by-day itinerary override on a tour row (null clears → CMS fallback). */
+export async function updateTourItinerary(
+  id: string,
+  itinerary: Tour['itinerary'],
+): Promise<Tour> {
+  const row = await callStaffApi<TourRow>('update_tour_itinerary', {
+    id,
+    itinerary: itinerary && itinerary.length > 0 ? itinerary : null,
+  })
   return normalizeTours([row])[0]
 }
 

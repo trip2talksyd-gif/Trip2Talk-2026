@@ -132,7 +132,9 @@ export default function TripDetailPage() {
   const details = getTripDetails(tour.trip_code)
   const durationEn = tourDurationLabel(tour, 'en')
   const durationTh = tourDurationLabel(tour, 'th')
-  const itinerary = getItinerary(tour.trip_code, details?.highlights, durationEn)
+  const itinerary = getItinerary(tour.trip_code, undefined, undefined, tour.itinerary)
+  const isMultiDay = (tour.duration_days ?? 0) > 1 || /[2-9]D|\d{2,}D/.test(tour.trip_code.toUpperCase())
+  const showItineraryComingSoon = !itinerary && isMultiDay
   const mapCfg = getTripMap(tour.trip_code)
   const coverVideoUrl = getTripCoverVideoUrl(tour.trip_code)
   const bookable = isTourBookable(tour)
@@ -463,6 +465,34 @@ export default function TripDetailPage() {
             </section>
           )}
 
+          {itinerary && (
+            <div className={pane('itinerary')}>
+              <TripTimeline itinerary={itinerary} nextDate={tour.departure_date} />
+            </div>
+          )}
+
+          {showItineraryComingSoon && (
+            <section
+              className={`rounded-2xl border border-dashed border-line bg-mint-100/50 px-4 py-5 ${pane('itinerary')}`}
+            >
+              <BiText
+                as="h2"
+                en="Day-by-day itinerary"
+                th="แผนทริปวันต่อวัน"
+                serif
+                className="text-xl text-ink"
+                thClassName="mt-0.5 block font-thai text-sm font-medium text-ink-soft"
+              />
+              <BiText
+                as="p"
+                en="Detailed day-by-day plan coming soon — we'll publish it here before departure."
+                th="แผนวันต่อวันกำลังจัดทำ — จะอัปเดตก่อนออกเดินทาง"
+                className="mt-2 text-sm text-ink-soft"
+                thClassName="mt-1 block font-thai text-xs text-ink-soft"
+              />
+            </section>
+          )}
+
           <div className={pane('reviews')}>
             <TestimonialSection testimonials={testimonials} />
             {testimonials.length === 0 && <ReviewsPlaceholder />}
@@ -535,12 +565,6 @@ export default function TripDetailPage() {
                 {details.accommodationNote.th}
               </p>
             </section>
-          )}
-
-          {itinerary && (
-            <div className={pane('itinerary')}>
-              <TripTimeline itinerary={itinerary} nextDate={tour.departure_date} />
-            </div>
           )}
 
           <div className={`relative overflow-hidden rounded-2xl border border-line ${pane('details')}`}>

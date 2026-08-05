@@ -186,6 +186,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   year_summary: ['OWNER', 'MANAGER'],
   delete_tour: ['OWNER', 'MANAGER'],
   update_tour_status: ['OWNER', 'MANAGER'],
+  update_tour_itinerary: ['OWNER', 'MANAGER'],
   record_payment: ['OWNER', 'MANAGER', 'CASHIER'],
   list_payments_for_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   search_customer_payments: ['OWNER', 'MANAGER', 'CASHIER'],
@@ -1463,6 +1464,41 @@ Deno.serve(async (req) => {
         const { data, error } = await admin
           .from('tours')
           .update({ status })
+          .eq('id', id)
+          .select()
+          .single()
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'update_tour_itinerary': {
+        const { id, itinerary } = params as { id: string; itinerary: unknown }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+
+        let cleaned: Record<string, unknown>[] | null = null
+        if (itinerary != null) {
+          if (!Array.isArray(itinerary)) return json({ error: 'invalid_itinerary' }, 400)
+          cleaned = []
+          for (const raw of itinerary) {
+            if (!raw || typeof raw !== 'object') continue
+            const row = raw as Record<string, unknown>
+            const day = Number(row.day)
+            if (!Number.isFinite(day) || day < 1) continue
+            cleaned.push({
+              day,
+              title_en: String(row.title_en ?? '').trim(),
+              title_th: String(row.title_th ?? '').trim(),
+              description_en: String(row.description_en ?? '').trim(),
+              description_th: String(row.description_th ?? '').trim(),
+            })
+          }
+          cleaned.sort((a, b) => Number(a.day) - Number(b.day))
+          if (cleaned.length === 0) cleaned = null
+        }
+
+        const { data, error } = await admin
+          .from('tours')
+          .update({ itinerary: cleaned })
           .eq('id', id)
           .select()
           .single()
