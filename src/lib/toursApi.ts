@@ -708,6 +708,64 @@ export async function fetchPaymentsForBooking(bookingId: string): Promise<Bookin
   return callStaffApi<BookingPayment[]>('list_payments_for_booking', { bookingId })
 }
 
+export type CustomerPaymentSearchRow = {
+  booking: TourBooking
+  payments: BookingPayment[]
+}
+
+export async function searchCustomerPayments(query: string): Promise<CustomerPaymentSearchRow[]> {
+  return callStaffApi<CustomerPaymentSearchRow[]>('search_customer_payments', { query })
+}
+
+export async function addPendingInstallment(
+  bookingId: string,
+  amount: number,
+  label?: string,
+  dueDate?: string | null,
+): Promise<BookingPayment> {
+  return callStaffApi<BookingPayment>('add_pending_installment', {
+    bookingId,
+    amount,
+    label,
+    dueDate,
+  })
+}
+
+export async function updateInstallment(params: {
+  paymentId: string
+  amount?: number
+  label?: string
+  status?: 'pending' | 'paid' | 'overdue'
+  dueDate?: string | null
+  paymentMethod?: string | null
+  markPaid?: boolean
+}): Promise<BookingPayment> {
+  return callStaffApi<BookingPayment>('update_installment', params)
+}
+
+export type InstallmentIncomeSummary = {
+  total_aud: number
+  count: number
+  by_trip: { trip_code: string; amount_aud: number }[]
+  payments: BookingPayment[]
+  range: {
+    start: string
+    end: string
+    mode: string
+    year: number
+    month?: number
+  }
+}
+
+export async function fetchInstallmentIncomeSummary(params: {
+  mode?: 'month' | 'trip' | 'tax_year'
+  year?: number
+  month?: number
+  tripCode?: string
+}): Promise<InstallmentIncomeSummary> {
+  return callStaffApi<InstallmentIncomeSummary>('installment_income_summary', params)
+}
+
 /** Fixes a typo'd name/phone/email on an existing booking. Does not touch
  * payment amounts, status, or seat counts. Pass only the fields to change. */
 export async function updateBookingDetails(

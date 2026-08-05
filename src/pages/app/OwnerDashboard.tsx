@@ -153,6 +153,12 @@ export default function OwnerDashboard() {
                 💳 Cashier POS
               </Link>
               <Link
+                to="/app/payments"
+                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+              >
+                💰 Customer payments / งวดชำระ
+              </Link>
+              <Link
                 to="/app/staff"
                 className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
               >
@@ -171,6 +177,13 @@ export default function OwnerDashboard() {
               className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
             >
               📊 Tax Summary (รายทริป + Export)
+            </Link>
+
+            <Link
+              to="/app/income"
+              className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+            >
+              💵 Income — paid installments (AU tax year)
             </Link>
 
             <Link

@@ -227,6 +227,12 @@ export default function CashierPOS() {
         >
           Waiver assist / กรอกแทนลูกค้า →
         </Link>
+        <Link
+          to="/app/payments"
+          className="mt-1 ml-3 inline-block text-xs font-medium text-gold/90 underline"
+        >
+          Customer payments / งวดชำระ →
+        </Link>
       </header>
 
       <main className="mx-auto max-w-2xl space-y-5 px-4 py-6">

@@ -188,6 +188,10 @@ const ACTION_ROLES: Record<string, Role[]> = {
   update_tour_status: ['OWNER', 'MANAGER'],
   record_payment: ['OWNER', 'MANAGER', 'CASHIER'],
   list_payments_for_booking: ['OWNER', 'MANAGER', 'CASHIER'],
+  search_customer_payments: ['OWNER', 'MANAGER', 'CASHIER'],
+  add_pending_installment: ['OWNER', 'MANAGER', 'CASHIER'],
+  update_installment: ['OWNER', 'MANAGER', 'CASHIER'],
+  installment_income_summary: ['OWNER'],
   update_booking_details: ['OWNER', 'MANAGER', 'CASHIER'],
   cancel_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   create_waiver_staff_assisted: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
@@ -722,6 +726,14 @@ Deno.serve(async (req) => {
           .eq('booking_id', bookingId)
         if (countError) throw countError
         const installmentNo = (count ?? 0) + 1
+        const paidAt = new Date().toISOString()
+        const staffId =
+          typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+        const invoiceNo = `T2T-INV-${booking.booking_reference ?? bookingId.slice(0, 8)}-${installmentNo}`
+        const label =
+          installmentNo === 1
+            ? 'Deposit'
+            : `Installment ${installmentNo}${booking.payment_plan_installments ? `/${booking.payment_plan_installments}` : ''}`
 
         const { data: payment, error: paymentError } = await admin
           .from('booking_payments')
@@ -730,6 +742,11 @@ Deno.serve(async (req) => {
             amount_aud: amount,
             payment_method: paymentMethod ?? 'manual',
             installment_no: installmentNo,
+            label,
+            status: 'paid',
+            paid_at: paidAt,
+            receipt_invoice_number: invoiceNo,
+            recorded_by_staff_id: staffId,
           })
           .select()
           .single()
@@ -752,6 +769,239 @@ Deno.serve(async (req) => {
             price_aud: priceAud,
             installment_no: installmentNo,
             installment_plan: booking.payment_plan_installments ?? null,
+            receipt_invoice_number: invoiceNo,
+          },
+        })
+      }
+
+      case 'search_customer_payments': {
+        // Find bookings by customer name; return each with payment history.
+        const { query } = params as { query?: string }
+        const q = (query ?? '').trim()
+        if (q.length < 2) return json({ error: 'invalid_params' }, 400)
+
+        const { data: bookings, error } = await admin
+          .from('tour_bookings')
+          .select('*')
+          .or(
+            `first_name_en.ilike.%${q}%,last_name_en.ilike.%${q}%,booking_reference.ilike.%${q}%,phone.ilike.%${q}%`,
+          )
+          .order('booked_at', { ascending: false })
+          .limit(40)
+        if (error) throw error
+
+        const ids = (bookings ?? []).map((b: { id: string }) => b.id)
+        let payments: Record<string, unknown>[] = []
+        if (ids.length > 0) {
+          const { data: pays, error: payErr } = await admin
+            .from('booking_payments')
+            .select('*')
+            .in('booking_id', ids)
+            .order('installment_no', { ascending: true })
+          if (payErr) throw payErr
+          payments = pays ?? []
+        }
+
+        const byBooking = new Map<string, Record<string, unknown>[]>()
+        for (const p of payments) {
+          const bid = String(p.booking_id)
+          const list = byBooking.get(bid) ?? []
+          list.push(p)
+          byBooking.set(bid, list)
+        }
+
+        return json({
+          data: (bookings ?? []).map((b: Record<string, unknown>) => ({
+            booking: b,
+            payments: byBooking.get(String(b.id)) ?? [],
+          })),
+        })
+      }
+
+      case 'add_pending_installment': {
+        const { bookingId, amount, label, dueDate } = params as {
+          bookingId?: string
+          amount?: number
+          label?: string
+          dueDate?: string | null
+        }
+        if (!bookingId || !amount || amount <= 0) return json({ error: 'invalid_params' }, 400)
+
+        const { count, error: countError } = await admin
+          .from('booking_payments')
+          .select('id', { count: 'exact', head: true })
+          .eq('booking_id', bookingId)
+        if (countError) throw countError
+        const installmentNo = (count ?? 0) + 1
+
+        const { data, error } = await admin
+          .from('booking_payments')
+          .insert({
+            booking_id: bookingId,
+            amount_aud: amount,
+            payment_method: null,
+            installment_no: installmentNo,
+            label: (label ?? '').trim() || (installmentNo === 1 ? 'Deposit' : `Installment ${installmentNo}`),
+            status: 'pending',
+            due_date: dueDate || null,
+            paid_at: null,
+          })
+          .select()
+          .single()
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'update_installment': {
+        const p = params as {
+          paymentId?: string
+          amount?: number
+          label?: string
+          status?: string
+          dueDate?: string | null
+          paymentMethod?: string | null
+          markPaid?: boolean
+        }
+        if (!p.paymentId) return json({ error: 'invalid_params' }, 400)
+
+        const { data: existing, error: fetchErr } = await admin
+          .from('booking_payments')
+          .select('*')
+          .eq('id', p.paymentId)
+          .maybeSingle()
+        if (fetchErr) throw fetchErr
+        if (!existing) return json({ error: 'not_found' }, 404)
+
+        const payload: Record<string, unknown> = {}
+        if (p.amount !== undefined && p.amount > 0) payload.amount_aud = p.amount
+        if (p.label !== undefined) payload.label = p.label.trim()
+        if (p.dueDate !== undefined) payload.due_date = p.dueDate
+        if (p.paymentMethod !== undefined) payload.payment_method = p.paymentMethod
+        if (p.status && ['pending', 'paid', 'overdue'].includes(p.status)) {
+          payload.status = p.status
+        }
+
+        const markingPaid =
+          p.markPaid === true || p.status === 'paid'
+        if (markingPaid && existing.status !== 'paid') {
+          const paidAt = new Date().toISOString()
+          const staffId =
+            typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+          payload.status = 'paid'
+          payload.paid_at = paidAt
+          payload.recorded_by_staff_id = staffId
+          if (!existing.receipt_invoice_number) {
+            payload.receipt_invoice_number = `T2T-INV-${existing.booking_id.slice(0, 8)}-${existing.installment_no}`
+          }
+          if (p.paymentMethod) payload.payment_method = p.paymentMethod
+          else if (!existing.payment_method) payload.payment_method = 'manual'
+        }
+
+        const { data: updated, error: updErr } = await admin
+          .from('booking_payments')
+          .update(payload)
+          .eq('id', p.paymentId)
+          .select()
+          .single()
+        if (updErr) throw updErr
+
+        // Recalc booking paid total from paid installments when status flips
+        if (markingPaid || p.amount !== undefined) {
+          const { data: allPays, error: sumErr } = await admin
+            .from('booking_payments')
+            .select('amount_aud, status')
+            .eq('booking_id', existing.booking_id)
+          if (sumErr) throw sumErr
+          const paidTotal = (allPays ?? [])
+            .filter((row: { status?: string }) => row.status === 'paid')
+            .reduce((s: number, row: { amount_aud: number }) => s + Number(row.amount_aud ?? 0), 0)
+
+          const { data: booking } = await admin
+            .from('tour_bookings')
+            .select('id, tour_id, amount_paid_aud')
+            .eq('id', existing.booking_id)
+            .maybeSingle()
+          let priceAud = 0
+          if (booking?.tour_id) {
+            const { data: tour } = await admin
+              .from('tours')
+              .select('price_aud, price_standard')
+              .eq('id', booking.tour_id)
+              .maybeSingle()
+            priceAud = tour ? Number(tour.price_aud ?? tour.price_standard ?? 0) : 0
+          }
+          const newStatus =
+            priceAud > 0 && paidTotal >= priceAud ? 'fully_paid' : paidTotal > 0 ? 'deposit_paid' : 'pending_payment'
+          await admin
+            .from('tour_bookings')
+            .update({ amount_paid_aud: paidTotal, booking_status: newStatus })
+            .eq('id', existing.booking_id)
+        }
+
+        return json({ data: updated })
+      }
+
+      case 'installment_income_summary': {
+        // Owner-only income from paid installments — AU tax year 1 Jul–30 Jun.
+        const { mode, year, month, tripCode } = params as {
+          mode?: 'month' | 'trip' | 'tax_year'
+          year?: number
+          month?: number
+          tripCode?: string
+        }
+        const y = Number(year) || new Date().getFullYear()
+        let startIso: string
+        let endIso: string
+        if (mode === 'tax_year') {
+          // AU tax year ending 30 Jun of `year` → 1 Jul (year-1) to 30 Jun year
+          startIso = `${y - 1}-07-01T00:00:00.000Z`
+          endIso = `${y}-07-01T00:00:00.000Z`
+        } else if (mode === 'month' && month) {
+          const m = String(month).padStart(2, '0')
+          startIso = `${y}-${m}-01T00:00:00.000Z`
+          const nextM = month === 12 ? 1 : month + 1
+          const nextY = month === 12 ? y + 1 : y
+          endIso = `${nextY}-${String(nextM).padStart(2, '0')}-01T00:00:00.000Z`
+        } else {
+          startIso = `${y}-01-01T00:00:00.000Z`
+          endIso = `${y + 1}-01-01T00:00:00.000Z`
+        }
+
+        let q = admin
+          .from('booking_payments')
+          .select('*, tour_bookings!inner(trip_code, first_name_en, last_name_en, booking_reference)')
+          .eq('status', 'paid')
+          .gte('paid_at', startIso)
+          .lt('paid_at', endIso)
+
+        if (mode === 'trip' && tripCode) {
+          q = q.eq('tour_bookings.trip_code', tripCode)
+        }
+
+        const { data, error } = await q.order('paid_at', { ascending: false })
+        if (error) throw error
+
+        const rows = data ?? []
+        const total = rows.reduce(
+          (s: number, r: { amount_aud?: number }) => s + Number(r.amount_aud ?? 0),
+          0,
+        )
+        const byTrip = new Map<string, number>()
+        for (const r of rows as Array<{ amount_aud?: number; tour_bookings?: { trip_code?: string } }>) {
+          const code = r.tour_bookings?.trip_code ?? 'unknown'
+          byTrip.set(code, (byTrip.get(code) ?? 0) + Number(r.amount_aud ?? 0))
+        }
+
+        return json({
+          data: {
+            total_aud: total,
+            count: rows.length,
+            by_trip: [...byTrip.entries()].map(([trip_code, amount_aud]) => ({
+              trip_code,
+              amount_aud,
+            })),
+            payments: rows,
+            range: { start: startIso, end: endIso, mode: mode ?? 'year', year: y, month },
           },
         })
       }
