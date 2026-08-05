@@ -2,52 +2,53 @@ import { Clock, Mail, MapPin, Phone } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
 import { TEAM_MEMBERS } from '../../data/teamMembers'
+import BiText from '../../components/ui/BiText'
 import CountUpStat from '../../components/ui/CountUpStat'
 import TeamAvatar from '../../components/about/TeamAvatar'
 
 export default function AboutPage() {
-  const { lang } = useLang()
+  const { tt } = useLang()
   const heroPhoto =
     GALLERY_PHOTOS.find((p) => p.id === 'nz-013') ??
     GALLERY_PHOTOS.find((p) => p.id === 'syd-009') ??
     GALLERY_PHOTOS[0]
 
-  const brandStory =
-    lang === 'th'
-      ? 'Trip2Talk เกิดจากความรักในการถ่ายรูปและการเดินทางของพวกเรา เป็นผลงานสร้างสรรค์จาก Chapter 99 Photography เราเชื่อว่าทุกการเดินทางมีเรื่องราว และทุกเรื่องราวควรถูกบันทึกด้วยภาพถ่ายที่งดงาม'
-      : 'Trip2Talk started with one idea: travelers shouldn\'t have to choose between exploring and getting great photos of themselves doing it. Every trip pairs a small group (max 6) with a professional photographer and styling support, so you can focus on the moment.'
+  const eyebrow = tt('about.page.eyebrow')
+  const pageTitle = tt('about.page.title')
+  const heroHeading = tt('about.hero.heading')
+  const heroStory = tt('about.hero.story')
+  const statTrips = tt('about.hero.stat.trips')
+  const statPhotographers = tt('about.hero.stat.photographers')
+  const statTravelers = tt('about.hero.stat.travelers')
+  const saenBio = tt('about.saen.bio')
+  const ployBio = tt('about.ploy.bio')
+  const whatToKnowTitle = tt('about.whatToKnow.title')
+  const whatToKnowBody = tt('about.whatToKnow.body')
+  const contactTitle = tt('about.contact')
+  const contactStudio = tt('about.contact.studio')
+  const contactHours = tt('about.contact.hours')
+  const contactFooter = tt('about.contact.footer')
 
-  const brandStoryTh =
-    'Trip2Talk เริ่มจากไอเดียง่ายๆ ว่านักเดินทางไม่ควรต้องเลือกระหว่างการไปเที่ยวกับการได้ภาพสวยๆ ทุกทริปมีกลุ่มเล็ก (สูงสุด 6 คน) พร้อมช่างภาพมืออาชีพและทีมสไตล์ลิ่งดูแล คุณแค่โฟกัสกับช่วงเวลานั้น'
-
-  const saenBio =
-    lang === 'th'
-      ? `สวัสดีครับ ผม Saen ช่างภาพผู้หลงใหลในความงามของธรรมชาติและแสงสี ผมเริ่มต้นการเดินทางบนเส้นทางสายการถ่ายภาพด้วยการเรียนรู้ด้วยตนเอง และด้วยความรักในการถ่ายภาพ ผมได้พบกับกลุ่มคนไทยในซิดนีย์ที่มีความสนใจในสิ่งเดียวกัน
-
-ตลอด 10 ปีที่ผ่านมา ผมได้พัฒนาทักษะการถ่ายภาพทิวทัศน์อย่างต่อเนื่อง — ผมเชื่อว่าการถ่ายภาพไม่ใช่แค่การบันทึกภาพ แต่เป็นการบันทึกเรื่องราว ความรู้สึก และประสบการณ์`
-      : `Hello — I'm Saen, a photographer captivated by nature and light. I taught myself the craft and, through that passion, connected with Thai communities in Sydney who shared the same love for exploring and photographing this city.
-
-Over the past 10 years I've honed landscape photography. For me, photography isn't just recording a scene — it's preserving a story, a feeling, and the experience of that moment in time.`
-
-  const ployBio =
-    lang === 'th'
-      ? 'Monsicha Chayakorn (พลอย) — Admin & Trip Staff ดูแลการประสานงานคิวจอง และดูแลลูกทริปให้พร้อมก่อนออกเดินทาง'
-      : 'Monsicha Chayakorn (Ploy) — Admin & Trip Staff. She coordinates bookings and makes sure every guest is prepared before departure.'
-
-  const whatToKnow =
-    lang === 'th'
-      ? 'เราไม่ใช่บริษัททัวร์ บริการของเราคือ Photo Trip — เน้นการเดินทางเพื่อถ่ายภาพเป็นหลัก ที่พักเป็นแบบ Hostel/Backpacker/Motel เน้นสะอาดปลอดภัย หากต้องการอัปเกรดห้องพักส่วนตัวสามารถแจ้งและจ่ายเพิ่มได้ อาหารไม่รวมในแพ็กเกจ'
-      : "We're not a traditional tour company — Trip2Talk is a Photo Trip service focused on photography-led travel. Accommodation is typically hostel, backpacker, or motel standard — clean and safe. Private room upgrades are available on request. Meals are not included."
+  const [saen, ploy] = TEAM_MEMBERS
 
   return (
     <div className="space-y-8 pb-4">
       <header>
-        <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-teal-600">
-          About Trip2Talk
-        </p>
-        <h1 className="mt-1 font-serif text-2xl text-ink sm:text-3xl">
-          {lang === 'th' ? 'เกี่ยวกับ Trip2Talk' : 'About Trip2Talk'}
-        </h1>
+        <BiText
+          as="p"
+          en={eyebrow.en}
+          th={eyebrow.th}
+          className="text-[10px] font-bold uppercase tracking-[0.14em] text-teal-600"
+          thClassName="mt-0.5 block font-thai text-[9px] font-bold normal-case tracking-normal"
+        />
+        <BiText
+          as="h1"
+          en={pageTitle.en}
+          th={pageTitle.th}
+          serif
+          className="mt-1 text-2xl text-ink sm:text-3xl"
+          thClassName="mt-0.5 block font-thai text-[0.75em] font-medium text-ink-soft"
+        />
       </header>
 
       <div className="grid gap-9 lg:grid-cols-2 lg:items-center">
@@ -59,40 +60,54 @@ Over the past 10 years I've honed landscape photography. For me, photography isn
           />
         )}
         <div>
-          <h2 className="m-0 font-serif text-[22px] text-ink">
-            {lang === 'th' ? 'ทริปถ่ายภาพ ที่จัดการให้ครบ' : 'Photo trips, handled end-to-end'}
-          </h2>
-          <p className="mb-3.5 mt-1.5 font-thai text-[14px] text-teal-700">
-            ทริปถ่ายภาพ ที่จัดการให้ครบทุกขั้นตอน
+          <BiText
+            as="h2"
+            en={heroHeading.en}
+            th={heroHeading.th}
+            serif
+            className="m-0 text-[22px] text-ink"
+            thClassName="mt-1 block font-thai text-[16px] font-medium text-teal-700"
+          />
+          <p className="mb-3 mt-3 text-[13.5px] leading-[1.75] text-ink-soft">{heroStory.en}</p>
+          <p className="mb-3 font-thai text-[13.5px] leading-[1.75] text-ink-soft/90">
+            {heroStory.th}
           </p>
-          <p className="mb-3 text-[13.5px] leading-[1.75] text-ink-soft">{brandStory}</p>
-          {lang === 'en' && (
-            <p className="mb-3 font-thai text-[13.5px] leading-[1.75] text-ink-soft">{brandStoryTh}</p>
-          )}
           <div className="mt-4 flex gap-[26px]">
             <div>
               <p className="m-0 text-[20px] font-extrabold text-ink">
                 <CountUpStat end={13} />
               </p>
-              <p className="mt-0.5 text-[10px] uppercase tracking-[0.04em] text-ink-soft">
-                {lang === 'th' ? 'ทริป' : 'Trips'}
-              </p>
+              <BiText
+                as="p"
+                en={statTrips.en}
+                th={statTrips.th}
+                className="mt-0.5 text-[10px] uppercase tracking-[0.04em] text-ink-soft"
+                thClassName="mt-px block font-thai text-[9px] normal-case text-ink-soft/90"
+              />
             </div>
             <div>
               <p className="m-0 text-[20px] font-extrabold text-ink">
                 <CountUpStat end={10} suffix="+" />
               </p>
-              <p className="mt-0.5 text-[10px] uppercase tracking-[0.04em] text-ink-soft">
-                {lang === 'th' ? 'ช่างภาพ' : 'Photographers'}
-              </p>
+              <BiText
+                as="p"
+                en={statPhotographers.en}
+                th={statPhotographers.th}
+                className="mt-0.5 text-[10px] uppercase tracking-[0.04em] text-ink-soft"
+                thClassName="mt-px block font-thai text-[9px] normal-case text-ink-soft/90"
+              />
             </div>
             <div>
               <p className="m-0 text-[20px] font-extrabold text-ink">
                 <CountUpStat end={500} suffix="+" />
               </p>
-              <p className="mt-0.5 text-[10px] uppercase tracking-[0.04em] text-ink-soft">
-                {lang === 'th' ? 'นักเดินทาง' : 'Travelers'}
-              </p>
+              <BiText
+                as="p"
+                en={statTravelers.en}
+                th={statTravelers.th}
+                className="mt-0.5 text-[10px] uppercase tracking-[0.04em] text-ink-soft"
+                thClassName="mt-px block font-thai text-[9px] normal-case text-ink-soft/90"
+              />
             </div>
           </div>
         </div>
@@ -100,63 +115,87 @@ Over the past 10 years I've honed landscape photography. For me, photography isn
 
       <section className="rounded-2xl border border-line bg-cream p-5">
         <div className="flex gap-4">
-          <TeamAvatar
-            srcs={TEAM_MEMBERS[0].photoSrcs}
-            alt={TEAM_MEMBERS[0].nameEn}
-            initial={TEAM_MEMBERS[0].initial}
-          />
+          <TeamAvatar srcs={saen.photoSrcs} alt={saen.nameEn} initial={saen.initial} />
           <div className="min-w-0 flex-1">
-            <p className="font-serif text-lg font-semibold text-ink">
-              {lang === 'th' ? TEAM_MEMBERS[0].nameTh : TEAM_MEMBERS[0].nameEn}
+            <p className="font-serif text-lg font-semibold text-ink">{saen.nameEn}</p>
+            <BiText
+              en={saen.roleEn}
+              th={saen.roleTh}
+              className="text-sm text-teal-700"
+              thClassName="mt-0.5 block font-thai text-[12px] font-medium text-teal-700/90"
+            />
+            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink/80">
+              {saenBio.en}
             </p>
-            <p className="text-sm text-teal-700">
-              {lang === 'th' ? TEAM_MEMBERS[0].roleTh : TEAM_MEMBERS[0].roleEn}
+            <p className="mt-2 whitespace-pre-line font-thai text-[13px] leading-relaxed text-ink/70">
+              {saenBio.th}
             </p>
-            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink/80">{saenBio}</p>
           </div>
         </div>
       </section>
 
       <section className="rounded-2xl border border-line bg-cream p-5">
         <div className="flex gap-4">
-          <TeamAvatar
-            srcs={TEAM_MEMBERS[1].photoSrcs}
-            alt={TEAM_MEMBERS[1].nameEn}
-            initial={TEAM_MEMBERS[1].initial}
-          />
+          <TeamAvatar srcs={ploy.photoSrcs} alt={ploy.nameEn} initial={ploy.initial} />
           <div className="min-w-0 flex-1">
-            <p className="font-serif text-lg font-semibold text-ink">
-              {lang === 'th' ? TEAM_MEMBERS[1].nameTh : TEAM_MEMBERS[1].nameEn}
-            </p>
-            <p className="text-sm text-teal-700">
-              {lang === 'th' ? TEAM_MEMBERS[1].roleTh : TEAM_MEMBERS[1].roleEn}
-            </p>
-            <p className="mt-3 text-sm leading-relaxed text-ink/80">{ployBio}</p>
+            <p className="font-serif text-lg font-semibold text-ink">{ploy.nameEn}</p>
+            <BiText
+              en={ploy.roleEn}
+              th={ploy.roleTh}
+              className="text-sm text-teal-700"
+              thClassName="mt-0.5 block font-thai text-[12px] font-medium text-teal-700/90"
+            />
+            <p className="mt-3 text-sm leading-relaxed text-ink/80">{ployBio.en}</p>
+            <p className="mt-2 font-thai text-[13px] leading-relaxed text-ink/70">{ployBio.th}</p>
           </div>
         </div>
       </section>
 
       <section className="rounded-2xl border border-teal-600/30 bg-teal-500/10 p-5">
-        <h2 className="font-serif text-lg text-ink">
-          {lang === 'th' ? 'สิ่งที่ควรรู้' : 'What you should know'}
-        </h2>
-        <p className="mt-3 text-sm leading-relaxed text-ink/80">{whatToKnow}</p>
+        <BiText
+          as="h2"
+          en={whatToKnowTitle.en}
+          th={whatToKnowTitle.th}
+          serif
+          className="text-lg text-ink"
+          thClassName="mt-0.5 block font-thai text-[14px] font-medium text-ink-soft"
+        />
+        <p className="mt-3 text-sm leading-relaxed text-ink/80">{whatToKnowBody.en}</p>
+        <p className="mt-2 font-thai text-[13px] leading-relaxed text-ink/70">
+          {whatToKnowBody.th}
+        </p>
       </section>
 
       <section className="rounded-2xl border border-line bg-cream p-5">
-        <h2 className="font-serif text-lg text-ink">{lang === 'th' ? 'ติดต่อเรา' : 'Contact'}</h2>
+        <BiText
+          as="h2"
+          en={contactTitle.en}
+          th={contactTitle.th}
+          serif
+          className="text-lg text-ink"
+          thClassName="mt-0.5 block font-thai text-[14px] font-medium text-ink-soft"
+        />
         <ul className="mt-4 space-y-3 text-sm">
           <li className="flex items-start gap-3 text-ink/80">
             <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-teal-600" />
             <span>
-              <span className="font-medium">{lang === 'th' ? 'สตูดิโอ' : 'Studio'}</span>
+              <BiText
+                en={contactStudio.en}
+                th={contactStudio.th}
+                className="font-medium"
+                thClassName="mt-px block font-thai text-[12px] font-normal text-ink-soft"
+              />
               <br />
               33/14 Jubilee Ave, Warriewood NSW 2102
             </span>
           </li>
           <li className="flex items-center gap-3 text-ink/80">
             <Clock className="h-4 w-4 shrink-0 text-teal-600" />
-            <span>{lang === 'th' ? 'จันทร์–ศุกร์ 10:00–17:00' : 'Monday–Friday 10am–5pm'}</span>
+            <BiText
+              en={contactHours.en}
+              th={contactHours.th}
+              thClassName="mt-0.5 block font-thai text-[12px] text-ink-soft/90"
+            />
           </li>
           <li>
             <a
@@ -174,7 +213,7 @@ Over the past 10 years I've honed landscape photography. For me, photography isn
             </a>
           </li>
         </ul>
-        <p className="mt-4 text-xs text-ink-soft">ABN 81 951 461 769 · Chapter 99 Photography</p>
+        <p className="mt-4 text-xs text-ink-soft">{contactFooter.en}</p>
       </section>
     </div>
   )

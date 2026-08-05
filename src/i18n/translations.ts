@@ -206,6 +206,45 @@ export type TranslationKey =
   | 'pricing.private.check.2'
   | 'pricing.private.check.3'
   | 'pricing.private.cta'
+  | 'pricing.page.subtitle'
+  | 'pricing.mostPopular'
+  | 'pricing.audPerPerson'
+  | 'pricing.priceHint'
+  | 'pricing.tier.day.title'
+  | 'pricing.tier.day.desc'
+  | 'pricing.tier.day.check.1'
+  | 'pricing.tier.day.check.2'
+  | 'pricing.tier.day.check.3'
+  | 'pricing.tier.day.check.4'
+  | 'pricing.tier.day.cta'
+  | 'pricing.tier.multi.title'
+  | 'pricing.tier.multi.desc'
+  | 'pricing.tier.multi.check.1'
+  | 'pricing.tier.multi.check.2'
+  | 'pricing.tier.multi.check.3'
+  | 'pricing.tier.multi.check.4'
+  | 'pricing.tier.multi.cta'
+  | 'pricing.tier.flagship.title'
+  | 'pricing.tier.flagship.desc'
+  | 'pricing.tier.flagship.check.1'
+  | 'pricing.tier.flagship.check.2'
+  | 'pricing.tier.flagship.check.3'
+  | 'pricing.tier.flagship.check.4'
+  | 'pricing.tier.flagship.cta'
+  | 'pricing.cancel.title'
+  | 'pricing.cancel.intro'
+  | 'pricing.cancel.col.condition'
+  | 'pricing.cancel.col.outcome'
+  | 'pricing.cancel.rule.1.condition'
+  | 'pricing.cancel.rule.1.outcome'
+  | 'pricing.cancel.rule.2.condition'
+  | 'pricing.cancel.rule.2.outcome'
+  | 'pricing.cancel.rule.3.condition'
+  | 'pricing.cancel.rule.3.outcome'
+  | 'pricing.cancel.rule.4.condition'
+  | 'pricing.cancel.rule.4.outcome'
+  | 'pricing.cancel.rule.5.condition'
+  | 'pricing.cancel.rule.5.outcome'
   | 'calendar.value.badge'
   | 'calendar.value.heading.line1'
   | 'calendar.value.heading.line2'
@@ -238,6 +277,41 @@ export type TranslationKey =
   | 'gallery.emptyCategory'
   | 'gallery.exampleAlbum'
   | 'gallery.inspiration'
+  | 'photoGuide.back'
+  | 'photoGuide.hub.badge'
+  | 'photoGuide.hub.title'
+  | 'photoGuide.hub.subtitle'
+  | 'photoGuide.readGuide'
+  | 'photoGuide.hub.albumTitle'
+  | 'photoGuide.hub.albumSub'
+  | 'photoGuide.hub.dragHint'
+  | 'photoGuide.swipeMore'
+  | 'photoGuide.fromTheRoad'
+  | 'photoGuide.posing.eyebrow'
+  | 'photoGuide.posing.title'
+  | 'photoGuide.posing.sub'
+  | 'photoGuide.posing.posesTitle'
+  | 'photoGuide.posing.seasonTitle'
+  | 'photoGuide.posing.seasonSub'
+  | 'photoGuide.posing.quote'
+  | 'photoGuide.posing.quoteBy'
+  | 'photoGuide.camera.eyebrow'
+  | 'photoGuide.camera.title'
+  | 'photoGuide.camera.sub'
+  | 'photoGuide.camera.examples'
+  | 'photoGuide.camera.table.scene'
+  | 'photoGuide.camera.table.aperture'
+  | 'photoGuide.camera.table.shutter'
+  | 'photoGuide.camera.table.iso'
+  | 'photoGuide.camera.table.notes'
+  | 'photoGuide.camera.disclaimer'
+  | 'photoGuide.camera.gear'
+  | 'photoGuide.mobile.eyebrow'
+  | 'photoGuide.mobile.title'
+  | 'photoGuide.mobile.sub'
+  | 'photoGuide.mobile.landscape'
+  | 'photoGuide.mobile.portrait'
+  | 'photoGuide.follow'
   | 'favorites.saved'
   | 'favorites.savedTripsLabel'
   | 'trips.suggested'
@@ -245,6 +319,20 @@ export type TranslationKey =
   | 'account.guestSub'
   | 'account.language'
   | 'about.positioning'
+  | 'about.page.eyebrow'
+  | 'about.page.title'
+  | 'about.hero.heading'
+  | 'about.hero.story'
+  | 'about.hero.stat.trips'
+  | 'about.hero.stat.photographers'
+  | 'about.hero.stat.travelers'
+  | 'about.saen.bio'
+  | 'about.ploy.bio'
+  | 'about.whatToKnow.title'
+  | 'about.whatToKnow.body'
+  | 'about.contact.studio'
+  | 'about.contact.hours'
+  | 'about.contact.footer'
   | 'about.stats.heading.line1'
   | 'about.stats.heading.line2'
   | 'about.stats.intro'
@@ -562,6 +650,48 @@ const en: Map = {
   'gallery.emptyCategory': 'No photos in this category',
   'gallery.exampleAlbum': 'Example album from Saen & team',
   'gallery.inspiration': 'Inspiration',
+  'photoGuide.back': 'Back to Photo Guide',
+  'photoGuide.hub.badge': "Let's Learn and Practice",
+  'photoGuide.hub.title': 'Photo Guide',
+  'photoGuide.hub.subtitle':
+    'Three guides for three kinds of travelers — linked from Home and Trip Prep.',
+  'photoGuide.readGuide': 'Read guide →',
+  'photoGuide.hub.albumTitle': 'Photos from Saen',
+  'photoGuide.hub.albumSub': 'Curated shots from past trips — drag or browse the slideshow below.',
+  'photoGuide.hub.dragHint': '↔ Drag to browse the album',
+  'photoGuide.swipeMore': 'Swipe for more →',
+  'photoGuide.fromTheRoad': 'From the road',
+  'photoGuide.posing.eyebrow': 'Photo Guide · Posing & Styling',
+  'photoGuide.posing.title': 'Posing & Styling Guide',
+  'photoGuide.posing.sub':
+    'For trip customers who love being in front of the camera. Browse the album, then try our photographers’ favorite poses and seasonal color guide.',
+  'photoGuide.posing.posesTitle': 'Photographer-approved poses',
+  'photoGuide.posing.seasonTitle': 'What to wear, by season',
+  'photoGuide.posing.seasonSub':
+    'Matched to real Trip2Talk trips, so your outfit works with the landscape you’ll shoot.',
+  'photoGuide.posing.quote':
+    '“Don’t try to be a model — try to look like you’re having the best day of your trip. That’s the photo people actually stop scrolling for.”',
+  'photoGuide.posing.quoteBy': 'Trip2Talk lead photographer',
+  'photoGuide.camera.eyebrow': 'Photo Guide · Camera Settings',
+  'photoGuide.camera.title': 'Camera Settings Guide',
+  'photoGuide.camera.sub':
+    'A starting-point cheat-sheet for beginners with a DSLR or mirrorless — morning light through stars, Milky Way and aurora on our NZ & Tasmania trips.',
+  'photoGuide.camera.examples': "Example shots from Saen's trips",
+  'photoGuide.camera.table.scene': 'Time / scene',
+  'photoGuide.camera.table.aperture': 'Aperture (f)',
+  'photoGuide.camera.table.shutter': 'Shutter',
+  'photoGuide.camera.table.iso': 'ISO',
+  'photoGuide.camera.table.notes': 'Notes',
+  'photoGuide.camera.disclaimer':
+    'Starting points only — adjust for your specific lens and camera’s low-light performance.',
+  'photoGuide.camera.gear': 'Beginner gear checklist',
+  'photoGuide.mobile.eyebrow': 'Photo Guide · Mobile Photography',
+  'photoGuide.mobile.title': 'Mobile Photography Guide',
+  'photoGuide.mobile.sub':
+    'No extra gear needed — simple landscape and portrait techniques any trip customer can use with just their phone.',
+  'photoGuide.mobile.landscape': 'Landscape',
+  'photoGuide.mobile.portrait': 'Portrait / People',
+  'photoGuide.follow': 'Follow Trip2Talk',
   'favorites.saved': 'saved',
   'favorites.savedTripsLabel': 'saved trips',
   'trips.suggested': 'You might also like',
@@ -569,6 +699,24 @@ const en: Map = {
   'account.guestSub': 'Guest booking — no account login required',
   'account.language': 'Language',
   'about.positioning': 'Who we are',
+  'about.page.eyebrow': 'About Trip2Talk',
+  'about.page.title': 'About Trip2Talk',
+  'about.hero.heading': 'Photo trips, handled end-to-end',
+  'about.hero.story':
+    "Trip2Talk started with one idea: travelers shouldn't have to choose between exploring and getting great photos of themselves doing it. Every trip pairs a small group (max 6) with a professional photographer and styling support, so you can focus on the moment.",
+  'about.hero.stat.trips': 'Trips',
+  'about.hero.stat.photographers': 'Photographers',
+  'about.hero.stat.travelers': 'Travelers',
+  'about.saen.bio':
+    "Hello — I'm Saen, a photographer captivated by nature and light. I taught myself the craft and, through that passion, connected with Thai communities in Sydney who shared the same love for exploring and photographing this city.\n\nOver the past 10 years I've honed landscape photography. For me, photography isn't just recording a scene — it's preserving a story, a feeling, and the experience of that moment in time.",
+  'about.ploy.bio':
+    'Monsicha Chayakorn (Ploy) — Admin & Trip Staff. She coordinates bookings and makes sure every guest is prepared before departure.',
+  'about.whatToKnow.title': 'What you should know',
+  'about.whatToKnow.body':
+    "We're not a traditional tour company — Trip2Talk is a Photo Trip service focused on photography-led travel. Accommodation is typically hostel, backpacker, or motel standard — clean and safe. Private room upgrades are available on request. Meals are not included.",
+  'about.contact.studio': 'Studio',
+  'about.contact.hours': 'Monday–Friday 10am–5pm',
+  'about.contact.footer': 'ABN 81 951 461 769 · Chapter 99 Photography',
   'about.stats.heading.line1': 'About',
   'about.stats.heading.line2': 'our team',
   'about.stats.intro':
@@ -853,6 +1001,46 @@ const th: Map = {
   'pricing.private.check.2': 'เลือกวันเดินทางเองได้',
   'pricing.private.check.3': 'ความเป็นส่วนตัวเต็มที่',
   'pricing.private.cta': 'จองทริปส่วนตัว',
+  'pricing.page.subtitle': 'ตัวเลขเป็นตัวอย่าง — ราคาจริงดูได้ในแต่ละทริป',
+  'pricing.mostPopular': 'ยอดนิยม',
+  'pricing.audPerPerson': 'AUD / คน',
+  'pricing.priceHint': 'จิ้มหรือโฮเวอร์ตัวเลขดูแอนิเมชัน',
+  'pricing.tier.day.title': 'ทริปวันเดียว',
+  'pricing.tier.day.desc': 'ไม่กี่ชั่วโมง ช่างภาพมืออาชีพหนึ่งคน โลจิสติกส์น้อย',
+  'pricing.tier.day.check.1': 'เซสชันถ่ายภาพ 3 ชม.',
+  'pricing.tier.day.check.2': 'ช่างภาพมืออาชีพท้องถิ่น',
+  'pricing.tier.day.check.3': 'รูปแก้ไม่จำกัด',
+  'pricing.tier.day.check.4': 'ส่งอัลบั้มออนไลน์',
+  'pricing.tier.day.cta': 'จองทริปวันเดียว',
+  'pricing.tier.multi.title': 'ทริปหลายวัน',
+  'pricing.tier.multi.desc': '3–4 วัน รวมรถและคนขับ ช่วยจัดการที่พัก',
+  'pricing.tier.multi.check.1': 'ทุกอย่างในทริปวันเดียว',
+  'pricing.tier.multi.check.2': 'รวมรถ SUV และคนขับ',
+  'pricing.tier.multi.check.3': 'ช่วยจองที่พัก',
+  'pricing.tier.multi.check.4': 'ค่าเข้าอุทยานและใบอนุญาต',
+  'pricing.tier.multi.cta': 'จองทริปหลายวัน',
+  'pricing.tier.flagship.title': 'ทริปเรือธง',
+  'pricing.tier.flagship.desc': '6 วัน ช่วยประสานตั๋วบิน ทริปเข้มข้นที่สุด',
+  'pricing.tier.flagship.check.1': 'ทุกอย่างในทริปหลายวัน',
+  'pricing.tier.flagship.check.2': 'ช่วยจองตั๋วเครื่องบิน',
+  'pricing.tier.flagship.check.3': 'ที่พัก 5+ คืน',
+  'pricing.tier.flagship.check.4': 'ทีมช่างภาพลำดับแรก',
+  'pricing.tier.flagship.cta': 'จองทริปเรือธง',
+  'pricing.cancel.title': 'นโยบายการยกเลิกและคืนเงิน',
+  'pricing.cancel.intro':
+    'Trip2Talk รับชำระผ่าน PayID (AUD) โดยมัดจำก่อนเดินทาง ราคาทั้งหมดเป็นดอลลาร์ออสเตรเลีย',
+  'pricing.cancel.col.condition': 'เงื่อนไข',
+  'pricing.cancel.col.outcome': 'ผลลัพธ์',
+  'pricing.cancel.rule.1.condition': 'ยกเลิกล่วงหน้า 10 วันขึ้นไป',
+  'pricing.cancel.rule.1.outcome': 'เลื่อนทริปหรือเก็บเครดิตสำหรับทริปถัดไป',
+  'pricing.cancel.rule.2.condition': 'ยกเลิกล่วงหน้า 3–9 วัน',
+  'pricing.cancel.rule.2.outcome': 'โอนสิทธิ์ให้ผู้อื่นเดินทางแทนเท่านั้น — ไม่คืนเงินสด',
+  'pricing.cancel.rule.3.condition': 'ยกเลิกล่วงหน้า 0–2 วัน',
+  'pricing.cancel.rule.3.outcome': 'ไม่คืนเงินทุกกรณี รวมมัดจำ',
+  'pricing.cancel.rule.4.condition': 'สภาพอากาศ / เหตุสุดวิสัย',
+  'pricing.cancel.rule.4.outcome': 'ออกเครดิตเต็มจำนวนสำหรับจองทริปครั้งถัดไป ไม่คืนเป็นเงินสด',
+  'pricing.cancel.rule.5.condition': 'จำนวนผู้ร่วมทริปไม่ถึงขั้นต่ำ',
+  'pricing.cancel.rule.5.outcome': 'อาจเลื่อนทริปหรือออกเครดิต — Trip2Talk จะแจ้งทาง SMS/อีเมล',
   'calendar.value.badge': 'จองมั่นใจ',
   'calendar.value.heading.line1': 'เลิกเดาสุ่มวันเดินทาง',
   'calendar.value.heading.line2': 'จองแบบมั่นใจ',
@@ -886,6 +1074,48 @@ const th: Map = {
   'gallery.emptyCategory': 'ไม่มีรูปในหมวดนี้',
   'gallery.exampleAlbum': 'อัลบั้มตัวอย่างจากพี่แสนและทีม',
   'gallery.inspiration': 'แรงบันดาลใจ',
+  'photoGuide.back': 'กลับไปหน้าคลังเคล็ดลับ',
+  'photoGuide.hub.badge': 'มาเรียนรู้และฝึกฝนไปด้วยกัน',
+  'photoGuide.hub.title': 'คลังเคล็ดลับถ่ายภาพ',
+  'photoGuide.hub.subtitle':
+    'สามคู่มือสำหรับสามสไตล์นักเดินทาง — ลิงก์จากหน้าแรกและหน้าเตรียมตัว',
+  'photoGuide.readGuide': 'อ่านคู่มือ →',
+  'photoGuide.hub.albumTitle': 'อัลบั้มรูปจากพี่แสน',
+  'photoGuide.hub.albumSub': 'รูปคัดสรรจากทริปที่ผ่านมา — ลากหรือดูสไลด์ด้านล่าง',
+  'photoGuide.hub.dragHint': '↔ ลากเพื่อดูอัลบั้ม',
+  'photoGuide.swipeMore': 'ปัดเพื่อดูเพิ่ม →',
+  'photoGuide.fromTheRoad': 'จากทริปจริง',
+  'photoGuide.posing.eyebrow': 'คลังเคล็ดลับ · โพสท่า',
+  'photoGuide.posing.title': 'คู่มือโพสท่า & แต่งตัว',
+  'photoGuide.posing.sub':
+    'สำหรับลูกทริปที่ชอบอยู่หน้ากล้อง — ดูอัลบั้มตัวอย่างก่อน แล้วตามด้วยท่าโพสและโทนเสื้อผ้าตามฤดูกาล',
+  'photoGuide.posing.posesTitle': 'ท่าโพสแนะนำจากช่างภาพ',
+  'photoGuide.posing.seasonTitle': 'โทนเสื้อผ้าตามฤดูกาล',
+  'photoGuide.posing.seasonSub':
+    'จับคู่กับทริปจริงของ Trip2Talk ให้ชุดเข้ากับวิวที่คุณจะถ่าย',
+  'photoGuide.posing.quote':
+    '“ไม่ต้องพยายามเป็นนางแบบ — พยายามให้ดูเหมือนวันที่สนุกที่สุดของทริป นั่นคือภาพที่คนหยุดเลื่อนดู”',
+  'photoGuide.posing.quoteBy': 'ช่างภาพหลักของ Trip2Talk',
+  'photoGuide.camera.eyebrow': 'คลังเคล็ดลับ · ตั้งค่ากล้อง',
+  'photoGuide.camera.title': 'คู่มือตั้งค่ากล้อง',
+  'photoGuide.camera.sub':
+    'ค่าเริ่มต้นสำหรับมือใหม่พก DSLR/mirrorless — จากแสงเช้าถึงดาว ทางช้างเผือก และแสงใต้ในทริป NZ & แทสเมเนีย',
+  'photoGuide.camera.examples': 'ตัวอย่างภาพจากทริปของพี่แสน',
+  'photoGuide.camera.table.scene': 'ช่วงเวลา/ฉาก',
+  'photoGuide.camera.table.aperture': 'รูรับแสง (f)',
+  'photoGuide.camera.table.shutter': 'ชัตเตอร์',
+  'photoGuide.camera.table.iso': 'ISO',
+  'photoGuide.camera.table.notes': 'หมายเหตุ',
+  'photoGuide.camera.disclaimer':
+    'เป็นค่าเริ่มต้นเท่านั้น ปรับตามเลนส์และกล้องของแต่ละคน',
+  'photoGuide.camera.gear': 'อุปกรณ์เบื้องต้นที่ควรมี',
+  'photoGuide.mobile.eyebrow': 'คลังเคล็ดลับ · มือถือ',
+  'photoGuide.mobile.title': 'คู่มือถ่ายภาพด้วยมือถือ',
+  'photoGuide.mobile.sub':
+    'ไม่ต้องมีอุปกรณ์เพิ่ม — เทคนิคทิวทัศน์และพอร์ตเทรตที่ลูกทริปใช้ได้แค่ด้วยมือถือ',
+  'photoGuide.mobile.landscape': 'ถ่ายวิว',
+  'photoGuide.mobile.portrait': 'ถ่ายคน',
+  'photoGuide.follow': 'ติดตามเรา',
   'favorites.saved': 'บันทึกไว้',
   'favorites.savedTripsLabel': 'ทริป',
   'trips.suggested': 'ทริปที่คุณอาจสนใจ',
@@ -893,6 +1123,24 @@ const th: Map = {
   'account.guestSub': 'จองแบบแขก — ไม่ต้องล็อกอิน',
   'account.language': 'ภาษา',
   'about.positioning': 'เราคือใคร',
+  'about.page.eyebrow': 'เกี่ยวกับ Trip2Talk',
+  'about.page.title': 'เกี่ยวกับ Trip2Talk',
+  'about.hero.heading': 'ทริปถ่ายภาพ ที่จัดการให้ครบทุกขั้นตอน',
+  'about.hero.story':
+    'Trip2Talk เริ่มจากไอเดียง่ายๆ ว่านักเดินทางไม่ควรต้องเลือกระหว่างการไปเที่ยวกับการได้ภาพสวยๆ ทุกทริปมีกลุ่มเล็ก (สูงสุด 6 คน) พร้อมช่างภาพมืออาชีพและทีมสไตล์ลิ่งดูแล คุณแค่โฟกัสกับช่วงเวลานั้น',
+  'about.hero.stat.trips': 'ทริป',
+  'about.hero.stat.photographers': 'ช่างภาพ',
+  'about.hero.stat.travelers': 'นักเดินทาง',
+  'about.saen.bio':
+    'สวัสดีครับ ผม Saen ช่างภาพผู้หลงใหลในความงามของธรรมชาติและแสงสี ผมเริ่มต้นการเดินทางบนเส้นทางสายการถ่ายภาพด้วยการเรียนรู้ด้วยตนเอง และด้วยความรักในการถ่ายภาพ ผมได้พบกับกลุ่มคนไทยในซิดนีย์ที่มีความสนใจในสิ่งเดียวกัน\n\nตลอด 10 ปีที่ผ่านมา ผมได้พัฒนาทักษะการถ่ายภาพทิวทัศน์อย่างต่อเนื่อง — ผมเชื่อว่าการถ่ายภาพไม่ใช่แค่การบันทึกภาพ แต่เป็นการบันทึกเรื่องราว ความรู้สึก และประสบการณ์',
+  'about.ploy.bio':
+    'Monsicha Chayakorn (พลอย) — Admin & Trip Staff ดูแลการประสานงานคิวจอง และดูแลลูกทริปให้พร้อมก่อนออกเดินทาง',
+  'about.whatToKnow.title': 'สิ่งที่ควรรู้',
+  'about.whatToKnow.body':
+    'เราไม่ใช่บริษัททัวร์ บริการของเราคือ Photo Trip — เน้นการเดินทางเพื่อถ่ายภาพเป็นหลัก ที่พักเป็นแบบ Hostel/Backpacker/Motel เน้นสะอาดปลอดภัย หากต้องการอัปเกรดห้องพักส่วนตัวสามารถแจ้งและจ่ายเพิ่มได้ อาหารไม่รวมในแพ็กเกจ',
+  'about.contact.studio': 'สตูดิโอ',
+  'about.contact.hours': 'จันทร์–ศุกร์ 10:00–17:00',
+  'about.contact.footer': 'ABN 81 951 461 769 · Chapter 99 Photography',
   'about.stats.heading.line1': 'เกี่ยวกับ',
   'about.stats.heading.line2': 'ทีมงานของเรา',
   'about.stats.intro':
