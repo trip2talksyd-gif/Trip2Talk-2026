@@ -9,14 +9,21 @@ import {
 } from '../../data/galleryPhotos'
 import GalleryLightbox from '../../components/gallery/GalleryLightbox'
 import PhotoSlideshow from '../../components/photoGuide/PhotoSlideshow'
+import BiText from '../../components/ui/BiText'
 
 export default function GalleryPage() {
-  const { lang, t } = useLang()
+  const { tt } = useLang()
   const [cat, setCat] = useState<GalleryFilter>('all')
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
+  const allBi = tt('common.all')
+  const titleBi = tt('nav.gallery')
+  const emptyBi = tt('gallery.empty')
+  const emptyCatBi = tt('gallery.emptyCategory')
+  const albumBi = tt('gallery.exampleAlbum')
+
   const tabs: { id: GalleryFilter; label: string; th: string }[] = [
-    { id: 'all', label: t('common.all'), th: 'ทั้งหมด' },
+    { id: 'all', label: allBi.en, th: allBi.th },
     { id: 'new-zealand', label: 'New Zealand', th: 'นิวซีแลนด์' },
     { id: 'tasmania', label: 'Tasmania', th: 'แทสเมเนีย' },
     { id: 'nsw', label: 'NSW', th: 'NSW' },
@@ -50,22 +57,28 @@ export default function GalleryPage() {
       }
       if (!addedAny) break
     }
+    const album = tt('gallery.exampleAlbum')
     return mixed.slice(0, 10).map((photo) => ({
       photo,
       sceneEn: photo.caption_en || 'Gallery',
       sceneTh: photo.caption_th || 'แกลเลอรี',
-      titleEn: 'Example album from Saen & team',
-      titleTh: 'อัลบั้มตัวอย่างจากพี่แสนและทีม',
+      titleEn: album.en,
+      titleTh: album.th,
       meta: photo.id,
     }))
-  }, [])
+  }, [tt])
 
   return (
     <div className="space-y-4 pb-4">
       <header className="-mx-4 border-b border-line bg-card px-4 pb-2.5 pt-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-5">
-        <h1 className="mb-2.5 font-serif text-[17px] text-ink sm:text-2xl">
-          {t('nav.gallery')}
-        </h1>
+        <BiText
+          as="h1"
+          en={titleBi.en}
+          th={titleBi.th}
+          serif
+          className="mb-2.5 text-[17px] text-ink sm:text-2xl"
+          thClassName="mt-px block font-thai text-[11px] font-medium text-ink-soft sm:text-[13px]"
+        />
         <div className="flex gap-[7px] overflow-x-auto pb-1">
           {tabs.map((tab) => (
             <button
@@ -78,7 +91,8 @@ export default function GalleryPage() {
                   : 'bg-mint-100 text-teal-700'
               }`}
             >
-              {lang === 'th' ? tab.th : tab.label}
+              {tab.label}
+              <span className="ml-1 font-thai text-[9px] font-medium opacity-80">{tab.th}</span>
             </button>
           ))}
         </div>
@@ -88,25 +102,32 @@ export default function GalleryPage() {
         <div className="mt-6 flex flex-col items-center rounded-2xl border border-dashed border-line bg-mint-100 px-6 py-12 text-center">
           <ImageOff className="h-10 w-10 text-ink-soft" />
           <p className="mt-3 text-sm font-medium text-ink">
-            {lang === 'th' ? 'ยังไม่มีรูปในแกลเลอรี' : 'No gallery photos yet'}
+            {emptyBi.en}
+            <span className="mt-0.5 block font-thai text-xs font-normal text-ink-soft">
+              {emptyBi.th}
+            </span>
           </p>
         </div>
       ) : items.length === 0 ? (
         <div className="rounded-xl bg-mint-100 px-4 py-8 text-center text-sm text-ink-soft">
-          {lang === 'th' ? 'ไม่มีรูปในหมวดนี้' : 'No photos in this category'}
+          {emptyCatBi.en}
+          <span className="mt-0.5 block font-thai text-xs text-ink-soft/85">{emptyCatBi.th}</span>
         </div>
       ) : (
         <section className="space-y-2.5">
           <div>
             <p className="mb-1.5 text-sm font-bold text-ink">
-              {lang === 'th' ? 'อัลบั้มตัวอย่างจากพี่แสนและทีม' : 'Example album from Saen & team'}
+              {albumBi.en}
+              <span className="ml-1.5 font-thai text-xs font-medium text-ink-soft">
+                {albumBi.th}
+              </span>
             </p>
             <PhotoSlideshow slides={slides} />
           </div>
 
           <div className="grid grid-cols-3 gap-[5px]">
             {items.map((photo, idx) => {
-              const caption = lang === 'th' ? photo.caption_th : photo.caption_en
+              const caption = `${photo.caption_en} / ${photo.caption_th}`
               const tall = idx % 7 === 0
               return (
                 <button

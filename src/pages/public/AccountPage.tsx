@@ -72,7 +72,7 @@ const MENU = [
 ] as const
 
 export default function AccountPage() {
-  const { lang, toggleLang } = useLang()
+  const { lang, toggleLang, tt } = useLang()
   const favorites = useFavoriteTripCodes()
 
   // Mockup .acct-stats — Trips / Saved / Photos. Saved + Photos are real counts;
@@ -83,6 +83,10 @@ export default function AccountPage() {
     { value: String(GALLERY_PHOTOS.length), en: 'Photos', th: 'รูปภาพ' },
   ]
 
+  const guestBadge = tt('account.guestBadge')
+  const guestSub = tt('account.guestSub')
+  const languageBi = tt('account.language')
+
   return (
     <div className="acct-shell pb-4">
       {/* .acct-hero */}
@@ -90,23 +94,27 @@ export default function AccountPage() {
         <div className="acct-avatar" aria-hidden>
           T2
         </div>
-        <b>Trip2Talk Guest</b>
+        <b>
+          {guestBadge.en}
+          <span className="mt-0.5 block font-thai text-[0.72em] font-medium opacity-85">
+            {guestBadge.th}
+          </span>
+        </b>
         <span className="acct-sub">
-          {lang === 'th'
-            ? 'จองแบบแขก — ไม่ต้องล็อกอิน'
-            : 'Guest booking — no account login required'}
+          {guestSub.en}
+          <span className="mt-0.5 block font-thai opacity-90">{guestSub.th}</span>
         </span>
         <div className="acct-stats">
           {stats.map((stat) => (
             <div key={stat.en}>
               <p>{stat.value}</p>
               <p>
-                {lang === 'th' ? stat.th : stat.en}
+                {stat.en}
                 <span
                   className="mt-px block font-thai text-[8px] normal-case tracking-normal opacity-85"
                   style={{ color: 'var(--mint-200)' }}
                 >
-                  {lang === 'th' ? stat.en : stat.th}
+                  {stat.th}
                 </span>
               </p>
             </div>
@@ -121,7 +129,12 @@ export default function AccountPage() {
             🌐
           </span>
           <span className="txt">
-            <b>{lang === 'th' ? 'ภาษา — TH / EN' : 'Language — EN / TH'}</b>
+            <b>
+              {languageBi.en}
+              <span className="ml-1 font-thai text-[0.85em] font-medium opacity-80">
+                {languageBi.th}
+              </span>
+            </b>
             <span className="font-thai">
               {lang === 'th' ? 'แตะเพื่อสลับเป็น English' : 'Tap to switch to Thai'}
             </span>
@@ -137,8 +150,16 @@ export default function AccountPage() {
               {item.ic}
             </span>
             <span className="txt">
-              <b>{lang === 'th' ? item.th : item.en}</b>
-              <span className="font-thai">{lang === 'th' ? item.subTh : item.subEn}</span>
+              <b>
+                {item.en}
+                <span className="ml-1 font-thai text-[0.85em] font-medium opacity-80">
+                  {item.th}
+                </span>
+              </b>
+              <span>
+                {item.subEn}
+                <span className="ml-1 font-thai opacity-85">{item.subTh}</span>
+              </span>
             </span>
             <span className="chev" aria-hidden>
               ›

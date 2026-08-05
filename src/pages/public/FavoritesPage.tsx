@@ -10,9 +10,10 @@ import TripFilmstrip from '../../components/trips/TripFilmstrip'
 import PhotoSlideshow, { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
 import { TripCardSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
+import BiText from '../../components/ui/BiText'
 
 export default function FavoritesPage() {
-  const { lang, t } = useLang()
+  const { tt, t } = useLang()
   const favoriteCodes = useFavoriteTripCodes()
   const removeFavorite = useRemoveFavorite()
   const [tours, setTours] = useState<Tour[]>([])
@@ -42,25 +43,48 @@ export default function FavoritesPage() {
     return tours.filter((tour) => !set.has(tour.trip_code.toUpperCase())).slice(0, 8)
   }, [tours, favoriteCodes])
 
+  const albumBi = tt('gallery.exampleAlbum')
+
   const emptySlides = useMemo(() => {
-    const album = galleryByIds(['nz-001', 'tas-002', 'syd-009', 'nsw-010', 'tas-003', 'nz-013'])
-    return album.map((photo) => ({
+    const photos = galleryByIds(['nz-001', 'tas-002', 'syd-009', 'nsw-010', 'tas-003', 'nz-013'])
+    const album = tt('gallery.exampleAlbum')
+    const inspiration = tt('gallery.inspiration')
+    return photos.map((photo) => ({
       photo,
-      sceneEn: 'Inspiration',
-      sceneTh: 'แรงบันดาลใจ',
-      titleEn: 'Example album from Saen & team',
-      titleTh: 'อัลบั้มตัวอย่างจากพี่แสนและทีม',
+      sceneEn: inspiration.en,
+      sceneTh: inspiration.th,
+      titleEn: album.en,
+      titleTh: album.th,
       meta: photo.id,
     }))
-  }, [])
+  }, [tt])
+
+  const titleBi = tt('nav.favorites')
+  const savedBi = tt('favorites.saved')
+  const savedTripsLabelBi = tt('favorites.savedTripsLabel')
+  const emptyBi = tt('favorites.empty')
+  const staleBi = tt('favorites.stale')
+  const removeBi = tt('favorites.remove')
+  const tripsBi = tt('nav.trips')
+  const suggestedBi = tt('trips.suggested')
 
   return (
     <div className="space-y-4 pb-4">
       <header className="-mx-4 flex items-start justify-between gap-3 border-b border-line bg-card px-4 pb-3 pt-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-5">
-        <h1 className="font-serif text-[17px] text-ink sm:text-2xl">{t('nav.favorites')}</h1>
+        <BiText
+          as="h1"
+          en={titleBi.en}
+          th={titleBi.th}
+          serif
+          className="text-[17px] text-ink sm:text-2xl"
+          thClassName="mt-px block font-thai text-[11px] font-medium text-ink-soft sm:text-[13px]"
+        />
         {favoriteCodes.length > 0 && (
-          <span className="mt-1 shrink-0 rounded-full bg-mint-100 px-3 py-[5px] text-[10px] font-bold text-teal-700">
-            {lang === 'th' ? `บันทึกไว้ ${favoriteCodes.length}` : `${favoriteCodes.length} saved`}
+          <span className="mt-1 shrink-0 rounded-full bg-mint-100 px-3 py-[5px] text-right text-[10px] font-bold text-teal-700">
+            {favoriteCodes.length} {savedBi.en}
+            <span className="mt-0.5 block font-thai text-[9px] font-medium opacity-80">
+              {savedBi.th} {favoriteCodes.length}
+            </span>
           </span>
         )}
       </header>
@@ -79,30 +103,40 @@ export default function FavoritesPage() {
         <div className="space-y-5">
           <div className="flex flex-col items-center rounded-2xl border border-line bg-mint-100 px-6 py-10 text-center">
             <Heart className="h-8 w-8 text-teal-600" strokeWidth={1.75} />
-            <p className="mt-3 text-sm text-ink-soft">{t('favorites.empty')}</p>
+            <p className="mt-3 text-sm text-ink-soft">
+              {emptyBi.en}
+              <span className="mt-0.5 block font-thai text-xs text-ink-soft/85">
+                {emptyBi.th}
+              </span>
+            </p>
             <Link to="/trips" className="btn-embossed mt-5 !text-[11px]">
-              {t('nav.trips')}
+              {tripsBi.en}
+              <span className="mt-0.5 block font-thai text-[9px] font-medium opacity-85">
+                {tripsBi.th}
+              </span>
             </Link>
           </div>
           <section>
             <p className="mb-2 text-sm font-bold text-ink">
-              {lang === 'th' ? 'อัลบั้มตัวอย่างจากพี่แสนและทีม' : 'Example album from Saen & team'}
+              {albumBi.en}
+              <span className="ml-1.5 font-thai text-xs font-medium text-ink-soft">
+                {albumBi.th}
+              </span>
             </p>
             <PhotoSlideshow slides={emptySlides} />
           </section>
           {suggestTours.length > 0 && (
-            <TripFilmstrip
-              tours={suggestTours}
-              labelEn="You might also like"
-              labelTh="ทริปที่คุณอาจสนใจ"
-            />
+            <TripFilmstrip tours={suggestTours} labelEn={suggestedBi.en} labelTh={suggestedBi.th} />
           )}
         </div>
       )}
 
       {!loading && !error && favoriteCodes.length > 0 && favoriteTours.length === 0 && (
         <div className="space-y-3">
-          <p className="text-sm text-ink-soft">{t('favorites.stale')}</p>
+          <p className="text-sm text-ink-soft">
+            {staleBi.en}
+            <span className="mt-0.5 block font-thai text-xs text-ink-soft/85">{staleBi.th}</span>
+          </p>
           <ul className="space-y-2">
             {favoriteCodes.map((code) => (
               <li
@@ -115,7 +149,8 @@ export default function FavoritesPage() {
                   onClick={() => removeFavorite(code)}
                   className="text-xs uppercase tracking-wider text-coral"
                 >
-                  {t('favorites.remove')}
+                  {removeBi.en}
+                  <span className="ml-1 font-thai normal-case opacity-85">{removeBi.th}</span>
                 </button>
               </li>
             ))}
@@ -131,15 +166,16 @@ export default function FavoritesPage() {
             ))}
           </div>
           <p className="text-center text-[10.5px] text-ink-soft">
-            {lang === 'th'
-              ? `บันทึกไว้ ${favoriteTours.length} ทริป`
-              : `${favoriteTours.length} saved trips`}
+            {favoriteTours.length} {savedTripsLabelBi.en}
+            <span className="mt-0.5 block font-thai text-[9.5px] text-ink-soft/85">
+              {savedBi.th} {favoriteTours.length} {savedTripsLabelBi.th}
+            </span>
           </p>
           {suggestTours.length > 0 && (
             <TripFilmstrip
               tours={suggestTours}
-              labelEn="You might also like"
-              labelTh="ทริปที่คุณอาจสนใจ"
+              labelEn={suggestedBi.en}
+              labelTh={suggestedBi.th}
               className="mt-2"
             />
           )}

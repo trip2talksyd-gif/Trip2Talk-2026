@@ -28,48 +28,61 @@ function ValueCard({
   items: readonly TranslationKey[]
   variant: 'negative' | 'positive'
 }) {
-  const { t } = useLang()
+  const { tt } = useLang()
   const isNegative = variant === 'negative'
 
   return (
     <div className="liquid-glass relative rounded-3xl p-5 transition-transform duration-300 hover:-translate-y-0.5 sm:p-6">
       <ul className="relative z-10 space-y-3.5">
-        {items.map((key) => (
-          <li key={key} className="flex items-start gap-3">
-            <span
-              className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
-                isNegative ? 'bg-coral/10 text-coral' : 'bg-gold/10 text-gold'
-              }`}
-            >
-              {isNegative ? (
-                <X className="h-3.5 w-3.5" strokeWidth={2.5} />
-              ) : (
-                <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
-              )}
-            </span>
-            <span className="text-sm leading-relaxed text-cream-muted">{t(key)}</span>
-          </li>
-        ))}
+        {items.map((key) => {
+          const bi = tt(key)
+          return (
+            <li key={key} className="flex items-start gap-3">
+              <span
+                className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${
+                  isNegative ? 'bg-coral/10 text-coral' : 'bg-gold/10 text-gold'
+                }`}
+              >
+                {isNegative ? (
+                  <X className="h-3.5 w-3.5" strokeWidth={2.5} />
+                ) : (
+                  <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
+                )}
+              </span>
+              <span className="text-sm leading-relaxed text-cream-muted">
+                {bi.en}
+                <span className="mt-0.5 block font-thai text-[0.9em] opacity-85">{bi.th}</span>
+              </span>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )
 }
 
 export default function CalendarValueProps() {
-  const { t } = useLang()
+  const { tt } = useLang()
+  const badge = tt('calendar.value.badge')
+  const heading1 = tt('calendar.value.heading.line1')
+  const heading2 = tt('calendar.value.heading.line2')
 
   return (
     <section className="mb-8 font-sans">
       <div className="flex flex-col items-center text-center">
         <span className="liquid-glass inline-flex items-center rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-cream">
-          {t('calendar.value.badge')}
+          {badge.en}
+          <span className="ml-1.5 font-thai text-[0.9em] font-medium opacity-85">{badge.th}</span>
         </span>
 
         <h2 className="mt-5 max-w-xl text-2xl font-semibold leading-tight tracking-tight text-cream sm:text-3xl md:text-4xl">
-          {t('calendar.value.heading.line1')}
+          {heading1.en}
           <br />
           <span className="bg-gradient-to-r from-gold via-gold to-amber bg-clip-text text-transparent">
-            {t('calendar.value.heading.line2')}
+            {heading2.en}
+          </span>
+          <span className="mt-1 block font-thai text-xl text-cream/85 sm:text-2xl">
+            {heading1.th} {heading2.th}
           </span>
         </h2>
       </div>

@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { useLang } from '../../hooks/useLang'
 import { GALLERY_PHOTOS, photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
 
 type Slide = {
@@ -20,7 +19,6 @@ type Props = {
 }
 
 export default function PhotoSlideshow({ slides, intervalMs = 4000, className = '' }: Props) {
-  const { lang } = useLang()
   const [index, setIndex] = useState(0)
 
   useEffect(() => {
@@ -33,8 +31,6 @@ export default function PhotoSlideshow({ slides, intervalMs = 4000, className = 
 
   if (slides.length === 0) return null
   const slide = slides[index]
-  const scene = lang === 'th' ? slide.sceneTh : slide.sceneEn
-  const title = lang === 'th' ? slide.titleTh : slide.titleEn
 
   return (
     <div className={className}>
@@ -62,13 +58,14 @@ export default function PhotoSlideshow({ slides, intervalMs = 4000, className = 
         />
         {/* .sc-scene — white pill */}
         <span className="absolute left-2.5 top-2.5 rounded-full bg-white/92 px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[0.02em] text-ink">
-          {scene}
+          {slide.sceneEn}
+          <span className="ml-1 font-thai font-medium normal-case opacity-80">
+            {slide.sceneTh}
+          </span>
         </span>
         <div className="absolute inset-x-3.5 bottom-3 text-cream">
-          <p className="text-[13.5px] font-bold leading-[1.3]">{title}</p>
-          {lang === 'en' && (
-            <p className="mt-0.5 font-thai text-[10px] opacity-85">{slide.titleTh}</p>
-          )}
+          <p className="text-[13.5px] font-bold leading-[1.3]">{slide.titleEn}</p>
+          <p className="mt-0.5 font-thai text-[10px] opacity-85">{slide.titleTh}</p>
           {slide.meta && (
             <p className="mt-1.5 font-mono text-[9.5px] font-bold tracking-[0.01em] opacity-92">
               {slide.meta}

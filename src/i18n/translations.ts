@@ -230,6 +230,20 @@ export type TranslationKey =
   | 'calendar.photo.feature.3.title'
   | 'calendar.photo.feature.3.desc'
   | 'calendar.trips.badge'
+  | 'calendar.banner.title'
+  | 'calendar.banner.sub'
+  | 'calendar.empty'
+  | 'calendar.moreDestinations'
+  | 'gallery.empty'
+  | 'gallery.emptyCategory'
+  | 'gallery.exampleAlbum'
+  | 'gallery.inspiration'
+  | 'favorites.saved'
+  | 'favorites.savedTripsLabel'
+  | 'trips.suggested'
+  | 'account.guestBadge'
+  | 'account.guestSub'
+  | 'account.language'
   | 'about.positioning'
   | 'about.stats.heading.line1'
   | 'about.stats.heading.line2'
@@ -540,6 +554,20 @@ const en: Map = {
   'calendar.photo.feature.3.title': 'High-res photos to keep',
   'calendar.photo.feature.3.desc': 'Full-resolution files, ready to post the same trip',
   'calendar.trips.badge': 'Open for booking',
+  'calendar.banner.title': 'Every trip includes a photographer',
+  'calendar.banner.sub': 'Styling / wardrobe support throughout the trip',
+  'calendar.empty': 'No trips in this month',
+  'calendar.moreDestinations': 'More destinations',
+  'gallery.empty': 'No gallery photos yet',
+  'gallery.emptyCategory': 'No photos in this category',
+  'gallery.exampleAlbum': 'Example album from Saen & team',
+  'gallery.inspiration': 'Inspiration',
+  'favorites.saved': 'saved',
+  'favorites.savedTripsLabel': 'saved trips',
+  'trips.suggested': 'You might also like',
+  'account.guestBadge': 'Trip2Talk Guest',
+  'account.guestSub': 'Guest booking — no account login required',
+  'account.language': 'Language',
   'about.positioning': 'Who we are',
   'about.stats.heading.line1': 'About',
   'about.stats.heading.line2': 'our team',
@@ -850,6 +878,20 @@ const th: Map = {
   'calendar.photo.feature.3.title': 'ได้ไฟล์ภาพความละเอียดสูง',
   'calendar.photo.feature.3.desc': 'รูปไฟล์เต็ม พร้อมโพสต์ตั้งแต่ทริปยังไม่จบ',
   'calendar.trips.badge': 'เปิดจองแล้ว',
+  'calendar.banner.title': 'ทุกทริปมีช่างภาพ · พร้อมทีมสไตล์ลิ่ง',
+  'calendar.banner.sub': 'พร้อมทีมสไตล์ลิ่ง/wardrobe ดูแลตลอดทริป',
+  'calendar.empty': 'ไม่มีทริปในเดือนนี้',
+  'calendar.moreDestinations': 'ทริปอื่นๆ ที่น่าสนใจ',
+  'gallery.empty': 'ยังไม่มีรูปในแกลเลอรี',
+  'gallery.emptyCategory': 'ไม่มีรูปในหมวดนี้',
+  'gallery.exampleAlbum': 'อัลบั้มตัวอย่างจากพี่แสนและทีม',
+  'gallery.inspiration': 'แรงบันดาลใจ',
+  'favorites.saved': 'บันทึกไว้',
+  'favorites.savedTripsLabel': 'ทริป',
+  'trips.suggested': 'ทริปที่คุณอาจสนใจ',
+  'account.guestBadge': 'บัญชีผู้เยี่ยมชม Trip2Talk',
+  'account.guestSub': 'จองแบบแขก — ไม่ต้องล็อกอิน',
+  'account.language': 'ภาษา',
   'about.positioning': 'เราคือใคร',
   'about.stats.heading.line1': 'เกี่ยวกับ',
   'about.stats.heading.line2': 'ทีมงานของเรา',
