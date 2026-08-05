@@ -84,6 +84,15 @@ export type TranslationKey =
   | 'trips.search'
   | 'trips.search.empty'
   | 'trips.going'
+  | 'trips.going.note'
+  | 'trips.cat.popular'
+  | 'trips.cat.desert'
+  | 'trips.cat.flagship'
+  | 'trips.cat.aurora'
+  | 'trips.cat.influencer'
+  | 'trips.seatsLeft'
+  | 'trips.seatsFull'
+  | 'common.clearSearch'
   | 'home.hero.destination.tasmania'
   | 'home.hero.destination.uluru'
   | 'home.hero.destination.sydney'
@@ -329,6 +338,7 @@ const en: Map = {
   'common.oneday': 'One Day',
   'common.overnight': 'Overnight',
   'common.multiday': 'Multi-day',
+  'common.clearSearch': 'Clear search',
   'home.stats.trips': '13 Trips',
   'home.stats.group': '100% Small Group',
   'home.stats.photographers': 'Local Photographers',
@@ -340,18 +350,26 @@ const en: Map = {
   'home.hero.title.line2': 'worth remembering',
   'home.hero.en.line1': 'Capture Moments',
   'home.hero.en.line2': 'Worth Showing Off',
-  'home.hero.th.line1': 'จับภาพโมเมนต์',
-  'home.hero.th.line2': 'ที่อยากอวด',
+  'home.hero.th.line1': 'ออกไปเก็บภาพ',
+  'home.hero.th.line2': 'ที่ทุกคนอยากดู',
   'home.hero.subtitle':
-    'From aurora hunts in Tasmania to sunrise over Uluru — private, small-group trips with a professional photographer, built for Thai travellers in Australia.',
+    'Photo trips across Australia & New Zealand — fully arranged, with a photographer & styling team the whole way.',
   'home.promo.eyebrow': "Let's Learn and Practice",
-  'home.promo.title': 'Photo Guide — posing, settings & mobile tips',
+  'home.promo.title': 'New: Photo Guide — poses, camera & phone tips',
   'trips.title': 'Find Your Trip',
   'trips.subtitle': 'Small groups, pro photographer on every trip.',
   'trips.empty': 'No trips in this category yet — check back soon.',
-  'trips.search': 'Search destination or trip…',
+  'trips.search': 'Search destination...',
   'trips.search.empty': 'No trips match your search.',
   'trips.going': 'Connect with people going',
+  'trips.going.note': 'Join the Facebook group chat — live traveler list coming later.',
+  'trips.cat.popular': 'Popular',
+  'trips.cat.desert': 'Desert',
+  'trips.cat.flagship': 'Flagship',
+  'trips.cat.aurora': 'Aurora',
+  'trips.cat.influencer': 'Influencer',
+  'trips.seatsLeft': 'left',
+  'trips.seatsFull': 'Full',
   'home.hero.destination.tasmania': 'Tasmania',
   'home.hero.destination.uluru': 'Uluru',
   'home.hero.destination.sydney': 'Sydney',
@@ -607,6 +625,7 @@ const th: Map = {
   'common.oneday': 'วันเดียว',
   'common.overnight': 'ค้างคืน',
   'common.multiday': 'หลายวัน',
+  'common.clearSearch': 'ล้างคำค้นหา',
   'home.stats.trips': '13 ทริป',
   'home.stats.group': 'กลุ่มเล็ก 100%',
   'home.stats.photographers': 'ช่างภาพท้องถิ่น',
@@ -618,18 +637,26 @@ const th: Map = {
   'home.hero.title.line2': 'ที่คุณจะไม่มีวันลืม',
   'home.hero.en.line1': 'Capture Moments',
   'home.hero.en.line2': 'Worth Showing Off',
-  'home.hero.th.line1': 'จับภาพโมเมนต์',
-  'home.hero.th.line2': 'ที่อยากอวด',
+  'home.hero.th.line1': 'ออกไปเก็บภาพ',
+  'home.hero.th.line2': 'ที่ทุกคนอยากดู',
   'home.hero.subtitle':
-    'ตั้งแต่ล่าแสงใต้ที่แทสเมเนีย ถึงพระอาทิตย์ขึ้นที่อูลูรู — ทริปกลุ่มเล็กส่วนตัว พร้อมช่างภาพมืออาชีพ ออกแบบมาเพื่อคนไทยในออสเตรเลียโดยเฉพาะ',
+    'ทริปถ่ายภาพทั่วออสเตรเลียและนิวซีแลนด์ จองครบ จบทุกขั้นตอน มีช่างภาพและทีมสไตล์ลิ่งดูแลตลอดทริป',
   'home.promo.eyebrow': 'Learn and Practice',
-  'home.promo.title': 'คู่มือถ่ายภาพ — โพสท่า ตั้งค่ากล้อง และมือถือ',
+  'home.promo.title': 'ใหม่! คู่มือถ่ายภาพ — ท่าโพส กล้อง และมือถือ',
   'trips.title': 'เลือกทริปของคุณ',
   'trips.subtitle': 'กลุ่มเล็ก มีช่างภาพมืออาชีพทุกทริป',
   'trips.empty': 'ยังไม่มีทริปในหมวดนี้ — กลับมาเช็คใหม่เร็วๆ นี้',
-  'trips.search': 'ค้นหาจุดหมายหรือชื่อทริป…',
+  'trips.search': 'ค้นหาจุดหมาย',
   'trips.search.empty': 'ไม่พบทริปที่ตรงกับคำค้นหา',
   'trips.going': 'เจอเพื่อนร่วมทริป',
+  'trips.going.note': 'เข้ากลุ่มแชท Facebook — รายชื่อผู้ร่วมทริปจริงจะมาทีหลัง',
+  'trips.cat.popular': 'ยอดนิยม',
+  'trips.cat.desert': 'ทะเลทราย',
+  'trips.cat.flagship': 'เรือธง',
+  'trips.cat.aurora': 'ล่าแสงใต้',
+  'trips.cat.influencer': 'อินฟลู',
+  'trips.seatsLeft': 'เหลือ',
+  'trips.seatsFull': 'เต็ม',
   'home.hero.destination.tasmania': 'แทสเมเนีย',
   'home.hero.destination.uluru': 'อูลูรู',
   'home.hero.destination.sydney': 'ซิดนีย์',

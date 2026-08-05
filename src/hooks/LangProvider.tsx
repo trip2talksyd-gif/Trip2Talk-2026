@@ -5,7 +5,10 @@ export type LangContextValue = {
   lang: Lang
   setLang: (lang: Lang) => void
   toggleLang: () => void
+  /** Active-language string (legacy / form chrome). Prefer `tt` for bilingual UI. */
   t: (key: TranslationKey) => string
+  /** Always returns both EN + TH — mockup bilingual pattern (show together). */
+  tt: (key: TranslationKey) => { en: string; th: string }
 }
 
 export const LangContext = createContext<LangContextValue | null>(null)
@@ -34,9 +37,17 @@ export function LangProvider({ children }: { children: ReactNode }) {
     [lang],
   )
 
+  const tt = useCallback(
+    (key: TranslationKey) => ({
+      en: translations.en[key] ?? key,
+      th: translations.th[key] ?? translations.en[key] ?? key,
+    }),
+    [],
+  )
+
   const value = useMemo(
-    () => ({ lang, setLang, toggleLang, t }),
-    [lang, setLang, toggleLang, t],
+    () => ({ lang, setLang, toggleLang, t, tt }),
+    [lang, setLang, toggleLang, t, tt],
   )
 
   return <LangContext.Provider value={value}>{children}</LangContext.Provider>
