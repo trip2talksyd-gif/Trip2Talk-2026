@@ -19,6 +19,8 @@ import { getTripVideoUrl } from '../../data/tripVideos'
 import { getTripWeatherHub } from '../../data/tripMaps'
 import { fetchTourByCode, formatDate } from '../../lib/toursApi'
 import type { Tour } from '../../types/tour'
+import { Skeleton } from '../../components/ui/Skeleton'
+import { PageError } from '../../components/ui/PageError'
 
 type PrepItem = {
   id: string
@@ -95,21 +97,61 @@ export default function TripPrepPage() {
   const weather = CLIMATE_WEATHER[packing.climate]
   const hub = getTripWeatherHub(code, lang)
   const [tour, setTour] = useState<Tour | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    if (!code) return
+    if (!code) {
+      setLoading(false)
+      return
+    }
     let cancelled = false
+    setLoading(true)
+    setError('')
     fetchTourByCode(code)
       .then((t) => {
         if (!cancelled) setTour(t)
       })
       .catch(() => {
-        if (!cancelled) setTour(null)
+        if (!cancelled) {
+          setTour(null)
+          setError(t('common.error'))
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
       })
     return () => {
       cancelled = true
     }
-  }, [code])
+  }, [code, t])
+
+  if (loading) {
+    return (
+      <div className="space-y-4 pb-6">
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-24 w-full rounded-xl" />
+        <Skeleton className="h-40 w-full rounded-xl" />
+        <Skeleton className="h-32 w-full rounded-xl" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <PageError
+        message={error}
+        onRetry={() => {
+          setLoading(true)
+          setError('')
+          fetchTourByCode(code)
+            .then(setTour)
+            .catch(() => setError(t('common.error')))
+            .finally(() => setLoading(false))
+        }}
+      />
+    )
+  }
 
   const dateLabel = tour?.departure_date
     ? formatDate(tour.departure_date, lang)

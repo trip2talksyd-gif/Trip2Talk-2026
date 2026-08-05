@@ -6,6 +6,7 @@ import { fetchConfirmedTours, formatDate, seatsRemaining } from '../../lib/tours
 import { tourDestinationLabel, tourDurationLabel } from '../../lib/tourDisplay'
 import type { Tour } from '../../types/tour'
 import { PageError } from '../../components/ui/PageError'
+import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import TripFilmstrip from '../../components/trips/TripFilmstrip'
 import BiText from '../../components/ui/BiText'
 
@@ -141,13 +142,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {loading && (
-        <div className="space-y-2">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-16 animate-pulse rounded-xl bg-mint-100" />
-          ))}
-        </div>
-      )}
+      {loading && <ListRowSkeleton count={3} />}
 
       {error && !loading && <PageError message={error} onRetry={load} />}
 
