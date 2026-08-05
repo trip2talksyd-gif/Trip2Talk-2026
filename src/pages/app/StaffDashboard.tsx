@@ -194,6 +194,18 @@ export default function StaffDashboard() {
           >
             ✍️ Waiver assist / กรอกแทนลูกค้า
           </Link>
+          <Link
+            to="/app/outbound"
+            className="inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
+          >
+            📨 Outbound queue
+          </Link>
+          <Link
+            to="/app/photos"
+            className="inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
+          >
+            📷 Photo delivery
+          </Link>
         </div>
       </header>
 

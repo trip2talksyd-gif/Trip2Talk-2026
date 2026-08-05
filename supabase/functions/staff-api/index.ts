@@ -196,6 +196,13 @@ const ACTION_ROLES: Record<string, Role[]> = {
   cancel_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   create_waiver_staff_assisted: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   list_waivers_for_tour: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  list_outbound_queue: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  complete_outbound: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  list_photos_pending: ['OWNER', 'MANAGER', 'GUIDE'],
+  mark_photos_delivered: ['OWNER', 'MANAGER', 'GUIDE'],
+  customer_loyalty: ['OWNER', 'MANAGER', 'CASHIER'],
+  list_recent_logins: ['OWNER'],
+  owner_ops_metrics: ['OWNER'],
   list_draft_content_posts: ['OWNER'],
   list_manual_pending_content_posts: ['OWNER'],
   update_content_post: ['OWNER'],
@@ -685,6 +692,254 @@ Deno.serve(async (req) => {
         return json({ data })
       }
 
+      case 'list_outbound_queue': {
+        const { status } = params as { status?: string }
+        let q = admin
+          .from('staff_outbound_queue')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(100)
+        if (status === 'pending' || status === 'done' || status === 'skipped') {
+          q = q.eq('status', status)
+        }
+        const { data, error } = await q
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'complete_outbound': {
+        const { id, status } = params as { id?: string; status?: string }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+        const next = status === 'skipped' ? 'skipped' : 'done'
+        const staffName =
+          (typeof session.full_name === 'string' && session.full_name.trim()) || 'Staff'
+        const { data, error } = await admin
+          .from('staff_outbound_queue')
+          .update({
+            status: next,
+            completed_at: new Date().toISOString(),
+            completed_by: staffName,
+          })
+          .eq('id', id)
+          .select()
+          .single()
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'list_photos_pending': {
+        // Trips that have departed (or are past) but photos not marked delivered.
+        const today = new Date().toISOString().slice(0, 10)
+        const { data: tours, error: tErr } = await admin
+          .from('tours')
+          .select('id, trip_code, name_en, departure_date, duration_days, next_date')
+        if (tErr) throw tErr
+
+        const endedCodes: string[] = []
+        const tourMeta = new Map<string, Record<string, unknown>>()
+        for (const t of tours ?? []) {
+          const dep = String(t.departure_date || t.next_date || '').slice(0, 10)
+          if (!dep || dep > today) continue
+          const days = Math.max(1, Number(t.duration_days ?? 1))
+          const end = new Date(dep + 'T00:00:00Z')
+          end.setUTCDate(end.getUTCDate() + days - 1)
+          const endStr = end.toISOString().slice(0, 10)
+          if (endStr <= today) {
+            endedCodes.push(String(t.trip_code))
+            tourMeta.set(String(t.trip_code), { ...t, end_date: endStr })
+          }
+        }
+
+        if (endedCodes.length === 0) return json({ data: [] })
+
+        const { data: bookings, error } = await admin
+          .from('tour_bookings')
+          .select('id, trip_code, first_name_en, last_name_en, email, phone, photos_delivered, photos_delivered_at, gallery_link, booking_status, cancelled_at')
+          .in('trip_code', endedCodes)
+          .eq('photos_delivered', false)
+          .is('cancelled_at', null)
+          .neq('booking_status', 'cancelled')
+        if (error) throw error
+
+        return json({
+          data: (bookings ?? []).map((b: Record<string, unknown>) => ({
+            ...b,
+            tour: tourMeta.get(String(b.trip_code)) ?? null,
+          })),
+        })
+      }
+
+      case 'mark_photos_delivered': {
+        const { bookingId, galleryLink, tripCode, allOnTrip } = params as {
+          bookingId?: string
+          galleryLink?: string
+          tripCode?: string
+          allOnTrip?: boolean
+        }
+        const now = new Date().toISOString()
+        const payload: Record<string, unknown> = {
+          photos_delivered: true,
+          photos_delivered_at: now,
+        }
+        if (typeof galleryLink === 'string' && galleryLink.trim()) {
+          payload.gallery_link = galleryLink.trim()
+        }
+
+        if (allOnTrip && tripCode) {
+          const { data, error } = await admin
+            .from('tour_bookings')
+            .update(payload)
+            .eq('trip_code', tripCode)
+            .is('cancelled_at', null)
+            .neq('booking_status', 'cancelled')
+            .select('id')
+          if (error) throw error
+          return json({ data: { updated: data?.length ?? 0 } })
+        }
+
+        if (!bookingId) return json({ error: 'invalid_params' }, 400)
+        const { data, error } = await admin
+          .from('tour_bookings')
+          .update(payload)
+          .eq('id', bookingId)
+          .select()
+          .single()
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'customer_loyalty': {
+        const { email, phone } = params as { email?: string; phone?: string }
+        const e = (email ?? '').trim().toLowerCase()
+        const p = (phone ?? '').trim()
+        if (!e && !p) return json({ error: 'invalid_params' }, 400)
+
+        let q = admin.from('tour_bookings').select('*').is('cancelled_at', null)
+        if (e && p) {
+          q = q.or(`email.ilike.${e},phone.eq.${p}`)
+        } else if (e) {
+          q = q.ilike('email', e)
+        } else {
+          q = q.eq('phone', p)
+        }
+        const { data, error } = await q.order('booked_at', { ascending: false })
+        if (error) throw error
+
+        const bookings = (data ?? []).filter(
+          (b: { booking_status?: string }) => b.booking_status !== 'cancelled',
+        )
+        const trips = new Set(bookings.map((b: { trip_code: string }) => b.trip_code))
+        const spend = bookings.reduce(
+          (s: number, b: { amount_paid_aud?: number }) => s + Number(b.amount_paid_aud ?? 0),
+          0,
+        )
+        return json({
+          data: {
+            trips_count: trips.size,
+            bookings_count: bookings.length,
+            total_spend_aud: spend,
+            bookings,
+          },
+        })
+      }
+
+      case 'list_recent_logins': {
+        const { data, error } = await admin
+          .from('staff_sessions')
+          .select('token, staff_id, role, full_name, created_at, expires_at, ip_address, user_agent')
+          .order('created_at', { ascending: false })
+          .limit(40)
+        if (error) throw error
+        // Never return raw token to UI — mask
+        return json({
+          data: (data ?? []).map((s: Record<string, unknown>) => ({
+            staff_id: s.staff_id,
+            role: s.role,
+            full_name: s.full_name,
+            created_at: s.created_at,
+            expires_at: s.expires_at,
+            ip_address: s.ip_address ?? null,
+            user_agent: s.user_agent ?? null,
+          })),
+        })
+      }
+
+      case 'owner_ops_metrics': {
+        // Profit per trip (paid installments − trip expenses) + repeat customer rate
+        const { data: payments, error: pErr } = await admin
+          .from('booking_payments')
+          .select('amount_aud, status, booking_id, tour_bookings!inner(trip_code, email, phone, cancelled_at, booking_status)')
+          .eq('status', 'paid')
+        if (pErr) throw pErr
+
+        const { data: expenses, error: eErr } = await admin.from('expenses').select('*')
+        if (eErr) throw eErr
+
+        const revenueByTrip = new Map<string, number>()
+        for (const row of payments ?? []) {
+          const tb = row.tour_bookings as {
+            trip_code?: string
+            cancelled_at?: string | null
+            booking_status?: string
+          } | null
+          if (!tb || tb.cancelled_at || tb.booking_status === 'cancelled') continue
+          const code = String(tb.trip_code ?? 'unknown')
+          revenueByTrip.set(code, (revenueByTrip.get(code) ?? 0) + Number(row.amount_aud ?? 0))
+        }
+
+        const expenseByTrip = new Map<string, number>()
+        let expensesHaveTripLink = false
+        for (const ex of expenses ?? []) {
+          const code = (ex.trip_code as string | null)?.trim()
+          if (code) {
+            expensesHaveTripLink = true
+            expenseByTrip.set(code, (expenseByTrip.get(code) ?? 0) + Number(ex.amount_aud ?? 0))
+          }
+        }
+
+        const profit_per_trip = [...revenueByTrip.entries()].map(([trip_code, revenue_aud]) => {
+          const expense_aud = expenseByTrip.get(trip_code) ?? 0
+          return {
+            trip_code,
+            revenue_aud,
+            expense_aud,
+            profit_aud: revenue_aud - expense_aud,
+          }
+        }).sort((a, b) => b.profit_aud - a.profit_aud)
+
+        // Repeat customer rate: bookings whose email/phone appeared on an earlier booking
+        const { data: allBookings, error: bErr } = await admin
+          .from('tour_bookings')
+          .select('id, email, phone, booked_at, cancelled_at, booking_status')
+          .order('booked_at', { ascending: true })
+        if (bErr) throw bErr
+
+        const seen = new Set<string>()
+        let active = 0
+        let repeats = 0
+        for (const b of allBookings ?? []) {
+          if (b.cancelled_at || b.booking_status === 'cancelled') continue
+          active++
+          const keys: string[] = []
+          if (b.email?.trim()) keys.push(`e:${String(b.email).trim().toLowerCase()}`)
+          if (b.phone?.trim()) keys.push(`p:${String(b.phone).trim()}`)
+          const isRepeat = keys.some((k) => seen.has(k))
+          if (isRepeat) repeats++
+          for (const k of keys) seen.add(k)
+        }
+
+        return json({
+          data: {
+            profit_per_trip,
+            expenses_linked_to_trips: expensesHaveTripLink,
+            repeat_customer_rate:
+              active > 0 ? Math.round((repeats / active) * 1000) / 10 : 0,
+            repeat_bookings: repeats,
+            active_bookings: active,
+          },
+        })
+      }
+
       case 'mark_attendance': {
         const { id, attended } = params as { id: string; attended: boolean | null }
         if (!id) return json({ error: 'invalid_params' }, 400)
@@ -1091,6 +1346,73 @@ Deno.serve(async (req) => {
           const { data: again } = await admin.from('tour_bookings').select('*').eq('id', id).maybeSingle()
           return json({ data: again ?? cancelled })
         }
+
+        // Phase I — notify next waitlist person (FIFO) via outbound queue
+        try {
+          const tripCode = String(booking.trip_code ?? '')
+          if (tripCode) {
+            const { data: nextWait } = await admin
+              .from('waitlist_entries')
+              .select('*')
+              .eq('trip_code', tripCode)
+              .eq('contacted', false)
+              .is('notified_at', null)
+              .order('created_at', { ascending: true })
+              .limit(1)
+              .maybeSingle()
+
+            if (nextWait) {
+              const SITE = 'https://trip2talk.com.au'
+              const tripUrl = `${SITE}/trips/${encodeURIComponent(tripCode)}`
+              const subject = `A seat opened — ${tripCode} — Trip2Talk`
+              const bodyEn = [
+                `Hi ${nextWait.name},`,
+                '',
+                `Good news — a seat opened on ${tripCode}.`,
+                `Book soon: ${tripUrl}`,
+                '',
+                'Trip2Talk team',
+              ].join('\n')
+              const bodyTh = [
+                `สวัสดีคุณ ${nextWait.name}`,
+                '',
+                `มีที่ว่างในทริป ${tripCode} แล้ว`,
+                `จองด่วน: ${tripUrl}`,
+              ].join('\n')
+              const gmailParams = new URLSearchParams({
+                view: 'cm',
+                fs: '1',
+                authuser: 'trip2talksyd@gmail.com',
+                su: subject,
+                body: `${bodyEn}\n\n---\n${bodyTh}`,
+              })
+              if (nextWait.email) gmailParams.set('to', nextWait.email)
+
+              await admin.from('staff_outbound_queue').insert({
+                kind: 'waitlist_spot',
+                waitlist_id: nextWait.id,
+                trip_code: tripCode,
+                customer_name: nextWait.name,
+                customer_email: nextWait.email,
+                customer_phone: nextWait.phone,
+                subject,
+                body_en: bodyEn,
+                body_th: bodyTh,
+                deep_link: tripUrl,
+                messenger_url: 'https://m.me/TriptoTalk',
+                gmail_url: `https://mail.google.com/mail/?${gmailParams.toString()}`,
+                status: 'pending',
+              })
+              await admin
+                .from('waitlist_entries')
+                .update({ notified_at: new Date().toISOString() })
+                .eq('id', nextWait.id)
+            }
+          }
+        } catch (waitErr) {
+          console.error('[cancel_booking] waitlist notify failed', waitErr)
+        }
+
         return json({ data })
       }
 

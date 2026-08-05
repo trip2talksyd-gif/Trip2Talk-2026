@@ -91,6 +91,14 @@ export interface TourBooking {
   cancelled_by?: string | null
   /** Optional reason entered at cancel time. */
   cancel_reason?: string | null
+  photos_delivered?: boolean | null
+  photos_delivered_at?: string | null
+  gallery_link?: string | null
+  reminder_7d_sent_at?: string | null
+  reminder_1d_sent_at?: string | null
+  review_requested_at?: string | null
+  /** Optional referral: another booking that referred this guest. */
+  referred_by_booking_id?: string | null
 }
 
 /** One recorded payment against a booking — lets a booking be paid off in several installments, each with its own receipt.
@@ -183,7 +191,46 @@ export interface WaitlistEntry {
   email: string | null
   note: string | null
   contacted: boolean
+  /** Set when a seat-open notification was enqueued (Phase I). */
+  notified_at?: string | null
   created_at: string
+}
+
+export type OutboundKind =
+  | 'trip_reminder_7d'
+  | 'trip_reminder_1d'
+  | 'review_request'
+  | 'waitlist_spot'
+
+export interface StaffOutboundItem {
+  id: string
+  kind: OutboundKind
+  booking_id: string | null
+  waitlist_id: string | null
+  trip_code: string | null
+  customer_name: string | null
+  customer_email: string | null
+  customer_phone: string | null
+  subject: string
+  body_en: string
+  body_th: string | null
+  deep_link: string | null
+  messenger_url: string | null
+  gmail_url: string | null
+  status: 'pending' | 'done' | 'skipped'
+  created_at: string
+  completed_at: string | null
+  completed_by: string | null
+}
+
+export interface StaffLoginRow {
+  staff_id: string
+  role: string
+  full_name: string
+  created_at: string
+  expires_at: string
+  ip_address: string | null
+  user_agent: string | null
 }
 
 export type ContentPostStatus =

@@ -67,6 +67,13 @@ Deno.serve(async (req) => {
     }
 
     const expiresAt = new Date(Date.now() + TOKEN_TTL_MS).toISOString()
+    const ip =
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      req.headers.get('cf-connecting-ip') ||
+      req.headers.get('x-real-ip') ||
+      null
+    const userAgent = req.headers.get('user-agent')?.slice(0, 400) || null
+
     const { data: session, error: sessionError } = await admin
       .from('staff_sessions')
       .insert({
@@ -74,6 +81,8 @@ Deno.serve(async (req) => {
         role: match.role,
         full_name: match.full_name,
         expires_at: expiresAt,
+        ip_address: ip,
+        user_agent: userAgent,
       })
       .select('token')
       .single()

@@ -6,6 +6,8 @@ import type {
   ComplianceItem,
   ContentPost,
   Expense,
+  StaffLoginRow,
+  StaffOutboundItem,
   StaffRole,
   Tour,
   TourBooking,
@@ -764,6 +766,73 @@ export async function fetchInstallmentIncomeSummary(params: {
   tripCode?: string
 }): Promise<InstallmentIncomeSummary> {
   return callStaffApi<InstallmentIncomeSummary>('installment_income_summary', params)
+}
+
+export async function fetchOutboundQueue(
+  status: 'pending' | 'done' | 'skipped' | 'all' = 'pending',
+): Promise<StaffOutboundItem[]> {
+  return callStaffApi<StaffOutboundItem[]>('list_outbound_queue', {
+    status: status === 'all' ? undefined : status,
+  })
+}
+
+export async function completeOutbound(
+  id: string,
+  status: 'done' | 'skipped' = 'done',
+): Promise<StaffOutboundItem> {
+  return callStaffApi<StaffOutboundItem>('complete_outbound', { id, status })
+}
+
+export type PhotosPendingRow = TourBooking & {
+  tour?: { trip_code?: string; name_en?: string; end_date?: string } | null
+}
+
+export async function fetchPhotosPending(): Promise<PhotosPendingRow[]> {
+  return callStaffApi<PhotosPendingRow[]>('list_photos_pending')
+}
+
+export async function markPhotosDelivered(params: {
+  bookingId?: string
+  tripCode?: string
+  galleryLink?: string
+  allOnTrip?: boolean
+}): Promise<unknown> {
+  return callStaffApi('mark_photos_delivered', params)
+}
+
+export type CustomerLoyalty = {
+  trips_count: number
+  bookings_count: number
+  total_spend_aud: number
+  bookings: TourBooking[]
+}
+
+export async function fetchCustomerLoyalty(params: {
+  email?: string
+  phone?: string
+}): Promise<CustomerLoyalty> {
+  return callStaffApi<CustomerLoyalty>('customer_loyalty', params)
+}
+
+export async function fetchRecentLogins(): Promise<StaffLoginRow[]> {
+  return callStaffApi<StaffLoginRow[]>('list_recent_logins')
+}
+
+export type OwnerOpsMetrics = {
+  profit_per_trip: {
+    trip_code: string
+    revenue_aud: number
+    expense_aud: number
+    profit_aud: number
+  }[]
+  expenses_linked_to_trips: boolean
+  repeat_customer_rate: number
+  repeat_bookings: number
+  active_bookings: number
+}
+
+export async function fetchOwnerOpsMetrics(): Promise<OwnerOpsMetrics> {
+  return callStaffApi<OwnerOpsMetrics>('owner_ops_metrics')
 }
 
 /** Fixes a typo'd name/phone/email on an existing booking. Does not touch

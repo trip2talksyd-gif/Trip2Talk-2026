@@ -40,6 +40,9 @@ import ExpenseEntryPage from './pages/app/ExpenseEntryPage'
 import ReceiptPage from './pages/app/ReceiptPage'
 import StaffPaymentsPage from './pages/app/StaffPaymentsPage'
 import InstallmentIncomePage from './pages/app/InstallmentIncomePage'
+import OutboundQueuePage from './pages/app/OutboundQueuePage'
+import PhotosDeliveryPage from './pages/app/PhotosDeliveryPage'
+import RecentLoginsPage from './pages/app/RecentLoginsPage'
 import SystemCheckPage from './pages/app/SystemCheckPage'
 import ConfirmationSummaryPage from './pages/public/ConfirmationSummaryPage'
 import ContentReview from './pages/admin/ContentReview'
@@ -159,6 +162,30 @@ export default function App() {
           element={
             <RequireStaffRole allow={['OWNER']}>
               <InstallmentIncomePage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/outbound"
+          element={
+            <RequireStaffRole allow={['OWNER', 'MANAGER', 'GUIDE', 'CASHIER']}>
+              <OutboundQueuePage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/photos"
+          element={
+            <RequireStaffRole allow={['OWNER', 'MANAGER', 'GUIDE']}>
+              <PhotosDeliveryPage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/logins"
+          element={
+            <RequireStaffRole allow={['OWNER']}>
+              <RecentLoginsPage />
             </RequireStaffRole>
           }
         />
