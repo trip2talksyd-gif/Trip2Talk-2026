@@ -17,6 +17,7 @@ import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import CancelBookingDialog from '../../components/app/CancelBookingDialog'
 import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
+import TripDaySafetyQuickView from '../../components/app/TripDaySafetyQuickView'
 
 type ManifestFilter = 'active' | 'cancelled' | 'all'
 
@@ -252,6 +253,17 @@ export default function StaffDashboard() {
                     {tab.label}
                   </button>
                 ))}
+              </div>
+            </div>
+            <div className="mt-4 rounded-editorial border border-amber-500/30 bg-amber-500/5 p-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-amber-200">
+                Trip-day safety
+                <span className="mt-0.5 block font-thai text-[10px] font-medium normal-case tracking-normal text-amber-200/80">
+                  ข้อมูลฉุกเฉินวันทริป
+                </span>
+              </h3>
+              <div className="mt-2.5">
+                <TripDaySafetyQuickView bookings={manifest.filter((b) => !isBookingCancelled(b))} />
               </div>
             </div>
             {filteredManifest.length === 0 ? (

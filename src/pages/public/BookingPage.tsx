@@ -38,6 +38,10 @@ type FormState = {
   emergency_contact_phone: string
   dietary_requirements: string
   medical_conditions: string
+  allergies: string
+  insurance_provider: string
+  insurance_policy_number: string
+  other_notes: string
   oshc_provider: string
   oshc_expiry: string
 }
@@ -68,19 +72,26 @@ export default function BookingPage() {
   const [slipFile, setSlipFile] = useState<File | null>(null)
   const [installmentPlan, setInstallmentPlan] = useState<1 | 2 | 4>(1)
 
-  const [form, setForm] = useState<FormState>({
-    first_name_en: '',
-    last_name_en: '',
-    passport_number: '',
-    date_of_birth: '',
-    email: '',
-    phone: '',
-    emergency_contact_name: '',
-    emergency_contact_phone: '',
-    dietary_requirements: '',
-    medical_conditions: '',
-    oshc_provider: '',
-    oshc_expiry: '',
+  const [form, setForm] = useState<FormState>(() => {
+    const safety = tripCode ? getWaiverSession(tripCode)?.safety : undefined
+    return {
+      first_name_en: '',
+      last_name_en: '',
+      passport_number: '',
+      date_of_birth: '',
+      email: '',
+      phone: '',
+      emergency_contact_name: safety?.emergency_contact_name ?? '',
+      emergency_contact_phone: safety?.emergency_contact_phone ?? '',
+      dietary_requirements: '',
+      medical_conditions: safety?.medical_conditions ?? '',
+      allergies: safety?.allergies ?? '',
+      insurance_provider: safety?.insurance_provider ?? '',
+      insurance_policy_number: safety?.insurance_policy_number ?? '',
+      other_notes: safety?.other_notes ?? '',
+      oshc_provider: '',
+      oshc_expiry: '',
+    }
   })
 
   useEffect(() => {
@@ -149,6 +160,10 @@ export default function BookingPage() {
         emergency_contact_phone: form.emergency_contact_phone.trim() || null,
         dietary_requirements: form.dietary_requirements || null,
         medical_conditions: form.medical_conditions || null,
+        allergies: form.allergies.trim() || null,
+        insurance_provider: form.insurance_provider.trim() || null,
+        insurance_policy_number: form.insurance_policy_number.trim() || null,
+        other_notes: form.other_notes.trim() || null,
         oshc_provider: form.oshc_provider || null,
         oshc_expiry: form.oshc_expiry || null,
         waiver_signed: true,

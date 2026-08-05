@@ -47,6 +47,13 @@ export interface TourBooking {
   emergency_contact_phone: string | null
   dietary_requirements: string | null
   medical_conditions: string | null
+  /** Free-text allergies for guides (trip-day quick view). */
+  allergies?: string | null
+  /** Travel insurance (not OSHC). */
+  insurance_provider?: string | null
+  insurance_policy_number?: string | null
+  /** Catch-all notes: swim/mobility/heights/etc. */
+  other_notes?: string | null
   oshc_provider: string | null
   oshc_expiry: string | null
   waiver_signed: boolean

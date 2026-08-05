@@ -349,6 +349,27 @@ export type TranslationKey =
   | 'about.tips'
   | 'waiver.title'
   | 'waiver.signName'
+  | 'safety.title'
+  | 'safety.subtitle'
+  | 'safety.emergencyName'
+  | 'safety.emergencyPhone'
+  | 'safety.allergies'
+  | 'safety.allergies.ph'
+  | 'safety.medical'
+  | 'safety.medical.ph'
+  | 'safety.insuranceProvider'
+  | 'safety.insuranceProvider.ph'
+  | 'safety.insurancePolicy'
+  | 'safety.insurancePolicy.ph'
+  | 'safety.otherNotes'
+  | 'safety.otherNotes.ph'
+  | 'safety.emergencyRequired'
+  | 'staff.safety.quickView'
+  | 'staff.safety.none'
+  | 'staff.safety.allergies'
+  | 'staff.safety.medical'
+  | 'staff.safety.insurance'
+  | 'staff.safety.notes'
   | 'lang.toggle'
   | 'validation.email'
   | 'validation.phone'
@@ -734,6 +755,27 @@ const en: Map = {
   'about.tips': 'Insider Tips — Aurora Hunting',
   'waiver.title': 'Waiver & Consent',
   'waiver.signName': 'Type your full name as digital signature',
+  'safety.title': 'Safety Info',
+  'safety.subtitle': 'For your guide in an emergency — keep it short.',
+  'safety.emergencyName': 'Emergency contact name',
+  'safety.emergencyPhone': 'Emergency contact phone',
+  'safety.allergies': 'Allergies',
+  'safety.allergies.ph': 'e.g. peanuts, none',
+  'safety.medical': 'Medical conditions',
+  'safety.medical.ph': 'e.g. asthma, none',
+  'safety.insuranceProvider': 'Travel insurance provider',
+  'safety.insuranceProvider.ph': 'Company name',
+  'safety.insurancePolicy': 'Policy number',
+  'safety.insurancePolicy.ph': 'Policy / member no.',
+  'safety.otherNotes': 'Anything else we should know',
+  'safety.otherNotes.ph': 'e.g. cannot swim, fear of heights, mobility needs',
+  'safety.emergencyRequired': 'Emergency contact name and phone are required',
+  'staff.safety.quickView': 'Trip-day safety',
+  'staff.safety.none': 'No safety notes',
+  'staff.safety.allergies': 'Allergies',
+  'staff.safety.medical': 'Medical',
+  'staff.safety.insurance': 'Insurance',
+  'staff.safety.notes': 'Notes',
   'lang.toggle': 'ไทย',
   'validation.email': 'Enter a valid email address',
   'validation.phone': 'Use Australian mobile format: 04XX XXX XXX',
@@ -1158,6 +1200,27 @@ const th: Map = {
   'about.tips': 'เคล็ดลับ — ล่าแสงออโรร่า',
   'waiver.title': 'เอกสารยินยอม',
   'waiver.signName': 'พิมพ์ชื่อ-นามสกุลเป็นลายเซ็นดิจิทัล',
+  'safety.title': 'ข้อมูลเพื่อความปลอดภัย',
+  'safety.subtitle': 'สำหรับไกด์ใช้ตอนฉุกเฉิน — กรอกสั้นๆ พอ',
+  'safety.emergencyName': 'ชื่อผู้ติดต่อฉุกเฉิน',
+  'safety.emergencyPhone': 'เบอร์ผู้ติดต่อฉุกเฉิน',
+  'safety.allergies': 'แพ้อาหาร / สาร',
+  'safety.allergies.ph': 'เช่น ถั่วลิสง หรือ none',
+  'safety.medical': 'โรคประจำตัว',
+  'safety.medical.ph': 'เช่น หอบหืด หรือ none',
+  'safety.insuranceProvider': 'บริษัทประกันการเดินทาง',
+  'safety.insuranceProvider.ph': 'ชื่อบริษัท',
+  'safety.insurancePolicy': 'เลขกรมธรรม์',
+  'safety.insurancePolicy.ph': 'เลขกรมธรรม์ / สมาชิก',
+  'safety.otherNotes': 'อื่นๆ ที่ควรรู้',
+  'safety.otherNotes.ph': 'เช่น ว่ายน้ำไม่ได้ กลัวความสูง มีข้อจำกัดการเคลื่อนไหว',
+  'safety.emergencyRequired': 'ต้องกรอกชื่อและเบอร์ผู้ติดต่อฉุกเฉิน',
+  'staff.safety.quickView': 'ข้อมูลฉุกเฉินวันทริป',
+  'staff.safety.none': 'ไม่มีบันทึกความปลอดภัย',
+  'staff.safety.allergies': 'แพ้',
+  'staff.safety.medical': 'สุขภาพ',
+  'staff.safety.insurance': 'ประกัน',
+  'staff.safety.notes': 'หมายเหตุ',
   'lang.toggle': 'EN',
   'validation.email': 'กรุณากรอกอีเมลที่ถูกต้อง',
   'validation.phone': 'ใช้รูปแบบมือถือออสเตรเลีย: 04XX XXX XXX',

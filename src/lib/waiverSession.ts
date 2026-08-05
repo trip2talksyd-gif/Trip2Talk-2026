@@ -1,10 +1,21 @@
 const PREFIX = 'trip2talk_waiver_'
 
+export type WaiverSafetyInfo = {
+  emergency_contact_name: string
+  emergency_contact_phone: string
+  allergies: string
+  medical_conditions: string
+  insurance_provider: string
+  insurance_policy_number: string
+  other_notes: string
+}
+
 export type WaiverSession = {
   tripCode: string
   signedName: string
   signedAt: string
   clauses: string[]
+  safety?: WaiverSafetyInfo
 }
 
 export function setWaiverSigned(tripCode: string, payload: WaiverSession): void {
