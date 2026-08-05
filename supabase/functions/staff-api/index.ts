@@ -734,13 +734,14 @@ Deno.serve(async (req) => {
         const today = new Date().toISOString().slice(0, 10)
         const { data: tours, error: tErr } = await admin
           .from('tours')
-          .select('id, trip_code, name_en, departure_date, duration_days, next_date')
+          // Production tours use departure_date (next_date was a legacy V5 column).
+          .select('id, trip_code, name_en, departure_date, duration_days')
         if (tErr) throw tErr
 
         const endedCodes: string[] = []
         const tourMeta = new Map<string, Record<string, unknown>>()
         for (const t of tours ?? []) {
-          const dep = String(t.departure_date || t.next_date || '').slice(0, 10)
+          const dep = String(t.departure_date || '').slice(0, 10)
           if (!dep || dep > today) continue
           const days = Math.max(1, Number(t.duration_days ?? 1))
           const end = new Date(dep + 'T00:00:00Z')
