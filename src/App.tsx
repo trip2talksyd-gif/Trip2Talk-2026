@@ -43,6 +43,7 @@ import InstallmentIncomePage from './pages/app/InstallmentIncomePage'
 import OutboundQueuePage from './pages/app/OutboundQueuePage'
 import PhotosDeliveryPage from './pages/app/PhotosDeliveryPage'
 import RecentLoginsPage from './pages/app/RecentLoginsPage'
+import StaffPinAdminPage from './pages/app/StaffPinAdminPage'
 import SystemCheckPage from './pages/app/SystemCheckPage'
 import ConfirmationSummaryPage from './pages/public/ConfirmationSummaryPage'
 import ContentReview from './pages/admin/ContentReview'
@@ -186,6 +187,14 @@ export default function App() {
           element={
             <RequireStaffRole allow={['OWNER']}>
               <RecentLoginsPage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/staff-pins"
+          element={
+            <RequireStaffRole allow={['OWNER']}>
+              <StaffPinAdminPage />
             </RequireStaffRole>
           }
         />

@@ -165,6 +165,12 @@ export default function OwnerDashboard() {
                 📋 Staff Dashboard
               </Link>
               <Link
+                to="/app/staff-pins"
+                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+              >
+                🔐 Staff PIN reset
+              </Link>
+              <Link
                 to="/app/waiver-assist"
                 className="block rounded-editorial border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-center text-sm font-medium text-amber-200 transition-colors hover:bg-amber-500/15"
               >
