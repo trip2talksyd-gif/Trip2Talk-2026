@@ -87,7 +87,7 @@ function writePacked(code: string, ids: Set<string>): void {
 
 export default function TripPrepPage() {
   const { tripCode } = useParams<{ tripCode: string }>()
-  const { lang } = useLang()
+  const { lang, t } = useLang()
   const code = tripCode?.toUpperCase() ?? ''
   const baggage = BAGGAGE_INFO[lang]
   const jetstar = JETSTAR_RESTRICTIONS[lang]
