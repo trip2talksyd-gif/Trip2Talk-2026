@@ -687,6 +687,356 @@ export const TRIP_ITINERARIES: Record<string, TripItinerary> = {
       },
     ],
   },
+  'TAS-SU-4D3N': {
+    detailed: true,
+    days: [
+      {
+        day: 1,
+        title: { en: 'Day 1 — Into the Highlands', th: 'วัน 1 — สู่ที่ราบสูง' },
+        subtitle: { en: 'Launceston → Cradle Mountain', th: 'Launceston → Cradle Mountain' },
+        events: [
+          {
+            time: '07:00',
+            category: 'flight',
+            description: {
+              en: 'Jetstar arrival Launceston — private SUV pickup',
+              th: 'ถึง Launceston — รถ SUV รับที่สนามบิน',
+            },
+          },
+          {
+            time: '10:00',
+            category: 'activity',
+            description: {
+              en: 'Drive to Cradle Mountain — scenic highland route',
+              th: 'ขับสู่ Cradle Mountain — เส้นทางที่ราบสูง',
+            },
+          },
+          {
+            time: '13:00',
+            category: 'activity',
+            description: {
+              en: 'Dove Lake circuit — reflection photography',
+              th: 'เดินรอบ Dove Lake — ถ่ายภาพสะท้อนน้ำ',
+            },
+          },
+          {
+            time: '17:00',
+            category: 'activity',
+            description: {
+              en: 'Ronny Creek — wombat & wildlife spotting golden hour',
+              th: 'Ronny Creek — ส่องวอมแบตและสัตว์ป่าช่วง Golden hour',
+            },
+          },
+        ],
+        note: {
+          en: 'Stay near Cradle Mountain Village — pack warm layers, highland nights are cold even in summer',
+          th: 'พักใกล้ Cradle Mountain Village — เตรียมเสื้อกันหนาว กลางคืนบนที่สูงหนาวแม้ในฤดูร้อน',
+        },
+      },
+      {
+        day: 2,
+        title: { en: 'Day 2 — Down to the East Coast', th: 'วัน 2 — ลงสู่ชายฝั่งตะวันออก' },
+        subtitle: { en: 'Cradle Mountain → Bay of Fires', th: 'Cradle Mountain → Bay of Fires' },
+        events: [
+          {
+            time: '06:00',
+            category: 'activity',
+            description: {
+              en: 'Sunrise session at Dove Lake before departure',
+              th: 'ถ่ายพระอาทิตย์ขึ้นที่ Dove Lake ก่อนออกเดินทาง',
+            },
+          },
+          {
+            time: '09:00',
+            category: 'activity',
+            description: {
+              en: 'Scenic drive across to the East Coast',
+              th: 'ขับข้ามเกาะสู่ชายฝั่งตะวันออก',
+            },
+          },
+          {
+            time: '15:00',
+            category: 'activity',
+            description: {
+              en: 'Bay of Fires — orange lichen granite boulders photography',
+              th: 'Bay of Fires — ถ่ายก้อนหินแกรนิตไลเคนสีส้ม',
+            },
+          },
+          {
+            time: '18:30',
+            category: 'activity',
+            description: {
+              en: 'Binalong Bay sunset session',
+              th: 'ถ่ายพระอาทิตย์ตกที่ Binalong Bay',
+            },
+          },
+        ],
+        note: { en: 'Stay in St Helens', th: 'พักที่ St Helens' },
+      },
+      {
+        day: 3,
+        title: { en: 'Day 3 — Fire-Orange Coastline', th: 'วัน 3 — ชายฝั่งสีส้มไฟ' },
+        subtitle: {
+          en: 'Bay of Fires full day & Milky Way',
+          th: 'Bay of Fires เต็มวัน & ทางช้างเผือก',
+        },
+        events: [
+          {
+            time: '06:00',
+            category: 'activity',
+            description: {
+              en: 'Sunrise at the Bay of Fires lookout',
+              th: 'ชมพระอาทิตย์ขึ้นที่จุดชม Bay of Fires',
+            },
+          },
+          {
+            time: '10:00',
+            category: 'activity',
+            description: {
+              en: 'Coastal walk — rockpools & turquoise water detail shots',
+              th: 'เดินชายฝั่ง — ถ่ายแอ่งหินและน้ำสีฟ้าเขียว',
+            },
+          },
+          {
+            time: '21:00',
+            category: 'activity',
+            description: {
+              en: 'Milky Way photography session (conditions permitting)',
+              th: 'ถ่ายทางช้างเผือก (ตามสภาพอากาศ)',
+            },
+          },
+        ],
+      },
+      {
+        day: 4,
+        title: { en: 'Day 4 — Farewell Tasmania', th: 'วัน 4 — ลาแทสเมเนีย' },
+        subtitle: {
+          en: 'Cataract Gorge, Launceston, departure',
+          th: 'Cataract Gorge Launceston และเดินทางกลับ',
+        },
+        events: [
+          {
+            time: '08:00',
+            category: 'activity',
+            description: { en: 'Drive back to Launceston', th: 'ขับกลับ Launceston' },
+          },
+          {
+            time: '10:00',
+            category: 'activity',
+            description: {
+              en: 'Cataract Gorge — final photo stop',
+              th: 'Cataract Gorge — จุดถ่ายภาพสุดท้าย',
+            },
+          },
+          {
+            time: '13:00',
+            category: 'flight',
+            description: {
+              en: 'Transfer to airport, fly back to Sydney',
+              th: 'เดินทางสู่สนามบิน บินกลับ Sydney',
+            },
+          },
+        ],
+      },
+    ],
+  },
+  'BER-3D2N': {
+    detailed: true,
+    days: [
+      {
+        day: 1,
+        title: { en: 'Day 1 — South Coast Arrival', th: 'วัน 1 — ถึงชายฝั่งใต้' },
+        subtitle: { en: 'Sydney → Bermagui', th: 'ซิดนีย์ → Bermagui' },
+        events: [
+          {
+            time: '07:00',
+            category: 'activity',
+            description: {
+              en: 'Depart Sydney — scenic drive south along the coast',
+              th: 'ออกจากซิดนีย์ — ขับชมวิวชายฝั่งลงใต้',
+            },
+          },
+          {
+            time: '13:00',
+            category: 'meal',
+            description: {
+              en: 'Arrive Bermagui — lunch at the fishing harbour',
+              th: 'ถึง Bermagui — มื้อกลางวันที่ท่าเรือประมง',
+            },
+          },
+          {
+            time: '17:00',
+            category: 'activity',
+            description: {
+              en: 'Camel Rock & Horse Head Rock — sunset photography',
+              th: 'Camel Rock และ Horse Head Rock — ถ่ายพระอาทิตย์ตก',
+            },
+          },
+        ],
+        note: { en: 'Stay in Bermagui', th: 'พักที่ Bermagui' },
+      },
+      {
+        day: 2,
+        title: { en: 'Day 2 — Blue Pool & National Park', th: 'วัน 2 — Blue Pool และอุทยานแห่งชาติ' },
+        subtitle: {
+          en: 'Bermagui Blue Pool, Mimosa Rocks, night sky',
+          th: 'Blue Pool Mimosa Rocks และท้องฟ้ายามค่ำ',
+        },
+        events: [
+          {
+            time: '08:00',
+            category: 'activity',
+            description: {
+              en: 'Bermagui Blue Pool — cliffside ocean pool photography',
+              th: 'Blue Pool — ถ่ายสระน้ำริมหน้าผา',
+            },
+          },
+          {
+            time: '11:00',
+            category: 'activity',
+            description: {
+              en: 'Mimosa Rocks National Park coastal walk',
+              th: 'เดินชายฝั่ง Mimosa Rocks National Park',
+            },
+          },
+          {
+            time: '17:00',
+            category: 'activity',
+            description: {
+              en: 'Gulaga lookout — golden hour over the coastline',
+              th: 'จุดชม Gulaga — Golden hour เหนือชายฝั่ง',
+            },
+          },
+          {
+            time: '21:00',
+            category: 'activity',
+            description: {
+              en: 'Milky Way photography session (conditions permitting)',
+              th: 'ถ่ายทางช้างเผือก (ตามสภาพอากาศ)',
+            },
+          },
+        ],
+      },
+      {
+        day: 3,
+        title: { en: 'Day 3 — Morning Light & Return', th: 'วัน 3 — แสงเช้าและเดินทางกลับ' },
+        subtitle: {
+          en: 'Harbour sunrise, drive back to Sydney',
+          th: 'พระอาทิตย์ขึ้นที่ท่าเรือ ขับกลับซิดนีย์',
+        },
+        events: [
+          {
+            time: '06:00',
+            category: 'activity',
+            description: {
+              en: 'Sunrise at Bermagui fishing harbour',
+              th: 'ถ่ายพระอาทิตย์ขึ้นที่ท่าเรือ Bermagui',
+            },
+          },
+          {
+            time: '09:00',
+            category: 'meal',
+            description: {
+              en: 'Breakfast & final coastal shots',
+              th: 'มื้อเช้า & เก็บภาพชายฝั่งสุดท้าย',
+            },
+          },
+          {
+            time: '10:30',
+            category: 'activity',
+            description: { en: 'Depart for Sydney', th: 'ออกเดินทางกลับซิดนีย์' },
+          },
+        ],
+      },
+    ],
+  },
+  'CAN-2D1N': {
+    detailed: true,
+    days: [
+      {
+        day: 1,
+        title: {
+          en: 'Day 1 — Golden Fields of the Central West',
+          th: 'วัน 1 — ทุ่งสีทองแห่งเซ็นทรัลเวสต์',
+        },
+        subtitle: { en: 'Sydney → Cowra → Canowindra', th: 'ซิดนีย์ → Cowra → Canowindra' },
+        events: [
+          {
+            time: '07:00',
+            category: 'activity',
+            description: { en: 'Depart Sydney for Cowra', th: 'ออกจากซิดนีย์สู่ Cowra' },
+          },
+          {
+            time: '11:00',
+            category: 'activity',
+            description: {
+              en: 'Cowra Japanese Garden photography',
+              th: 'ถ่ายภาพที่ Cowra Japanese Garden',
+            },
+          },
+          {
+            time: '14:00',
+            category: 'activity',
+            description: {
+              en: 'Drive to Canowindra — canola field scouting',
+              th: 'ขับสู่ Canowindra — สำรวจทุ่งคาโนล่า',
+            },
+          },
+          {
+            time: '17:30',
+            category: 'activity',
+            description: {
+              en: 'Golden hour among the canola fields',
+              th: 'ถ่าย Golden hour ท่ามกลางทุ่งคาโนล่า',
+            },
+          },
+        ],
+        note: {
+          en: 'Stay in Canowindra — canola typically blooms Aug–Sep, confirm bloom status before departure',
+          th: 'พักที่ Canowindra — คาโนล่ามักบานช่วง ส.ค.–ก.ย. เช็คสถานะดอกก่อนออกเดินทาง',
+        },
+      },
+      {
+        day: 2,
+        title: { en: 'Day 2 — Balloon Capital Sunrise', th: 'วัน 2 — แสงเช้าเมืองหลวงบอลลูน' },
+        subtitle: {
+          en: 'Sunrise fields, Carrington Park, return to Sydney',
+          th: 'ทุ่งยามเช้า Carrington Park และเดินทางกลับ',
+        },
+        events: [
+          {
+            time: '06:00',
+            category: 'activity',
+            description: {
+              en: 'Sunrise over the canola fields — Canowindra is known as the ballooning capital, hot air balloons often drift overhead',
+              th: 'พระอาทิตย์ขึ้นเหนือทุ่งคาโนล่า — Canowindra ขึ้นชื่อเรื่องบอลลูนลมร้อนที่มักลอยผ่าน',
+            },
+          },
+          {
+            time: '09:00',
+            category: 'meal',
+            description: {
+              en: 'Breakfast in Canowindra town',
+              th: 'มื้อเช้าในตัวเมือง Canowindra',
+            },
+          },
+          {
+            time: '10:30',
+            category: 'activity',
+            description: {
+              en: 'Carrington Park lookout — panoramic valley view',
+              th: 'จุดชม Carrington Park — วิวหุบเขา panorama',
+            },
+          },
+          {
+            time: '12:00',
+            category: 'activity',
+            description: { en: 'Depart for Sydney', th: 'ออกเดินทางกลับซิดนีย์' },
+          },
+        ],
+      },
+    ],
+  },
   'NZ-6D5N': {
     detailed: true,
     headerNote: {
