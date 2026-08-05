@@ -58,7 +58,11 @@ type FormState = {
   flight_frequent_flyer_number: string
 }
 
-const REQUIRED: (keyof FormState)[] = [
+type FormStringKey = {
+  [K in keyof FormState]: FormState[K] extends string ? K : never
+}[keyof FormState]
+
+const REQUIRED: FormStringKey[] = [
   'first_name_en',
   'last_name_en',
   'date_of_birth',
@@ -379,7 +383,7 @@ export default function BookingPage() {
 
   const name = lang === 'th' ? tour.name_th : tour.name_en
 
-  const fields: { key: keyof FormState; label: string; type?: string; required?: boolean }[] = [
+  const fields: { key: FormStringKey; label: string; type?: string; required?: boolean }[] = [
     { key: 'first_name_en', label: t('form.firstName'), required: true },
     { key: 'last_name_en', label: t('form.lastName'), required: true },
     { key: 'passport_number', label: t('form.passport') },

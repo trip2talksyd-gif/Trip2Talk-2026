@@ -102,7 +102,7 @@ export default function PricingPage() {
                   className="text-[26px] font-extrabold leading-none text-ink"
                 />
                 <BiText
-                  as="small"
+                  as="span"
                   en={audPerPerson.en}
                   th={audPerPerson.th}
                   className="text-[11px] font-semibold text-ink-soft"
