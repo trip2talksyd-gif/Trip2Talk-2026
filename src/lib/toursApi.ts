@@ -1,5 +1,5 @@
 import { supabase, supabaseConfig } from './supabase'
-import { callStaffApi, StaffSessionExpiredError } from './supabaseStaff'
+import { callStaffApi, clearStaffSession, StaffSessionExpiredError } from './supabaseStaff'
 import { SeatsFullError } from '../types/errors'
 import type {
   BookingPayment,
@@ -835,6 +835,62 @@ export async function fetchCustomerLoyalty(params: {
 
 export async function fetchRecentLogins(): Promise<StaffLoginRow[]> {
   return callStaffApi<StaffLoginRow[]>('list_recent_logins')
+}
+
+export type StaffProfileRow = {
+  id: string
+  full_name: string
+  role: StaffRole | string
+  active: boolean
+  created_at: string
+}
+
+/** OWNER-only staff roster (no pin_hash). */
+export async function listStaffProfiles(): Promise<StaffProfileRow[]> {
+  return callStaffApi<StaffProfileRow[]>('list_staff_profiles')
+}
+
+/**
+ * OWNER-only PIN reset via reset-pin Edge Function.
+ * Returns plaintext PIN once — caller must not log it.
+ */
+export async function resetStaffPin(staffId: string): Promise<{
+  staff_id: string
+  full_name: string
+  role: string
+  pin: string
+}> {
+  const token = sessionStorage.getItem('staff_token')
+  if (!token) throw new StaffSessionExpiredError()
+
+  const res = await fetch(`${supabaseConfig.url}/functions/v1/reset-pin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseConfig.anonKey,
+      Authorization: `Bearer ${supabaseConfig.anonKey}`,
+    },
+    body: JSON.stringify({ token, staff_id: staffId }),
+  })
+
+  if (res.status === 401) {
+    clearStaffSession()
+    throw new StaffSessionExpiredError()
+  }
+
+  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>
+  if (res.status === 403) throw new Error('Only OWNER can reset staff PINs')
+  if (res.status === 404) throw new Error('Staff member not found')
+  if (!res.ok || typeof body.pin !== 'string') {
+    throw new Error(typeof body.error === 'string' ? body.error : `reset-pin failed: ${res.status}`)
+  }
+
+  return {
+    staff_id: String(body.staff_id ?? staffId),
+    full_name: String(body.full_name ?? ''),
+    role: String(body.role ?? ''),
+    pin: body.pin,
+  }
 }
 
 export type OwnerOpsMetrics = {

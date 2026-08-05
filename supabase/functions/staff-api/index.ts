@@ -203,6 +203,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   mark_photos_delivered: ['OWNER', 'MANAGER', 'GUIDE'],
   customer_loyalty: ['OWNER', 'MANAGER', 'CASHIER'],
   list_recent_logins: ['OWNER'],
+  list_staff_profiles: ['OWNER'],
   owner_ops_metrics: ['OWNER'],
   list_draft_content_posts: ['OWNER'],
   list_manual_pending_content_posts: ['OWNER'],
@@ -863,6 +864,16 @@ Deno.serve(async (req) => {
             user_agent: s.user_agent ?? null,
           })),
         })
+      }
+
+      case 'list_staff_profiles': {
+        // OWNER-only roster for PIN reset UI — never return pin_hash.
+        const { data, error } = await admin
+          .from('staff_profiles')
+          .select('id, full_name, role, active, created_at')
+          .order('full_name', { ascending: true })
+        if (error) throw error
+        return json({ data: data ?? [] })
       }
 
       case 'owner_ops_metrics': {
