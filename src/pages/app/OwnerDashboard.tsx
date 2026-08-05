@@ -11,6 +11,13 @@ import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { ComplianceItem, TourBooking } from '../../types/tour'
 import { DashboardCardSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
+import {
+  StaffCard,
+  StaffMain,
+  StaffPageHeader,
+  staffChipClass,
+  staffShellClass,
+} from '../../components/app/staffUi'
 
 function daysUntil(dateStr: string | null): number {
   if (!dateStr) return 999
@@ -20,6 +27,21 @@ function daysUntil(dateStr: string | null): number {
   expiry.setHours(0, 0, 0, 0)
   return Math.ceil((expiry.getTime() - today.getTime()) / 86400000)
 }
+
+const NAV_LINKS: { to: string; label: string }[] = [
+  { to: '/app/trips', label: '+ ลงทริปใหม่' },
+  { to: '/app/expenses/new', label: '+ Add expense' },
+  { to: '/app/cashier', label: '💳 Cashier POS' },
+  { to: '/app/payments', label: '💰 Customer payments / งวดชำระ' },
+  { to: '/app/staff', label: '📋 Staff Dashboard' },
+  { to: '/app/staff-pins', label: '🔐 Staff PIN reset' },
+  { to: '/app/waiver-assist', label: '✍️ Waiver assist / กรอกแทนลูกค้า' },
+  { to: '/app/tax-summary', label: '📊 Tax Summary (รายทริป + Export)' },
+  { to: '/app/income', label: '💵 Income — paid installments (AU tax year)' },
+  { to: '/app/logins', label: '🔐 Recent staff logins' },
+  { to: '/app/content-review', label: '✎ Content Review (Facebook drafts)' },
+  { to: '/app/quick-post', label: '📷 Quick Post (value content)' },
+]
 
 export default function OwnerDashboard() {
   const navigate = useNavigate()
@@ -71,22 +93,17 @@ export default function OwnerDashboard() {
   )
 
   return (
-    <div className="min-h-svh bg-near-black-green text-cream">
-      <header className="border-b border-white/8 px-4 py-4">
-        <Link to="/app" className="text-sm text-gold">
-          ← PIN
-        </Link>
-        <h1 className="mt-2 font-serif text-lg text-cream">Owner Dashboard</h1>
-      </header>
+    <div className={staffShellClass}>
+      <StaffPageHeader backTo="/app" backLabel="← PIN" title="Owner Dashboard" />
 
-      <main className="mx-auto max-w-2xl space-y-6 px-4 py-6">
+      <StaffMain>
         {loading && <DashboardCardSkeleton />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
 
         {!loading && !error && (
           <>
             {urgentItems.length > 0 && (
-              <section className="rounded-editorial border-2 border-coral bg-coral/15 p-4">
+              <StaffCard className="border-2 border-coral bg-coral/15">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold uppercase tracking-wider text-coral">
                     Compliance alerts
@@ -113,105 +130,39 @@ export default function OwnerDashboard() {
                       </li>
                     ))}
                 </ul>
-              </section>
+              </StaffCard>
             )}
 
-            <div className="grid grid-cols-2 divide-x divide-white/8 overflow-hidden rounded-editorial border border-white/8 bg-surface-card">
-              {[
-                { label: 'Bookings (month)', value: String(activeBookings.length) },
-                { label: 'Revenue', value: formatAud(revenue) },
-                { label: 'Expenses', value: formatAud(expenseTotal) },
-                { label: 'Net profit', value: formatAud(revenue - expenseTotal) },
-              ].map((card, i) => (
-                <div
-                  key={card.label}
-                  className={`p-4 ${i >= 2 ? 'border-t border-white/8' : ''}`}
-                >
-                  <p className="text-xs text-cream-muted">{card.label}</p>
-                  <p className="mt-1 font-serif text-lg text-gold">{card.value}</p>
-                </div>
-              ))}
-            </div>
+            <StaffCard padding={false}>
+              <div className="grid grid-cols-2 divide-x divide-white/8">
+                {[
+                  { label: 'Bookings (month)', value: String(activeBookings.length) },
+                  { label: 'Revenue', value: formatAud(revenue) },
+                  { label: 'Expenses', value: formatAud(expenseTotal) },
+                  { label: 'Net profit', value: formatAud(revenue - expenseTotal) },
+                ].map((card, i) => (
+                  <div
+                    key={card.label}
+                    className={`p-4 ${i >= 2 ? 'border-t border-white/8' : ''}`}
+                  >
+                    <p className="text-xs text-cream-muted">{card.label}</p>
+                    <p className="mt-1 font-serif text-lg text-teal-500">{card.value}</p>
+                  </div>
+                ))}
+              </div>
+            </StaffCard>
 
             <div className="grid grid-cols-2 gap-3">
-              <Link
-                to="/app/trips"
-                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-              >
-                + ลงทริปใหม่
-              </Link>
-              <Link
-                to="/app/expenses/new"
-                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-              >
-                + Add expense
-              </Link>
-              <Link
-                to="/app/cashier"
-                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-              >
-                💳 Cashier POS
-              </Link>
-              <Link
-                to="/app/payments"
-                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-              >
-                💰 Customer payments / งวดชำระ
-              </Link>
-              <Link
-                to="/app/staff"
-                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-              >
-                📋 Staff Dashboard
-              </Link>
-              <Link
-                to="/app/staff-pins"
-                className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-              >
-                🔐 Staff PIN reset
-              </Link>
-              <Link
-                to="/app/waiver-assist"
-                className="block rounded-editorial border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-center text-sm font-medium text-amber-200 transition-colors hover:bg-amber-500/15"
-              >
-                ✍️ Waiver assist / กรอกแทนลูกค้า
-              </Link>
+              {NAV_LINKS.map((link) => (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  className={`${staffChipClass} w-full justify-center text-center`}
+                >
+                  {link.label}
+                </Link>
+              ))}
             </div>
-
-            <Link
-              to="/app/tax-summary"
-              className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-            >
-              📊 Tax Summary (รายทริป + Export)
-            </Link>
-
-            <Link
-              to="/app/income"
-              className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-            >
-              💵 Income — paid installments (AU tax year)
-            </Link>
-
-            <Link
-              to="/app/logins"
-              className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-            >
-              🔐 Recent staff logins
-            </Link>
-
-            <Link
-              to="/app/content-review"
-              className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-            >
-              ✎ Content Review (Facebook drafts)
-            </Link>
-
-            <Link
-              to="/app/quick-post"
-              className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
-            >
-              📷 Quick Post (value content)
-            </Link>
 
             {urgentItems.length === 0 && (
               <section>
@@ -221,7 +172,7 @@ export default function OwnerDashboard() {
             )}
           </>
         )}
-      </main>
+      </StaffMain>
     </div>
   )
 }

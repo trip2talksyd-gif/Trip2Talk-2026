@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   addPendingInstallment,
   fetchCustomerLoyalty,
@@ -17,6 +17,15 @@ import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import { useLang } from '../../hooks/useLang'
 import type { BookingPayment, TourBooking } from '../../types/tour'
+import {
+  staffShellClass,
+  StaffPageHeader,
+  StaffMain,
+  StaffCard,
+  StaffButton,
+  StaffField,
+  StaffInput,
+} from '../../components/app/staffUi'
 
 function progressLabel(booking: TourBooking, payments: BookingPayment[]): string {
   const paid = payments.filter((p) => p.status === 'paid' || (!p.status && p.paid_at))
@@ -157,32 +166,29 @@ export default function StaffPaymentsPage() {
   }
 
   return (
-    <div className="min-h-svh bg-near-black-green text-cream">
-      <header className="border-b border-white/8 px-4 py-4">
-        <Link to="/app/cashier" className="text-sm text-gold">
-          ← Cashier
-        </Link>
-        <h1 className="mt-2 font-serif text-lg text-cream">
-          {title.en}
-          <span className="mt-0.5 block font-thai text-sm font-medium text-cream-muted">
-            {title.th}
-          </span>
-        </h1>
-      </header>
+    <div className={staffShellClass}>
+      <StaffPageHeader
+        backTo="/app/cashier"
+        backLabel="← Cashier"
+        title={title.en}
+        subtitle={<span className="font-thai text-sm font-medium">{title.th}</span>}
+      />
 
-      <main className="mx-auto max-w-2xl space-y-4 px-4 py-6">
-        <label className="block">
-          <span className="text-xs text-cream-muted">
-            {searchBi.en}
-            <span className="mt-0.5 block font-thai">{searchBi.th}</span>
-          </span>
-          <input
+      <StaffMain>
+        <StaffField
+          label={
+            <>
+              {searchBi.en}
+              <span className="mt-0.5 block font-thai">{searchBi.th}</span>
+            </>
+          }
+        >
+          <StaffInput
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Name / phone / booking ref"
-            className="mt-1 w-full rounded-editorial border border-white/15 bg-surface-card px-3 py-2.5 text-sm text-cream outline-none focus:border-gold"
           />
-        </label>
+        </StaffField>
 
         {loading && <ListRowSkeleton />}
         {error && !loading && <PageError message={error} onRetry={runSearch} dark />}
@@ -195,102 +201,100 @@ export default function StaffPaymentsPage() {
           {rows.map(({ booking, payments }) => {
             const open = expandedId === booking.id
             return (
-              <li
-                key={booking.id}
-                className="rounded-editorial border border-white/10 bg-surface-card p-3"
-              >
-                <button
-                  type="button"
-                  className="w-full text-left"
-                  onClick={() => setExpandedId(open ? null : booking.id)}
-                >
-                  <p className="text-sm font-semibold text-cream">
-                    {booking.first_name_en} {booking.last_name_en}
-                  </p>
-                  <p className="text-[11px] text-cream-muted">
-                    {booking.trip_code} · {booking.booking_reference ?? booking.id.slice(0, 8)} ·{' '}
-                    {booking.booking_status}
-                  </p>
-                  <p className="mt-1 text-[11px] text-gold">{progressLabel(booking, payments)}</p>
-                </button>
+              <li key={booking.id}>
+                <StaffCard>
+                  <button
+                    type="button"
+                    className="w-full text-left"
+                    onClick={() => setExpandedId(open ? null : booking.id)}
+                  >
+                    <p className="text-sm font-semibold text-cream">
+                      {booking.first_name_en} {booking.last_name_en}
+                    </p>
+                    <p className="text-[11px] text-cream-muted">
+                      {booking.trip_code} · {booking.booking_reference ?? booking.id.slice(0, 8)} ·{' '}
+                      {booking.booking_status}
+                    </p>
+                    <p className="mt-1 text-[11px] text-teal-500">{progressLabel(booking, payments)}</p>
+                  </button>
 
-                {open && (
-                  <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
-                    <LoyaltyBlock booking={booking} />
-                    {booking.referred_by_booking_id && (
-                      <p className="text-[10px] text-cream-muted">
-                        Referred by booking: {booking.referred_by_booking_id.slice(0, 8)}…
-                      </p>
-                    )}
-                    {payments.length === 0 && (
-                      <p className="text-xs text-cream-muted">No installments yet</p>
-                    )}
-                    {payments.map((p) => (
-                      <div
-                        key={p.id}
-                        className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-near-black-green/50 px-2.5 py-2 text-[11px]"
-                      >
-                        <div>
-                          <p className="font-semibold text-cream">
-                            #{p.installment_no} {p.label ?? 'Payment'} · {formatAud(p.amount_aud)}
-                          </p>
-                          <p className="text-cream-muted">
-                            {p.status ?? 'paid'}
-                            {p.due_date ? ` · due ${p.due_date}` : ''}
-                            {p.receipt_invoice_number ? ` · ${p.receipt_invoice_number}` : ''}
-                          </p>
+                  {open && (
+                    <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
+                      <LoyaltyBlock booking={booking} />
+                      {booking.referred_by_booking_id && (
+                        <p className="text-[10px] text-cream-muted">
+                          Referred by booking: {booking.referred_by_booking_id.slice(0, 8)}…
+                        </p>
+                      )}
+                      {payments.length === 0 && (
+                        <p className="text-xs text-cream-muted">No installments yet</p>
+                      )}
+                      {payments.map((p) => (
+                        <div
+                          key={p.id}
+                          className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-near-black-green/50 px-2.5 py-2 text-[11px]"
+                        >
+                          <div>
+                            <p className="font-semibold text-cream">
+                              #{p.installment_no} {p.label ?? 'Payment'} · {formatAud(p.amount_aud)}
+                            </p>
+                            <p className="text-cream-muted">
+                              {p.status ?? 'paid'}
+                              {p.due_date ? ` · due ${p.due_date}` : ''}
+                              {p.receipt_invoice_number ? ` · ${p.receipt_invoice_number}` : ''}
+                            </p>
+                          </div>
+                          {(p.status === 'pending' || p.status === 'overdue') && (
+                            <StaffButton
+                              disabled={busyId === p.id}
+                              onClick={() => void handleMarkPaid(booking, p)}
+                              className="w-auto px-2.5 py-1 text-[10px] uppercase"
+                            >
+                              Mark paid
+                            </StaffButton>
+                          )}
                         </div>
-                        {(p.status === 'pending' || p.status === 'overdue') && (
-                          <button
-                            type="button"
-                            disabled={busyId === p.id}
-                            onClick={() => void handleMarkPaid(booking, p)}
-                            className="rounded-lg bg-gold px-2.5 py-1 text-[10px] font-bold uppercase text-near-black-green disabled:opacity-50"
-                          >
-                            Mark paid
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                      ))}
 
-                    <div className="grid gap-2 rounded-lg border border-white/10 p-2 sm:grid-cols-3">
-                      <input
-                        type="number"
-                        min={1}
-                        step={0.01}
-                        value={addAmount}
-                        onChange={(e) => setAddAmount(e.target.value)}
-                        placeholder="Amount AUD"
-                        className="rounded-lg border border-white/15 bg-near-black-green px-2 py-1.5 text-xs text-cream"
-                      />
-                      <input
-                        value={addLabel}
-                        onChange={(e) => setAddLabel(e.target.value)}
-                        placeholder="Label (Deposit / Installment 2)"
-                        className="rounded-lg border border-white/15 bg-near-black-green px-2 py-1.5 text-xs text-cream"
-                      />
-                      <input
-                        type="date"
-                        value={addDue}
-                        onChange={(e) => setAddDue(e.target.value)}
-                        className="rounded-lg border border-white/15 bg-near-black-green px-2 py-1.5 text-xs text-cream"
-                      />
-                      <button
-                        type="button"
-                        disabled={busyId === booking.id || !addAmount}
-                        onClick={() => void handleAddPending(booking.id)}
-                        className="sm:col-span-3 rounded-lg border border-gold/40 bg-gold/10 py-2 text-xs font-semibold text-gold disabled:opacity-50"
-                      >
-                        + Add installment / เพิ่มงวด
-                      </button>
+                      <StaffCard className="grid gap-2 p-2 sm:grid-cols-3" padding={false}>
+                        <StaffInput
+                          type="number"
+                          min={1}
+                          step={0.01}
+                          value={addAmount}
+                          onChange={(e) => setAddAmount(e.target.value)}
+                          placeholder="Amount AUD"
+                          className="text-xs"
+                        />
+                        <StaffInput
+                          value={addLabel}
+                          onChange={(e) => setAddLabel(e.target.value)}
+                          placeholder="Label (Deposit / Installment 2)"
+                          className="text-xs"
+                        />
+                        <StaffInput
+                          type="date"
+                          value={addDue}
+                          onChange={(e) => setAddDue(e.target.value)}
+                          className="text-xs"
+                        />
+                        <StaffButton
+                          variant="secondary"
+                          disabled={busyId === booking.id || !addAmount}
+                          onClick={() => void handleAddPending(booking.id)}
+                          className="sm:col-span-3 text-xs"
+                        >
+                          + Add installment / เพิ่มงวด
+                        </StaffButton>
+                      </StaffCard>
                     </div>
-                  </div>
-                )}
+                  )}
+                </StaffCard>
               </li>
             )
           })}
         </ul>
-      </main>
+      </StaffMain>
     </div>
   )
 }
@@ -326,7 +330,7 @@ function LoyaltyBlock({ booking }: { booking: TourBooking }) {
   return (
     <div
       className={`rounded-lg px-2.5 py-2 text-[11px] ${
-        repeat ? 'border border-gold/40 bg-gold/10' : 'bg-near-black-green/40'
+        repeat ? 'border border-teal-500/40 bg-teal-500/10' : 'bg-near-black-green/40'
       }`}
     >
       <p className="font-semibold text-cream">

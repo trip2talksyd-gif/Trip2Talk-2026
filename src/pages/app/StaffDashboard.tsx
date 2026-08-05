@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import {
+  Camera,
+  CreditCard,
+  FileCheck,
+  MapPin,
+  Mountain,
+  Plane,
+  Send,
+  Trees,
+} from 'lucide-react'
 import {
   fetchConfirmedTours,
   fetchBookingsForTour,
@@ -18,10 +28,67 @@ import { useToast } from '../../components/ui/Toast'
 import CancelBookingDialog from '../../components/app/CancelBookingDialog'
 import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
 import TripDaySafetyQuickView from '../../components/app/TripDaySafetyQuickView'
+import {
+  StaffActionChip,
+  StaffButton,
+  StaffMain,
+  StaffPageHeader,
+  staffShellClass,
+  staffTabActiveClass,
+  staffTabIdleClass,
+} from '../../components/app/staffUi'
 
 type ManifestFilter = 'active' | 'cancelled' | 'all'
 
 const CAN_CANCEL_ROLES = new Set(['OWNER', 'MANAGER', 'CASHIER'])
+
+/** Destination-themed accent for tour cards (dark staff shell). */
+function tripTheme(tripCode: string): { bar: string; iconBg: string; Icon: typeof Camera } {
+  const code = tripCode.toUpperCase()
+  if (code.startsWith('ULU')) {
+    return { bar: 'bg-coral', iconBg: 'bg-coral/20 text-coral', Icon: Mountain }
+  }
+  if (code.startsWith('TAS')) {
+    return { bar: 'bg-teal-400', iconBg: 'bg-teal-400/15 text-teal-400', Icon: Trees }
+  }
+  if (code.startsWith('NZ')) {
+    return { bar: 'bg-teal-500', iconBg: 'bg-teal-500/15 text-teal-500', Icon: Plane }
+  }
+  if (code.startsWith('MEL') || code.startsWith('CAN') || code.startsWith('BER')) {
+    return { bar: 'bg-amber', iconBg: 'bg-amber/15 text-amber', Icon: MapPin }
+  }
+  return { bar: 'bg-gold', iconBg: 'bg-gold/15 text-gold', Icon: Camera }
+}
+
+function SeatsProgress({ booked, max, left }: { booked: number; max: number; left: number }) {
+  const safeMax = Math.max(max, 1)
+  const filled = Math.min(Math.max(booked, 0), safeMax)
+  const pct = Math.round((filled / safeMax) * 100)
+  const full = left <= 0
+
+  return (
+    <div className="mt-3 space-y-1.5">
+      <div className="flex items-center justify-between gap-2 text-[11px]">
+        <span className="tabular-nums text-cream-muted">
+          {booked}/{max} pax
+        </span>
+        <span
+          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+            full ? 'bg-coral/20 text-coral' : 'bg-teal-500/15 text-teal-500'
+          }`}
+        >
+          {left} seats left
+        </span>
+      </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div
+          className={`h-full rounded-full transition-[width] ${full ? 'bg-coral' : 'bg-teal-500'}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  )
+}
 
 export default function StaffDashboard() {
   const navigate = useNavigate()
@@ -172,70 +239,82 @@ export default function StaffDashboard() {
   const activeCount = manifest.length - cancelledCount
 
   return (
-    <div className="min-h-svh bg-near-black-green text-cream">
-      <header className="border-b border-white/8 px-4 py-4">
-        <Link to="/app" className="text-sm text-gold">
-          ← PIN
-        </Link>
-        <h1 className="mt-2 font-serif text-lg text-cream">Staff Dashboard</h1>
-        <p className="text-sm text-cream-muted">{staffName}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {staffRole === 'MANAGER' && (
-            <Link
-              to="/app/cashier"
-              className="inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
-            >
-              💳 Cashier POS
-            </Link>
-          )}
-          <Link
-            to="/app/waiver-assist"
-            className="inline-block rounded-editorial border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200"
-          >
-            ✍️ Waiver assist / กรอกแทนลูกค้า
-          </Link>
-          <Link
-            to="/app/outbound"
-            className="inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
-          >
-            📨 Outbound queue
-          </Link>
-          <Link
-            to="/app/photos"
-            className="inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
-          >
-            📷 Photo delivery
-          </Link>
-        </div>
-      </header>
+    <div className={staffShellClass}>
+      <StaffPageHeader backTo="/app" backLabel="← PIN" title="Staff Dashboard" subtitle={staffName}>
+        {staffRole === 'MANAGER' && (
+          <StaffActionChip
+            to="/app/cashier"
+            highlighted
+            icon={<CreditCard className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />}
+            label="Cashier POS"
+          />
+        )}
+        <StaffActionChip
+          to="/app/waiver-assist"
+          icon={<FileCheck className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />}
+          label="Waiver assist / กรอกแทนลูกค้า"
+        />
+        <StaffActionChip
+          to="/app/outbound"
+          icon={<Send className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />}
+          label="Outbound queue"
+        />
+        <StaffActionChip
+          to="/app/photos"
+          icon={<Camera className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />}
+          label="Photo delivery"
+        />
+      </StaffPageHeader>
 
-      <main className="mx-auto max-w-2xl space-y-6 px-4 py-6">
+      <StaffMain>
         {loading && <ListRowSkeleton count={4} />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
 
         {!loading && !error && (
           <section>
             <h2 className="text-sm font-medium text-cream-muted">Upcoming tours</h2>
-            <ul className="mt-3 space-y-2">
-              {upcoming.map((tour) => (
-                <li key={tour.id}>
-                  <button
-                    type="button"
-                    onClick={() => setSelected(tour)}
-                    className={`w-full rounded-editorial border px-4 py-3 text-left transition-colors ${
-                      selected?.id === tour.id
-                        ? 'border-gold bg-surface-card'
-                        : 'border-white/8 bg-surface-card/50 hover:border-white/15'
-                    }`}
-                  >
-                    <p className="font-medium text-cream">{tour.name_en}</p>
-                    <p className="text-xs text-cream-muted">
-                      {tour.departure_date} · {tour.booked_seats}/{tour.max_seats} pax ·{' '}
-                      {seatsRemaining(tour)} seats left
-                    </p>
-                  </button>
-                </li>
-              ))}
+            <ul className="mt-4 space-y-3">
+              {upcoming.map((tour) => {
+                const theme = tripTheme(tour.trip_code)
+                const TripIcon = theme.Icon
+                const selectedCard = selected?.id === tour.id
+                const left = seatsRemaining(tour)
+                return (
+                  <li key={tour.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelected(tour)}
+                      className={`group w-full overflow-hidden rounded-2xl border text-left shadow-[0_12px_28px_-18px_rgba(0,0,0,0.65)] transition-[border-color,background-color,transform] active:scale-[0.99] ${
+                        selectedCard
+                          ? 'border-teal-500/50 bg-surface-card ring-1 ring-teal-500/30'
+                          : 'border-white/8 bg-surface-card/70 hover:border-white/18 hover:bg-surface-card'
+                      }`}
+                    >
+                      <div className={`h-1 w-full ${theme.bar}`} />
+                      <div className="px-4 py-3.5">
+                        <div className="flex items-start gap-3">
+                          <span
+                            className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${theme.iconBg}`}
+                          >
+                            <TripIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-serif text-[15px] leading-snug text-cream sm:text-base">
+                              {tour.name_en}
+                            </p>
+                            <p className="mt-1 text-xs text-cream-muted">{tour.departure_date}</p>
+                            <SeatsProgress
+                              booked={tour.booked_seats}
+                              max={tour.max_seats}
+                              left={left}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </li>
+                )
+              })}
             </ul>
           </section>
         )}
@@ -256,21 +335,17 @@ export default function StaffDashboard() {
                     key={tab.id}
                     type="button"
                     onClick={() => setFilter(tab.id)}
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-medium ${
-                      filter === tab.id
-                        ? 'bg-gold text-near-black-green'
-                        : 'bg-white/10 text-cream-muted hover:bg-white/15'
-                    }`}
+                    className={filter === tab.id ? staffTabActiveClass : staffTabIdleClass}
                   >
                     {tab.label}
                   </button>
                 ))}
               </div>
             </div>
-            <div className="mt-4 rounded-editorial border border-amber-500/30 bg-amber-500/5 p-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-amber-200">
+            <div className="mt-4 rounded-2xl border border-amber/30 bg-amber/5 p-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-amber">
                 Trip-day safety
-                <span className="mt-0.5 block font-thai text-[10px] font-medium normal-case tracking-normal text-amber-200/80">
+                <span className="mt-0.5 block font-thai text-[10px] font-medium normal-case tracking-normal text-amber/80">
                   ข้อมูลฉุกเฉินวันทริป
                 </span>
               </h3>
@@ -290,7 +365,7 @@ export default function StaffDashboard() {
                     return (
                       <li
                         key={b.id}
-                        className="space-y-2 rounded-editorial border border-gold/30 bg-surface-card px-3 py-3 text-sm"
+                        className="space-y-2 overflow-hidden rounded-2xl border border-teal-500/30 bg-surface-card px-3 py-3 text-sm"
                       >
                         <div className="grid grid-cols-2 gap-2">
                           <label className="block">
@@ -298,7 +373,6 @@ export default function StaffDashboard() {
                             <input
                               value={editFirst}
                               onChange={(e) => setEditFirst(e.target.value)}
-                              className="mt-0.5 w-full rounded-lg border border-white/15 bg-near-black-green px-2.5 py-1.5 text-sm text-cream"
                             />
                           </label>
                           <label className="block">
@@ -306,7 +380,6 @@ export default function StaffDashboard() {
                             <input
                               value={editLast}
                               onChange={(e) => setEditLast(e.target.value)}
-                              className="mt-0.5 w-full rounded-lg border border-white/15 bg-near-black-green px-2.5 py-1.5 text-sm text-cream"
                             />
                           </label>
                         </div>
@@ -316,7 +389,6 @@ export default function StaffDashboard() {
                             <input
                               value={editPhone}
                               onChange={(e) => setEditPhone(e.target.value)}
-                              className="mt-0.5 w-full rounded-lg border border-white/15 bg-near-black-green px-2.5 py-1.5 text-sm text-cream"
                             />
                           </label>
                           <label className="block">
@@ -324,26 +396,21 @@ export default function StaffDashboard() {
                             <input
                               value={editEmail}
                               onChange={(e) => setEditEmail(e.target.value)}
-                              className="mt-0.5 w-full rounded-lg border border-white/15 bg-near-black-green px-2.5 py-1.5 text-sm text-cream"
                             />
                           </label>
                         </div>
                         <div className="flex gap-2 pt-1">
-                          <button
+                          <StaffButton
                             type="button"
                             disabled={savingEdit || !editFirst.trim() || !editLast.trim()}
                             onClick={() => saveEdit(b)}
-                            className="flex-1 rounded-lg bg-gold px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-near-black-green disabled:opacity-50"
+                            className="flex-1"
                           >
                             {savingEdit ? 'กำลังบันทึก...' : 'บันทึก'}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={cancelEdit}
-                            className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-cream-muted"
-                          >
+                          </StaffButton>
+                          <StaffButton type="button" variant="secondary" onClick={cancelEdit}>
                             ยกเลิก
-                          </button>
+                          </StaffButton>
                         </div>
                       </li>
                     )
@@ -352,10 +419,10 @@ export default function StaffDashboard() {
                   return (
                     <li
                       key={b.id}
-                      className={`flex items-center justify-between gap-2 rounded-editorial px-3 py-2 text-sm ${
+                      className={`flex items-center justify-between gap-2 rounded-2xl px-3 py-2.5 text-sm ${
                         cancelled
                           ? 'border border-white/5 bg-surface-card/40 text-cream-muted opacity-60'
-                          : 'bg-surface-card text-cream'
+                          : 'border border-white/8 bg-surface-card text-cream'
                       }`}
                     >
                       <span className="min-w-0 truncate">
@@ -382,32 +449,20 @@ export default function StaffDashboard() {
                       </span>
                       {!cancelled && (
                         <span className="flex shrink-0 gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => openEdit(b)}
-                            className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-medium text-cream-muted hover:bg-white/15"
-                            title="แก้ไขชื่อ/เบอร์/อีเมล"
-                          >
+                          <StaffButton type="button" variant="ghost" onClick={() => openEdit(b)} title="แก้ไขชื่อ/เบอร์/อีเมล">
                             ✏️ แก้ไข
-                          </button>
+                          </StaffButton>
                           {canCancel && (
-                            <button
-                              type="button"
-                              onClick={() => setCancelling(b)}
-                              className="rounded-full bg-coral/20 px-2.5 py-1 text-xs font-medium text-coral hover:bg-coral/30"
-                              title="Cancel booking"
-                            >
+                            <StaffButton type="button" variant="danger" onClick={() => setCancelling(b)} title="Cancel booking">
                               Cancel
-                            </button>
+                            </StaffButton>
                           )}
                           <button
                             type="button"
                             onClick={() => toggleAttended(b, true)}
-                            className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                              b.attended === true
-                                ? 'bg-gold text-near-black-green'
-                                : 'bg-white/10 text-cream-muted hover:bg-white/15'
-                            }`}
+                            className={
+                              b.attended === true ? staffTabActiveClass : staffTabIdleClass
+                            }
                           >
                             มา
                           </button>
@@ -431,7 +486,7 @@ export default function StaffDashboard() {
             )}
           </section>
         )}
-      </main>
+      </StaffMain>
 
       {cancelling && (
         <CancelBookingDialog

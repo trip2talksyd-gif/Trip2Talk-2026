@@ -15,6 +15,16 @@ import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import { useLang } from '../../hooks/useLang'
 import CancelBookingDialog from '../../components/app/CancelBookingDialog'
+import {
+  staffShellClass,
+  StaffPageHeader,
+  StaffMain,
+  StaffCard,
+  StaffButton,
+  StaffField,
+  StaffInput,
+  StaffSelect,
+} from '../../components/app/staffUi'
 
 export default function CashierPOS() {
   const { t } = useLang()
@@ -215,161 +225,134 @@ export default function CashierPOS() {
   }
 
   return (
-    <div className="min-h-svh bg-near-black-green text-cream">
-      <header className="border-b border-white/8 px-4 py-4">
-        <Link to="/app" className="text-sm text-gold">
-          ← PIN
-        </Link>
-        <h1 className="mt-2 font-serif text-lg text-cream">Cashier POS</h1>
+    <div className={staffShellClass}>
+      <StaffPageHeader backTo="/app" backLabel="← PIN" title="Cashier POS">
         <Link
           to="/app/waiver-assist"
-          className="mt-2 inline-block text-xs font-medium text-amber-200/90 underline"
+          className="text-xs font-medium text-amber-200/90 underline"
         >
           Waiver assist / กรอกแทนลูกค้า →
         </Link>
         <Link
           to="/app/payments"
-          className="mt-1 ml-3 inline-block text-xs font-medium text-gold/90 underline"
+          className="text-xs font-medium text-teal-500/90 underline"
         >
           Customer payments / งวดชำระ →
         </Link>
-      </header>
+      </StaffPageHeader>
 
-      <main className="mx-auto max-w-2xl space-y-5 px-4 py-6">
-        <button
-          type="button"
+      <StaffMain>
+        <StaffButton
+          variant="secondary"
           onClick={() => setFormOpen((v) => !v)}
-          className="block w-full rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+          className="w-full"
         >
           {formOpen ? '− ปิดฟอร์ม' : '+ เพิ่มการจองใหม่ (โทร/Facebook)'}
-        </button>
+        </StaffButton>
 
         {formOpen && (
-          <form
-            onSubmit={handleCreateBooking}
-            className="space-y-3 rounded-editorial border border-white/8 bg-surface-card p-4"
-          >
-            <label className="block">
-              <span className="text-xs text-cream-muted">ทริป</span>
-              <select
-                value={tripCode}
-                onChange={(e) => setTripCode(e.target.value)}
-                required
-                className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
-              >
-                <option value="">— เลือกทริป —</option>
-                {bookableTours.map((tr) => (
-                  <option key={tr.id} value={tr.trip_code}>
-                    {tr.name_en} · {tr.trip_code}
-                    {tr.departure_date ? ` · ${tr.departure_date}` : ''}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block">
-                <span className="text-xs text-cream-muted">ชื่อ</span>
-                <input
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+          <StaffCard>
+            <form onSubmit={handleCreateBooking} className="space-y-3">
+              <StaffField label="ทริป">
+                <StaffSelect
+                  value={tripCode}
+                  onChange={(e) => setTripCode(e.target.value)}
                   required
-                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
-                />
-              </label>
-              <label className="block">
-                <span className="text-xs text-cream-muted">นามสกุล</span>
-                <input
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                  required
-                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
-                />
-              </label>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block">
-                <span className="text-xs text-cream-muted">เบอร์โทร</span>
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
-                />
-              </label>
-              <label className="block">
-                <span className="text-xs text-cream-muted">อีเมล</span>
-                <input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
-                />
-              </label>
-            </div>
-            <p className="text-xs text-cream-muted">กรอกอย่างน้อยเบอร์โทรหรืออีเมลอย่างใดอย่างหนึ่ง</p>
-
-            <label className="block">
-              <span className="text-xs text-cream-muted">ลูกค้าติดต่อมาทาง</span>
-              <select
-                value={source}
-                onChange={(e) => setSource(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
-              >
-                <option value="facebook">Facebook</option>
-                <option value="phone">โทรศัพท์</option>
-                <option value="line">LINE</option>
-                <option value="walk_in">Walk-in</option>
-                <option value="other">อื่นๆ</option>
-              </select>
-            </label>
-
-            <div className="grid grid-cols-2 gap-3">
-              <label className="block">
-                <span className="text-xs text-cream-muted">รับเงินแล้ว (AUD)</span>
-                <input
-                  type="number"
-                  min={0}
-                  value={amountPaid}
-                  onChange={(e) => setAmountPaid(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
-                />
-              </label>
-              <label className="block">
-                <span className="text-xs text-cream-muted">ช่องทาง</span>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
                 >
-                  <option value="cash">เงินสด</option>
-                  <option value="payid">PayID</option>
-                  <option value="bank_transfer">โอนธนาคาร</option>
-                  <option value="manual">อื่นๆ</option>
-                </select>
-              </label>
-            </div>
+                  <option value="">— เลือกทริป —</option>
+                  {bookableTours.map((tr) => (
+                    <option key={tr.id} value={tr.trip_code}>
+                      {tr.name_en} · {tr.trip_code}
+                      {tr.departure_date ? ` · ${tr.departure_date}` : ''}
+                    </option>
+                  ))}
+                </StaffSelect>
+              </StaffField>
 
-            <label className="block">
-              <span className="text-xs text-cream-muted">แบ่งจ่าย (ถ้าลูกค้าขอ)</span>
-              <select
-                value={installmentPlan}
-                onChange={(e) => setInstallmentPlan(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
-              >
-                <option value="1">จ่ายเต็มจำนวน (ไม่แบ่งงวด)</option>
-                <option value="2">แบ่งจ่าย 2 งวด</option>
-                <option value="4">แบ่งจ่าย 4 งวด</option>
-              </select>
-            </label>
+              <div className="grid grid-cols-2 gap-3">
+                <StaffField label="ชื่อ">
+                  <StaffInput
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    required
+                  />
+                </StaffField>
+                <StaffField label="นามสกุล">
+                  <StaffInput
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    required
+                  />
+                </StaffField>
+              </div>
 
-            <button
-              type="submit"
-              disabled={!isValid || submitting}
-              className="w-full rounded-lg bg-gold px-4 py-2.5 text-sm font-bold text-near-black-green disabled:opacity-50"
-            >
-              {submitting ? 'กำลังบันทึก...' : 'บันทึกการจอง'}
-            </button>
-          </form>
+              <div className="grid grid-cols-2 gap-3">
+                <StaffField label="เบอร์โทร">
+                  <StaffInput
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </StaffField>
+                <StaffField label="อีเมล">
+                  <StaffInput
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </StaffField>
+              </div>
+              <p className="text-xs text-cream-muted">กรอกอย่างน้อยเบอร์โทรหรืออีเมลอย่างใดอย่างหนึ่ง</p>
+
+              <StaffField label="ลูกค้าติดต่อมาทาง">
+                <StaffSelect
+                  value={source}
+                  onChange={(e) => setSource(e.target.value)}
+                >
+                  <option value="facebook">Facebook</option>
+                  <option value="phone">โทรศัพท์</option>
+                  <option value="line">LINE</option>
+                  <option value="walk_in">Walk-in</option>
+                  <option value="other">อื่นๆ</option>
+                </StaffSelect>
+              </StaffField>
+
+              <div className="grid grid-cols-2 gap-3">
+                <StaffField label="รับเงินแล้ว (AUD)">
+                  <StaffInput
+                    type="number"
+                    min={0}
+                    value={amountPaid}
+                    onChange={(e) => setAmountPaid(e.target.value)}
+                  />
+                </StaffField>
+                <StaffField label="ช่องทาง">
+                  <StaffSelect
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                  >
+                    <option value="cash">เงินสด</option>
+                    <option value="payid">PayID</option>
+                    <option value="bank_transfer">โอนธนาคาร</option>
+                    <option value="manual">อื่นๆ</option>
+                  </StaffSelect>
+                </StaffField>
+              </div>
+
+              <StaffField label="แบ่งจ่าย (ถ้าลูกค้าขอ)">
+                <StaffSelect
+                  value={installmentPlan}
+                  onChange={(e) => setInstallmentPlan(e.target.value)}
+                >
+                  <option value="1">จ่ายเต็มจำนวน (ไม่แบ่งงวด)</option>
+                  <option value="2">แบ่งจ่าย 2 งวด</option>
+                  <option value="4">แบ่งจ่าย 4 งวด</option>
+                </StaffSelect>
+              </StaffField>
+
+              <StaffButton type="submit" disabled={!isValid || submitting}>
+                {submitting ? 'กำลังบันทึก...' : 'บันทึกการจอง'}
+              </StaffButton>
+            </form>
+          </StaffCard>
         )}
 
         {loading && <ListRowSkeleton count={3} />}
@@ -389,122 +372,117 @@ export default function CashierPOS() {
               const cancelled = isBookingCancelled(b)
 
               return (
-                <li
-                  key={b.id}
-                  className={`rounded-editorial border p-4 ${
-                    cancelled
-                      ? 'border-white/5 bg-surface-card/40 opacity-60'
-                      : 'border-white/8 bg-surface-card'
-                  }`}
-                >
-                  <p className="font-medium text-cream">
-                    {b.first_name_en} {b.last_name_en}
-                    {cancelled && (
-                      <span className="ml-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-cream-muted">
-                        Cancelled
-                      </span>
-                    )}
-                  </p>
-                  <p className="text-xs text-cream-muted">
-                    {b.trip_code} · {b.email}
-                  </p>
-                  <p className="mt-1 text-xs text-cream-muted">
-                    จ่ายแล้ว {b.amount_paid_aud.toLocaleString()} AUD
-                    {tour ? ` / ${tour.price_aud.toLocaleString()} AUD` : ''}
-                    {plan > 1 ? ` · แบ่งจ่าย ${plan} งวด` : ''}
-                    {remaining !== null && remaining > 0 ? ` · เหลือ ${remaining.toLocaleString()} AUD` : ''}
-                  </p>
+                <li key={b.id}>
+                  <StaffCard
+                    className={cancelled ? 'border-white/5 bg-surface-card/40 opacity-60' : ''}
+                  >
+                    <p className="font-medium text-cream">
+                      {b.first_name_en} {b.last_name_en}
+                      {cancelled && (
+                        <span className="ml-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-cream-muted">
+                          Cancelled
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-cream-muted">
+                      {b.trip_code} · {b.email}
+                    </p>
+                    <p className="mt-1 text-xs text-cream-muted">
+                      จ่ายแล้ว {b.amount_paid_aud.toLocaleString()} AUD
+                      {tour ? ` / ${tour.price_aud.toLocaleString()} AUD` : ''}
+                      {plan > 1 ? ` · แบ่งจ่าย ${plan} งวด` : ''}
+                      {remaining !== null && remaining > 0 ? ` · เหลือ ${remaining.toLocaleString()} AUD` : ''}
+                    </p>
 
-                  {cancelled ? null : !isPaying ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => openPaymentRow(b)}
-                        className="rounded-editorial bg-gold px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-gold-dark transition-transform active:scale-95"
-                      >
-                        + บันทึกการชำระ
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setCancelling(b)}
-                        className="rounded-editorial border border-coral/40 bg-coral/10 px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-coral transition-transform active:scale-95"
-                      >
-                        Cancel booking
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="mt-3 space-y-2 rounded-lg border border-gold/30 bg-near-black-green p-3">
-                      <div className="grid grid-cols-2 gap-2">
-                        <label className="block">
-                          <span className="text-xs text-cream-muted">จำนวนเงิน (AUD)</span>
-                          <input
-                            type="number"
-                            min={0}
-                            autoFocus
-                            value={payAmount}
-                            onChange={(e) => setPayAmount(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-white/15 bg-surface-card px-3 py-2 text-sm text-cream"
-                          />
-                        </label>
-                        <label className="block">
-                          <span className="text-xs text-cream-muted">ช่องทาง</span>
-                          <select
-                            value={payMethod}
-                            onChange={(e) => setPayMethod(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-white/15 bg-surface-card px-3 py-2 text-sm text-cream"
-                          >
-                            <option value="cash">เงินสด</option>
-                            <option value="payid">PayID</option>
-                            <option value="bank_transfer">โอนธนาคาร</option>
-                            <option value="manual">อื่นๆ</option>
-                          </select>
-                        </label>
-                      </div>
-                      <div className="flex flex-wrap gap-1.5">
-                        {tour?.deposit_aud ? (
-                          <button
-                            type="button"
-                            onClick={() => setPayAmount(String(tour.deposit_aud))}
-                            className="rounded-full border border-white/15 px-2.5 py-1 text-[11px] text-cream-muted"
-                          >
-                            มัดจำ {tour.deposit_aud}
-                          </button>
-                        ) : null}
-                        {remaining ? (
-                          <button
-                            type="button"
-                            onClick={() => setPayAmount(String(remaining))}
-                            className="rounded-full border border-white/15 px-2.5 py-1 text-[11px] text-cream-muted"
-                          >
-                            จ่ายครบ {remaining}
-                          </button>
-                        ) : null}
-                      </div>
-                      <div className="flex gap-2 pt-1">
-                        <button
-                          type="button"
-                          disabled={!payAmount || Number(payAmount) <= 0 || payingSubmitting}
-                          onClick={() => submitPayment(b)}
-                          className="flex-1 rounded-lg bg-gold px-3 py-2 text-xs font-bold uppercase tracking-wider text-gold-dark disabled:opacity-50"
+                    {cancelled ? null : !isPaying ? (
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <StaffButton
+                          onClick={() => openPaymentRow(b)}
+                          className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
                         >
-                          {payingSubmitting ? 'กำลังบันทึก...' : 'ยืนยันรับเงิน'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={closePaymentRow}
-                          className="rounded-lg border border-white/15 px-3 py-2 text-xs text-cream-muted"
+                          + บันทึกการชำระ
+                        </StaffButton>
+                        <StaffButton
+                          variant="danger"
+                          onClick={() => setCancelling(b)}
+                          className="px-3 py-1.5 text-xs uppercase tracking-wider"
                         >
-                          ยกเลิก
-                        </button>
+                          Cancel booking
+                        </StaffButton>
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <StaffCard className="mt-3 border-teal-500/30 bg-near-black-green p-3" padding={false}>
+                        <div className="space-y-2 p-3">
+                          <div className="grid grid-cols-2 gap-2">
+                            <StaffField label="จำนวนเงิน (AUD)">
+                              <StaffInput
+                                type="number"
+                                min={0}
+                                autoFocus
+                                value={payAmount}
+                                onChange={(e) => setPayAmount(e.target.value)}
+                              />
+                            </StaffField>
+                            <StaffField label="ช่องทาง">
+                              <StaffSelect
+                                value={payMethod}
+                                onChange={(e) => setPayMethod(e.target.value)}
+                              >
+                                <option value="cash">เงินสด</option>
+                                <option value="payid">PayID</option>
+                                <option value="bank_transfer">โอนธนาคาร</option>
+                                <option value="manual">อื่นๆ</option>
+                              </StaffSelect>
+                            </StaffField>
+                          </div>
+                          <div className="flex flex-wrap gap-1.5">
+                            {tour?.deposit_aud ? (
+                              <StaffButton
+                                type="button"
+                                variant="ghost"
+                                onClick={() => setPayAmount(String(tour.deposit_aud))}
+                                className="px-2.5 py-1 text-[11px]"
+                              >
+                                มัดจำ {tour.deposit_aud}
+                              </StaffButton>
+                            ) : null}
+                            {remaining ? (
+                              <StaffButton
+                                type="button"
+                                variant="ghost"
+                                onClick={() => setPayAmount(String(remaining))}
+                                className="px-2.5 py-1 text-[11px]"
+                              >
+                                จ่ายครบ {remaining}
+                              </StaffButton>
+                            ) : null}
+                          </div>
+                          <div className="flex gap-2 pt-1">
+                            <StaffButton
+                              disabled={!payAmount || Number(payAmount) <= 0 || payingSubmitting}
+                              onClick={() => submitPayment(b)}
+                              className="flex-1 text-xs uppercase tracking-wider"
+                            >
+                              {payingSubmitting ? 'กำลังบันทึก...' : 'ยืนยันรับเงิน'}
+                            </StaffButton>
+                            <StaffButton
+                              variant="secondary"
+                              onClick={closePaymentRow}
+                              className="text-xs"
+                            >
+                              ยกเลิก
+                            </StaffButton>
+                          </div>
+                        </div>
+                      </StaffCard>
+                    )}
+                  </StaffCard>
                 </li>
               )
             })}
           </ul>
         )}
-      </main>
+      </StaffMain>
 
       {cancelling && (
         <CancelBookingDialog

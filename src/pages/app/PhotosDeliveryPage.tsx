@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   fetchPhotosPending,
   markPhotosDelivered,
@@ -9,6 +9,14 @@ import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
+import {
+  StaffButton,
+  StaffCard,
+  StaffInput,
+  StaffMain,
+  StaffPageHeader,
+  staffShellClass,
+} from '../../components/app/staffUi'
 
 /** Trips ended but photos not yet marked delivered — feeds Phase H review timer. */
 export default function PhotosDeliveryPage() {
@@ -91,22 +99,23 @@ export default function PhotosDeliveryPage() {
   }
 
   return (
-    <div className="min-h-svh bg-near-black-green text-cream">
-      <header className="border-b border-white/8 px-4 py-4">
-        <Link to="/app/staff" className="text-sm text-gold">
-          ← Staff
-        </Link>
-        <h1 className="mt-2 font-serif text-lg">Photo delivery</h1>
-        <p className="mt-1 text-[11px] text-cream-muted">
-          Ended trips still waiting for gallery delivery. Marking delivered starts the review-request
-          window (Phase H).
-          <span className="mt-0.5 block font-thai">
-            ทริปจบแล้วที่ยังไม่ส่งรูป — ติ๊กส่งแล้วเพื่อเริ่มนับเวลาขอรีวิว
-          </span>
-        </p>
-      </header>
+    <div className={staffShellClass}>
+      <StaffPageHeader
+        backTo="/app/staff"
+        backLabel="← Staff"
+        title="Photo delivery"
+        subtitle={
+          <>
+            Ended trips still waiting for gallery delivery. Marking delivered starts the review-request
+            window (Phase H).
+            <span className="mt-0.5 block font-thai">
+              ทริปจบแล้วที่ยังไม่ส่งรูป — ติ๊กส่งแล้วเพื่อเริ่มนับเวลาขอรีวิว
+            </span>
+          </>
+        }
+      />
 
-      <main className="mx-auto max-w-2xl space-y-4 px-4 py-6">
+      <StaffMain className="space-y-4">
         {loading && <ListRowSkeleton />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
         {!loading && !error && byTrip.length === 0 && (
@@ -116,10 +125,7 @@ export default function PhotosDeliveryPage() {
         {byTrip.map(([tripCode, guests]) => {
           const meta = guests[0]?.tour
           return (
-            <section
-              key={tripCode}
-              className="rounded-editorial border border-amber-500/30 bg-amber-500/5 p-3"
-            >
+            <StaffCard key={tripCode} className="border-amber-500/30 bg-amber-500/5">
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <h2 className="font-semibold text-cream">
@@ -135,22 +141,21 @@ export default function PhotosDeliveryPage() {
                     · {guests.length} guest(s)
                   </p>
                 </div>
-                <button
-                  type="button"
+                <StaffButton
+                  className="!w-auto px-3 py-1.5 text-[11px]"
                   disabled={busy === tripCode}
                   onClick={() => void markTrip(tripCode)}
-                  className="rounded-lg bg-gold px-3 py-1.5 text-[11px] font-bold text-near-black-green disabled:opacity-50"
                 >
                   Mark all delivered
-                </button>
+                </StaffButton>
               </div>
-              <input
+              <StaffInput
                 value={galleryByTrip[tripCode] ?? ''}
                 onChange={(e) =>
                   setGalleryByTrip((prev) => ({ ...prev, [tripCode]: e.target.value }))
                 }
                 placeholder="Gallery / Drive link (optional)"
-                className="mt-2 w-full rounded-lg border border-white/15 bg-near-black-green px-2.5 py-1.5 text-xs text-cream"
+                className="mt-2 w-full text-xs"
               />
               <ul className="mt-2 space-y-1">
                 {guests.map((g) => (
@@ -165,17 +170,17 @@ export default function PhotosDeliveryPage() {
                       type="button"
                       disabled={busy === g.id}
                       onClick={() => void markOne(g.id, tripCode)}
-                      className="text-[10px] font-semibold text-gold underline disabled:opacity-50"
+                      className="text-[10px] font-semibold text-teal-500 underline disabled:opacity-50"
                     >
                       Delivered
                     </button>
                   </li>
                 ))}
               </ul>
-            </section>
+            </StaffCard>
           )
         })}
-      </main>
+      </StaffMain>
     </div>
   )
 }

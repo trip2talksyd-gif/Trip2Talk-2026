@@ -1,6 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
+  StaffButton,
+  StaffCard,
+  StaffField,
+  StaffInput,
+  StaffMain,
+  StaffPageHeader,
+  StaffSelect,
+  staffShellClass,
+  staffTabIdleClass,
+} from '../../components/app/staffUi'
+import {
   addMonthsIso,
   createTour,
   createToursBulk,
@@ -321,23 +332,22 @@ export default function TripManagerPage() {
   }
 
   return (
-    <div className="min-h-svh bg-near-black-green text-cream">
-      <header className="border-b border-white/8 px-4 py-4">
-        <Link to="/app/owner" className="text-sm text-gold">
-          ← Owner Dashboard
-        </Link>
-        <h1 className="mt-2 font-serif text-lg text-cream">Trip Manager</h1>
-        <p className="mt-0.5 text-xs text-cream-muted">ลงทริปใหม่ · ดูที่นั่งใกล้เต็ม · Waitlist</p>
-      </header>
+    <div className={staffShellClass}>
+      <StaffPageHeader
+        backTo="/app/owner"
+        backLabel="← Owner Dashboard"
+        title="Trip Manager"
+        subtitle="ลงทริปใหม่ · ดูที่นั่งใกล้เต็ม · Waitlist"
+      />
 
-      <main className="mx-auto max-w-2xl space-y-6 px-4 py-6">
+      <StaffMain className="space-y-6">
         {loading && <DashboardCardSkeleton />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
 
         {!loading && !error && (
           <>
             {contentBanner && (
-              <div className="rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-sm text-cream">
+              <StaffCard className="border-teal-500/40 bg-teal-500/10 text-sm text-cream">
                 <p>
                   {contentBanner.reused
                     ? `มีร่างของ “${contentBanner.tripName}” อยู่แล้วใน 7 วันล่าสุด`
@@ -345,7 +355,7 @@ export default function TripManagerPage() {
                 </p>
                 <Link
                   to="/admin/content-review"
-                  className="mt-2 inline-block font-medium text-gold underline-offset-2 hover:underline"
+                  className="mt-2 inline-block font-medium text-teal-500 underline-offset-2 hover:underline"
                 >
                   ไปดูที่หน้ารีวิว →
                 </Link>
@@ -356,16 +366,16 @@ export default function TripManagerPage() {
                 >
                   ปิด
                 </button>
-              </div>
+              </StaffCard>
             )}
 
             {waitlistMatches.length > 0 && (
-              <section className="rounded-editorial border-2 border-gold bg-gold/15 p-4">
+              <StaffCard className="border-2 border-teal-500 bg-teal-500/15">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-sm font-semibold uppercase tracking-wider text-gold">
+                  <h2 className="text-sm font-semibold uppercase tracking-wider text-teal-500">
                     🔔 มีที่ว่าง + คนรอคิว
                   </h2>
-                  <span className="rounded-full bg-gold px-2 py-0.5 text-xs font-medium text-near-black-green">
+                  <span className="rounded-full bg-teal-500 px-2 py-0.5 text-xs font-medium text-near-black-green">
                     {waitlistMatches.reduce((sum, m) => sum + m.waiting.length, 0)}
                   </span>
                 </div>
@@ -373,13 +383,13 @@ export default function TripManagerPage() {
                   {waitlistMatches.map(({ tour: t, waiting }) => (
                     <li
                       key={t.id}
-                      className="rounded-editorial border border-gold/40 bg-near-black-green/60 px-3 py-2"
+                      className="rounded-editorial border border-teal-500/40 bg-near-black-green/60 px-3 py-2"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-cream">
                           {t.name_en} <span className="text-cream-muted">· {t.trip_code}</span>
                         </span>
-                        <span className="rounded-full bg-gold px-2 py-0.5 text-xs font-medium text-near-black-green">
+                        <span className="rounded-full bg-teal-500 px-2 py-0.5 text-xs font-medium text-near-black-green">
                           {t.max_seats - t.booked_seats} ว่าง
                         </span>
                       </div>
@@ -396,7 +406,7 @@ export default function TripManagerPage() {
                             <button
                               type="button"
                               onClick={() => toggleContacted(w)}
-                              className="shrink-0 rounded-full bg-gold px-2 py-0.5 text-[10px] font-medium text-near-black-green"
+                              className="shrink-0 rounded-full bg-teal-500 px-2 py-0.5 text-[10px] font-medium text-near-black-green"
                             >
                               ติดต่อแล้ว
                             </button>
@@ -409,11 +419,11 @@ export default function TripManagerPage() {
                 <p className="mt-2 text-xs text-cream-muted">
                   ทริปเหล่านี้มีที่ว่างแล้ว และยังมีคนลงชื่อ waitlist รออยู่ — ติดต่อได้เลยก่อนที่ว่างจะเต็มอีกครั้ง
                 </p>
-              </section>
+              </StaffCard>
             )}
 
             {lowSeatTrips.length > 0 && (
-              <section className="rounded-editorial border-2 border-coral bg-coral/15 p-4">
+              <StaffCard className="border-2 border-coral bg-coral/15">
                 <div className="flex items-center justify-between">
                   <h2 className="text-sm font-semibold uppercase tracking-wider text-coral">
                     ที่นั่งใกล้เต็ม
@@ -440,30 +450,27 @@ export default function TripManagerPage() {
                 <p className="mt-2 text-xs text-cream-muted">
                   ที่นั่งเหลือน้อย พิจารณาเปิดรอบถัดไปได้เลยครับ
                 </p>
-              </section>
+              </StaffCard>
             )}
 
             <section>
-              <button
-                type="button"
+              <StaffButton
+                variant="secondary"
+                className="border-teal-500/40 bg-teal-500/10 text-teal-500 hover:border-teal-500/40 hover:bg-teal-500/15"
                 onClick={() => setFormOpen((v) => !v)}
-                className="block w-full rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
               >
                 {formOpen ? '− ปิดฟอร์ม' : '+ ลงทริปใหม่'}
-              </button>
+              </StaffButton>
 
               {formOpen && (
-                <form
-                  onSubmit={handleSubmit}
-                  className="mt-3 space-y-3 rounded-editorial border border-white/8 bg-surface-card p-4"
-                >
-                  <label className="block">
-                    <span className="text-xs text-cream-muted">ทริปต้นแบบ (คัดลอกรายละเอียดจากนี้)</span>
-                    <select
+                <StaffCard className="mt-3">
+                <form onSubmit={handleSubmit} className="space-y-3">
+                  <StaffField label="ทริปต้นแบบ (คัดลอกรายละเอียดจากนี้)">
+                    <StaffSelect
                       value={templateCode}
                       onChange={(e) => applyTemplate(e.target.value)}
                       required
-                      className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                      className="mt-1 w-full text-sm"
                     >
                       <option value="">— เลือกทริป —</option>
                       {tours.map((t) => (
@@ -472,25 +479,23 @@ export default function TripManagerPage() {
                           {t.departure_date ? ` · ${formatDate(t.departure_date)}` : ''}
                         </option>
                       ))}
-                    </select>
-                  </label>
+                    </StaffSelect>
+                  </StaffField>
 
-                  <label className="block">
-                    <span className="text-xs text-cream-muted">วันเดินทางใหม่</span>
-                    <input
+                  <StaffField label="วันเดินทางใหม่">
+                    <StaffInput
                       type="date"
                       value={departureDate}
                       onChange={(e) => handleDateChange(e.target.value)}
                       required
-                      className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                      className="mt-1 w-full text-sm"
                     />
-                  </label>
+                  </StaffField>
 
-                  <label className="block">
-                    <span className="text-xs text-cream-muted">
-                      รหัสทริป {repeatMonths > 1 ? '(รอบแรก — รอบถัดไป auto-gen ตามเดือน)' : ''}
-                    </span>
-                    <input
+                  <StaffField
+                    label={`รหัสทริป ${repeatMonths > 1 ? '(รอบแรก — รอบถัดไป auto-gen ตามเดือน)' : ''}`}
+                  >
+                    <StaffInput
                       type="text"
                       value={tripCode}
                       onChange={(e) => {
@@ -498,87 +503,75 @@ export default function TripManagerPage() {
                         setTripCodeTouched(true)
                       }}
                       required
-                      className={`mt-1 w-full rounded-lg border bg-near-black-green px-3 py-2 text-sm text-cream ${
-                        duplicateCode ? 'border-coral' : 'border-white/15'
-                      }`}
+                      className={`mt-1 w-full text-sm ${duplicateCode ? 'border-coral' : ''}`}
                     />
                     {duplicateCode && (
                       <p className="mt-1 text-xs text-coral">รหัสนี้มีทริปอยู่แล้ว ลองเปลี่ยนรหัส</p>
                     )}
-                  </label>
+                  </StaffField>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <label className="block">
-                      <span className="text-xs text-cream-muted">ที่นั่ง</span>
-                      <input
+                    <StaffField label="ที่นั่ง">
+                      <StaffInput
                         type="number"
                         min={1}
                         value={maxSeats}
                         onChange={(e) => setMaxSeats(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                        className="mt-1 w-full text-sm"
                       />
-                    </label>
-                    <label className="block">
-                      <span className="text-xs text-cream-muted">สถานะ</span>
-                      <select
+                    </StaffField>
+                    <StaffField label="สถานะ">
+                      <StaffSelect
                         value={status}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                        className="mt-1 w-full text-sm"
                       >
                         {statusOptions.map((s) => (
                           <option key={s} value={s}>
                             {s}
                           </option>
                         ))}
-                      </select>
-                    </label>
+                      </StaffSelect>
+                    </StaffField>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
-                    <label className="block">
-                      <span className="text-xs text-cream-muted">ราคา (AUD)</span>
-                      <input
+                    <StaffField label="ราคา (AUD)">
+                      <StaffInput
                         type="number"
                         min={0}
                         value={priceAud}
                         onChange={(e) => setPriceAud(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                        className="mt-1 w-full text-sm"
                       />
-                    </label>
-                    <label className="block">
-                      <span className="text-xs text-cream-muted">มัดจำ (AUD)</span>
-                      <input
+                    </StaffField>
+                    <StaffField label="มัดจำ (AUD)">
+                      <StaffInput
                         type="number"
                         min={0}
                         value={depositAud}
                         onChange={(e) => setDepositAud(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                        className="mt-1 w-full text-sm"
                       />
-                    </label>
+                    </StaffField>
                   </div>
 
-                  <label className="block">
-                    <span className="text-xs text-cream-muted">
-                      ทำซ้ำทุกเดือน กี่รอบ (1 = แค่รอบเดียว)
-                    </span>
-                    <input
+                  <StaffField label="ทำซ้ำทุกเดือน กี่รอบ (1 = แค่รอบเดียว)">
+                    <StaffInput
                       type="number"
                       min={1}
                       max={12}
                       value={repeatMonths}
                       onChange={(e) => setRepeatMonths(Math.max(1, Number(e.target.value) || 1))}
-                      className="mt-1 w-full rounded-lg border border-white/15 bg-near-black-green px-3 py-2 text-sm text-cream"
+                      className="mt-1 w-full text-sm"
                     />
-                  </label>
+                  </StaffField>
 
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full rounded-lg bg-gold px-4 py-2.5 text-sm font-bold text-near-black-green disabled:opacity-50"
-                  >
+                  <StaffButton type="submit" disabled={submitting}>
                     {submitting ? 'กำลังบันทึก...' : repeatMonths > 1 ? `สร้าง ${repeatMonths} รอบ` : 'บันทึกทริปใหม่'}
-                  </button>
+                  </StaffButton>
                 </form>
+                </StaffCard>
               )}
             </section>
 
@@ -591,7 +584,7 @@ export default function TripManagerPage() {
                   <button
                     type="button"
                     onClick={() => setShowPast((v) => !v)}
-                    className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-cream-muted hover:bg-white/15"
+                    className={staffTabIdleClass}
                   >
                     {showPast ? 'ซ่อนทริปเก่า' : `แสดงทริปเก่า (${pastCount})`}
                   </button>
@@ -607,17 +600,15 @@ export default function TripManagerPage() {
                   const ratio = seatFillRatio(t)
                   const badgeColor =
                     ratio >= 1
-                      ? 'bg-coral text-white'
-                      : ratio >= LOW_SEATS_RATIO
-                        ? 'bg-gold/80 text-near-black-green'
-                        : 'bg-white/10 text-cream-muted'
+                        ? 'bg-coral text-white'
+                        : ratio >= LOW_SEATS_RATIO
+                          ? 'bg-teal-500/80 text-near-black-green'
+                          : 'bg-white/10 text-cream-muted'
                   const isGenerating = generatingTripId === t.id
                   const showContentBtn = isLiveStatus(t.status) && isUpcoming(t)
                   return (
-                    <li
-                      key={t.id}
-                      className="rounded-lg border border-white/8 bg-surface-card px-3 py-2 text-sm"
-                    >
+                    <li key={t.id}>
+                      <StaffCard className="text-sm">
                       <div className="flex items-center justify-between gap-2">
                         <div className="min-w-0">
                           <p className="truncate text-cream">{t.name_en}</p>
@@ -634,7 +625,7 @@ export default function TripManagerPage() {
                               type="button"
                               onClick={() => handleRestoreTour(t)}
                               title="เปิดทริปนี้กลับมา (published)"
-                              className="rounded-full p-1 text-cream-muted hover:bg-gold/20 hover:text-gold"
+                              className="rounded-full p-1 text-cream-muted hover:bg-teal-500/20 hover:text-teal-500"
                             >
                               ♻️
                             </button>
@@ -665,7 +656,7 @@ export default function TripManagerPage() {
                           type="button"
                           disabled={generatingTripId !== null}
                           onClick={() => void handleGenerateTripPost(t)}
-                          className="mt-2 flex min-h-10 w-full items-center justify-center gap-2 rounded-editorial border border-gold/40 bg-gold/10 px-3 text-xs font-medium text-gold transition-colors hover:bg-gold/15 disabled:opacity-50"
+                          className="mt-2 flex min-h-10 w-full items-center justify-center gap-2 rounded-2xl border border-teal-500/40 bg-teal-500/10 px-3 text-xs font-medium text-teal-500 transition-colors hover:bg-teal-500/15 disabled:opacity-50"
                         >
                           {isGenerating ? (
                             <>
@@ -685,6 +676,7 @@ export default function TripManagerPage() {
                         onSessionExpired={() => navigate('/app')}
                         onToast={(msg, tone) => toast(msg, tone ?? 'success')}
                       />
+                      </StaffCard>
                     </li>
                   )
                 })}
@@ -703,10 +695,8 @@ export default function TripManagerPage() {
               ) : (
                 <ul className="mt-2 space-y-1.5">
                   {waitlist.map((w) => (
-                    <li
-                      key={w.id}
-                      className="flex items-center justify-between rounded-lg border border-white/8 bg-surface-card px-3 py-2 text-sm"
-                    >
+                    <li key={w.id}>
+                      <StaffCard className="flex items-center justify-between text-sm">
                       <div className="min-w-0">
                         <p className="truncate text-cream">
                           {w.name} <span className="text-cream-muted">· {w.trip_code}</span>
@@ -720,11 +710,12 @@ export default function TripManagerPage() {
                         type="button"
                         onClick={() => toggleContacted(w)}
                         className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
-                          w.contacted ? 'bg-white/10 text-cream-muted' : 'bg-gold text-near-black-green'
+                          w.contacted ? 'bg-white/10 text-cream-muted' : 'bg-teal-500 text-near-black-green'
                         }`}
                       >
                         {w.contacted ? 'ติดต่อแล้ว' : 'ติดต่อแล้ว?'}
                       </button>
+                      </StaffCard>
                     </li>
                   ))}
                 </ul>
@@ -732,7 +723,7 @@ export default function TripManagerPage() {
             </section>
           </>
         )}
-      </main>
+      </StaffMain>
     </div>
   )
 }

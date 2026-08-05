@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { fetchRecentLogins } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { StaffLoginRow } from '../../types/tour'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
+import {
+  StaffCard,
+  StaffMain,
+  StaffPageHeader,
+  staffShellClass,
+} from '../../components/app/staffUi'
 
 /** Owner-only: recent staff PIN logins (visibility, not a security overhaul). */
 export default function RecentLoginsPage() {
@@ -33,21 +39,22 @@ export default function RecentLoginsPage() {
   }, [load])
 
   return (
-    <div className="min-h-svh bg-near-black-green text-cream">
-      <header className="border-b border-white/8 px-4 py-4">
-        <Link to="/app/owner" className="text-sm text-gold">
-          ← Owner
-        </Link>
-        <h1 className="mt-2 font-serif text-lg">Recent logins</h1>
-        <p className="mt-1 text-[11px] text-cream-muted">
-          Who opened a staff session (PIN), when, and best-effort IP / device.
-          <span className="mt-0.5 block font-thai">
-            ใครล็อกอินด้วย PIN เมื่อไหร่ และ IP/อุปกรณ์เท่าที่เก็บได้
-          </span>
-        </p>
-      </header>
+    <div className={staffShellClass}>
+      <StaffPageHeader
+        backTo="/app/owner"
+        backLabel="← Owner"
+        title="Recent logins"
+        subtitle={
+          <>
+            Who opened a staff session (PIN), when, and best-effort IP / device.
+            <span className="mt-0.5 block font-thai">
+              ใครล็อกอินด้วย PIN เมื่อไหร่ และ IP/อุปกรณ์เท่าที่เก็บได้
+            </span>
+          </>
+        }
+      />
 
-      <main className="mx-auto max-w-2xl space-y-3 px-4 py-6">
+      <StaffMain className="space-y-3">
         {loading && <ListRowSkeleton />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
         {!loading && !error && rows.length === 0 && (
@@ -55,31 +62,30 @@ export default function RecentLoginsPage() {
         )}
         <ul className="space-y-2">
           {rows.map((r, i) => (
-            <li
-              key={`${r.staff_id}-${r.created_at}-${i}`}
-              className="rounded-editorial border border-white/10 bg-surface-card px-3 py-2.5 text-sm"
-            >
-              <div className="flex flex-wrap justify-between gap-2">
-                <p className="font-semibold text-cream">
-                  {r.full_name}{' '}
-                  <span className="text-[10px] font-medium uppercase text-gold">{r.role}</span>
+            <li key={`${r.staff_id}-${r.created_at}-${i}`}>
+              <StaffCard className="text-sm">
+                <div className="flex flex-wrap justify-between gap-2">
+                  <p className="font-semibold text-cream">
+                    {r.full_name}{' '}
+                    <span className="text-[10px] font-medium uppercase text-teal-500">{r.role}</span>
+                  </p>
+                  <p className="text-[11px] text-cream-muted">
+                    {new Date(r.created_at).toLocaleString()}
+                  </p>
+                </div>
+                <p className="mt-1 text-[11px] text-cream-muted">
+                  IP: {r.ip_address ?? '—'}
                 </p>
-                <p className="text-[11px] text-cream-muted">
-                  {new Date(r.created_at).toLocaleString()}
-                </p>
-              </div>
-              <p className="mt-1 text-[11px] text-cream-muted">
-                IP: {r.ip_address ?? '—'}
-              </p>
-              {r.user_agent && (
-                <p className="mt-0.5 truncate text-[10px] text-cream-muted/80" title={r.user_agent}>
-                  {r.user_agent}
-                </p>
-              )}
+                {r.user_agent && (
+                  <p className="mt-0.5 truncate text-[10px] text-cream-muted/80" title={r.user_agent}>
+                    {r.user_agent}
+                  </p>
+                )}
+              </StaffCard>
             </li>
           ))}
         </ul>
-      </main>
+      </StaffMain>
     </div>
   )
 }

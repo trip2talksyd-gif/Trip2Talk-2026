@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { CheckCircle2, XCircle } from 'lucide-react'
 import { supabase, supabaseConfig } from '../../lib/supabase'
+import {
+  StaffButton,
+  StaffCard,
+  StaffMain,
+  StaffPageHeader,
+  staffShellClass,
+} from '../../components/app/staffUi'
 
 type CheckStatus = 'pending' | 'ok' | 'fail'
 
@@ -95,33 +101,31 @@ export default function SystemCheckPage() {
   const allOk = checks.every((c) => c.status === 'ok')
 
   return (
-    <div className="min-h-svh bg-near-black-green text-cream">
-      <header className="border-b border-white/8 px-4 py-4">
-        <Link to="/app/staff" className="text-sm text-gold">
-          ← Staff
-        </Link>
-        <h1 className="mt-2 font-serif text-lg text-cream">System check</h1>
-        <p className="text-sm text-cream-muted">Post-deploy Supabase connectivity</p>
-      </header>
+    <div className={staffShellClass}>
+      <StaffPageHeader
+        backTo="/app/staff"
+        backLabel="← Staff"
+        title="System check"
+        subtitle="Post-deploy Supabase connectivity"
+      />
 
-      <main className="mx-auto max-w-lg space-y-4 px-4 py-6">
+      <StaffMain className="max-w-lg space-y-4">
         <ul className="space-y-3">
           {checks.map((check) => (
-            <li
-              key={check.label}
-              className="flex items-start gap-3 rounded-editorial border border-white/8 bg-surface-card p-4"
-            >
-              <StatusIcon status={check.status} />
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-cream">{check.label}</p>
-                <p className="mt-1 break-all text-xs text-cream-muted">{check.detail || '…'}</p>
-              </div>
+            <li key={check.label}>
+              <StaffCard className="flex items-start gap-3">
+                <StatusIcon status={check.status} />
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-cream">{check.label}</p>
+                  <p className="mt-1 break-all text-xs text-cream-muted">{check.detail || '…'}</p>
+                </div>
+              </StaffCard>
             </li>
           ))}
         </ul>
 
         <p
-          className={`rounded-editorial px-4 py-3 text-center text-sm font-medium ${
+          className={`rounded-2xl px-4 py-3 text-center text-sm font-medium ${
             running
               ? 'bg-white/5 text-cream-muted'
               : allOk
@@ -132,15 +136,10 @@ export default function SystemCheckPage() {
           {running ? 'Running checks…' : allOk ? 'All checks passed' : 'One or more checks failed'}
         </p>
 
-        <button
-          type="button"
-          onClick={runChecks}
-          disabled={running}
-          className="w-full rounded-editorial bg-gold py-2.5 text-sm font-medium text-gold-dark disabled:opacity-50"
-        >
+        <StaffButton onClick={runChecks} disabled={running}>
           Re-run checks
-        </button>
-      </main>
+        </StaffButton>
+      </StaffMain>
     </div>
   )
 }
