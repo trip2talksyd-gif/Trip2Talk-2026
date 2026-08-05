@@ -1,7 +1,13 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron/daily",
+      "schedule": "0 22 * * *"
+    }
+  ],
   "rewrites": [
     {
-      "source": "/((?!assets/|icons/|icon-|apple-touch|favicon|manifest|registerSW|sw\\.js|workbox).*)",
+      "source": "/((?!api/|assets/|icons/|icon-|apple-touch|favicon|manifest|registerSW|sw\\.js|workbox).*)",
       "destination": "/index.html"
     }
   ]
