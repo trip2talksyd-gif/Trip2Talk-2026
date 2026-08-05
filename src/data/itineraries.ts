@@ -365,6 +365,59 @@ const NZ_AUTUMN_WINTER_DAYS: ItineraryDay[] = [
   },
 ]
 
+/**
+ * TAS-LH 3D2N — explicit alias of TAS-LH-4D3N with the farewell buffer day removed.
+ * Day 3 folds MONA / Hobart daylight into the departure afternoon (2 nights only).
+ * Keys TAS-LH-3D2N-DEC / TAS-LH-3D2N-WIN are registered manually below — do NOT rely on
+ * resolveTemplateTripCode (3D2N does not prefix-match 4D3N).
+ */
+const TAS_LH_3D2N_ITINERARY: TripItinerary = {
+  detailed: true,
+  headerNote: {
+    en: '3 days / 2 nights — condensed Launceston→Hobart photo route (from the 4D3N itinerary).',
+    th: '3 วัน 2 คืน — เส้นทางถ่ายภาพ Launceston→Hobart ฉบับย่อ (จากทริป 4D3N)',
+  },
+  days: [
+    {
+      day: 1,
+      title: { en: 'Day 1 — Lavender Dreams & Heritage Lines', th: 'วัน 1 — ทุ่งลาเวนเดอร์ & เส้นนำสายตา' },
+      subtitle: { en: 'Bridestowe, Richmond Bridge, first aurora hunt', th: 'Bridestowe Richmond Bridge ล่าแสงใต้ครั้งแรก' },
+      events: [
+        { time: '08:00', description: { en: 'Arrive Launceston — Bridestowe Lavender Estate shoot', th: 'ถึง Launceston — ถ่ายที่ Bridestowe Lavender Estate' } },
+        { time: '13:00', description: { en: 'Lunch & travel to Richmond', th: 'มื้อกลางวัน & ไป Richmond' } },
+        { time: '15:30', description: { en: 'Richmond Bridge — leading lines technique coaching', th: 'Richmond Bridge — สอนเทคนิค leading lines' } },
+        { time: '20:00', description: { en: 'First Aurora Hunt + camera setup coaching', th: 'ล่าแสงใต้ครั้งแรก + สอนตั้งค่ากล้อง' } },
+      ],
+    },
+    {
+      day: 2,
+      title: { en: 'Day 2 — Cradle Mountain', th: 'วัน 2 — Cradle Mountain' },
+      subtitle: { en: 'Water reflections, wildlife & second aurora mission', th: 'สะท้อนน้ำ ธรรมชาติ & ภารกิจล่าแสงใต้รอบสอง' },
+      events: [
+        { time: '06:00', description: { en: 'Depart for Cradle Mountain — wait for reflection shots', th: 'ออกสู่ Cradle Mountain — รอจังหวะสะท้อนน้ำ' } },
+        { time: '10:00', description: { en: 'Dove Lake circuit photography', th: 'ถ่ายภาพรอบ Dove Lake' } },
+        { time: '14:00', description: { en: 'Wildlife & nature photography session', th: 'ถ่ายภาพสัตว์ป่าและธรรมชาติ' } },
+        { time: '21:00', description: { en: 'Second Aurora Mission at new location', th: 'ภารกิจล่าแสงใต้รอบสอง จุดใหม่' } },
+      ],
+      note: {
+        en: 'Pack thermal layers — Cradle Mountain can be near freezing',
+        th: 'เตรียมเสื้อกันหนาว — Cradle Mountain อาจใกล้ 0°C',
+      },
+    },
+    {
+      day: 3,
+      title: { en: 'Day 3 — MONA, Hobart & Departure', th: 'วัน 3 — MONA Hobart & ออกเดินทาง' },
+      subtitle: { en: 'Chiaroscuro morning, then Jetstar home', th: 'เช้า chiaroscuro แล้วบิน Jetstar กลับ' },
+      events: [
+        { time: '09:00', description: { en: 'MONA museum — chiaroscuro technique session', th: 'MONA — สอนเทคนิค chiaroscuro' } },
+        { time: '12:30', description: { en: 'Hobart Market / Cascade Brewery — quick street frames', th: 'ตลาด Hobart / Cascade Brewery — เก็บภาพสตรีทสั้นๆ' } },
+        { time: '15:00', description: { en: 'Transfer to Hobart Airport', th: 'รถไปสนามบิน Hobart' } },
+        { time: '17:00', description: { en: 'Jetstar flight Hobart → Sydney — trip concludes', th: 'บิน Jetstar โฮบาร์ต → ซิดนีย์ — จบทริป' } },
+      ],
+    },
+  ],
+}
+
 export const TRIP_ITINERARIES: Record<string, TripItinerary> = {
   'ULU-4D3N': {
     detailed: true,
@@ -1037,6 +1090,8 @@ export const TRIP_ITINERARIES: Record<string, TripItinerary> = {
       },
     ],
   },
+  'TAS-LH-3D2N-DEC': TAS_LH_3D2N_ITINERARY,
+  'TAS-LH-3D2N-WIN': TAS_LH_3D2N_ITINERARY,
   'NZ-6D5N': {
     detailed: true,
     headerNote: {
