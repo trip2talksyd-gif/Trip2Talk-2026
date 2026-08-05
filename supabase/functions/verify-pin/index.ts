@@ -33,6 +33,17 @@ function json(body: unknown, status = 200): Response {
   })
 }
 
+function isMissingAuditColumnError(err: { message?: string; code?: string; details?: string } | null): boolean {
+  if (!err) return false
+  const blob = `${err.code ?? ''} ${err.message ?? ''} ${err.details ?? ''}`.toLowerCase()
+  return (
+    blob.includes('ip_address') ||
+    blob.includes('user_agent') ||
+    blob.includes('pgrst204') ||
+    blob.includes('42703')
+  )
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS })
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405)
@@ -54,7 +65,10 @@ Deno.serve(async (req) => {
       .from('staff_profiles')
       .select('id, pin_hash, full_name, role')
 
-    if (error) throw error
+    if (error) {
+      console.error('[verify-pin] staff_profiles select failed', error)
+      throw error
+    }
 
     const match = (staffList ?? []).find(
       (s) => typeof s.pin_hash === 'string' && s.pin_hash.length > 0 && bcrypt.compareSync(pin, s.pin_hash),
@@ -74,20 +88,34 @@ Deno.serve(async (req) => {
       null
     const userAgent = req.headers.get('user-agent')?.slice(0, 400) || null
 
-    const { data: session, error: sessionError } = await admin
+    const baseRow = {
+      staff_id: match.id,
+      role: match.role,
+      full_name: match.full_name,
+      expires_at: expiresAt,
+    }
+
+    // Prefer insert with Phase N audit columns; fall back if migration not applied yet.
+    let { data: session, error: sessionError } = await admin
       .from('staff_sessions')
-      .insert({
-        staff_id: match.id,
-        role: match.role,
-        full_name: match.full_name,
-        expires_at: expiresAt,
-        ip_address: ip,
-        user_agent: userAgent,
-      })
+      .insert({ ...baseRow, ip_address: ip, user_agent: userAgent })
       .select('token')
       .single()
 
-    if (sessionError) throw sessionError
+    if (sessionError && isMissingAuditColumnError(sessionError)) {
+      console.warn(
+        '[verify-pin] staff_sessions missing ip_address/user_agent — inserting without audit fields. Apply 20260805150000 Phase N.',
+        sessionError,
+      )
+      const retry = await admin.from('staff_sessions').insert(baseRow).select('token').single()
+      session = retry.data
+      sessionError = retry.error
+    }
+
+    if (sessionError) {
+      console.error('[verify-pin] staff_sessions insert failed', sessionError)
+      throw sessionError
+    }
 
     return json({ token: session.token, role: match.role, full_name: match.full_name })
   } catch (err) {
