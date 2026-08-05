@@ -1,6 +1,22 @@
-# React + TypeScript + Vite
+# Trip2Talk (2026)
+
+Vite + React + TypeScript PWA. Backend: Supabase (`bljhnelgmkulxwuhedbi`).
+Production: https://www.trip2talk.com.au
+
+## Supabase hotfix sync (required)
+
+If you change schema or Edge Functions **directly** on Supabase (access token,
+Dashboard SQL, CLI deploy outside a merged PR), you must **in the same session**:
+
+1. Write the matching `supabase/migrations/*.sql` and/or `supabase/functions/**` into this repo  
+2. Commit and open a PR so git matches production  
+
+Never leave production ahead of the repo. See root `CLAUDE.md`.
+
+## React + TypeScript + Vite template notes
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
 
 Currently, two official plugins are available:
 
