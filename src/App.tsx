@@ -32,6 +32,7 @@ import {
 import PinGatePage from './pages/app/PinGatePage'
 import StaffDashboard from './pages/app/StaffDashboard'
 import CashierPOS from './pages/app/CashierPOS'
+import StaffWaiverAssistPage from './pages/app/StaffWaiverAssistPage'
 import OwnerDashboard from './pages/app/OwnerDashboard'
 import TripManagerPage from './pages/app/TripManagerPage'
 import TaxSummaryPage from './pages/app/TaxSummaryPage'
@@ -90,6 +91,14 @@ export default function App() {
           element={
             <RequireStaffRole allow={['CASHIER', 'OWNER', 'MANAGER']}>
               <CashierPOS />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/waiver-assist"
+          element={
+            <RequireStaffRole allow={['OWNER', 'MANAGER', 'GUIDE', 'CASHIER']}>
+              <StaffWaiverAssistPage />
             </RequireStaffRole>
           }
         />

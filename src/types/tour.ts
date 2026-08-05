@@ -120,6 +120,14 @@ export interface WaiverSignature {
   clauses: string[] | Record<string, unknown>
   locale: 'en' | 'th'
   created_at: string
+  /** Staff filled waiver on customer's explicit request */
+  filled_by_staff?: boolean
+  staff_fill_staff_id?: string | null
+  staff_fill_authorized_at?: string | null
+  staff_fill_authorization_note?: string | null
+  staff_fill_evidence_url?: string | null
+  staff_fill_staff_name?: string | null
+  booking_id?: string | null
 }
 
 /** @deprecated Public inserts no longer return rows (anon SELECT revoked). */
@@ -148,10 +156,19 @@ export interface WaitlistEntry {
   created_at: string
 }
 
-export type ContentPostStatus = 'draft' | 'approved' | 'rejected' | 'posted'
+export type ContentPostStatus =
+  | 'draft'
+  | 'approved'
+  | 'approved_pending_manual_post'
+  | 'rejected'
+  | 'posted'
 export type ContentPostType = 'trip_promo' | 'value_content'
+export type ContentTargetAccount =
+  | 'trip2talk_page'
+  | 'chapter99_page'
+  | 'group_thaiaus'
 
-/** Draft Facebook/content post awaiting OWNER review before Make.com posts it. */
+/** Draft Facebook/content post awaiting OWNER review. */
 export interface ContentPost {
   id: string
   /** Null when post_type = value_content (page-growth, no trip). */
@@ -165,6 +182,12 @@ export interface ContentPost {
   caption_line?: string | null
   photo_urls: string[] | null
   page_id?: string | null
+  /** Required before review — routes Graph vs manual publish */
+  target_account?: ContentTargetAccount | string | null
+  group_id?: string | null
+  posted_at?: string | null
+  facebook_post_id?: string | null
+  facebook_post_url?: string | null
   created_at: string
   updated_at?: string | null
   tours: {

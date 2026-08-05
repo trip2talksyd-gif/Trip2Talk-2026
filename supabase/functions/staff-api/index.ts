@@ -30,6 +30,141 @@ function json(body: unknown, status = 200): Response {
   })
 }
 
+type ContentTargetAccount =
+  | 'trip2talk_page'
+  | 'chapter99_page'
+  | 'group_thaiaus'
+
+const VALID_TARGET_ACCOUNTS: ContentTargetAccount[] = [
+  'trip2talk_page',
+  'chapter99_page',
+  'group_thaiaus',
+]
+
+const GRAPH_VERSION = Deno.env.get('FB_API_VERSION')?.trim() || 'v20.0'
+const GRAPH_BASE = `https://graph.facebook.com/${GRAPH_VERSION}`
+
+function isManualTargetAccount(account: string | null | undefined): boolean {
+  return account === 'group_thaiaus'
+}
+
+function resolvePageCredentials(account: ContentTargetAccount): {
+  pageId: string
+  accessToken: string
+} | null {
+  if (account === 'trip2talk_page') {
+    const pageId =
+      Deno.env.get('FACEBOOK_PAGE_ID_TRIP2TALK')?.trim() ||
+      Deno.env.get('FB_PAGE_ID_TRIP2TALK')?.trim() ||
+      ''
+    const accessToken =
+      Deno.env.get('FACEBOOK_PAGE_ACCESS_TOKEN_TRIP2TALK')?.trim() ||
+      Deno.env.get('FB_PAGE_ACCESS_TOKEN_TRIP2TALK')?.trim() ||
+      ''
+    if (!pageId || !accessToken) return null
+    return { pageId, accessToken }
+  }
+  if (account === 'chapter99_page') {
+    const pageId =
+      Deno.env.get('FACEBOOK_PAGE_ID')?.trim() ||
+      Deno.env.get('FB_PAGE_ID')?.trim() ||
+      ''
+    const accessToken =
+      Deno.env.get('FACEBOOK_PAGE_ACCESS_TOKEN')?.trim() ||
+      Deno.env.get('FB_PAGE_ACCESS_TOKEN')?.trim() ||
+      ''
+    if (!pageId || !accessToken) return null
+    return { pageId, accessToken }
+  }
+  return null
+}
+
+/** Official Graph Page publish — /photos (album) → /feed. Never used for groups. */
+async function publishToFacebookPage(opts: {
+  pageId: string
+  accessToken: string
+  message: string
+  imageUrls: string[]
+}): Promise<{ facebook_post_id: string; facebook_post_url: string }> {
+  const mock = Deno.env.get('MOCK_FACEBOOK') === 'true'
+  if (mock) {
+    const id = `mock_fb_${opts.pageId}_${Date.now()}`
+    return {
+      facebook_post_id: id,
+      facebook_post_url: `https://www.facebook.com/${opts.pageId}/posts/mock`,
+    }
+  }
+
+  const images = opts.imageUrls.filter((u) => /^https?:\/\//i.test(u))
+  if (images.length === 0) {
+    throw new Error('Graph publish requires public https image URLs')
+  }
+
+  // Single photo — published photo endpoint
+  if (images.length === 1) {
+    const body = new URLSearchParams()
+    body.set('url', images[0])
+    body.set('caption', opts.message)
+    body.set('published', 'true')
+    body.set('access_token', opts.accessToken)
+    const res = await fetch(`${GRAPH_BASE}/${opts.pageId}/photos`, {
+      method: 'POST',
+      body,
+    })
+    const jsonRes = (await res.json()) as { id?: string; post_id?: string; error?: unknown }
+    if (!jsonRes.id && !jsonRes.post_id) {
+      throw new Error(`Graph /photos failed: ${JSON.stringify(jsonRes)}`)
+    }
+    const postId = jsonRes.post_id || jsonRes.id!
+    return {
+      facebook_post_id: postId,
+      facebook_post_url: `https://www.facebook.com/${opts.pageId}/posts/${postId}`,
+    }
+  }
+
+  // Multi-photo album via unpublished uploads + /feed attached_media
+  const mediaFbids: string[] = []
+  for (const url of images) {
+    const body = new URLSearchParams()
+    body.set('url', url)
+    body.set('published', 'false')
+    body.set('access_token', opts.accessToken)
+    const uploadRes = await fetch(`${GRAPH_BASE}/${opts.pageId}/photos`, {
+      method: 'POST',
+      body,
+    })
+    const uploadJson = (await uploadRes.json()) as { id?: string; error?: unknown }
+    if (!uploadJson.id) {
+      throw new Error(`Graph photo upload failed: ${JSON.stringify(uploadJson)}`)
+    }
+    mediaFbids.push(uploadJson.id)
+  }
+
+  const feedBody = new URLSearchParams()
+  feedBody.set('message', opts.message)
+  feedBody.set(
+    'attached_media',
+    JSON.stringify(mediaFbids.map((media_fbid) => ({ media_fbid }))),
+  )
+  feedBody.set('access_token', opts.accessToken)
+  const postRes = await fetch(`${GRAPH_BASE}/${opts.pageId}/feed`, {
+    method: 'POST',
+    body: feedBody,
+  })
+  const postJson = (await postRes.json()) as { id?: string; error?: unknown }
+  if (!postJson.id) {
+    throw new Error(`Graph /feed failed: ${JSON.stringify(postJson)}`)
+  }
+  return {
+    facebook_post_id: postJson.id,
+    facebook_post_url: `https://www.facebook.com/${postJson.id}`,
+  }
+}
+
+const CONTENT_POST_SELECT =
+  'id, trip_id, post_type, status, headline_options, selected_headline, caption_fb, caption_ig, caption_line, photo_urls, page_id, target_account, group_id, posted_at, facebook_post_id, facebook_post_url, created_at, updated_at, tours:trip_id (id, trip_code, name_en, name_th, departure_date, max_seats, booked_seats)'
+
+
 type Role = 'OWNER' | 'MANAGER' | 'GUIDE' | 'CASHIER'
 
 const ACTION_ROLES: Record<string, Role[]> = {
@@ -55,8 +190,12 @@ const ACTION_ROLES: Record<string, Role[]> = {
   list_payments_for_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   update_booking_details: ['OWNER', 'MANAGER', 'CASHIER'],
   cancel_booking: ['OWNER', 'MANAGER', 'CASHIER'],
+  create_waiver_staff_assisted: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  list_waivers_for_tour: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   list_draft_content_posts: ['OWNER'],
+  list_manual_pending_content_posts: ['OWNER'],
   update_content_post: ['OWNER'],
+  mark_content_post_posted: ['OWNER'],
   insert_content_post: ['OWNER'],
 }
 
@@ -446,6 +585,102 @@ Deno.serve(async (req) => {
         return json({ data })
       }
 
+      case 'create_waiver_staff_assisted': {
+        // Staff fills waiver on customer's explicit request — same clause
+        // acknowledgment as public flow; audit fields record authorization.
+        const p = params as {
+          trip_code?: string
+          signed_name?: string
+          clauses?: string[]
+          locale?: string
+          authorization_note?: string
+          evidence_url?: string | null
+          booking_id?: string | null
+          confirmed_customer_request?: boolean
+        }
+        const tripCode = (p.trip_code ?? '').trim()
+        const signedName = (p.signed_name ?? '').trim()
+        const note = (p.authorization_note ?? '').trim()
+        const clauses = Array.isArray(p.clauses) ? p.clauses.filter((c) => typeof c === 'string') : []
+
+        if (!tripCode || signedName.length < 3 || clauses.length === 0 || note.length < 8) {
+          return json({ error: 'invalid_params' }, 400)
+        }
+        if (p.confirmed_customer_request !== true) {
+          return json({ error: 'confirmation_required' }, 400)
+        }
+
+        const staffId =
+          typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+        const staffName =
+          (typeof session.full_name === 'string' && session.full_name.trim()) || 'Staff'
+        const authorizedAt = new Date().toISOString()
+        const evidence =
+          typeof p.evidence_url === 'string' && p.evidence_url.trim()
+            ? p.evidence_url.trim()
+            : null
+        const bookingId =
+          typeof p.booking_id === 'string' && p.booking_id.trim() ? p.booking_id.trim() : null
+
+        if (bookingId) {
+          const { data: booking, error: bookingErr } = await admin
+            .from('tour_bookings')
+            .select('id, trip_code')
+            .eq('id', bookingId)
+            .maybeSingle()
+          if (bookingErr) throw bookingErr
+          if (!booking) return json({ error: 'booking_not_found' }, 404)
+          if (String(booking.trip_code) !== tripCode) {
+            return json({ error: 'booking_trip_mismatch' }, 400)
+          }
+        }
+
+        const { data, error } = await admin
+          .from('waiver_signatures')
+          .insert({
+            trip_code: tripCode,
+            signed_name: signedName,
+            signed_at: authorizedAt,
+            clauses,
+            locale: p.locale === 'th' ? 'th' : 'en',
+            filled_by_staff: true,
+            staff_fill_staff_id: staffId,
+            staff_fill_authorized_at: authorizedAt,
+            staff_fill_authorization_note: note,
+            staff_fill_evidence_url: evidence,
+            staff_fill_staff_name: staffName,
+            booking_id: bookingId,
+          })
+          .select('*')
+          .single()
+        if (error) throw error
+
+        if (bookingId) {
+          const { error: updErr } = await admin
+            .from('tour_bookings')
+            .update({
+              waiver_signed: true,
+              waiver_signed_at: authorizedAt,
+            })
+            .eq('id', bookingId)
+          if (updErr) throw updErr
+        }
+
+        return json({ data })
+      }
+
+      case 'list_waivers_for_tour': {
+        const { tripCode } = params as { tripCode?: string }
+        if (!tripCode) return json({ error: 'invalid_params' }, 400)
+        const { data, error } = await admin
+          .from('waiver_signatures')
+          .select('*')
+          .eq('trip_code', tripCode)
+          .order('signed_at', { ascending: false })
+        if (error) throw error
+        return json({ data })
+      }
+
       case 'mark_attendance': {
         const { id, attended } = params as { id: string; attended: boolean | null }
         if (!id) return json({ error: 'invalid_params' }, 400)
@@ -688,23 +923,29 @@ Deno.serve(async (req) => {
       }
 
       case 'list_draft_content_posts': {
-        // Draft FB/content posts awaiting OWNER review. Make.com watches
-        // status → 'approved' via Database Webhook — do not post from here.
         const { data, error } = await admin
           .from('content_posts')
-          .select(
-            'id, trip_id, post_type, status, headline_options, selected_headline, caption_fb, caption_ig, caption_line, photo_urls, page_id, created_at, updated_at, tours:trip_id (id, trip_code, name_en, name_th, departure_date, max_seats, booked_seats)',
-          )
+          .select(CONTENT_POST_SELECT)
           .eq('status', 'draft')
           .order('created_at', { ascending: false })
         if (error) throw error
         return json({ data })
       }
 
+      case 'list_manual_pending_content_posts': {
+        const { data, error } = await admin
+          .from('content_posts')
+          .select(CONTENT_POST_SELECT)
+          .eq('status', 'approved_pending_manual_post')
+          .order('updated_at', { ascending: false })
+        if (error) throw error
+        return json({ data })
+      }
+
       case 'update_content_post': {
-        // Single-row update so Make.com's Database Webhook on status change
-        // still fires exactly once. Approve carries headline/caption/photos;
-        // reject only flips status.
+        // Approve routing by target_account:
+        //   trip2talk_page / chapter99_page → Graph /feed|photos auto-publish → posted
+        //   group_thaiaus → approved_pending_manual_post (NO Graph)
         const {
           id,
           status,
@@ -719,32 +960,147 @@ Deno.serve(async (req) => {
           photo_urls?: string[]
         }
         if (!id || !status) return json({ error: 'invalid_params' }, 400)
-        if (status !== 'approved' && status !== 'rejected') {
+        if (
+          status !== 'approved' &&
+          status !== 'approved_pending_manual_post' &&
+          status !== 'rejected'
+        ) {
           return json({ error: 'invalid_status' }, 400)
         }
 
-        const patch: Record<string, unknown> = { status }
-        if (status === 'approved') {
-          if (!selected_headline || typeof selected_headline !== 'string') {
-            return json({ error: 'invalid_params' }, 400)
-          }
-          if (typeof caption_fb !== 'string') {
-            return json({ error: 'invalid_params' }, 400)
-          }
-          if (!Array.isArray(photo_urls) || photo_urls.length < 1 || photo_urls.length > 4) {
-            return json({ error: 'invalid_params' }, 400)
-          }
-          patch.selected_headline = selected_headline
-          patch.caption_fb = caption_fb
-          patch.photo_urls = photo_urls
+        const { data: existing, error: existingErr } = await admin
+          .from('content_posts')
+          .select('id, status, target_account, group_id')
+          .eq('id', id)
+          .eq('status', 'draft')
+          .maybeSingle()
+        if (existingErr) throw existingErr
+        if (!existing) return json({ error: 'not_found' }, 404)
+
+        if (status === 'rejected') {
+          const { data, error } = await admin
+            .from('content_posts')
+            .update({ status: 'rejected' })
+            .eq('id', id)
+            .eq('status', 'draft')
+            .select('id, status, target_account')
+            .maybeSingle()
+          if (error) throw error
+          if (!data) return json({ error: 'not_found' }, 404)
+          return json({ data })
+        }
+
+        if (!existing.target_account) {
+          return json({ error: 'target_account_required' }, 400)
+        }
+        if (!selected_headline || typeof selected_headline !== 'string') {
+          return json({ error: 'invalid_params' }, 400)
+        }
+        if (typeof caption_fb !== 'string') {
+          return json({ error: 'invalid_params' }, 400)
+        }
+        if (!Array.isArray(photo_urls) || photo_urls.length < 1 || photo_urls.length > 4) {
+          return json({ error: 'invalid_params' }, 400)
+        }
+
+        const account = existing.target_account as ContentTargetAccount
+        const message = [selected_headline.trim(), caption_fb.trim()]
+          .filter(Boolean)
+          .join('\n\n')
+
+        // Manual destinations — never call Graph
+        if (isManualTargetAccount(account)) {
+          const { data, error } = await admin
+            .from('content_posts')
+            .update({
+              status: 'approved_pending_manual_post',
+              selected_headline,
+              caption_fb,
+              photo_urls,
+              group_id:
+                account === 'group_thaiaus'
+                  ? existing.group_id || '1631889741218502'
+                  : existing.group_id,
+            })
+            .eq('id', id)
+            .eq('status', 'draft')
+            .select('id, status, target_account, group_id')
+            .maybeSingle()
+          if (error) throw error
+          if (!data) return json({ error: 'not_found' }, 404)
+          return json({ data })
+        }
+
+        // Page auto-publish via Graph
+        const creds = resolvePageCredentials(account)
+        if (!creds) {
+          return json(
+            {
+              error: 'meta_credentials_missing',
+              hint:
+                account === 'trip2talk_page'
+                  ? 'Set FACEBOOK_PAGE_ID_TRIP2TALK + FACEBOOK_PAGE_ACCESS_TOKEN_TRIP2TALK'
+                  : 'Set FACEBOOK_PAGE_ID + FACEBOOK_PAGE_ACCESS_TOKEN',
+            },
+            503,
+          )
+        }
+
+        let graph: { facebook_post_id: string; facebook_post_url: string }
+        try {
+          graph = await publishToFacebookPage({
+            pageId: creds.pageId,
+            accessToken: creds.accessToken,
+            message,
+            imageUrls: photo_urls,
+          })
+        } catch (graphErr) {
+          console.error('[staff-api] Graph publish failed', graphErr)
+          return json(
+            {
+              error: 'graph_publish_failed',
+              detail: graphErr instanceof Error ? graphErr.message : String(graphErr),
+            },
+            502,
+          )
         }
 
         const { data, error } = await admin
           .from('content_posts')
-          .update(patch)
+          .update({
+            status: 'posted',
+            selected_headline,
+            caption_fb,
+            photo_urls,
+            facebook_post_id: graph.facebook_post_id,
+            facebook_post_url: graph.facebook_post_url,
+            posted_at: new Date().toISOString(),
+            page_id: creds.pageId,
+          })
           .eq('id', id)
           .eq('status', 'draft')
-          .select('id, status')
+          .select(
+            'id, status, target_account, facebook_post_id, facebook_post_url, posted_at',
+          )
+          .maybeSingle()
+        if (error) throw error
+        if (!data) return json({ error: 'not_found' }, 404)
+        return json({ data })
+      }
+
+      case 'mark_content_post_posted': {
+        const { id } = params as { id: string }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+
+        const { data, error } = await admin
+          .from('content_posts')
+          .update({
+            status: 'posted',
+            posted_at: new Date().toISOString(),
+          })
+          .eq('id', id)
+          .eq('status', 'approved_pending_manual_post')
+          .select('id, status, posted_at, target_account')
           .maybeSingle()
         if (error) throw error
         if (!data) return json({ error: 'not_found' }, 404)
@@ -752,7 +1108,6 @@ Deno.serve(async (req) => {
       }
 
       case 'insert_content_post': {
-        // Quick Post / Make.com draft insert. value_content requires trip_id null.
         const {
           post_type,
           trip_id,
@@ -760,6 +1115,8 @@ Deno.serve(async (req) => {
           headline_options,
           caption_fb,
           status,
+          target_account,
+          group_id,
         } = params as {
           post_type?: string
           trip_id?: string | null
@@ -767,10 +1124,15 @@ Deno.serve(async (req) => {
           headline_options?: string[]
           caption_fb?: string
           status?: string
+          target_account?: string
+          group_id?: string | null
         }
         const postType = post_type ?? 'value_content'
         if (postType !== 'value_content' && postType !== 'trip_promo') {
           return json({ error: 'invalid_post_type' }, 400)
+        }
+        if (!target_account || !VALID_TARGET_ACCOUNTS.includes(target_account as ContentTargetAccount)) {
+          return json({ error: 'target_account_required' }, 400)
         }
         if (!Array.isArray(photo_urls) || photo_urls.length < 1) {
           return json({ error: 'invalid_params' }, 400)
@@ -782,6 +1144,7 @@ Deno.serve(async (req) => {
           return json({ error: 'invalid_params' }, 400)
         }
 
+        const account = target_account as ContentTargetAccount
         const row: Record<string, unknown> = {
           post_type: postType,
           trip_id: postType === 'value_content' ? null : trip_id ?? null,
@@ -789,6 +1152,11 @@ Deno.serve(async (req) => {
           headline_options,
           caption_fb,
           status: status ?? 'draft',
+          target_account: account,
+          group_id:
+            account === 'group_thaiaus'
+              ? group_id || '1631889741218502'
+              : group_id ?? null,
         }
         if (postType === 'trip_promo' && !row.trip_id) {
           return json({ error: 'trip_id_required' }, 400)
@@ -797,7 +1165,7 @@ Deno.serve(async (req) => {
         const { data, error } = await admin
           .from('content_posts')
           .insert(row)
-          .select('id, post_type, status, created_at')
+          .select('id, post_type, status, target_account, created_at')
           .single()
         if (error) throw error
         return json({ data })

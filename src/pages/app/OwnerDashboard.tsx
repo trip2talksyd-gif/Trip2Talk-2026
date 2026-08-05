@@ -158,6 +158,12 @@ export default function OwnerDashboard() {
               >
                 📋 Staff Dashboard
               </Link>
+              <Link
+                to="/app/waiver-assist"
+                className="block rounded-editorial border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-center text-sm font-medium text-amber-200 transition-colors hover:bg-amber-500/15"
+              >
+                ✍️ Waiver assist / กรอกแทนลูกค้า
+              </Link>
             </div>
 
             <Link

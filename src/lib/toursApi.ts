@@ -311,6 +311,55 @@ export async function insertWaiverSignature(
   }
 }
 
+export type StaffAssistedWaiverInput = {
+  trip_code: string
+  signed_name: string
+  clauses: string[]
+  locale: 'en' | 'th'
+  authorization_note: string
+  evidence_url?: string | null
+  booking_id?: string | null
+  confirmed_customer_request: true
+}
+
+/** PIN-gated: staff records a customer-authorized waiver on their behalf. */
+export async function createWaiverStaffAssisted(
+  input: StaffAssistedWaiverInput,
+): Promise<WaiverSignature> {
+  return callStaffApi<WaiverSignature>('create_waiver_staff_assisted', input)
+}
+
+export async function listWaiversForTour(tripCode: string): Promise<WaiverSignature[]> {
+  return callStaffApi<WaiverSignature[]>('list_waivers_for_tour', { tripCode })
+}
+
+/** Evidence screenshot for staff-assisted waiver — same payment-slips bucket pattern. */
+export async function uploadWaiverAuthEvidence(file: File, tripCode: string): Promise<string> {
+  const ext = file.name.split('.').pop() ?? 'jpg'
+  const safeCode = tripCode.replace(/[^a-zA-Z0-9_-]/g, '')
+  const path = `waiver-auth/${safeCode}-${Date.now()}.${ext}`
+
+  try {
+    const { error: uploadError } = await supabase.storage
+      .from('payment-slips')
+      .upload(path, file, { upsert: false })
+
+    if (uploadError) {
+      logSupabaseError(`uploadWaiverAuthEvidence (${tripCode})`, uploadError)
+      throw uploadError
+    }
+
+    const { data } = supabase.storage.from('payment-slips').getPublicUrl(path)
+    // Prefer public URL when bucket is public; otherwise store the path for staff lookup.
+    return data?.publicUrl || path
+  } catch (err) {
+    if (!(err && typeof err === 'object' && 'code' in err)) {
+      logSupabaseError(`uploadWaiverAuthEvidence (${tripCode})`, err)
+    }
+    throw err
+  }
+}
+
 export type BookingInsertPayload = Omit<TourBooking, 'id' | 'booked_at' | 'tour_id'>
 
 export type MyTripBookingSummary = {
@@ -819,36 +868,50 @@ function normalizeHeadlineOptions(raw: unknown): string[] {
   return []
 }
 
+function mapContentPostRow(row: Record<string, unknown>): ContentPost {
+  const tourJoin = row.tours
+  const tours =
+    tourJoin && typeof tourJoin === 'object' && !Array.isArray(tourJoin)
+      ? (tourJoin as ContentPost['tours'])
+      : Array.isArray(tourJoin) && tourJoin[0]
+        ? (tourJoin[0] as ContentPost['tours'])
+        : null
+
+  return {
+    id: String(row.id),
+    trip_id: row.trip_id != null ? String(row.trip_id) : null,
+    post_type: String(row.post_type ?? (row.trip_id ? 'trip_promo' : 'value_content')),
+    status: String(row.status ?? 'draft'),
+    headline_options: normalizeHeadlineOptions(row.headline_options),
+    selected_headline: (row.selected_headline as string | null) ?? null,
+    caption_fb: (row.caption_fb as string | null) ?? null,
+    caption_ig: (row.caption_ig as string | null) ?? null,
+    caption_line: (row.caption_line as string | null) ?? null,
+    photo_urls: Array.isArray(row.photo_urls)
+      ? (row.photo_urls as string[])
+      : null,
+    page_id: (row.page_id as string | null) ?? null,
+    target_account: (row.target_account as string | null) ?? null,
+    group_id: (row.group_id as string | null) ?? null,
+    posted_at: (row.posted_at as string | null) ?? null,
+    facebook_post_id: (row.facebook_post_id as string | null) ?? null,
+    facebook_post_url: (row.facebook_post_url as string | null) ?? null,
+    created_at: String(row.created_at ?? ''),
+    updated_at: (row.updated_at as string | null) ?? null,
+    tours,
+  }
+}
+
 export async function fetchDraftContentPosts(): Promise<ContentPost[]> {
   const rows = await callStaffApi<Record<string, unknown>[]>('list_draft_content_posts')
-  return (rows ?? []).map((row) => {
-    const tourJoin = row.tours
-    const tours =
-      tourJoin && typeof tourJoin === 'object' && !Array.isArray(tourJoin)
-        ? (tourJoin as ContentPost['tours'])
-        : Array.isArray(tourJoin) && tourJoin[0]
-          ? (tourJoin[0] as ContentPost['tours'])
-          : null
+  return (rows ?? []).map(mapContentPostRow)
+}
 
-    return {
-      id: String(row.id),
-      trip_id: row.trip_id != null ? String(row.trip_id) : null,
-      post_type: String(row.post_type ?? (row.trip_id ? 'trip_promo' : 'value_content')),
-      status: String(row.status ?? 'draft'),
-      headline_options: normalizeHeadlineOptions(row.headline_options),
-      selected_headline: (row.selected_headline as string | null) ?? null,
-      caption_fb: (row.caption_fb as string | null) ?? null,
-      caption_ig: (row.caption_ig as string | null) ?? null,
-      caption_line: (row.caption_line as string | null) ?? null,
-      photo_urls: Array.isArray(row.photo_urls)
-        ? (row.photo_urls as string[])
-        : null,
-      page_id: (row.page_id as string | null) ?? null,
-      created_at: String(row.created_at ?? ''),
-      updated_at: (row.updated_at as string | null) ?? null,
-      tours,
-    }
-  })
+export async function fetchManualPendingContentPosts(): Promise<ContentPost[]> {
+  const rows = await callStaffApi<Record<string, unknown>[]>(
+    'list_manual_pending_content_posts',
+  )
+  return (rows ?? []).map(mapContentPostRow)
 }
 
 export async function rejectContentPost(id: string): Promise<void> {
@@ -862,8 +925,13 @@ export async function approveContentPost(
     caption_fb: string
     photo_urls: string[]
   },
-): Promise<void> {
-  await callStaffApi('update_content_post', {
+): Promise<{
+  status: string
+  target_account?: string
+  facebook_post_id?: string
+  facebook_post_url?: string
+}> {
+  return callStaffApi('update_content_post', {
     id,
     status: 'approved',
     selected_headline: payload.selected_headline,
@@ -872,13 +940,23 @@ export async function approveContentPost(
   })
 }
 
+export async function markContentPostPosted(id: string): Promise<void> {
+  await callStaffApi('mark_content_post_posted', { id })
+}
+
 export async function insertContentPostDraft(input: {
   post_type: 'value_content' | 'trip_promo'
   trip_id?: string | null
   photo_urls: string[]
   headline_options: string[]
   caption_fb: string
+  /** Required — routes Graph vs manual on approve */
+  target_account: NonNullable<ContentPost['target_account']>
+  group_id?: string | null
 }): Promise<{ id: string }> {
+  if (!input.target_account) {
+    throw new Error('target_account is required')
+  }
   return callStaffApi<{ id: string }>('insert_content_post', {
     ...input,
     status: 'draft',
