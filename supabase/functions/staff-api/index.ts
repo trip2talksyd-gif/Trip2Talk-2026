@@ -986,7 +986,7 @@ Deno.serve(async (req) => {
           .select('*')
           .eq('id', booking.tour_id)
           .maybeSingle()
-        const priceAud = tour ? Number(tour.price_aud ?? tour.price_standard ?? 0) : 0
+        const priceAud = tour ? Number(tour.price_aud ?? 0) : 0
 
         const { count, error: countError } = await admin
           .from('booking_payments')
@@ -1193,10 +1193,10 @@ Deno.serve(async (req) => {
           if (booking?.tour_id) {
             const { data: tour } = await admin
               .from('tours')
-              .select('price_aud, price_standard')
+              .select('price_aud')
               .eq('id', booking.tour_id)
               .maybeSingle()
-            priceAud = tour ? Number(tour.price_aud ?? tour.price_standard ?? 0) : 0
+            priceAud = tour ? Number(tour.price_aud ?? 0) : 0
           }
           const newStatus =
             priceAud > 0 && paidTotal >= priceAud ? 'fully_paid' : paidTotal > 0 ? 'deposit_paid' : 'pending_payment'
