@@ -2,6 +2,10 @@ import { useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useToast } from '../../components/ui/Toast'
 import { PAYID_OPTIONS } from '../../data/paymentDetails'
+import {
+  StaffButton,
+  staffShellClass,
+} from '../../components/app/staffUi'
 
 /** Data handed off via router state right after a payment is recorded —
  * no extra staff-api round trip, since the caller already has everything. */
@@ -176,58 +180,56 @@ export default function ReceiptPage() {
 
   if (!data) {
     return (
-      <div className="min-h-svh bg-near-black-green px-4 py-6 text-cream">
-        <p className="text-sm text-cream-muted">ไม่พบข้อมูลใบเสร็จ</p>
-        <Link to="/app/cashier" className="mt-3 inline-block text-sm text-gold">
-          ← กลับไป Cashier POS
-        </Link>
+      <div className={staffShellClass}>
+        <header className="border-b border-white/8 px-4 py-4">
+          <Link to="/app/cashier" className="text-sm text-teal-500 hover:text-teal-400">
+            ← กลับไป Cashier POS
+          </Link>
+        </header>
+        <main className="mx-auto max-w-md px-4 py-6">
+          <p className="text-sm text-cream-muted">ไม่พบข้อมูลใบเสร็จ</p>
+        </main>
       </div>
     )
   }
 
   return (
-    <div className="min-h-svh bg-near-black-green px-4 py-6 text-cream print:bg-white print:text-black">
-      <div className="mx-auto max-w-md space-y-3 print:hidden">
-        <button type="button" onClick={() => navigate(-1)} className="text-sm text-gold">
+    <div className={`${staffShellClass} print:bg-white print:text-black`}>
+      <header className="border-b border-white/8 px-4 py-4 print:hidden">
+        <button type="button" onClick={() => navigate(-1)} className="text-sm text-teal-500 hover:text-teal-400">
           ← ย้อนกลับ
         </button>
-        <button
-          type="button"
-          onClick={handleDownloadImage}
-          disabled={downloading}
-          className="block w-full rounded-editorial bg-gold px-4 py-3 text-center text-sm font-bold text-near-black-green disabled:opacity-60"
-        >
+      </header>
+
+      <div className="mx-auto max-w-md space-y-3 px-4 py-6 print:hidden">
+        <StaffButton onClick={handleDownloadImage} disabled={downloading}>
           {downloading ? 'กำลังสร้างรูป...' : '📥 ดาวน์โหลดรูปใบเสร็จ (ส่ง FB ได้เลย)'}
-        </button>
+        </StaffButton>
         <div className="flex gap-2">
-          <button
-            type="button"
+          <StaffButton
+            variant="secondary"
+            className="flex-1"
             onClick={handleEmailReceipt}
-            className="flex-1 rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold"
           >
             📧 เปิด Gmail ส่งใบเสร็จ
-          </button>
-          <button
-            type="button"
+          </StaffButton>
+          <StaffButton
+            variant="secondary"
+            className="!w-auto px-3"
             onClick={handleCopyEmailText}
-            className="rounded-editorial border border-gold/40 bg-gold/10 px-3 py-3 text-center text-sm font-medium text-gold"
             title="คัดลอกข้อความอีเมล (เผื่อ Gmail เปิดไม่ได้)"
           >
             📋
-          </button>
+          </StaffButton>
         </div>
         {!data.customerEmail && (
           <p className="text-center text-xs text-cream-muted">
             ไม่มีอีเมลลูกค้าในระบบ — Gmail จะเปิดแบบไม่กรอกผู้รับ ใส่เองได้
           </p>
         )}
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="block w-full rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold"
-        >
+        <StaffButton variant="secondary" onClick={() => window.print()}>
           🖨️ พิมพ์ใบเสร็จ
-        </button>
+        </StaffButton>
       </div>
 
       <div

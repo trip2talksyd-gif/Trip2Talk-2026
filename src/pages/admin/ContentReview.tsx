@@ -19,6 +19,13 @@ import {
 } from '../../data/facebookDestinations'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { useToast } from '../../components/ui/Toast'
+import {
+  StaffButton,
+  StaffCard,
+  StaffMain,
+  StaffPageHeader,
+  staffShellClass,
+} from '../../components/app/staffUi'
 
 const MAX_PHOTOS = 4
 
@@ -551,18 +558,15 @@ export default function ContentReview() {
   }
 
   return (
-    <div className="min-h-svh bg-near-black-green text-cream">
-      <header className="border-b border-white/8 px-4 py-4">
-        <Link to="/app/owner" className="text-sm text-gold">
-          ← แดชบอร์ดเจ้าของ
-        </Link>
-        <h1 className="mt-2 font-serif text-lg text-cream">รีวิวคอนเทนต์</h1>
-        <p className="mt-1 text-sm text-cream-muted">
-          Page → Graph auto-publish · Thai-Aus Group → คัดลอกแล้วโพสต์มือ
-        </p>
-      </header>
+    <div className={staffShellClass}>
+      <StaffPageHeader
+        backTo="/app/owner"
+        backLabel="← แดชบอร์ดเจ้าของ"
+        title="รีวิวคอนเทนต์"
+        subtitle="Page → Graph auto-publish · Thai-Aus Group → คัดลอกแล้วโพสต์มือ"
+      />
 
-      <main className="mx-auto max-w-2xl space-y-8 px-4 py-6">
+      <StaffMain className="space-y-8">
         {loading && (
           <div role="status" aria-live="polite" aria-busy="true">
             <p className="mb-3 flex items-center gap-2 text-sm text-cream-muted">
@@ -589,27 +593,26 @@ export default function ContentReview() {
         )}
 
         {!loading && posts.length === 0 && manualPosts.length === 0 && (
-          <div className="rounded-editorial border border-white/8 bg-surface-card/50 px-4 py-10 text-center">
+          <StaffCard className="bg-surface-card/50 py-10 text-center">
             <p className="text-base text-cream">ยังไม่มีโพสต์ร่างให้รีวิว</p>
             <p className="mt-2 text-sm text-cream-muted">
               เมื่อมีร่างใหม่จาก Quick Post หรือ Make.com จะโชว์ที่นี่
             </p>
             <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
-              <Link
-                to="/app/quick-post"
-                className="inline-flex min-h-12 items-center justify-center rounded-editorial border border-gold/40 bg-gold/15 px-4 text-sm font-medium text-gold"
-              >
-                ไป Quick Post
+              <Link to="/app/quick-post" className="block sm:inline-block">
+                <StaffButton variant="secondary" className="min-h-12 text-sm">
+                  ไป Quick Post
+                </StaffButton>
               </Link>
-              <button
-                type="button"
+              <StaffButton
+                variant="secondary"
+                className="min-h-12 text-sm"
                 onClick={() => void load()}
-                className="inline-flex min-h-12 items-center justify-center rounded-editorial border border-white/15 px-4 text-sm text-cream-muted"
               >
                 รีเฟรช
-              </button>
+              </StaffButton>
             </div>
-          </div>
+          </StaffCard>
         )}
 
         {!loading && posts.length > 0 && (
@@ -632,7 +635,7 @@ export default function ContentReview() {
             })}
           </section>
         )}
-      </main>
+      </StaffMain>
     </div>
   )
 }

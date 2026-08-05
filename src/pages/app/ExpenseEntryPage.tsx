@@ -1,9 +1,19 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { fetchToursAdmin, insertExpense } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { Tour } from '../../types/tour'
 import { useToast } from '../../components/ui/Toast'
+import {
+  staffShellClass,
+  StaffPageHeader,
+  StaffMain,
+  StaffButton,
+  StaffField,
+  StaffCheckRow,
+  StaffInput,
+  StaffSelect,
+} from '../../components/app/staffUi'
 
 const ATO_CATEGORIES = [
   'Fuel',
@@ -84,49 +94,48 @@ export default function ExpenseEntryPage() {
   }
 
   return (
-    <div className="min-h-svh bg-near-black-green text-cream">
-      <header className="border-b border-white/8 px-4 py-4">
-        <Link to="/app/owner" className="text-sm text-gold">
-          ← Owner Dashboard
-        </Link>
-        <h1 className="mt-2 font-serif text-lg text-cream">Add Expense</h1>
-      </header>
+    <div className={staffShellClass}>
+      <StaffPageHeader
+        backTo="/app/owner"
+        backLabel="← Owner Dashboard"
+        title="Add Expense"
+      />
 
-      <main className="mx-auto max-w-2xl px-4 py-6">
+      <StaffMain>
         <form onSubmit={handleSubmit} className="space-y-5" noValidate>
-          <label className="block">
-            <span className="text-sm font-medium text-cream-muted">
-              Amount (AUD) <span className="text-coral">*</span>
-            </span>
-            <input
+          <StaffField
+            label={
+              <>
+                Amount (AUD) <span className="text-coral">*</span>
+              </>
+            }
+          >
+            <StaffInput
               type="number"
               min="0"
               step="0.01"
               value={amount}
               onChange={(e) => autoGst(e.target.value)}
-              className="mt-1 w-full rounded-editorial border border-white/8 bg-surface-card px-3 py-2 text-sm text-cream"
             />
-          </label>
+          </StaffField>
 
-          <label className="block">
-            <span className="text-sm font-medium text-cream-muted">
-              Vendor / paid to <span className="text-coral">*</span>
-            </span>
-            <input
+          <StaffField
+            label={
+              <>
+                Vendor / paid to <span className="text-coral">*</span>
+              </>
+            }
+          >
+            <StaffInput
               value={vendorName}
               onChange={(e) => setVendorName(e.target.value)}
-              className="mt-1 w-full rounded-editorial border border-white/8 bg-surface-card px-3 py-2 text-sm text-cream"
             />
-          </label>
+          </StaffField>
 
-          <label className="block">
-            <span className="text-sm font-medium text-cream-muted">
-              ทริป (ถ้ามี — เว้นว่างถ้าเป็นค่าใช้จ่ายทั่วไป)
-            </span>
-            <select
+          <StaffField label="ทริป (ถ้ามี — เว้นว่างถ้าเป็นค่าใช้จ่ายทั่วไป)">
+            <StaffSelect
               value={tripCode}
               onChange={(e) => setTripCode(e.target.value)}
-              className="mt-1 w-full rounded-editorial border border-white/8 bg-surface-card px-3 py-2 text-sm text-cream"
             >
               <option value="">— ทั่วไป / ไม่ผูกกับทริป —</option>
               {tours.map((tr) => (
@@ -134,64 +143,54 @@ export default function ExpenseEntryPage() {
                   {tr.name_en} · {tr.trip_code}
                 </option>
               ))}
-            </select>
-          </label>
+            </StaffSelect>
+          </StaffField>
 
-          <label className="block">
-            <span className="text-sm font-medium text-cream-muted">ATO category</span>
-            <select
+          <StaffField label="ATO category">
+            <StaffSelect
               value={atoCategory}
               onChange={(e) => setAtoCategory(e.target.value)}
-              className="mt-1 w-full rounded-editorial border border-white/8 bg-surface-card px-3 py-2 text-sm text-cream"
             >
               {ATO_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
                 </option>
               ))}
-            </select>
-          </label>
+            </StaffSelect>
+          </StaffField>
 
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={hasGst}
-              onChange={(e) => {
-                setHasGst(e.target.checked)
-                if (!e.target.checked) setGstAmount('')
-              }}
-            />
-            <span className="text-sm text-cream-muted">Includes GST</span>
-          </label>
+          <StaffCheckRow
+            checked={hasGst}
+            onChange={(next) => {
+              setHasGst(next)
+              if (!next) setGstAmount('')
+            }}
+          >
+            Includes GST
+          </StaffCheckRow>
 
           {hasGst && (
-            <label className="block">
-              <span className="text-sm font-medium text-cream-muted">GST amount (AUD)</span>
-              <input
+            <StaffField label="GST amount (AUD)">
+              <StaffInput
                 type="number"
                 min="0"
                 step="0.01"
                 value={gstAmount}
                 onChange={(e) => setGstAmount(e.target.value)}
-                className="mt-1 w-full rounded-editorial border border-white/8 bg-surface-card px-3 py-2 text-sm text-cream"
               />
               <span className="mt-1 block text-xs text-cream-muted">
                 Auto-filled at 1/11th of amount; adjust if different
               </span>
-            </label>
+            </StaffField>
           )}
 
           {error && <p className="text-sm text-coral">{error}</p>}
 
-          <button
-            type="submit"
-            disabled={!isValid || submitting}
-            className="w-full rounded-editorial bg-gold py-2.5 text-sm font-medium uppercase tracking-wider text-gold-dark transition-transform active:scale-95 disabled:opacity-40"
-          >
+          <StaffButton type="submit" disabled={!isValid || submitting}>
             {submitting ? 'Saving…' : 'Save expense'}
-          </button>
+          </StaffButton>
         </form>
-      </main>
+      </StaffMain>
     </div>
   )
 }

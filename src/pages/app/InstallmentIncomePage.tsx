@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   fetchInstallmentIncomeSummary,
   fetchOwnerOpsMetrics,
@@ -11,6 +11,16 @@ import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import { DashboardCardSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useLang } from '../../hooks/useLang'
+import {
+  StaffCard,
+  StaffInput,
+  StaffMain,
+  StaffPageHeader,
+  StaffSelect,
+  staffShellClass,
+  staffTabActiveClass,
+  staffTabIdleClass,
+} from '../../components/app/staffUi'
 
 const NOW = new Date()
 const CURRENT_YEAR = NOW.getFullYear()
@@ -66,26 +76,23 @@ export default function InstallmentIncomePage() {
   }, [load])
 
   return (
-    <div className="min-h-svh bg-near-black-green text-cream">
-      <header className="border-b border-white/8 px-4 py-4">
-        <Link to="/app/owner" className="text-sm text-gold">
-          ← Owner
-        </Link>
-        <h1 className="mt-2 font-serif text-lg text-cream">
-          {title.en}
-          <span className="mt-0.5 block font-thai text-sm font-medium text-cream-muted">
-            {title.th}
-          </span>
-        </h1>
-        <p className="mt-1 text-[11px] text-cream-muted">
-          Paid installments only · AU tax year = 1 Jul–30 Jun · expenses not included
-          <span className="mt-0.5 block font-thai">
-            เฉพาะงวดที่จ่ายแล้ว · ปีภาษีออสฯ 1 ก.ค.–30 มิ.ย. · ไม่รวมรายจ่าย
-          </span>
-        </p>
-      </header>
+    <div className={staffShellClass}>
+      <StaffPageHeader
+        backTo="/app/owner"
+        backLabel="← Owner"
+        title={title.en}
+        subtitle={
+          <>
+            <span className="block font-thai text-sm font-medium">{title.th}</span>
+            Paid installments only · AU tax year = 1 Jul–30 Jun · expenses not included
+            <span className="mt-0.5 block font-thai">
+              เฉพาะงวดที่จ่ายแล้ว · ปีภาษีออสฯ 1 ก.ค.–30 มิ.ย. · ไม่รวมรายจ่าย
+            </span>
+          </>
+        }
+      />
 
-      <main className="mx-auto max-w-2xl space-y-4 px-4 py-6">
+      <StaffMain className="space-y-4">
         <div className="flex flex-wrap gap-2">
           {(
             [
@@ -98,9 +105,7 @@ export default function InstallmentIncomePage() {
               key={m}
               type="button"
               onClick={() => setMode(m)}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold ${
-                mode === m ? 'bg-gold text-near-black-green' : 'border border-white/15 text-cream-muted'
-              }`}
+              className={mode === m ? staffTabActiveClass : staffTabIdleClass}
             >
               {label}
             </button>
@@ -108,36 +113,36 @@ export default function InstallmentIncomePage() {
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <select
+          <StaffSelect
             value={year}
             onChange={(e) => setYear(Number(e.target.value))}
-            className="rounded-lg border border-white/15 bg-surface-card px-2 py-1.5 text-sm text-cream"
+            className="text-sm"
           >
             {[CURRENT_YEAR, CURRENT_YEAR - 1, CURRENT_YEAR - 2].map((y) => (
               <option key={y} value={y}>
                 {mode === 'tax_year' ? `TY ending Jun ${y}` : y}
               </option>
             ))}
-          </select>
+          </StaffSelect>
           {mode === 'month' && (
-            <select
+            <StaffSelect
               value={month}
               onChange={(e) => setMonth(Number(e.target.value))}
-              className="rounded-lg border border-white/15 bg-surface-card px-2 py-1.5 text-sm text-cream"
+              className="text-sm"
             >
               {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                 <option key={m} value={m}>
                   {m}
                 </option>
               ))}
-            </select>
+            </StaffSelect>
           )}
           {mode === 'trip' && (
-            <input
+            <StaffInput
               value={tripCode}
               onChange={(e) => setTripCode(e.target.value)}
               placeholder="Trip code"
-              className="rounded-lg border border-white/15 bg-surface-card px-2 py-1.5 text-sm text-cream"
+              className="text-sm"
             />
           )}
         </div>
@@ -147,11 +152,11 @@ export default function InstallmentIncomePage() {
 
         {!loading && !error && summary && (
           <>
-            <div className="rounded-editorial border border-gold/30 bg-gold/10 p-4">
+            <StaffCard className="border-teal-500/30 bg-teal-500/10">
               <p className="text-xs text-cream-muted">Total paid income</p>
-              <p className="mt-1 font-serif text-2xl text-gold">{formatAud(summary.total_aud)}</p>
+              <p className="mt-1 font-serif text-2xl text-teal-500">{formatAud(summary.total_aud)}</p>
               <p className="mt-1 text-[11px] text-cream-muted">{summary.count} payments</p>
-            </div>
+            </StaffCard>
 
             {summary.by_trip.length > 0 && (
               <section>
@@ -167,7 +172,7 @@ export default function InstallmentIncomePage() {
                         className="flex justify-between rounded-lg bg-surface-card px-3 py-2 text-sm"
                       >
                         <span>{r.trip_code}</span>
-                        <span className="text-gold">{formatAud(r.amount_aud)}</span>
+                        <span className="text-teal-500">{formatAud(r.amount_aud)}</span>
                       </li>
                     ))}
                 </ul>
@@ -176,14 +181,14 @@ export default function InstallmentIncomePage() {
 
             {ops && (
               <section className="space-y-3">
-                <div className="rounded-editorial border border-white/10 bg-surface-card p-4">
+                <StaffCard>
                   <p className="text-xs text-cream-muted">Repeat customer rate</p>
-                  <p className="mt-1 font-serif text-2xl text-gold">{ops.repeat_customer_rate}%</p>
+                  <p className="mt-1 font-serif text-2xl text-teal-500">{ops.repeat_customer_rate}%</p>
                   <p className="mt-1 text-[11px] text-cream-muted">
                     {ops.repeat_bookings} of {ops.active_bookings} active bookings from guests who
                     booked before (email/phone match)
                   </p>
-                </div>
+                </StaffCard>
 
                 <div>
                   <h2 className="text-xs font-semibold uppercase tracking-wider text-cream-muted">
@@ -203,7 +208,7 @@ export default function InstallmentIncomePage() {
                       >
                         <span>{r.trip_code}</span>
                         <span className="text-right text-[11px]">
-                          <span className="text-gold">{formatAud(r.profit_aud)}</span>
+                          <span className="text-teal-500">{formatAud(r.profit_aud)}</span>
                           <span className="mt-0.5 block text-cream-muted">
                             rev {formatAud(r.revenue_aud)} − exp {formatAud(r.expense_aud)}
                           </span>
@@ -220,7 +225,7 @@ export default function InstallmentIncomePage() {
             </p>
           </>
         )}
-      </main>
+      </StaffMain>
     </div>
   )
 }

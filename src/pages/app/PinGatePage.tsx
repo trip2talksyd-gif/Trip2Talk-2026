@@ -6,6 +6,7 @@ import type { StaffRole } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
 import { setStaffSession } from '../../lib/supabaseStaff'
 import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
+import { staffShellClass } from '../../components/app/staffUi'
 
 const MAX_ATTEMPTS = 3
 const LOCKOUT_MS = 30_000
@@ -114,7 +115,7 @@ export default function PinGatePage() {
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'back'] as const
 
   return (
-    <div className="relative flex min-h-svh flex-col items-center justify-center px-4">
+    <div className={`${staffShellClass} relative flex flex-col items-center justify-center px-4`}>
       <div
         className="fixed inset-0 bg-cover bg-center"
         style={AURORA_BG_SRC ? { backgroundImage: `url(${AURORA_BG_SRC})` } : undefined}

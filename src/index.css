@@ -1769,3 +1769,90 @@
   color: #fff;
 }
 
+/* ---------- Staff /app/* dark shell (shared form + card chrome) ---------- */
+.staff-shell .staff-control,
+.staff-shell input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='submit']):not([type='button']):not([type='reset']):not(.staff-check),
+.staff-shell select,
+.staff-shell textarea {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #16262b;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #f7f5f0;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.staff-shell .staff-control:focus,
+.staff-shell input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='submit']):not([type='button']):not([type='reset']):not(.staff-check):focus,
+.staff-shell select:focus,
+.staff-shell textarea:focus {
+  border-color: rgba(239, 165, 101, 0.55);
+  box-shadow: 0 0 0 3px rgba(239, 165, 101, 0.18);
+}
+
+.staff-shell .staff-control:disabled,
+.staff-shell input:disabled,
+.staff-shell select:disabled,
+.staff-shell textarea:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.staff-shell input[type='checkbox'].staff-check,
+.staff-shell input[type='checkbox'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  margin: 0;
+  flex-shrink: 0;
+  border-radius: 0.35rem;
+  border: 1.5px solid rgba(255, 255, 255, 0.28);
+  background: #16262b;
+  cursor: pointer;
+  vertical-align: top;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.staff-shell input[type='checkbox'].staff-check:checked,
+.staff-shell input[type='checkbox']:checked {
+  border-color: #efa565;
+  background-color: #efa565;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2316262b' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 8.5 6.5 11.5 12.5 4.5'/%3E%3C/svg%3E");
+  background-size: 0.85rem 0.85rem;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.staff-shell input[type='checkbox'].staff-check:focus-visible,
+.staff-shell input[type='checkbox']:focus-visible {
+  outline: 2px solid rgba(239, 165, 101, 0.55);
+  outline-offset: 2px;
+}
+
+.staff-shell input[type='file'] {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: #5a6c6a;
+}
+
+.staff-shell input[type='file']::file-selector-button {
+  margin-right: 0.75rem;
+  border: 0;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.375rem 0.75rem;
+  color: #f7f5f0;
+  cursor: pointer;
+}
+
+.staff-shell option {
+  background: #16262b;
+  color: #f7f5f0;
+}
