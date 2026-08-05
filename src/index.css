@@ -126,7 +126,11 @@
 
 @layer components {
   .btn-primary {
-    @apply relative inline-flex items-center justify-center overflow-hidden rounded-editorial bg-gold px-[22px] py-[13px] text-xs font-medium uppercase tracking-[0.5px] text-gold-dark;
+    @apply relative inline-flex items-center justify-center overflow-hidden rounded-full bg-gradient-to-b from-teal-400 to-teal-600 px-[22px] py-[13px] text-xs font-bold uppercase tracking-[0.5px] text-white;
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.45) inset,
+      0 -3px 0 rgba(0, 0, 0, 0.14) inset,
+      0 9px 16px -6px rgba(50, 25, 8, 0.45);
     transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
   }
 

@@ -33,7 +33,10 @@ export default function HomeCtaFaq() {
           {t('home.cta.title.line2')}
         </h2>
         <p className="mt-3 text-sm opacity-90">{t('home.cta.subtitle')}</p>
-        <Link to="/trips" className="btn-primary mt-7 !bg-cream !text-ink">
+        <Link
+          to="/trips"
+          className="btn-embossed cta-shine mt-7 !flex-none px-8 py-3 text-[12px] font-bold normal-case tracking-normal"
+        >
           {t('btn.bookNow')}
         </Link>
       </div>
