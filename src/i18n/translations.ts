@@ -364,12 +364,45 @@ export type TranslationKey =
   | 'safety.otherNotes'
   | 'safety.otherNotes.ph'
   | 'safety.emergencyRequired'
+  | 'safety.insuranceType'
+  | 'safety.oshcMembership'
+  | 'safety.oshcRiskRequired'
+  | 'safety.travelProvider'
+  | 'safety.travelPolicy'
+  | 'safety.flightToggle'
+  | 'safety.flightNzNote'
+  | 'safety.flightFirst'
+  | 'safety.flightLast'
+  | 'safety.flightDob'
+  | 'safety.flightPassport'
+  | 'safety.flightNationality'
+  | 'safety.flightFf'
+  | 'confirm.title'
+  | 'confirm.subtitle'
+  | 'confirm.noInvoice'
+  | 'confirm.nextTitle'
+  | 'confirm.next.1'
+  | 'confirm.next.2'
+  | 'confirm.next.3'
+  | 'confirm.check.deposit'
+  | 'confirm.check.waiver'
+  | 'confirm.check.safety'
+  | 'confirm.check.facebook'
+  | 'confirm.download'
+  | 'confirm.email'
+  | 'confirm.open'
   | 'staff.safety.quickView'
   | 'staff.safety.none'
   | 'staff.safety.allergies'
   | 'staff.safety.medical'
   | 'staff.safety.insurance'
   | 'staff.safety.notes'
+  | 'staff.payments.title'
+  | 'staff.payments.search'
+  | 'staff.payments.progress'
+  | 'staff.payments.add'
+  | 'staff.payments.markPaid'
+  | 'staff.income.title'
   | 'lang.toggle'
   | 'validation.email'
   | 'validation.phone'
@@ -770,12 +803,47 @@ const en: Map = {
   'safety.otherNotes': 'Anything else we should know',
   'safety.otherNotes.ph': 'e.g. cannot swim, fear of heights, mobility needs',
   'safety.emergencyRequired': 'Emergency contact name and phone are required',
+  'safety.insuranceType': 'Insurance type',
+  'safety.oshcMembership': 'OSHC membership number',
+  'safety.oshcRiskRequired': 'Please acknowledge the OSHC repatriation risk',
+  'safety.travelProvider': 'Travel insurance provider',
+  'safety.travelPolicy': 'Travel insurance policy number',
+  'safety.flightToggle': 'Book flights on my behalf',
+  'safety.flightNzNote':
+    'Passport & nationality required for NZ flights only — not needed for AU domestic.',
+  'safety.flightFirst': 'Legal first name (passport)',
+  'safety.flightLast': 'Legal last name (passport)',
+  'safety.flightDob': 'Date of birth',
+  'safety.flightPassport': 'Passport number',
+  'safety.flightNationality': 'Nationality',
+  'safety.flightFf': 'Frequent flyer number (optional)',
+  'confirm.title': 'Confirmation Summary',
+  'confirm.subtitle': 'Your booking checklist — no tax invoice here.',
+  'confirm.noInvoice':
+    'No tax invoice included here — sent separately per payment.',
+  'confirm.nextTitle': 'What happens next',
+  'confirm.next.1': 'Transfer your deposit via PayID and send the slip on Facebook.',
+  'confirm.next.2': 'We confirm your seat and add you to the trip group chat.',
+  'confirm.next.3': 'Before departure, check Trip Prep for packing and meeting point.',
+  'confirm.check.deposit': 'Deposit paid',
+  'confirm.check.waiver': 'Waiver signed',
+  'confirm.check.safety': 'Safety info on file',
+  'confirm.check.facebook': 'Message us on Facebook',
+  'confirm.download': 'Download summary (PNG)',
+  'confirm.email': 'Open Gmail to share',
+  'confirm.open': 'Open confirmation summary',
   'staff.safety.quickView': 'Trip-day safety',
   'staff.safety.none': 'No safety notes',
   'staff.safety.allergies': 'Allergies',
   'staff.safety.medical': 'Medical',
   'staff.safety.insurance': 'Insurance',
   'staff.safety.notes': 'Notes',
+  'staff.payments.title': 'Customer payments',
+  'staff.payments.search': 'Search by customer name',
+  'staff.payments.progress': 'Installment progress',
+  'staff.payments.add': 'Add installment',
+  'staff.payments.markPaid': 'Mark paid',
+  'staff.income.title': 'Income (paid installments)',
   'lang.toggle': 'ไทย',
   'validation.email': 'Enter a valid email address',
   'validation.phone': 'Use Australian mobile format: 04XX XXX XXX',
@@ -1215,12 +1283,47 @@ const th: Map = {
   'safety.otherNotes': 'อื่นๆ ที่ควรรู้',
   'safety.otherNotes.ph': 'เช่น ว่ายน้ำไม่ได้ กลัวความสูง มีข้อจำกัดการเคลื่อนไหว',
   'safety.emergencyRequired': 'ต้องกรอกชื่อและเบอร์ผู้ติดต่อฉุกเฉิน',
+  'safety.insuranceType': 'ประเภทประกัน',
+  'safety.oshcMembership': 'เลขสมาชิก OSHC',
+  'safety.oshcRiskRequired': 'กรุณายืนยันการรับทราบความเสี่ยง OSHC',
+  'safety.travelProvider': 'บริษัทประกันการเดินทาง',
+  'safety.travelPolicy': 'เลขกรมธรรม์ประกันเดินทาง',
+  'safety.flightToggle': 'ให้ทีมจองตั๋วบินให้',
+  'safety.flightNzNote':
+    'หนังสือเดินทางและสัญชาติจำเป็นสำหรับเที่ยวบิน NZ เท่านั้น — ไม่ต้องใช้สำหรับบินในออสฯ',
+  'safety.flightFirst': 'ชื่อจริงตามพาสปอร์ต',
+  'safety.flightLast': 'นามสกุลตามพาสปอร์ต',
+  'safety.flightDob': 'วันเกิด',
+  'safety.flightPassport': 'เลขหนังสือเดินทาง',
+  'safety.flightNationality': 'สัญชาติ',
+  'safety.flightFf': 'เลขสมาชิกสายการบิน (ถ้ามี)',
+  'confirm.title': 'สรุปการยืนยันการจอง',
+  'confirm.subtitle': 'เช็กลิสต์การจอง — ไม่รวมใบกำกับภาษี',
+  'confirm.noInvoice':
+    'ไม่มีใบกำกับภาษีในหน้านี้ — ส่งแยกตามแต่ละครั้งที่ชำระ',
+  'confirm.nextTitle': 'ขั้นตอนถัดไป',
+  'confirm.next.1': 'โอนมัดจำผ่าน PayID แล้วส่งสลิปทาง Facebook',
+  'confirm.next.2': 'เรายืนยันที่นั่งและเชิญเข้ากลุ่มแชททริป',
+  'confirm.next.3': 'ก่อนเดินทาง ดู Trip Prep สำหรับของที่ต้องเตรียมและจุดนัดพบ',
+  'confirm.check.deposit': 'ชำระมัดจำแล้ว',
+  'confirm.check.waiver': 'ลงนาม waiver แล้ว',
+  'confirm.check.safety': 'มีข้อมูลความปลอดภัยแล้ว',
+  'confirm.check.facebook': 'ทัก Facebook หาเรา',
+  'confirm.download': 'ดาวน์โหลดสรุป (PNG)',
+  'confirm.email': 'เปิด Gmail เพื่อแชร์',
+  'confirm.open': 'เปิดสรุปการยืนยัน',
   'staff.safety.quickView': 'ข้อมูลฉุกเฉินวันทริป',
   'staff.safety.none': 'ไม่มีบันทึกความปลอดภัย',
   'staff.safety.allergies': 'แพ้',
   'staff.safety.medical': 'สุขภาพ',
   'staff.safety.insurance': 'ประกัน',
   'staff.safety.notes': 'หมายเหตุ',
+  'staff.payments.title': 'การชำระของลูกค้า',
+  'staff.payments.search': 'ค้นหาด้วยชื่อลูกค้า',
+  'staff.payments.progress': 'ความคืบหน้างวด',
+  'staff.payments.add': 'เพิ่มงวด',
+  'staff.payments.markPaid': 'บันทึกว่าจ่ายแล้ว',
+  'staff.income.title': 'รายได้ (งวดที่จ่ายแล้ว)',
   'lang.toggle': 'EN',
   'validation.email': 'กรุณากรอกอีเมลที่ถูกต้อง',
   'validation.phone': 'ใช้รูปแบบมือถือออสเตรเลีย: 04XX XXX XXX',

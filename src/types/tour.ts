@@ -49,13 +49,28 @@ export interface TourBooking {
   medical_conditions: string | null
   /** Free-text allergies for guides (trip-day quick view). */
   allergies?: string | null
-  /** Travel insurance (not OSHC). */
+  /** oshc | travel_insurance | none — default oshc for Thai student-visa base. */
+  insurance_type?: 'oshc' | 'travel_insurance' | 'none' | null
+  oshc_membership_number?: string | null
+  oshc_risk_acknowledged?: boolean | null
+  /** Legacy / alias travel insurance fields. */
   insurance_provider?: string | null
   insurance_policy_number?: string | null
+  travel_insurance_provider?: string | null
+  travel_insurance_policy_number?: string | null
   /** Catch-all notes: swim/mobility/heights/etc. */
   other_notes?: string | null
   oshc_provider: string | null
   oshc_expiry: string | null
+  /** Opt-in: Trip2Talk books flights on customer's behalf. */
+  flight_booking_requested?: boolean | null
+  flight_legal_first_name?: string | null
+  flight_legal_last_name?: string | null
+  flight_date_of_birth?: string | null
+  /** SENSITIVE — NZ flights; staff-api only after insert (same as passport). */
+  flight_passport_number?: string | null
+  flight_nationality?: string | null
+  flight_frequent_flyer_number?: string | null
   waiver_signed: boolean
   waiver_signed_at: string | null
   /** Day-of check-in, separate from payment status. null/undefined = not checked yet. */
@@ -78,13 +93,21 @@ export interface TourBooking {
   cancel_reason?: string | null
 }
 
-/** One recorded payment against a booking — lets a booking be paid off in several installments, each with its own receipt. */
+/** One recorded payment against a booking — lets a booking be paid off in several installments, each with its own receipt.
+ * installment_no = sequence (1 = deposit). Extends 20260720040000 + 20260805140000. */
 export interface BookingPayment {
   id: string
   booking_id: string
   amount_aud: number
   payment_method: string | null
+  /** Sequence: 1 = deposit, 2/3/4 = later installments. */
   installment_no: number
+  label?: string | null
+  status?: 'pending' | 'paid' | 'overdue' | null
+  due_date?: string | null
+  paid_at?: string | null
+  receipt_invoice_number?: string | null
+  recorded_by_staff_id?: string | null
   created_at: string
 }
 

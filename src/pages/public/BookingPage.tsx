@@ -14,7 +14,7 @@ import {
 } from '../../lib/toursApi'
 import { SeatsFullError } from '../../types/errors'
 import { tourDurationLabel, isOneDayTrip } from '../../lib/tourDisplay'
-import { isWaiverSigned, getWaiverSession } from '../../lib/waiverSession'
+import { isWaiverSigned, getWaiverSession, setConfirmationSummary } from '../../lib/waiverSession'
 import {
   getSupabaseErrorMessage,
   isValidAuMobile,
@@ -39,11 +39,23 @@ type FormState = {
   dietary_requirements: string
   medical_conditions: string
   allergies: string
+  insurance_type: 'oshc' | 'travel_insurance' | 'none'
+  oshc_membership_number: string
+  oshc_risk_acknowledged: boolean
   insurance_provider: string
   insurance_policy_number: string
+  travel_insurance_provider: string
+  travel_insurance_policy_number: string
   other_notes: string
   oshc_provider: string
   oshc_expiry: string
+  flight_booking_requested: boolean
+  flight_legal_first_name: string
+  flight_legal_last_name: string
+  flight_date_of_birth: string
+  flight_passport_number: string
+  flight_nationality: string
+  flight_frequent_flyer_number: string
 }
 
 const REQUIRED: (keyof FormState)[] = [
@@ -73,7 +85,9 @@ export default function BookingPage() {
   const [installmentPlan, setInstallmentPlan] = useState<1 | 2 | 4>(1)
 
   const [form, setForm] = useState<FormState>(() => {
-    const safety = tripCode ? getWaiverSession(tripCode)?.safety : undefined
+    const session = tripCode ? getWaiverSession(tripCode) : null
+    const safety = session?.safety
+    const flight = session?.flight
     return {
       first_name_en: '',
       last_name_en: '',
@@ -86,11 +100,25 @@ export default function BookingPage() {
       dietary_requirements: '',
       medical_conditions: safety?.medical_conditions ?? '',
       allergies: safety?.allergies ?? '',
-      insurance_provider: safety?.insurance_provider ?? '',
-      insurance_policy_number: safety?.insurance_policy_number ?? '',
+      insurance_type: safety?.insurance_type ?? 'oshc',
+      oshc_membership_number: safety?.oshc_membership_number ?? '',
+      oshc_risk_acknowledged: safety?.oshc_risk_acknowledged ?? false,
+      insurance_provider:
+        safety?.travel_insurance_provider ?? safety?.insurance_provider ?? '',
+      insurance_policy_number:
+        safety?.travel_insurance_policy_number ?? safety?.insurance_policy_number ?? '',
+      travel_insurance_provider: safety?.travel_insurance_provider ?? '',
+      travel_insurance_policy_number: safety?.travel_insurance_policy_number ?? '',
       other_notes: safety?.other_notes ?? '',
       oshc_provider: '',
       oshc_expiry: '',
+      flight_booking_requested: flight?.requested ?? false,
+      flight_legal_first_name: flight?.flight_legal_first_name ?? '',
+      flight_legal_last_name: flight?.flight_legal_last_name ?? '',
+      flight_date_of_birth: flight?.flight_date_of_birth ?? '',
+      flight_passport_number: flight?.flight_passport_number ?? '',
+      flight_nationality: flight?.flight_nationality ?? '',
+      flight_frequent_flyer_number: flight?.flight_frequent_flyer_number ?? '',
     }
   })
 
@@ -161,11 +189,39 @@ export default function BookingPage() {
         dietary_requirements: form.dietary_requirements || null,
         medical_conditions: form.medical_conditions || null,
         allergies: form.allergies.trim() || null,
-        insurance_provider: form.insurance_provider.trim() || null,
-        insurance_policy_number: form.insurance_policy_number.trim() || null,
+        insurance_type: form.insurance_type,
+        oshc_membership_number: form.oshc_membership_number.trim() || null,
+        oshc_risk_acknowledged: form.oshc_risk_acknowledged,
+        insurance_provider:
+          form.travel_insurance_provider.trim() || form.insurance_provider.trim() || null,
+        insurance_policy_number:
+          form.travel_insurance_policy_number.trim() ||
+          form.insurance_policy_number.trim() ||
+          null,
+        travel_insurance_provider: form.travel_insurance_provider.trim() || null,
+        travel_insurance_policy_number: form.travel_insurance_policy_number.trim() || null,
         other_notes: form.other_notes.trim() || null,
         oshc_provider: form.oshc_provider || null,
         oshc_expiry: form.oshc_expiry || null,
+        flight_booking_requested: form.flight_booking_requested,
+        flight_legal_first_name: form.flight_booking_requested
+          ? form.flight_legal_first_name.trim() || null
+          : null,
+        flight_legal_last_name: form.flight_booking_requested
+          ? form.flight_legal_last_name.trim() || null
+          : null,
+        flight_date_of_birth: form.flight_booking_requested
+          ? form.flight_date_of_birth || null
+          : null,
+        flight_passport_number: form.flight_booking_requested
+          ? form.flight_passport_number.trim() || null
+          : null,
+        flight_nationality: form.flight_booking_requested
+          ? form.flight_nationality.trim() || null
+          : null,
+        flight_frequent_flyer_number: form.flight_booking_requested
+          ? form.flight_frequent_flyer_number.trim() || null
+          : null,
         waiver_signed: true,
         waiver_signed_at: waiver?.signedAt ?? new Date().toISOString(),
         booking_status: 'pending_payment',
@@ -175,6 +231,23 @@ export default function BookingPage() {
         slip_url: slipUrl,
         booking_reference: bookingRef,
         payment_plan_installments: installmentPlan,
+      })
+
+      setConfirmationSummary({
+        bookingReference: bookingRef,
+        tripCode: tour.trip_code,
+        tripNameEn: tour.name_en,
+        tripNameTh: tour.name_th,
+        coverImageUrl: tour.cover_image_url,
+        departureDate: tour.departure_date,
+        durationLabel: tourDurationLabel(tour, 'en'),
+        waiverSigned: true,
+        safetyInfoOnFile: Boolean(
+          form.emergency_contact_name.trim() && form.emergency_contact_phone.trim(),
+        ),
+        depositPaid: false,
+        facebookMessagePending: true,
+        createdAt: new Date().toISOString(),
       })
 
       setReference(bookingRef)
@@ -278,7 +351,16 @@ export default function BookingPage() {
 
         <BookingJourneyTimeline bookingStatus="pending_payment" tripCode={tripCode} />
 
-        <Link to="/my-trip" className="book-btn flip-cta mt-[18px] block w-full">
+        <Link
+          to={`/booking/confirmation?ref=${encodeURIComponent(reference)}`}
+          className="book-btn flip-cta mt-[18px] block w-full"
+        >
+          {lang === 'th' ? 'เปิดสรุปการยืนยัน' : 'Open confirmation summary'}
+          <span className="mt-0.5 block font-thai text-[10px] font-medium opacity-85">
+            {lang === 'th' ? 'Open confirmation summary' : 'เปิดสรุปการยืนยัน'}
+          </span>
+        </Link>
+        <Link to="/my-trip" className="ghost-link mt-2 block">
           {lang === 'th' ? 'ดูการจองของฉัน' : 'View My Booking'}
         </Link>
         <Link to="/trips" className="ghost-link">
