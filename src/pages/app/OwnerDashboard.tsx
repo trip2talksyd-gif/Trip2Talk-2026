@@ -187,6 +187,13 @@ export default function OwnerDashboard() {
             </Link>
 
             <Link
+              to="/app/logins"
+              className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
+            >
+              🔐 Recent staff logins
+            </Link>
+
+            <Link
               to="/app/content-review"
               className="block rounded-editorial border border-gold/40 bg-gold/10 px-4 py-3 text-center text-sm font-medium text-gold transition-colors hover:bg-gold/15"
             >

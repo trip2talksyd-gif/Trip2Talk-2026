@@ -2,8 +2,10 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   fetchInstallmentIncomeSummary,
+  fetchOwnerOpsMetrics,
   formatAud,
   type InstallmentIncomeSummary,
+  type OwnerOpsMetrics,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import { DashboardCardSkeleton } from '../../components/ui/Skeleton'
@@ -26,6 +28,7 @@ export default function InstallmentIncomePage() {
   const [month, setMonth] = useState(NOW.getMonth() + 1)
   const [tripCode, setTripCode] = useState('')
   const [summary, setSummary] = useState<InstallmentIncomeSummary | null>(null)
+  const [ops, setOps] = useState<OwnerOpsMetrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -34,13 +37,19 @@ export default function InstallmentIncomePage() {
   const load = useCallback(() => {
     setLoading(true)
     setError('')
-    fetchInstallmentIncomeSummary({
-      mode,
-      year,
-      month: mode === 'month' ? month : undefined,
-      tripCode: mode === 'trip' && tripCode.trim() ? tripCode.trim() : undefined,
-    })
-      .then(setSummary)
+    Promise.all([
+      fetchInstallmentIncomeSummary({
+        mode,
+        year,
+        month: mode === 'month' ? month : undefined,
+        tripCode: mode === 'trip' && tripCode.trim() ? tripCode.trim() : undefined,
+      }),
+      fetchOwnerOpsMetrics().catch(() => null),
+    ])
+      .then(([sum, metrics]) => {
+        setSummary(sum)
+        setOps(metrics)
+      })
       .catch((err) => {
         if (err instanceof StaffSessionExpiredError) {
           navigate('/app')
@@ -165,9 +174,49 @@ export default function InstallmentIncomePage() {
               </section>
             )}
 
+            {ops && (
+              <section className="space-y-3">
+                <div className="rounded-editorial border border-white/10 bg-surface-card p-4">
+                  <p className="text-xs text-cream-muted">Repeat customer rate</p>
+                  <p className="mt-1 font-serif text-2xl text-gold">{ops.repeat_customer_rate}%</p>
+                  <p className="mt-1 text-[11px] text-cream-muted">
+                    {ops.repeat_bookings} of {ops.active_bookings} active bookings from guests who
+                    booked before (email/phone match)
+                  </p>
+                </div>
+
+                <div>
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-cream-muted">
+                    Profit per trip
+                  </h2>
+                  {!ops.expenses_linked_to_trips && (
+                    <p className="mt-1 text-[10px] text-amber-200/90">
+                      Few/no expenses linked to trip_code — showing revenue; expense subtract when
+                      trip-linked expenses exist.
+                    </p>
+                  )}
+                  <ul className="mt-2 max-h-64 space-y-1.5 overflow-y-auto">
+                    {ops.profit_per_trip.slice(0, 20).map((r) => (
+                      <li
+                        key={r.trip_code}
+                        className="flex justify-between gap-2 rounded-lg bg-surface-card px-3 py-2 text-sm"
+                      >
+                        <span>{r.trip_code}</span>
+                        <span className="text-right text-[11px]">
+                          <span className="text-gold">{formatAud(r.profit_aud)}</span>
+                          <span className="mt-0.5 block text-cream-muted">
+                            rev {formatAud(r.revenue_aud)} − exp {formatAud(r.expense_aud)}
+                          </span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </section>
+            )}
+
             <p className="text-[10px] text-cream-muted">
-              Follow-up: combine with expense tracking (`expenseDb` / Tax Summary expenses) for a full
-              P&amp;L view — not in this phase.
+              Combined P&amp;L already uses paid installments minus trip-linked expenses when present.
             </p>
           </>
         )}

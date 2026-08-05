@@ -2,11 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   addPendingInstallment,
+  fetchCustomerLoyalty,
   fetchPaymentsForBooking,
   formatAud,
   recordPayment,
   searchCustomerPayments,
   updateInstallment,
+  type CustomerLoyalty,
   type CustomerPaymentSearchRow,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
@@ -214,6 +216,12 @@ export default function StaffPaymentsPage() {
 
                 {open && (
                   <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
+                    <LoyaltyBlock booking={booking} />
+                    {booking.referred_by_booking_id && (
+                      <p className="text-[10px] text-cream-muted">
+                        Referred by booking: {booking.referred_by_booking_id.slice(0, 8)}…
+                      </p>
+                    )}
                     {payments.length === 0 && (
                       <p className="text-xs text-cream-muted">No installments yet</p>
                     )}
@@ -283,6 +291,55 @@ export default function StaffPaymentsPage() {
           })}
         </ul>
       </main>
+    </div>
+  )
+}
+
+function LoyaltyBlock({ booking }: { booking: TourBooking }) {
+  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState<CustomerLoyalty | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    fetchCustomerLoyalty({ email: booking.email, phone: booking.phone })
+      .then((res) => {
+        if (!cancelled) setData(res)
+      })
+      .catch(() => {
+        if (!cancelled) setData(null)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [booking.email, booking.phone])
+
+  if (loading) {
+    return <p className="text-[11px] text-cream-muted">Loading loyalty…</p>
+  }
+  if (!data) return null
+
+  const repeat = data.trips_count > 1
+  return (
+    <div
+      className={`rounded-lg px-2.5 py-2 text-[11px] ${
+        repeat ? 'border border-gold/40 bg-gold/10' : 'bg-near-black-green/40'
+      }`}
+    >
+      <p className="font-semibold text-cream">
+        Loyalty · {data.trips_count} trip{data.trips_count === 1 ? '' : 's'} ·{' '}
+        {formatAud(data.total_spend_aud)} lifetime
+        {repeat ? ' · REPEAT' : ''}
+      </p>
+      <p className="mt-0.5 text-cream-muted">
+        {data.bookings_count} booking row(s) matched by email/phone — for seasonal outreach (manual)
+        <span className="mt-0.5 block font-thai text-[10px]">
+          จับคู่ด้วยอีเมล/เบอร์ — สำหรับติดต่อลูกค้าประจำ (ยังไม่ส่งออโต้)
+        </span>
+      </p>
     </div>
   )
 }
