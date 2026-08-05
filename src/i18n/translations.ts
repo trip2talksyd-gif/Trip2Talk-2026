@@ -93,6 +93,28 @@ export type TranslationKey =
   | 'trips.seatsLeft'
   | 'trips.seatsFull'
   | 'common.clearSearch'
+  | 'detail.tab.details'
+  | 'detail.tab.itinerary'
+  | 'detail.tab.reviews'
+  | 'detail.stat.duration'
+  | 'detail.stat.seats'
+  | 'detail.stat.perPerson'
+  | 'detail.stat.destination'
+  | 'detail.stat.group'
+  | 'detail.stat.photographer'
+  | 'detail.stat.photographerSub'
+  | 'detail.highlights'
+  | 'detail.includes'
+  | 'detail.excludes'
+  | 'detail.accommodation'
+  | 'detail.prep'
+  | 'detail.photoGuide'
+  | 'detail.swipePhotos'
+  | 'detail.moreTrips'
+  | 'detail.reviews.title'
+  | 'detail.reviews.body'
+  | 'detail.reviews.cta'
+  | 'detail.fromPrice'
   | 'home.hero.destination.tasmania'
   | 'home.hero.destination.uluru'
   | 'home.hero.destination.sydney'
@@ -370,6 +392,29 @@ const en: Map = {
   'trips.cat.influencer': 'Influencer',
   'trips.seatsLeft': 'left',
   'trips.seatsFull': 'Full',
+  'detail.tab.details': 'Details',
+  'detail.tab.itinerary': 'Itinerary',
+  'detail.tab.reviews': 'Reviews',
+  'detail.stat.duration': 'Duration',
+  'detail.stat.seats': 'Seats',
+  'detail.stat.perPerson': 'Per person',
+  'detail.stat.destination': 'Destination',
+  'detail.stat.group': 'Group size',
+  'detail.stat.photographer': 'Pro photographer',
+  'detail.stat.photographerSub': 'Every trip',
+  'detail.highlights': 'Highlights',
+  'detail.includes': "What's included",
+  'detail.excludes': 'Not included',
+  'detail.accommodation': 'Accommodation',
+  'detail.prep': 'Trip Preparation',
+  'detail.photoGuide': 'Read the Photo Guide before you go',
+  'detail.swipePhotos': '↔ Swipe for more photos',
+  'detail.moreTrips': 'More Trips For You',
+  'detail.reviews.title': 'Guest reviews',
+  'detail.reviews.body':
+    "We don't publish review scores here yet — read real comments and guest photos on our Facebook Page.",
+  'detail.reviews.cta': 'See reviews on Facebook',
+  'detail.fromPrice': 'From',
   'home.hero.destination.tasmania': 'Tasmania',
   'home.hero.destination.uluru': 'Uluru',
   'home.hero.destination.sydney': 'Sydney',
@@ -657,6 +702,29 @@ const th: Map = {
   'trips.cat.influencer': 'อินฟลู',
   'trips.seatsLeft': 'เหลือ',
   'trips.seatsFull': 'เต็ม',
+  'detail.tab.details': 'รายละเอียด',
+  'detail.tab.itinerary': 'เส้นทาง',
+  'detail.tab.reviews': 'รีวิว',
+  'detail.stat.duration': 'ระยะเวลา',
+  'detail.stat.seats': 'ที่นั่ง',
+  'detail.stat.perPerson': 'ต่อคน',
+  'detail.stat.destination': 'ปลายทาง',
+  'detail.stat.group': 'ขนาดกลุ่ม',
+  'detail.stat.photographer': 'ช่างภาพมืออาชีพ',
+  'detail.stat.photographerSub': 'ทุกทริป',
+  'detail.highlights': 'ไฮไลท์',
+  'detail.includes': 'รวมในราคา',
+  'detail.excludes': 'ไม่รวม',
+  'detail.accommodation': 'ที่พัก',
+  'detail.prep': 'เตรียมตัวก่อนเดินทาง',
+  'detail.photoGuide': 'อ่านคู่มือถ่ายภาพก่อนออกเดินทาง',
+  'detail.swipePhotos': '↔ ปัดดูรูปเพิ่มเติม',
+  'detail.moreTrips': 'ทริปแนะนำเพิ่มเติม',
+  'detail.reviews.title': 'รีวิวจากลูกทริป',
+  'detail.reviews.body':
+    'เรายังไม่ลงรีวิวในเว็บ — อ่านคอมเมนต์และรูปจากลูกทริปจริงได้ที่เพจ Facebook ของเรา',
+  'detail.reviews.cta': 'ดูรีวิวบน Facebook',
+  'detail.fromPrice': 'เริ่มต้น',
   'home.hero.destination.tasmania': 'แทสเมเนีย',
   'home.hero.destination.uluru': 'อูลูรู',
   'home.hero.destination.sydney': 'ซิดนีย์',
