@@ -1,5 +1,15 @@
-import { useEffect, useMemo, useState, useCallback } from 'react'
+import { useEffect, useMemo, useState, useCallback, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import {
+  Camera,
+  CreditCard,
+  FileCheck,
+  MapPin,
+  Mountain,
+  Plane,
+  Send,
+  Trees,
+} from 'lucide-react'
 import {
   fetchConfirmedTours,
   fetchBookingsForTour,
@@ -22,6 +32,86 @@ import TripDaySafetyQuickView from '../../components/app/TripDaySafetyQuickView'
 type ManifestFilter = 'active' | 'cancelled' | 'all'
 
 const CAN_CANCEL_ROLES = new Set(['OWNER', 'MANAGER', 'CASHIER'])
+
+/** Destination-themed accent for tour cards (dark staff shell). */
+function tripTheme(tripCode: string): { bar: string; iconBg: string; Icon: typeof Camera } {
+  const code = tripCode.toUpperCase()
+  if (code.startsWith('ULU')) {
+    return { bar: 'bg-coral', iconBg: 'bg-coral/20 text-coral', Icon: Mountain }
+  }
+  if (code.startsWith('TAS')) {
+    return { bar: 'bg-teal-400', iconBg: 'bg-teal-400/15 text-teal-400', Icon: Trees }
+  }
+  if (code.startsWith('NZ')) {
+    return { bar: 'bg-teal-500', iconBg: 'bg-teal-500/15 text-teal-500', Icon: Plane }
+  }
+  if (code.startsWith('MEL') || code.startsWith('CAN') || code.startsWith('BER')) {
+    return { bar: 'bg-amber', iconBg: 'bg-amber/15 text-amber', Icon: MapPin }
+  }
+  return { bar: 'bg-gold', iconBg: 'bg-gold/15 text-gold', Icon: Camera }
+}
+
+function QuickActionChip({
+  to,
+  icon,
+  label,
+  highlighted = false,
+}: {
+  to: string
+  icon: ReactNode
+  label: string
+  highlighted?: boolean
+}) {
+  return (
+    <Link
+      to={to}
+      className={`inline-flex min-h-11 items-center gap-2 rounded-full px-3.5 py-2 text-xs font-medium transition-colors active:scale-[0.98] ${
+        highlighted
+          ? 'bg-teal-500 text-near-black-green shadow-[0_8px_20px_-8px_rgba(233,147,90,0.55)]'
+          : 'border border-white/10 bg-surface-card text-cream hover:border-teal-500/40 hover:bg-teal-800/80'
+      }`}
+    >
+      <span
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
+          highlighted ? 'bg-near-black-green/15 text-near-black-green' : 'bg-white/8 text-teal-500'
+        }`}
+      >
+        {icon}
+      </span>
+      <span className="leading-snug">{label}</span>
+    </Link>
+  )
+}
+
+function SeatsProgress({ booked, max, left }: { booked: number; max: number; left: number }) {
+  const safeMax = Math.max(max, 1)
+  const filled = Math.min(Math.max(booked, 0), safeMax)
+  const pct = Math.round((filled / safeMax) * 100)
+  const full = left <= 0
+
+  return (
+    <div className="mt-3 space-y-1.5">
+      <div className="flex items-center justify-between gap-2 text-[11px]">
+        <span className="tabular-nums text-cream-muted">
+          {booked}/{max} pax
+        </span>
+        <span
+          className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${
+            full ? 'bg-coral/20 text-coral' : 'bg-teal-500/15 text-teal-500'
+          }`}
+        >
+          {left} seats left
+        </span>
+      </div>
+      <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
+        <div
+          className={`h-full rounded-full transition-[width] ${full ? 'bg-coral' : 'bg-teal-500'}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  )
+}
 
 export default function StaffDashboard() {
   const navigate = useNavigate()
@@ -179,33 +269,30 @@ export default function StaffDashboard() {
         </Link>
         <h1 className="mt-2 font-serif text-lg text-cream">Staff Dashboard</h1>
         <p className="text-sm text-cream-muted">{staffName}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           {staffRole === 'MANAGER' && (
-            <Link
+            <QuickActionChip
               to="/app/cashier"
-              className="inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
-            >
-              💳 Cashier POS
-            </Link>
+              highlighted
+              icon={<CreditCard className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />}
+              label="Cashier POS"
+            />
           )}
-          <Link
+          <QuickActionChip
             to="/app/waiver-assist"
-            className="inline-block rounded-editorial border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-medium text-amber-200"
-          >
-            ✍️ Waiver assist / กรอกแทนลูกค้า
-          </Link>
-          <Link
+            icon={<FileCheck className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />}
+            label="Waiver assist / กรอกแทนลูกค้า"
+          />
+          <QuickActionChip
             to="/app/outbound"
-            className="inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
-          >
-            📨 Outbound queue
-          </Link>
-          <Link
+            icon={<Send className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />}
+            label="Outbound queue"
+          />
+          <QuickActionChip
             to="/app/photos"
-            className="inline-block rounded-editorial border border-gold/40 bg-gold/10 px-3 py-1.5 text-xs font-medium text-gold"
-          >
-            📷 Photo delivery
-          </Link>
+            icon={<Camera className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />}
+            label="Photo delivery"
+          />
         </div>
       </header>
 
@@ -216,26 +303,48 @@ export default function StaffDashboard() {
         {!loading && !error && (
           <section>
             <h2 className="text-sm font-medium text-cream-muted">Upcoming tours</h2>
-            <ul className="mt-3 space-y-2">
-              {upcoming.map((tour) => (
-                <li key={tour.id}>
-                  <button
-                    type="button"
-                    onClick={() => setSelected(tour)}
-                    className={`w-full rounded-editorial border px-4 py-3 text-left transition-colors ${
-                      selected?.id === tour.id
-                        ? 'border-gold bg-surface-card'
-                        : 'border-white/8 bg-surface-card/50 hover:border-white/15'
-                    }`}
-                  >
-                    <p className="font-medium text-cream">{tour.name_en}</p>
-                    <p className="text-xs text-cream-muted">
-                      {tour.departure_date} · {tour.booked_seats}/{tour.max_seats} pax ·{' '}
-                      {seatsRemaining(tour)} seats left
-                    </p>
-                  </button>
-                </li>
-              ))}
+            <ul className="mt-4 space-y-3">
+              {upcoming.map((tour) => {
+                const theme = tripTheme(tour.trip_code)
+                const TripIcon = theme.Icon
+                const selectedCard = selected?.id === tour.id
+                const left = seatsRemaining(tour)
+                return (
+                  <li key={tour.id}>
+                    <button
+                      type="button"
+                      onClick={() => setSelected(tour)}
+                      className={`group w-full overflow-hidden rounded-2xl border text-left shadow-[0_12px_28px_-18px_rgba(0,0,0,0.65)] transition-[border-color,background-color,transform] active:scale-[0.99] ${
+                        selectedCard
+                          ? 'border-teal-500/50 bg-surface-card ring-1 ring-teal-500/30'
+                          : 'border-white/8 bg-surface-card/70 hover:border-white/18 hover:bg-surface-card'
+                      }`}
+                    >
+                      <div className={`h-1 w-full ${theme.bar}`} />
+                      <div className="px-4 py-3.5">
+                        <div className="flex items-start gap-3">
+                          <span
+                            className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${theme.iconBg}`}
+                          >
+                            <TripIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <p className="font-serif text-[15px] leading-snug text-cream sm:text-base">
+                              {tour.name_en}
+                            </p>
+                            <p className="mt-1 text-xs text-cream-muted">{tour.departure_date}</p>
+                            <SeatsProgress
+                              booked={tour.booked_seats}
+                              max={tour.max_seats}
+                              left={left}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </li>
+                )
+              })}
             </ul>
           </section>
         )}
