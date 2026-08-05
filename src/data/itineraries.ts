@@ -1,3 +1,5 @@
+import { resolveTemplateTripCode } from '../lib/tripCode'
+
 export type ItinerarySeason = 'spring' | 'summer' | 'autumn' | 'winter'
 
 export const ITINERARY_SEASONS: ItinerarySeason[] = ['spring', 'summer', 'autumn', 'winter']
@@ -858,7 +860,8 @@ export const TRIP_ITINERARIES: Record<string, TripItinerary> = {
   },
 }
 
-/** Build overview itinerary from highlights when full day-by-day isn't defined */
+/** Build overview itinerary from highlights when full day-by-day isn't defined.
+ * Kept for tooling; public detail page no longer fabricates day-by-day from highlights. */
 function overviewFromHighlights(
   tripCode: string,
   highlights: { en: string[]; th: string[] },
@@ -891,15 +894,76 @@ function overviewFromHighlights(
   return { detailed: false, days }
 }
 
+/** Convert DB simple day cards into the TripTimeline shape. */
+export function itineraryFromDbDays(
+  days: {
+    day: number
+    title_en: string
+    title_th: string
+    description_en: string
+    description_th: string
+  }[],
+): TripItinerary {
+  return {
+    detailed: true,
+    days: days.map((d) => ({
+      day: d.day,
+      title: { en: d.title_en, th: d.title_th },
+      subtitle: { en: '', th: '' },
+      events: [
+        {
+          time: 'Day plan',
+          category: 'activity' as const,
+          description: { en: d.description_en, th: d.description_th },
+        },
+      ],
+    })),
+  }
+}
+
+export function listItineraryTemplateCodes(): string[] {
+  return Object.keys(TRIP_ITINERARIES)
+}
+
+export function hasDetailedCmsItinerary(tripCode: string): boolean {
+  const template = resolveTemplateTripCode(tripCode, listItineraryTemplateCodes())
+  if (!template) return false
+  const entry = TRIP_ITINERARIES[template]
+  return Boolean(entry?.detailed)
+}
+
+/**
+ * Resolve itinerary for a tour:
+ * 1) DB override (tours.itinerary) when non-empty
+ * 2) Local CMS via template code (ULU-4D3N-SEP26_29 → ULU-4D3N)
+ * 3) null — UI hides / shows coming-soon (no fabricated days)
+ */
 export function getItinerary(
   tripCode: string,
   highlights?: { en: string[]; th: string[] },
   durationLabel?: string,
+  dbDays?: {
+    day: number
+    title_en: string
+    title_th: string
+    description_en: string
+    description_th: string
+  }[] | null,
 ): TripItinerary | null {
-  const code = tripCode.toUpperCase()
-  if (TRIP_ITINERARIES[code]) return TRIP_ITINERARIES[code]
-  if (highlights && durationLabel) {
-    return overviewFromHighlights(code, highlights, durationLabel)
+  if (dbDays && dbDays.length > 0) {
+    return itineraryFromDbDays(dbDays)
   }
+
+  const template = resolveTemplateTripCode(tripCode, listItineraryTemplateCodes())
+  if (template && TRIP_ITINERARIES[template]) {
+    return TRIP_ITINERARIES[template]
+  }
+
+  // Optional overview fallback only when explicitly requested with highlights —
+  // public TripDetailPage passes no highlights for fabrication anymore.
+  if (highlights && durationLabel) {
+    return overviewFromHighlights(tripCode.toUpperCase(), highlights, durationLabel)
+  }
+
   return null
 }

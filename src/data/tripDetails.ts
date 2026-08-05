@@ -1,3 +1,5 @@
+import { resolveTemplateTripCode } from '../lib/tripCode'
+
 export type BilingualText = { en: string; th: string }
 export type BilingualList = { en: string[]; th: string[] }
 
@@ -356,7 +358,10 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
 }
 
 export function getTripDetails(tripCode: string): TripDetailContent | undefined {
-  return TRIP_DETAILS[tripCode.toUpperCase()]
+  const code = tripCode.toUpperCase()
+  if (TRIP_DETAILS[code]) return TRIP_DETAILS[code]
+  const template = resolveTemplateTripCode(tripCode, Object.keys(TRIP_DETAILS))
+  return template ? TRIP_DETAILS[template] : undefined
 }
 
 export function textFor(item: BilingualText, lang: 'en' | 'th'): string {

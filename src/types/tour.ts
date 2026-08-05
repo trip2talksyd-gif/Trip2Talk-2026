@@ -1,5 +1,14 @@
 export type TripType = 'oneday' | 'overnight' | 'multiday'
 export type TourStatus = 'draft' | 'published' | 'confirmed' | 'completed' | 'cancelled'
+
+/** DB / admin itinerary day — bilingual simple day card (optional override of CMS). */
+export type TourItineraryDay = {
+  day: number
+  title_en: string
+  title_th: string
+  description_en: string
+  description_th: string
+}
 export type BookingStatus =
   | 'pending_payment'
   | 'deposit_paid'
@@ -27,6 +36,8 @@ export interface Tour {
   booked_seats: number
   status: TourStatus | string
   cover_image_url: string | null
+  /** Optional DB override; null/empty → local CMS via template trip code. */
+  itinerary?: TourItineraryDay[] | null
   created_at: string
   updated_at: string
 }

@@ -1,3 +1,5 @@
+import { resolveTemplateTripCode } from '../lib/tripCode'
+
 /** Budget trips: friendly peer-to-peer tone (price_standard < $500) */
 export const BUDGET_TRIP_CODES = [
   'SYD-MW-WIN',
@@ -20,11 +22,15 @@ export const PREMIUM_TRIP_CODES = [
 ] as const
 
 export function isPremiumTrip(tripCode: string): boolean {
-  return PREMIUM_TRIP_CODES.includes(tripCode.toUpperCase() as (typeof PREMIUM_TRIP_CODES)[number])
+  const template =
+    resolveTemplateTripCode(tripCode, PREMIUM_TRIP_CODES) ?? tripCode.toUpperCase()
+  return PREMIUM_TRIP_CODES.includes(template as (typeof PREMIUM_TRIP_CODES)[number])
 }
 
 export function isBudgetTrip(tripCode: string): boolean {
-  return BUDGET_TRIP_CODES.includes(tripCode.toUpperCase() as (typeof BUDGET_TRIP_CODES)[number])
+  const template =
+    resolveTemplateTripCode(tripCode, BUDGET_TRIP_CODES) ?? tripCode.toUpperCase()
+  return BUDGET_TRIP_CODES.includes(template as (typeof BUDGET_TRIP_CODES)[number])
 }
 
 export const PREMIUM_MODEL_CALLOUT = {
