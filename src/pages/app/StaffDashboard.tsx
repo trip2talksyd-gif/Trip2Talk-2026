@@ -284,13 +284,21 @@ export default function StaffDashboard() {
   }
 
   const today = new Date().toISOString().slice(0, 10)
-  const liveStatuses = new Set(['confirmed', 'published', 'active'])
-  const upcoming = tours.filter((t) => {
-    const s = (t.status ?? '').toLowerCase()
-    return liveStatuses.has(s) && t.departure_date && t.departure_date >= today
-  })
+  const liveStatuses = new Set(['confirmed', 'published', 'active', 'draft', 'completed'])
+  // Include past + future live trips so OWNER can archive old/duplicate/test rows
+  // (previously only departure_date >= today, so past test trips were unreachable).
+  const activeTours = tours
+    .filter((t) => {
+      const s = (t.status ?? '').toLowerCase()
+      return liveStatuses.has(s)
+    })
+    .slice()
+    .sort((a, b) => String(a.departure_date ?? '').localeCompare(String(b.departure_date ?? '')))
   const archived = tours.filter((t) => (t.status ?? '').toLowerCase() === 'archived')
-  const visibleTours = tourTab === 'archived' ? archived : upcoming
+  const visibleTours = tourTab === 'archived' ? archived : activeTours
+  const upcomingCount = activeTours.filter(
+    (t) => t.departure_date && t.departure_date >= today,
+  ).length
 
   const filteredManifest = useMemo(() => {
     if (filter === 'all') return manifest
@@ -337,7 +345,7 @@ export default function StaffDashboard() {
           <section>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <h2 className="text-sm font-medium text-cream-muted">
-                {tourTab === 'archived' ? 'Archived tours' : 'Upcoming tours'}
+                {tourTab === 'archived' ? 'Archived tours' : 'Active tours'}
               </h2>
               <div className="flex gap-1">
                 <button
@@ -345,7 +353,10 @@ export default function StaffDashboard() {
                   onClick={() => setTourTab('upcoming')}
                   className={tourTab === 'upcoming' ? staffTabActiveClass : staffTabIdleClass}
                 >
-                  Upcoming ({upcoming.length})
+                  Active ({activeTours.length})
+                  {upcomingCount > 0 && upcomingCount !== activeTours.length ? (
+                    <span className="ml-1 opacity-70">· {upcomingCount} soon</span>
+                  ) : null}
                 </button>
                 <button
                   type="button"
@@ -358,7 +369,7 @@ export default function StaffDashboard() {
             </div>
             {visibleTours.length === 0 ? (
               <p className="mt-4 text-sm text-cream-muted">
-                {tourTab === 'archived' ? 'No archived tours' : 'No upcoming tours'}
+                {tourTab === 'archived' ? 'No archived tours' : 'No active tours'}
               </p>
             ) : (
               <ul className="mt-4 space-y-3">

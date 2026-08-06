@@ -13,6 +13,7 @@ import {
 } from '../../components/app/staffUi'
 import {
   addMonthsIso,
+  archiveTour,
   createTour,
   createToursBulk,
   deleteTour,
@@ -22,6 +23,7 @@ import {
   formatDate,
   generateTripPost,
   markWaitlistContacted,
+  unarchiveTour,
   updateTourStatus,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
@@ -30,7 +32,8 @@ import { DashboardCardSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import TripItineraryEditor from '../../components/app/TripItineraryEditor'
-import { Loader2 } from 'lucide-react'
+import ArchiveTourDialog from '../../components/app/ArchiveTourDialog'
+import { Archive, Loader2, RotateCcw, Trash2 } from 'lucide-react'
 
 const LOW_SEATS_RATIO = 0.8
 
@@ -76,6 +79,13 @@ export default function TripManagerPage() {
   const [contentBanner, setContentBanner] = useState<{ tripName: string; reused: boolean } | null>(
     null,
   )
+  const [listTab, setListTab] = useState<'active' | 'archived'>('active')
+  const [tourAction, setTourAction] = useState<{
+    tour: Tour
+    mode: 'archive' | 'unarchive' | 'delete'
+  } | null>(null)
+  const [tourActionSubmitting, setTourActionSubmitting] = useState(false)
+  const isOwner = sessionStorage.getItem('staff_role') === 'OWNER'
 
   const load = useCallback(() => {
     setLoading(true)
@@ -145,11 +155,57 @@ export default function TripManagerPage() {
       }),
     [tours],
   )
-  const pastCount = useMemo(() => allTours.filter((t) => !isUpcoming(t)).length, [allTours])
-  const visibleTours = useMemo(
-    () => (showPast ? allTours : allTours.filter(isUpcoming)),
-    [allTours, showPast],
+  const archivedTours = useMemo(
+    () => tours.filter((t) => t.status.toLowerCase() === 'archived'),
+    [tours],
   )
+  const pastCount = useMemo(() => allTours.filter((t) => !isUpcoming(t)).length, [allTours])
+  const visibleTours = useMemo(() => {
+    if (listTab === 'archived') return archivedTours
+    return showPast ? allTours : allTours.filter(isUpcoming)
+  }, [listTab, archivedTours, showPast, allTours])
+
+  async function confirmTourAction() {
+    if (!tourAction || !isOwner) return
+    setTourActionSubmitting(true)
+    const { tour, mode } = tourAction
+    try {
+      if (mode === 'archive') {
+        const updated = await archiveTour(tour.id)
+        setTours((prev) => prev.map((x) => (x.id === updated.id ? updated : x)))
+        toast('Archived trip', 'success')
+      } else if (mode === 'unarchive') {
+        const updated = await unarchiveTour(tour.id, 'published')
+        setTours((prev) => prev.map((x) => (x.id === updated.id ? updated : x)))
+        toast('Restored trip', 'success')
+      } else {
+        await deleteTour(tour.id)
+        setTours((prev) => prev.filter((x) => x.id !== tour.id))
+        toast('Deleted trip', 'success')
+      }
+      setTourAction(null)
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      const msg = err instanceof Error ? err.message : ''
+      if (msg.includes('has_bookings')) {
+        toast('Cannot delete — trip has bookings. Archive instead.', 'error')
+      } else {
+        toast(
+          mode === 'delete'
+            ? 'Delete failed'
+            : mode === 'archive'
+              ? 'Archive failed'
+              : 'Restore failed',
+          'error',
+        )
+      }
+    } finally {
+      setTourActionSubmitting(false)
+    }
+  }
 
   const existingCodes = useMemo(() => new Set(tours.map((t) => t.trip_code)), [tours])
   const duplicateCode = tripCode.length > 0 && existingCodes.has(tripCode)
@@ -242,28 +298,6 @@ export default function TripManagerPage() {
       }
     } finally {
       setSubmitting(false)
-    }
-  }
-
-  async function handleDeleteTour(t: Tour) {
-    const ok = window.confirm(
-      `ลบทริป "${t.name_en}" (${t.trip_code}) ถาวร?\n\nใช้สำหรับทริปตัวอย่าง/ทดสอบที่ยังไม่มีคนจองจริงเท่านั้น — ถ้ามีคนจองแล้วระบบจะไม่ยอมลบ (ต้องเก็บไว้ทำบัญชี/ภาษี)`,
-    )
-    if (!ok) return
-    try {
-      await deleteTour(t.id)
-      toast('ลบทริปแล้ว', 'success')
-      setTours((prev) => prev.filter((x) => x.id !== t.id))
-    } catch (err) {
-      if (err instanceof StaffSessionExpiredError) {
-        navigate('/app')
-        return
-      }
-      const msg = err instanceof Error ? err.message : ''
-      toast(
-        msg.includes('has_bookings') ? 'ลบไม่ได้ — ทริปนี้มีคนจองแล้ว ต้องเก็บไว้ทำบัญชี' : 'ลบทริปไม่สำเร็จ',
-        'error',
-      )
     }
   }
 
@@ -580,23 +614,48 @@ export default function TripManagerPage() {
             </section>
 
             <section>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-sm font-medium text-cream-muted">
-                  {showPast ? 'ทริปทั้งหมด' : 'ทริปที่กำลังจะมาถึง'}
+                  {listTab === 'archived'
+                    ? 'Archived trips'
+                    : showPast
+                      ? 'ทริปทั้งหมด'
+                      : 'ทริปที่กำลังจะมาถึง'}
                 </h2>
-                {pastCount > 0 && (
+                <div className="flex flex-wrap items-center gap-1">
                   <button
                     type="button"
-                    onClick={() => setShowPast((v) => !v)}
-                    className={staffTabIdleClass}
+                    onClick={() => setListTab('active')}
+                    className={listTab === 'active' ? 'rounded-full bg-teal-500/20 px-2.5 py-1 text-xs text-teal-400' : staffTabIdleClass}
                   >
-                    {showPast ? 'ซ่อนทริปเก่า' : `แสดงทริปเก่า (${pastCount})`}
+                    Active ({allTours.length})
                   </button>
-                )}
+                  <button
+                    type="button"
+                    onClick={() => setListTab('archived')}
+                    className={listTab === 'archived' ? 'rounded-full bg-teal-500/20 px-2.5 py-1 text-xs text-teal-400' : staffTabIdleClass}
+                  >
+                    Archived ({archivedTours.length})
+                  </button>
+                  {listTab === 'active' && pastCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPast((v) => !v)}
+                      className={staffTabIdleClass}
+                    >
+                      {showPast ? 'ซ่อนทริปเก่า' : `แสดงทริปเก่า (${pastCount})`}
+                    </button>
+                  )}
+                </div>
               </div>
-              {!showPast && pastCount > 0 && (
+              {listTab === 'active' && !showPast && pastCount > 0 && (
                 <p className="mt-1 text-xs text-cream-muted">
-                  ทริปเก่ายังอยู่ครบสำหรับทำบัญชี/ภาษี แค่ซ่อนจากลิสต์นี้ไว้ไม่ให้รก · ทริปที่ยังไม่มีคนจอง (0 pax) จะมีปุ่ม 🗑️ ให้ลบถาวรได้ ใช้กับทริปตัวอย่าง/ทดสอบเท่านั้น
+                  ทริปเก่ายังอยู่ครบสำหรับทำบัญชี/ภาษี · OWNER: Archive (soft) หรือ Delete ถาวรเมื่อ 0 bookings
+                </p>
+              )}
+              {listTab === 'archived' && (
+                <p className="mt-1 text-xs text-cream-muted">
+                  Soft-hidden from public + default lists. Restore or hard-delete (0 bookings only).
                 </p>
               )}
               <ul className="mt-2 space-y-1.5">
@@ -609,7 +668,9 @@ export default function TripManagerPage() {
                           ? 'bg-teal-500/80 text-near-black-green'
                           : 'bg-white/10 text-cream-muted'
                   const isGenerating = generatingTripId === t.id
-                  const showContentBtn = isLiveStatus(t.status) && isUpcoming(t)
+                  const showContentBtn =
+                    listTab === 'active' && isLiveStatus(t.status) && isUpcoming(t)
+                  const isArchived = t.status.toLowerCase() === 'archived'
                   return (
                     <li key={t.id}>
                       <StaffCard className="text-sm">
@@ -624,7 +685,7 @@ export default function TripManagerPage() {
                           <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${badgeColor}`}>
                             {t.booked_seats}/{t.max_seats}
                           </span>
-                          {t.status.toLowerCase() === 'cancelled' ? (
+                          {!isArchived && t.status.toLowerCase() === 'cancelled' ? (
                             <button
                               type="button"
                               onClick={() => handleRestoreTour(t)}
@@ -633,7 +694,7 @@ export default function TripManagerPage() {
                             >
                               ♻️
                             </button>
-                          ) : (
+                          ) : !isArchived ? (
                             <button
                               type="button"
                               onClick={() => handleCancelTour(t)}
@@ -642,15 +703,35 @@ export default function TripManagerPage() {
                             >
                               🚫
                             </button>
-                          )}
-                          {t.booked_seats === 0 && (
+                          ) : null}
+                          {isOwner && !isArchived && (
                             <button
                               type="button"
-                              onClick={() => handleDeleteTour(t)}
-                              title="ลบทริปนี้ (เฉพาะทริปตัวอย่างที่ยังไม่มีคนจอง)"
+                              title="Archive trip (soft hide)"
+                              onClick={() => setTourAction({ tour: t, mode: 'archive' })}
+                              className="rounded-full p-1 text-cream-muted hover:bg-amber/20 hover:text-amber"
+                            >
+                              <Archive className="h-4 w-4" strokeWidth={2} aria-hidden />
+                            </button>
+                          )}
+                          {isOwner && isArchived && (
+                            <button
+                              type="button"
+                              title="Restore trip"
+                              onClick={() => setTourAction({ tour: t, mode: 'unarchive' })}
+                              className="rounded-full p-1 text-cream-muted hover:bg-teal-500/20 hover:text-teal-500"
+                            >
+                              <RotateCcw className="h-4 w-4" strokeWidth={2} aria-hidden />
+                            </button>
+                          )}
+                          {isOwner && (
+                            <button
+                              type="button"
+                              title="Delete permanently (only if zero bookings)"
+                              onClick={() => setTourAction({ tour: t, mode: 'delete' })}
                               className="rounded-full p-1 text-cream-muted hover:bg-coral/20 hover:text-coral"
                             >
-                              🗑️
+                              <Trash2 className="h-4 w-4" strokeWidth={2} aria-hidden />
                             </button>
                           )}
                         </span>
@@ -728,6 +809,18 @@ export default function TripManagerPage() {
           </>
         )}
       </StaffMain>
+
+      {tourAction && (
+        <ArchiveTourDialog
+          tour={tourAction.tour}
+          mode={tourAction.mode}
+          submitting={tourActionSubmitting}
+          onConfirm={() => void confirmTourAction()}
+          onClose={() => {
+            if (!tourActionSubmitting) setTourAction(null)
+          }}
+        />
+      )}
     </div>
   )
 }

@@ -199,6 +199,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   cancel_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   create_waiver_staff_assisted: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   list_waivers_for_tour: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  delete_waiver_signature: ['OWNER'],
   list_outbound_queue: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   complete_outbound: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   list_photos_pending: ['OWNER', 'MANAGER', 'GUIDE'],
@@ -694,6 +695,70 @@ Deno.serve(async (req) => {
           .order('signed_at', { ascending: false })
         if (error) throw error
         return json({ data })
+      }
+
+      case 'delete_waiver_signature': {
+        // OWNER hard-delete for mistaken/test staff-assisted (or any) waiver
+        // rows. No other tables FK → waiver_signatures. If linked to a booking,
+        // clear booking.waiver_signed* only when no other signature remains for
+        // that booking (avoid stranding a valid customer self-sign).
+        const { id } = params as { id?: string }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+
+        const { data: existing, error: existingErr } = await admin
+          .from('waiver_signatures')
+          .select('id, booking_id, staff_fill_evidence_url')
+          .eq('id', id)
+          .maybeSingle()
+        if (existingErr) throw existingErr
+        if (!existing) return json({ error: 'not_found' }, 404)
+
+        const bookingId =
+          typeof existing.booking_id === 'string' && existing.booking_id
+            ? existing.booking_id
+            : null
+
+        const { error: delErr } = await admin.from('waiver_signatures').delete().eq('id', id)
+        if (delErr) throw delErr
+
+        if (bookingId) {
+          const { data: remaining, error: remErr } = await admin
+            .from('waiver_signatures')
+            .select('id')
+            .eq('booking_id', bookingId)
+            .limit(1)
+          if (remErr) throw remErr
+          if (!remaining || remaining.length === 0) {
+            const { error: clrErr } = await admin
+              .from('tour_bookings')
+              .update({ waiver_signed: false, waiver_signed_at: null })
+              .eq('id', bookingId)
+            if (clrErr) throw clrErr
+          }
+        }
+
+        // Best-effort: remove staff evidence from payment-slips if path is ours.
+        const evidence =
+          typeof existing.staff_fill_evidence_url === 'string'
+            ? existing.staff_fill_evidence_url
+            : ''
+        const marker = '/payment-slips/'
+        const idx = evidence.indexOf(marker)
+        let objectPath = ''
+        if (idx >= 0) {
+          objectPath = evidence.slice(idx + marker.length).split('?')[0]
+        } else if (evidence.startsWith('waiver-auth/')) {
+          objectPath = evidence
+        }
+        if (objectPath.startsWith('waiver-auth/')) {
+          try {
+            await admin.storage.from('payment-slips').remove([objectPath])
+          } catch {
+            // ignore storage cleanup failures
+          }
+        }
+
+        return json({ ok: true })
       }
 
       case 'list_outbound_queue': {
