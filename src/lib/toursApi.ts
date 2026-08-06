@@ -788,6 +788,14 @@ export type InstallmentIncomeSummary = {
   total_aud: number
   count: number
   by_trip: { trip_code: string; amount_aud: number }[]
+  /** Same period as total_aud / by_trip (paid installments − trip expenses). */
+  profit_per_trip?: {
+    trip_code: string
+    revenue_aud: number
+    expense_aud: number
+    profit_aud: number
+  }[]
+  expenses_linked_to_trips?: boolean
   payments: BookingPayment[]
   range: {
     start: string

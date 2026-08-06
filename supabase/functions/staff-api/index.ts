@@ -1376,6 +1376,39 @@ Deno.serve(async (req) => {
           byTrip.set(code, (byTrip.get(code) ?? 0) + Number(r.amount_aud ?? 0))
         }
 
+        // Expenses in the same period (by expense_date) for profit-per-trip that
+        // matches Total paid income / By trip — not all-time owner_ops_metrics.
+        const { data: expenses, error: expErr } = await admin
+          .from('expenses')
+          .select('amount_aud, trip_code, expense_date')
+          .gte('expense_date', startIso.slice(0, 10))
+          .lt('expense_date', endIso.slice(0, 10))
+        if (expErr) throw expErr
+
+        const expenseByTrip = new Map<string, number>()
+        let expensesHaveTripLink = false
+        for (const ex of expenses ?? []) {
+          const code = (ex.trip_code as string | null)?.trim()
+          if (code) {
+            expensesHaveTripLink = true
+            expenseByTrip.set(code, (expenseByTrip.get(code) ?? 0) + Number(ex.amount_aud ?? 0))
+          }
+        }
+
+        const tripCodes = new Set([...byTrip.keys(), ...expenseByTrip.keys()])
+        const profit_per_trip = [...tripCodes]
+          .map((trip_code) => {
+            const revenue_aud = byTrip.get(trip_code) ?? 0
+            const expense_aud = expenseByTrip.get(trip_code) ?? 0
+            return {
+              trip_code,
+              revenue_aud,
+              expense_aud,
+              profit_aud: revenue_aud - expense_aud,
+            }
+          })
+          .sort((a, b) => b.profit_aud - a.profit_aud)
+
         return json({
           data: {
             total_aud: total,
@@ -1384,6 +1417,8 @@ Deno.serve(async (req) => {
               trip_code,
               amount_aud,
             })),
+            profit_per_trip,
+            expenses_linked_to_trips: expensesHaveTripLink,
             payments: rows,
             range: { start: startIso, end: endIso, mode: mode ?? 'year', year: y, month },
           },

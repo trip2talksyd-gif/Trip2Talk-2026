@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   fetchInstallmentIncomeSummary,
@@ -23,7 +23,20 @@ import {
 } from '../../components/app/staffUi'
 
 const NOW = new Date()
-const CURRENT_YEAR = NOW.getFullYear()
+const CURRENT_CALENDAR_YEAR = NOW.getFullYear()
+
+/**
+ * AU tax year label year = calendar year of 30 Jun end.
+ * Jul–Dec → ending next Jun (e.g. Aug 2026 → TY ending Jun 2027).
+ * Jan–Jun → ending this Jun (e.g. Mar 2026 → TY ending Jun 2026).
+ */
+export function currentAuTaxYearEnding(now: Date = new Date()): number {
+  const y = now.getFullYear()
+  const month = now.getMonth() + 1
+  return month >= 7 ? y + 1 : y
+}
+
+const DEFAULT_AU_TY_ENDING = currentAuTaxYearEnding(NOW)
 
 /**
  * Owner-only income from paid installments.
@@ -34,7 +47,8 @@ export default function InstallmentIncomePage() {
   const { tt } = useLang()
   const navigate = useNavigate()
   const [mode, setMode] = useState<'month' | 'trip' | 'tax_year'>('tax_year')
-  const [year, setYear] = useState(CURRENT_YEAR)
+  // Calendar year for Month/By trip; AU tax-year *ending* year for tax_year mode.
+  const [year, setYear] = useState(DEFAULT_AU_TY_ENDING)
   const [month, setMonth] = useState(NOW.getMonth() + 1)
   const [tripCode, setTripCode] = useState('')
   const [summary, setSummary] = useState<InstallmentIncomeSummary | null>(null)
@@ -43,6 +57,22 @@ export default function InstallmentIncomePage() {
   const [error, setError] = useState('')
 
   const title = tt('staff.income.title')
+
+  const yearOptions = useMemo(() => {
+    if (mode === 'tax_year') {
+      const end = currentAuTaxYearEnding()
+      return [end, end - 1, end - 2]
+    }
+    return [CURRENT_CALENDAR_YEAR, CURRENT_CALENDAR_YEAR - 1, CURRENT_CALENDAR_YEAR - 2]
+  }, [mode])
+
+  // When switching tabs, keep a sensible year for that mode (don't leave TY 2027
+  // selected under Month where options are calendar years).
+  useEffect(() => {
+    if (!yearOptions.includes(year)) {
+      setYear(yearOptions[0])
+    }
+  }, [mode, yearOptions, year])
 
   const load = useCallback(() => {
     setLoading(true)
@@ -74,6 +104,10 @@ export default function InstallmentIncomePage() {
   useEffect(() => {
     load()
   }, [load])
+
+  const profitRows = summary?.profit_per_trip ?? []
+  const periodRevenue = summary?.total_aud ?? 0
+  const periodProfitSum = profitRows.reduce((s, r) => s + r.profit_aud, 0)
 
   return (
     <div className={staffShellClass}>
@@ -118,7 +152,7 @@ export default function InstallmentIncomePage() {
             onChange={(e) => setYear(Number(e.target.value))}
             className="text-sm"
           >
-            {[CURRENT_YEAR, CURRENT_YEAR - 1, CURRENT_YEAR - 2].map((y) => (
+            {yearOptions.map((y) => (
               <option key={y} value={y}>
                 {mode === 'tax_year' ? `TY ending Jun ${y}` : y}
               </option>
@@ -156,6 +190,11 @@ export default function InstallmentIncomePage() {
               <p className="text-xs text-cream-muted">Total paid income</p>
               <p className="mt-1 font-serif text-2xl text-teal-500">{formatAud(summary.total_aud)}</p>
               <p className="mt-1 text-[11px] text-cream-muted">{summary.count} payments</p>
+              {summary.range?.start && (
+                <p className="mt-1 text-[10px] text-cream-muted">
+                  {summary.range.start.slice(0, 10)} → {summary.range.end.slice(0, 10)} (exclusive end)
+                </p>
+              )}
             </StaffCard>
 
             {summary.by_trip.length > 0 && (
@@ -165,6 +204,7 @@ export default function InstallmentIncomePage() {
                 </h2>
                 <ul className="mt-2 space-y-1.5">
                   {summary.by_trip
+                    .slice()
                     .sort((a, b) => b.amount_aud - a.amount_aud)
                     .map((r) => (
                       <li
@@ -179,29 +219,39 @@ export default function InstallmentIncomePage() {
               </section>
             )}
 
-            {ops && (
-              <section className="space-y-3">
+            <section className="space-y-3">
+              {ops && (
                 <StaffCard>
-                  <p className="text-xs text-cream-muted">Repeat customer rate</p>
+                  <p className="text-xs text-cream-muted">Repeat customer rate (all-time)</p>
                   <p className="mt-1 font-serif text-2xl text-teal-500">{ops.repeat_customer_rate}%</p>
                   <p className="mt-1 text-[11px] text-cream-muted">
                     {ops.repeat_bookings} of {ops.active_bookings} active bookings from guests who
                     booked before (email/phone match)
                   </p>
                 </StaffCard>
+              )}
 
-                <div>
-                  <h2 className="text-xs font-semibold uppercase tracking-wider text-cream-muted">
-                    Profit per trip
-                  </h2>
-                  {!ops.expenses_linked_to_trips && (
-                    <p className="mt-1 text-[10px] text-amber-200/90">
-                      Few/no expenses linked to trip_code — showing revenue; expense subtract when
-                      trip-linked expenses exist.
-                    </p>
-                  )}
+              <div>
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-cream-muted">
+                  Profit per trip
+                </h2>
+                <p className="mt-1 text-[10px] text-cream-muted">
+                  Same period as Total paid income · sum revenue {formatAud(periodRevenue)}
+                  {profitRows.length > 0
+                    ? ` · sum profit ${formatAud(periodProfitSum)}`
+                    : ''}
+                </p>
+                {summary.expenses_linked_to_trips === false && (
+                  <p className="mt-1 text-[10px] text-amber-200/90">
+                    Few/no expenses linked to trip_code in this period — showing revenue; expense
+                    subtract when trip-linked expenses exist.
+                  </p>
+                )}
+                {profitRows.length === 0 ? (
+                  <p className="mt-2 text-sm text-cream-muted">No paid installments in this period</p>
+                ) : (
                   <ul className="mt-2 max-h-64 space-y-1.5 overflow-y-auto">
-                    {ops.profit_per_trip.slice(0, 20).map((r) => (
+                    {profitRows.slice(0, 20).map((r) => (
                       <li
                         key={r.trip_code}
                         className="flex justify-between gap-2 rounded-lg bg-surface-card px-3 py-2 text-sm"
@@ -216,12 +266,13 @@ export default function InstallmentIncomePage() {
                       </li>
                     ))}
                   </ul>
-                </div>
-              </section>
-            )}
+                )}
+              </div>
+            </section>
 
             <p className="text-[10px] text-cream-muted">
-              Combined P&amp;L already uses paid installments minus trip-linked expenses when present.
+              Combined P&amp;L uses paid installments in the selected period minus trip-linked
+              expenses dated in the same period.
             </p>
           </>
         )}
