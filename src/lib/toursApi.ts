@@ -1,6 +1,7 @@
 import { supabase, supabaseConfig } from './supabase'
 import { callStaffApi, clearStaffSession, StaffSessionExpiredError } from './supabaseStaff'
 import { SeatsFullError } from '../types/errors'
+import { deriveDatedTripCode, isSelectableBookableTour } from './tourSelectability'
 import type {
   BookingPayment,
   ComplianceItem,
@@ -16,7 +17,16 @@ import type {
   WaitlistEntry,
 } from '../types/tour'
 
-/** Featured trip codes pinned to the top of home + /trips (in this order). */
+/** Featured trip families pinned to the top of home + /trips (by code prefix). */
+export const TRIPS_LISTING_PRIORITY_PREFIXES = [
+  'TAS-SP',
+  'ULU-4D3N',
+  'TAS-LH',
+  'NZ-',
+  'TAS-3D2N',
+] as const
+
+/** @deprecated Prefer TRIPS_LISTING_PRIORITY_PREFIXES — kept for older callers. */
 export const TRIPS_LISTING_PRIORITY = ['TAS-3D2N', 'ULU-4D3N', 'NZ-6D5N'] as const
 
 export { SeatsFullError } from '../types/errors'
@@ -173,7 +183,10 @@ export async function fetchFeaturedTours(limit = 3): Promise<Tour[]> {
     }
     const tours = sortByDepartureDate(normalizeTours(data as TourRow[])).filter((t) => {
       const s = statusLower(t)
-      return s === 'confirmed' || s === 'published' || s === 'active'
+      return (
+        (s === 'confirmed' || s === 'published' || s === 'active') &&
+        isSelectableBookableTour(t)
+      )
     })
     return sortToursForListing(tours).slice(0, limit)
   } catch (err) {
@@ -195,7 +208,9 @@ export async function fetchAllTours(): Promise<Tour[]> {
     }
     const tours = sortByDepartureDate(normalizeTours(data as TourRow[])).filter((t) => {
       const s = statusLower(t)
-      return s !== 'cancelled' && s !== 'archived'
+      if (s === 'cancelled' || s === 'archived') return false
+      // Public catalog: dated bookable instances only (templates stay for CMS resolve).
+      return isSelectableBookableTour(t)
     })
     return tours
   } catch (err) {
@@ -206,19 +221,20 @@ export async function fetchAllTours(): Promise<Tour[]> {
   }
 }
 
-/** Pin priority trips first; preserve Supabase order for the rest. */
+/** Pin priority trip families first; preserve relative order for the rest. */
 export function sortToursForListing(tours: Tour[]): Tour[] {
-  const priorityRank = new Map(
-    TRIPS_LISTING_PRIORITY.map((code, index) => [code.toUpperCase(), index]),
-  )
+  function familyRank(code: string): number {
+    const u = code.toUpperCase()
+    const idx = TRIPS_LISTING_PRIORITY_PREFIXES.findIndex((p) => u.startsWith(p.toUpperCase()))
+    return idx >= 0 ? idx : TRIPS_LISTING_PRIORITY_PREFIXES.length
+  }
   return tours
     .map((tour, index) => ({ tour, index }))
     .sort((a, b) => {
-      const aCode = a.tour.trip_code.toUpperCase()
-      const bCode = b.tour.trip_code.toUpperCase()
-      const aRank = priorityRank.get(aCode) ?? TRIPS_LISTING_PRIORITY.length + a.index
-      const bRank = priorityRank.get(bCode) ?? TRIPS_LISTING_PRIORITY.length + b.index
-      return aRank - bRank
+      const aRank = familyRank(a.tour.trip_code)
+      const bRank = familyRank(b.tour.trip_code)
+      if (aRank !== bRank) return aRank - bRank
+      return a.index - b.index
     })
     .map(({ tour }) => tour)
 }
@@ -607,27 +623,17 @@ export async function createToursBulk(
   return { data: normalizeTours(result.data), skipped: result.skipped ?? [] }
 }
 
-const MONTH_ABBRS = [
-  'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
-]
-
 /**
- * Derives a new trip_code for a cloned departure date. If the template's code
- * already ends in a month abbreviation (e.g. "TAS-LH-4D3N-JUL"), swaps it for
- * the new date's month; otherwise appends one. Keeps codes readable and avoids
- * relying on the person to invent a unique suffix by hand.
+ * Derives a new trip_code for a cloned departure date.
+ * Prefer day-window suffixes (SEP26_29) so clones are selectable in booking UIs.
+ * Pass durationDays when known (from template tour).
  */
-export function deriveTripCodeForDate(baseTripCode: string, isoDate: string): string {
-  const d = new Date(isoDate)
-  const abbr = MONTH_ABBRS[d.getMonth()] ?? 'TBA'
-  const parts = baseTripCode.split('-')
-  const last = parts[parts.length - 1]?.toUpperCase()
-  if (last && MONTH_ABBRS.includes(last)) {
-    parts[parts.length - 1] = abbr
-  } else {
-    parts.push(abbr)
-  }
-  return parts.join('-')
+export function deriveTripCodeForDate(
+  baseTripCode: string,
+  isoDate: string,
+  durationDays?: number | null,
+): string {
+  return deriveDatedTripCode(baseTripCode, isoDate, durationDays ?? 1)
 }
 
 /** Adds `months` calendar months to an ISO date string, returning ISO (yyyy-mm-dd). */
@@ -637,7 +643,14 @@ export function addMonthsIso(isoDate: string, months: number): string {
   return d.toISOString().slice(0, 10)
 }
 
-export type UnbookableReason = 'draft' | 'no_date' | 'cancelled' | 'completed' | 'full' | null
+export type UnbookableReason =
+  | 'draft'
+  | 'no_date'
+  | 'template'
+  | 'cancelled'
+  | 'completed'
+  | 'full'
+  | null
 
 /** Why a tour can't be booked right now — lets the UI offer a waitlist specifically when full. */
 export function getUnbookableReason(tour: Tour): UnbookableReason {
@@ -646,6 +659,7 @@ export function getUnbookableReason(tour: Tour): UnbookableReason {
   if (status === 'completed') return 'completed'
   if (status !== 'confirmed' && status !== 'published' && status !== 'active') return 'draft'
   if (!tour.departure_date) return 'no_date'
+  if (!isSelectableBookableTour(tour)) return 'template'
   if (tour.max_seats <= 0 || tour.booked_seats >= tour.max_seats) return 'full'
   return null
 }
@@ -1344,20 +1358,7 @@ export function seatsRemaining(tour: Tour): number {
 
 /** Bookable when confirmed/published/active, has departure date, and seats remain. */
 export function isTourBookable(tour: Tour): boolean {
-  const status = (tour.status ?? '').toLowerCase()
-  if (status === 'draft' || status === 'cancelled' || status === 'completed' || status === 'planning') {
-    return false
-  }
-  if (
-    status !== 'confirmed' &&
-    status !== 'published' &&
-    status !== 'active'
-  ) {
-    return false
-  }
-  if (!tour.departure_date) return false
-  if (tour.max_seats <= 0) return false
-  return tour.booked_seats < tour.max_seats
+  return getUnbookableReason(tour) === null
 }
 
 export function formatAud(amount: number): string {

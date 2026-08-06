@@ -4,6 +4,7 @@ import {
   addPendingInstallment,
   fetchCustomerLoyalty,
   fetchPaymentsForBooking,
+  fetchTourByCode,
   formatAud,
   recordPayment,
   searchCustomerPayments,
@@ -136,15 +137,24 @@ export default function StaffPaymentsPage() {
         await recordPayment(booking.id, Number(payment.amount_aud), 'payid')
       }
       await refreshRow(booking.id)
+      let departureDate: string | null = null
+      let tripName = booking.trip_code
+      try {
+        const tour = await fetchTourByCode(booking.trip_code)
+        departureDate = tour?.departure_date ?? null
+        tripName = tour?.name_en ?? booking.trip_code
+      } catch {
+        /* receipt still works without tour metadata */
+      }
       // Hand off to tax invoice page for this installment
       navigate('/app/receipt', {
         state: {
           bookingReference: booking.booking_reference,
           customerName: `${booking.first_name_en} ${booking.last_name_en}`,
           customerEmail: booking.email,
-          tripName: booking.trip_code,
+          tripName,
           tripCode: booking.trip_code,
-          departureDate: null,
+          departureDate,
           amountPaid: Number(payment.amount_aud),
           paymentMethod: 'payid',
           bookingStatus: booking.booking_status,

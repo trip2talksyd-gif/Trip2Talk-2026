@@ -533,6 +533,44 @@ Deno.serve(async (req) => {
         if (tourError) throw tourError
         if (!tour) return json({ error: 'tour_not_found' }, 404)
 
+        // Block booking against itinerary templates / month shells (no day window).
+        const dep =
+          (typeof tour.departure_date === 'string' && tour.departure_date) ||
+          (typeof tour.next_date === 'string' && tour.next_date) ||
+          null
+        if (!dep) return json({ error: 'tour_not_bookable_no_date' }, 400)
+        const codeU = String(tripCode).trim().toUpperCase()
+        const cmsTemplates = new Set([
+          'ULU-4D3N',
+          'MEL-4D3N',
+          'TAS-3D2N',
+          'TAS-LH-4D3N',
+          'TAS-SU-4D3N',
+          'BER-3D2N',
+          'CAN-2D1N',
+          'TAS-SP-3D2N',
+          'NZ-10D9N',
+          'NZ-6D5N',
+        ])
+        const months = new Set([
+          'JAN',
+          'FEB',
+          'MAR',
+          'APR',
+          'MAY',
+          'JUN',
+          'JUL',
+          'AUG',
+          'SEP',
+          'OCT',
+          'NOV',
+          'DEC',
+        ])
+        const lastSeg = codeU.split('-').pop() ?? ''
+        if (cmsTemplates.has(codeU) || months.has(lastSeg) || /-(1DAY|1D)$/.test(codeU)) {
+          return json({ error: 'tour_is_template_not_bookable' }, 400)
+        }
+
         // Same seat-hold RPC the public booking flow uses, so staff-entered
         // bookings (phone/Facebook customers) can't oversell a trip either.
         const { data: rpcResult, error: rpcError } = await admin.rpc('book_seat', {

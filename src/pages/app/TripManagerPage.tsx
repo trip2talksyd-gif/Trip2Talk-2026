@@ -221,14 +221,18 @@ export default function TripManagerPage() {
     setMaxSeats(String(t.max_seats))
     setStatus(t.status)
     if (!tripCodeTouched && departureDate) {
-      setTripCode(deriveTripCodeForDate(t.trip_code, departureDate))
+      setTripCode(
+        deriveTripCodeForDate(t.trip_code, departureDate, t.duration_days),
+      )
     }
   }
 
   function handleDateChange(value: string) {
     setDepartureDate(value)
     if (!tripCodeTouched && template && value) {
-      setTripCode(deriveTripCodeForDate(template.trip_code, value))
+      setTripCode(
+        deriveTripCodeForDate(template.trip_code, value, template.duration_days),
+      )
     }
   }
 
@@ -249,7 +253,10 @@ export default function TripManagerPage() {
         const entries = Array.from({ length: repeatMonths }).map((_, i) => {
           const date = addMonthsIso(departureDate, i)
           return {
-            trip_code: i === 0 ? tripCode : deriveTripCodeForDate(template.trip_code, date),
+            trip_code:
+              i === 0
+                ? tripCode
+                : deriveTripCodeForDate(template.trip_code, date, template.duration_days),
             name_en: nameEn || undefined,
             name_th: nameTh || undefined,
             departure_date: date,
