@@ -186,6 +186,11 @@ export const WAIVER_CLAUSES = {
       title: 'Force Majeure & Aurora Disclaimer',
       text: AURORA_DISCLAIMER.en,
     },
+    {
+      id: 'photo_delivery',
+      title: 'Photo Delivery Timeline',
+      text: 'Highlight photos will be delivered within 3 days of trip completion. The full photo gallery will be delivered within 14–30 days of trip completion.',
+    },
   ],
   th: [
     {
@@ -212,6 +217,11 @@ export const WAIVER_CLAUSES = {
       id: 'aurora',
       title: 'เหตุสุดวิสัย & ข้อจำกัดแสงออโรร่า',
       text: AURORA_DISCLAIMER.th,
+    },
+    {
+      id: 'photo_delivery',
+      title: 'กำหนดส่งภาพถ่าย',
+      text: 'ภาพไฮไลท์จะจัดส่งภายใน 3 วันหลังจบทริป ส่วนอัลบั้มภาพทั้งหมดจะจัดส่งภายใน 14–30 วันหลังจบทริป',
     },
   ],
 }

@@ -804,8 +804,16 @@ export async function completeOutbound(
 }
 
 export type PhotosPendingRow = TourBooking & {
-  tour?: { trip_code?: string; name_en?: string; end_date?: string } | null
+  tour?: {
+    trip_code?: string
+    name_en?: string
+    end_date?: string
+    departure_date?: string
+    duration_days?: number
+  } | null
 }
+
+export type PhotoDeliveryStage = 'highlight' | 'full'
 
 export async function fetchPhotosPending(): Promise<PhotosPendingRow[]> {
   return callStaffApi<PhotosPendingRow[]>('list_photos_pending')
@@ -816,6 +824,8 @@ export async function markPhotosDelivered(params: {
   tripCode?: string
   galleryLink?: string
   allOnTrip?: boolean
+  /** highlight = 3-day SLA; full = 30-day hard deadline (+ syncs legacy photos_delivered). */
+  stage?: PhotoDeliveryStage
 }): Promise<unknown> {
   return callStaffApi('mark_photos_delivered', params)
 }
