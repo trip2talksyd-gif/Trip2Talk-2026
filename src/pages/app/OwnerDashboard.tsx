@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react
 import { useNavigate } from 'react-router-dom'
 import {
   Banknote,
+  CalendarDays,
   CalendarPlus,
   Camera,
   ClipboardList,
@@ -13,6 +14,8 @@ import {
   LayoutDashboard,
   Receipt,
   ShieldAlert,
+  TrendingDown,
+  TrendingUp,
   Wallet,
 } from 'lucide-react'
 import {
@@ -32,6 +35,7 @@ import {
   StaffMain,
   StaffPageHeader,
   StaffSectionTitle,
+  StaffStatCard,
   staffShellClass,
 } from '../../components/app/staffUi'
 
@@ -158,14 +162,38 @@ export default function OwnerDashboard() {
     (item) => item.due_date && daysUntil(item.due_date) <= 30 && item.status !== 'done',
   )
 
+  const primaryActions = NAV_LINKS.filter((link) => link.highlighted)
+  const secondaryActions = NAV_LINKS.filter((link) => !link.highlighted)
+
   const stats = [
-    { label: 'Bookings (month)', value: String(activeBookings.length), tone: 'default' as const },
-    { label: 'Revenue', value: formatAud(revenue), tone: 'default' as const },
-    { label: 'Expenses', value: formatAud(expenseTotal), tone: 'muted' as const },
+    {
+      label: 'Bookings (month)',
+      value: String(activeBookings.length),
+      tone: 'default' as const,
+      icon: <CalendarDays className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
+    },
+    {
+      label: 'Revenue',
+      value: formatAud(revenue),
+      tone: 'default' as const,
+      icon: <Banknote className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
+    },
+    {
+      label: 'Expenses',
+      value: formatAud(expenseTotal),
+      tone: 'muted' as const,
+      icon: <Receipt className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
+    },
     {
       label: 'Net profit',
       value: formatAud(netProfit),
       tone: netProfit >= 0 ? ('positive' as const) : ('negative' as const),
+      icon:
+        netProfit >= 0 ? (
+          <TrendingUp className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+        ) : (
+          <TrendingDown className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
+        ),
     },
   ]
 
@@ -185,15 +213,15 @@ export default function OwnerDashboard() {
         {!loading && !error && (
           <>
             {urgentItems.length > 0 && (
-              <StaffCard className="border-coral/50 bg-coral/10">
+              <StaffCard className="border-coral/45 [background:linear-gradient(145deg,rgba(226,115,74,0.22),rgba(32,54,60,0.92)_50%,rgba(22,38,43,0.96))]">
                 <div className="flex items-center justify-between gap-3">
                   <StaffSectionTitle>
-                    <span className="inline-flex items-center gap-2 text-coral">
+                    <span className="inline-flex items-center gap-2 normal-case tracking-normal text-coral">
                       <ShieldAlert className="h-4 w-4" strokeWidth={2.25} aria-hidden />
                       Compliance alerts (30 days)
                     </span>
                   </StaffSectionTitle>
-                  <span className="rounded-full bg-coral px-2.5 py-0.5 text-xs font-semibold text-white">
+                  <span className="rounded-full bg-coral px-2.5 py-0.5 text-xs font-semibold text-white shadow-[0_6px_14px_-6px_rgba(226,115,74,0.8)]">
                     {urgentItems.length}
                   </span>
                 </div>
@@ -220,42 +248,42 @@ export default function OwnerDashboard() {
 
             <section>
               <StaffSectionTitle>This month</StaffSectionTitle>
-              <div className="mt-3 grid grid-cols-2 gap-3">
+              <div className="mt-3.5 grid grid-cols-2 gap-3 sm:gap-3.5">
                 {stats.map((card) => (
-                  <StaffCard key={card.label} className="p-3.5 sm:p-4">
-                    <p className="text-[11px] font-medium uppercase tracking-wider text-cream-muted">
-                      {card.label}
-                    </p>
-                    <p
-                      className={`mt-2 font-serif text-xl tabular-nums leading-none sm:text-2xl ${
-                        card.tone === 'positive'
-                          ? 'text-teal-500'
-                          : card.tone === 'negative'
-                            ? 'text-coral'
-                            : card.tone === 'muted'
-                              ? 'text-cream'
-                              : 'text-teal-500'
-                      }`}
-                    >
-                      {card.value}
-                    </p>
-                  </StaffCard>
+                  <StaffStatCard
+                    key={card.label}
+                    label={card.label}
+                    value={card.value}
+                    tone={card.tone}
+                    icon={card.icon}
+                  />
                 ))}
               </div>
             </section>
 
             <section>
               <StaffSectionTitle>Quick actions</StaffSectionTitle>
-              <div className="mt-3 flex flex-wrap gap-2.5">
-                {NAV_LINKS.map((link) => (
+              <div className="mt-3.5 space-y-3">
+                {primaryActions.map((link) => (
                   <StaffActionChip
                     key={link.to}
                     to={link.to}
                     icon={link.icon}
                     label={link.label}
-                    highlighted={link.highlighted}
+                    highlighted
+                    className="w-full justify-center sm:w-auto sm:justify-start"
                   />
                 ))}
+                <div className="flex flex-wrap gap-2.5">
+                  {secondaryActions.map((link) => (
+                    <StaffActionChip
+                      key={link.to}
+                      to={link.to}
+                      icon={link.icon}
+                      label={link.label}
+                    />
+                  ))}
+                </div>
               </div>
             </section>
 
