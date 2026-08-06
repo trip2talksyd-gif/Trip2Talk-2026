@@ -206,6 +206,8 @@ export function buildWaiverStaffConfirmation(opts: {
   customerName: string
   tripCode: string
   tripName?: string | null
+  /** Trip travel / departure date (ISO), distinct from form-fill timestamp. */
+  departureDate?: string | null
   signedAt: string
   filledByStaffName?: string | null
   clauseTitlesEn: string[]
@@ -217,6 +219,7 @@ export function buildWaiverStaffConfirmation(opts: {
   const tripLabel = opts.tripName?.trim()
     ? `${opts.tripName.trim()} (${opts.tripCode})`
     : opts.tripCode
+  const departureLabel = formatDepartureDate(opts.departureDate)
   const staff = opts.filledByStaffName?.trim() || 'Trip2Talk staff'
   const clausesEn =
     opts.clauseTitlesEn.length > 0
@@ -235,6 +238,7 @@ export function buildWaiverStaffConfirmation(opts: {
     'This confirms your Trip2Talk liability waiver was completed.',
     '',
     `Trip: ${tripLabel}`,
+    ...(departureLabel ? [`Trip dates: ${departureLabel}`] : []),
     `Signed name: ${opts.customerName}`,
     `Completed at: ${when}`,
     `Filled by staff (on your request): ${staff}`,
@@ -256,6 +260,7 @@ export function buildWaiverStaffConfirmation(opts: {
     'ยืนยันว่า waiver (เอกสารยินยอม/สละสิทธิ์) ของคุณกับ Trip2Talk เสร็จแล้วครับ',
     '',
     `ทริป: ${tripLabel}`,
+    ...(departureLabel ? [`วันเดินทาง: ${departureLabel}`] : []),
     `ชื่อที่ลงนาม: ${opts.customerName}`,
     `เวลาที่กรอก: ${when}`,
     `กรอกโดยเจ้าหน้าที่ (ตามที่คุณขอ): ${staff}`,
@@ -280,5 +285,18 @@ export function buildWaiverStaffConfirmation(opts: {
     clipboardText,
     messengerUrl: FACEBOOK_MESSENGER_URL,
     gmailUrl: gmailCompose(opts.customerEmail, subject, clipboardText),
+  }
+}
+
+function formatDepartureDate(iso: string | null | undefined): string | null {
+  if (!iso?.trim()) return null
+  try {
+    return new Date(`${iso.slice(0, 10)}T00:00:00`).toLocaleDateString('en-AU', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
+  } catch {
+    return iso.slice(0, 10)
   }
 }

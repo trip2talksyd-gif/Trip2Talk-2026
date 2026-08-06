@@ -9,6 +9,8 @@ import { StaffButton } from './staffUi'
 type Props = {
   waiver: WaiverSignature
   tripName?: string | null
+  /** Tour departure_date (ISO) — travel date, not form-fill time. */
+  departureDate?: string | null
   customerEmail?: string | null
 }
 
@@ -30,6 +32,7 @@ function titlesFor(locale: 'en' | 'th', ids: string[]): string[] {
 export default function StaffWaiverConfirmActions({
   waiver,
   tripName,
+  departureDate,
   customerEmail,
 }: Props) {
   const { toast } = useToast()
@@ -43,6 +46,7 @@ export default function StaffWaiverConfirmActions({
       customerName: waiver.signed_name,
       tripCode: waiver.trip_code,
       tripName,
+      departureDate,
       signedAt: waiver.staff_fill_authorized_at ?? waiver.signed_at,
       filledByStaffName: waiver.staff_fill_staff_name,
       clauseTitlesEn: titlesFor('en', ids),
@@ -50,7 +54,7 @@ export default function StaffWaiverConfirmActions({
       authorizationNote: waiver.staff_fill_authorization_note,
       customerEmail,
     })
-  }, [waiver, tripName, customerEmail])
+  }, [waiver, tripName, departureDate, customerEmail])
 
   const whenLabel = useMemo(() => {
     try {
@@ -65,6 +69,19 @@ export default function StaffWaiverConfirmActions({
       return waiver.signed_at
     }
   }, [waiver])
+
+  const departureLabel = useMemo(() => {
+    if (!departureDate?.trim()) return null
+    try {
+      return new Date(`${departureDate.slice(0, 10)}T00:00:00`).toLocaleDateString('en-AU', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      })
+    } catch {
+      return departureDate.slice(0, 10)
+    }
+  }, [departureDate])
 
   async function handleCopy() {
     try {
@@ -164,6 +181,9 @@ export default function StaffWaiverConfirmActions({
           <p className="mt-1 text-[11px] text-black/70">
             Trip: {tripName ? `${tripName} (${waiver.trip_code})` : waiver.trip_code}
           </p>
+          {departureLabel && (
+            <p className="text-[11px] text-black/70">Trip date: {departureLabel}</p>
+          )}
           <p className="text-[11px] text-black/70">Completed: {whenLabel}</p>
           <p className="mt-2 rounded-md bg-amber-50 px-2 py-1.5 text-[11px] text-amber-950">
             Filled by staff on customer request: {staff}
