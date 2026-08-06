@@ -7,8 +7,9 @@ import {
   photoSrc,
   type GalleryFilter,
 } from '../../data/galleryPhotos'
+import { getGalleryAlbums } from '../../data/galleryAlbums'
+import GalleryAlbumCarousel from '../../components/gallery/GalleryAlbumCarousel'
 import GalleryLightbox from '../../components/gallery/GalleryLightbox'
-import PhotoSlideshow from '../../components/photoGuide/PhotoSlideshow'
 import BiText from '../../components/ui/BiText'
 
 export default function GalleryPage() {
@@ -22,51 +23,19 @@ export default function GalleryPage() {
   const emptyCatBi = tt('gallery.emptyCategory')
   const albumBi = tt('gallery.exampleAlbum')
 
+  const albums = useMemo(() => getGalleryAlbums(), [])
+
   const tabs: { id: GalleryFilter; label: string; th: string }[] = [
     { id: 'all', label: allBi.en, th: allBi.th },
-    { id: 'new-zealand', label: 'New Zealand', th: 'นิวซีแลนด์' },
+    { id: 'outback', label: 'Uluru', th: 'อุลูรู' },
     { id: 'tasmania', label: 'Tasmania', th: 'แทสเมเนีย' },
-    { id: 'nsw', label: 'NSW', th: 'NSW' },
-    { id: 'sydney', label: 'Sydney', th: 'ซิดนีย์' },
+    { id: 'new-zealand', label: 'New Zealand', th: 'นิวซีแลนด์' },
     { id: 'melbourne', label: 'Melbourne', th: 'เมลเบิร์น' },
+    { id: 'sydney', label: 'Sydney', th: 'ซิดนีย์' },
+    { id: 'nsw', label: 'NSW', th: 'NSW' },
   ]
 
   const items = useMemo(() => filterGalleryPhotos(cat), [cat])
-
-  // Featured slideshow always mixes photos from every trip/destination
-  // (regardless of which filter tab is selected below) so it feels like a
-  // showcase of the whole gallery, not just whatever category is active.
-  // Interleaved round-robin by category so it doesn't just show Melbourne's
-  // 8 photos back-to-back before getting to anywhere else.
-  const slides = useMemo(() => {
-    const byCategory = new Map<string, typeof GALLERY_PHOTOS>()
-    for (const photo of GALLERY_PHOTOS) {
-      const list = byCategory.get(photo.category)
-      if (list) list.push(photo)
-      else byCategory.set(photo.category, [photo])
-    }
-    const buckets = [...byCategory.values()]
-    const mixed: typeof GALLERY_PHOTOS = []
-    for (let i = 0; mixed.length < GALLERY_PHOTOS.length; i++) {
-      let addedAny = false
-      for (const bucket of buckets) {
-        if (bucket[i]) {
-          mixed.push(bucket[i])
-          addedAny = true
-        }
-      }
-      if (!addedAny) break
-    }
-    const album = tt('gallery.exampleAlbum')
-    return mixed.slice(0, 10).map((photo) => ({
-      photo,
-      sceneEn: photo.caption_en || 'Gallery',
-      sceneTh: photo.caption_th || 'แกลเลอรี',
-      titleEn: album.en,
-      titleTh: album.th,
-      meta: photo.id,
-    }))
-  }, [tt])
 
   return (
     <div className="space-y-4 pb-4">
@@ -108,45 +77,64 @@ export default function GalleryPage() {
             </span>
           </p>
         </div>
-      ) : items.length === 0 ? (
-        <div className="rounded-xl bg-mint-100 px-4 py-8 text-center text-sm text-ink-soft">
-          {emptyCatBi.en}
-          <span className="mt-0.5 block font-thai text-xs text-ink-soft/85">{emptyCatBi.th}</span>
-        </div>
       ) : (
-        <section className="space-y-2.5">
+        <section className="space-y-4">
+          {albums.length > 0 && (
+            <GalleryAlbumCarousel
+              albums={albums}
+              onSelectAlbum={(album) => setCat(album.id)}
+            />
+          )}
+
           <div>
-            <p className="mb-1.5 text-sm font-bold text-ink">
+            <p className="mb-2 px-0.5 text-sm font-bold text-ink">
               {albumBi.en}
               <span className="ml-1.5 font-thai text-xs font-medium text-ink-soft">
                 {albumBi.th}
               </span>
+              {cat !== 'all' && (
+                <span className="ml-2 text-[11px] font-medium text-teal-700">
+                  · {tabs.find((t) => t.id === cat)?.label}
+                </span>
+              )}
             </p>
-            <PhotoSlideshow slides={slides} />
-          </div>
 
-          <div className="grid grid-cols-3 gap-[5px]">
-            {items.map((photo, idx) => {
-              const caption = `${photo.caption_en} / ${photo.caption_th}`
-              const tall = idx % 7 === 0
-              return (
-                <button
-                  key={photo.id}
-                  type="button"
-                  onClick={() => setLightboxIndex(idx)}
-                  className={`overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 ${
-                    tall ? 'row-span-2' : ''
-                  }`}
-                >
-                  <img
-                    src={photoSrc(photo)}
-                    alt={caption}
-                    loading="lazy"
-                    className={`w-full object-cover ${tall ? 'h-[164px]' : 'h-[78px]'}`}
-                  />
-                </button>
-              )
-            })}
+            {items.length === 0 ? (
+              <div className="rounded-xl bg-mint-100 px-4 py-8 text-center text-sm text-ink-soft">
+                {emptyCatBi.en}
+                <span className="mt-0.5 block font-thai text-xs text-ink-soft/85">
+                  {emptyCatBi.th}
+                </span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-3 gap-[5px] sm:grid-cols-4 sm:gap-1.5 md:grid-cols-5">
+                {items.map((photo, idx) => {
+                  const caption = `${photo.caption_en} / ${photo.caption_th}`
+                  const tall = idx % 7 === 0
+                  return (
+                    <button
+                      key={photo.id}
+                      type="button"
+                      onClick={() => setLightboxIndex(idx)}
+                      className={`overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 ${
+                        tall ? 'row-span-2' : ''
+                      }`}
+                    >
+                      <img
+                        src={photoSrc(photo)}
+                        alt={caption}
+                        loading="lazy"
+                        className={`w-full object-cover ${
+                          tall
+                            ? 'h-[164px] sm:h-[200px]'
+                            : 'h-[78px] sm:h-[110px]'
+                        }`}
+                      />
+                    </button>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </section>
       )}
