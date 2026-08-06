@@ -536,6 +536,7 @@ export const TRIP_GALLERY_CATEGORY: Record<string, GalleryCategory> = {
   'TAS-LH-4D3N': 'tasmania',
   'TAS-LH-3D2N-WIN': 'tasmania',
   'TAS-SU-4D3N': 'tasmania',
+  'TAS-SP-3D2N': 'tasmania',
   'ULU-4D3N': 'outback',
   'BER-3D2N': 'bermagui',
   'CAN-2D1N': 'nsw',

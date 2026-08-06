@@ -1092,6 +1092,154 @@ export const TRIP_ITINERARIES: Record<string, TripItinerary> = {
   },
   'TAS-LH-3D2N-DEC': TAS_LH_3D2N_ITINERARY,
   'TAS-LH-3D2N-WIN': TAS_LH_3D2N_ITINERARY,
+  'TAS-SP-3D2N': {
+    detailed: true,
+    headerNote: {
+      en: 'Private photo trip (max 5) — Launceston → North-West Coast → Hobart. Flights and meals not included. Arrive Launceston before 08:30 on Day 1 (Sunday); depart Hobart after 18:30 on Day 3 (Tuesday).',
+      th: 'ทริปถ่ายภาพส่วนตัว (สูงสุด 5 ท่าน) — Launceston → ชายฝั่งตะวันตกเฉียงเหนือ → Hobart ไม่รวมตั๋วเครื่องบินและอาหาร ถึง Launceston ก่อน 08:30 ของวัน 1 (อาทิตย์) และออกจาก Hobart หลัง 18:30 ของวัน 3 (อังคาร)',
+    },
+    days: [
+      {
+        day: 1,
+        title: {
+          en: 'Day 1 — Table Cape Tulips & Cradle Mountain',
+          th: 'วัน 1 — ทิวลิป Table Cape & Cradle Mountain',
+        },
+        subtitle: {
+          en: 'Launceston → Table Cape Tulip Farm → Cradle Mountain',
+          th: 'Launceston → Table Cape Tulip Farm → Cradle Mountain',
+        },
+        events: [
+          {
+            time: 'Morning',
+            category: 'activity',
+            description: {
+              en: 'Arrive Launceston Airport before 08:30 — pick up the rental car and drive the north coast',
+              th: 'ถึงสนามบิน Launceston ก่อน 08:30 — รับรถเช่าแล้วขับรถขึ้นชายฝั่งเหนือ',
+            },
+          },
+          {
+            time: 'Late morning',
+            category: 'activity',
+            description: {
+              en: 'Table Cape Tulip Farm — tulip fields on a clifftop extinct volcano overlooking Bass Strait',
+              th: 'Table Cape Tulip Farm — ทุ่งทิวลิปบนหน้าผาภูเขาไฟเก่า มองออกไปยัง Bass Strait',
+            },
+          },
+          {
+            time: 'Afternoon',
+            category: 'activity',
+            description: {
+              en: 'Drive south into Cradle Mountain National Park — shuttle to Dove Lake for lakeside and summit photography walks',
+              th: 'ขับรถลงใต้เข้าอุทยาน Cradle Mountain — รถรับส่งไป Dove Lake เดินถ่ายภาพริมทะเลสาบและขึ้นยอดเขา',
+            },
+          },
+          {
+            time: 'Evening',
+            category: 'activity',
+            description: {
+              en: 'Check in at Discovery Parks – Cradle Mountain (Standard Cabin, sleeps 6)',
+              th: 'เช็กอิน Discovery Parks – Cradle Mountain (Standard Cabin นอนได้ 6 คน)',
+            },
+          },
+        ],
+        note: {
+          en: 'Stay: Discovery Parks – Cradle Mountain (Standard Cabin). Pack warm layers — highland evenings are cold in spring.',
+          th: 'ที่พัก: Discovery Parks – Cradle Mountain (Standard Cabin) เตรียมเสื้อกันหนาว — เย็นบนที่สูงยังหนาวแม้ฤดูใบไม้ผลิ',
+        },
+      },
+      {
+        day: 2,
+        title: {
+          en: 'Day 2 — Murals, Heritage Bridges & Hobart',
+          th: 'วัน 2 — จิตรกรรมฝาผนัง สะพานโบราณ & Hobart',
+        },
+        subtitle: {
+          en: 'Cradle Mountain → Sheffield → Ross → Richmond Bridge → Hobart',
+          th: 'Cradle Mountain → Sheffield → Ross → Richmond Bridge → Hobart',
+        },
+        events: [
+          {
+            time: 'Morning',
+            category: 'activity',
+            description: {
+              en: 'Drive through Sheffield — the “Town of Murals” — street-art photography stop',
+              th: 'ขับรถผ่าน Sheffield — “เมืองแห่งจิตรกรรมฝาผนัง” — แวะถ่ายภาพศิลปะริมถนน',
+            },
+          },
+          {
+            time: 'Midday',
+            category: 'activity',
+            description: {
+              en: 'Heritage Highway south — Ross Bridge (carved sandstone) plus a well-known local bakery stop',
+              th: 'ลงใต้ตาม Heritage Highway — Ross Bridge (สะพานหินทรายสลัก) และแวะเบเกอรี่ท้องถิ่นชื่อดัง',
+            },
+          },
+          {
+            time: 'Afternoon',
+            category: 'activity',
+            description: {
+              en: 'Richmond Bridge — Australia’s oldest stone-span bridge (1823) — walk the historic town',
+              th: 'Richmond Bridge — สะพานหินโค้งที่เก่าแก่ที่สุดในออสเตรเลีย (ค.ศ. 1823) — เดินชมเมืองประวัติศาสตร์',
+            },
+          },
+          {
+            time: 'Evening',
+            category: 'activity',
+            description: {
+              en: 'Arrive Hobart — dinner around Victoria Dock / Salamanca; stay at Rydges Hobart (One-Bedroom Suite)',
+              th: 'ถึง Hobart — ดินเนอร์แถว Victoria Dock / Salamanca พัก Rydges Hobart (One-Bedroom Suite)',
+            },
+          },
+        ],
+        note: {
+          en: 'Stay: Rydges Hobart (One-Bedroom Suite).',
+          th: 'ที่พัก: Rydges Hobart (One-Bedroom Suite)',
+        },
+      },
+      {
+        day: 3,
+        title: {
+          en: 'Day 3 — kunanyi/Mt Wellington, Port Arthur & Departure',
+          th: 'วัน 3 — kunanyi/Mt Wellington, Port Arthur & ออกเดินทาง',
+        },
+        subtitle: {
+          en: 'Mt Wellington → Port Arthur → Hobart Airport',
+          th: 'Mt Wellington → Port Arthur → สนามบิน Hobart',
+        },
+        events: [
+          {
+            time: 'Early morning',
+            category: 'activity',
+            description: {
+              en: 'Drive up kunanyi/Mt Wellington for a 360° view over Hobart',
+              th: 'ขับรถขึ้น kunanyi/Mt Wellington มอง Hobart แบบ 360°',
+            },
+          },
+          {
+            time: 'Late morning–afternoon',
+            category: 'activity',
+            description: {
+              en: 'Tasman Peninsula — Port Arthur Historic Site (former penal colony ruins by the sea)',
+              th: 'คาบสมุทร Tasman — Port Arthur Historic Site (ซากอาณานิคมนักโทษริมทะเล)',
+            },
+          },
+          {
+            time: 'Evening',
+            category: 'flight',
+            description: {
+              en: 'Return to Hobart Airport, drop off the rental car — depart after 18:30 for Sydney',
+              th: 'กลับสนามบิน Hobart คืนรถเช่า — ออกเที่ยวบินหลัง 18:30 กลับซิดนีย์',
+            },
+          },
+        ],
+        note: {
+          en: 'Book a Hobart departure after 18:30 so there is time after Port Arthur.',
+          th: 'จองเที่ยวบินออกจาก Hobart หลัง 18:30 เพื่อมีเวลาหลัง Port Arthur',
+        },
+      },
+    ],
+  },
   'NZ-6D5N': {
     detailed: true,
     headerNote: {

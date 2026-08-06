@@ -189,6 +189,60 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
       th: ['ตั๋วเครื่องบิน (เราช่วยจอง)', 'ค่าอาหาร', 'ประกันการเดินทาง'],
     },
   },
+  'TAS-SP-3D2N': {
+    tagline: {
+      en: 'Private spring tulip route — Table Cape blooms, Cradle Mountain, heritage bridges, then Hobart & Port Arthur. Max 5 guests.',
+      th: 'ทริปทิวลิปฤดูใบไม้ผลิส่วนตัว — Table Cape Cradle Mountain สะพานโบราณ แล้ว Hobart กับ Port Arthur สูงสุด 5 ท่าน',
+    },
+    highlights: {
+      en: [
+        'Table Cape Tulip Farm clifftop fields',
+        'Cradle Mountain & Dove Lake walks',
+        'Sheffield murals, Ross & Richmond Bridges',
+        'kunanyi/Mt Wellington & Port Arthur',
+      ],
+      th: [
+        'ทุ่งทิวลิป Table Cape บนหน้าผา',
+        'Cradle Mountain และเดินรอบ Dove Lake',
+        'จิตรกรรม Sheffield สะพาน Ross และ Richmond',
+        'kunanyi/Mt Wellington และ Port Arthur',
+      ],
+    },
+    includes: {
+      en: [
+        'Private group capped at 5 guests',
+        'Shared vehicle for the Launceston → Hobart route',
+        'Professional photographer / Trip Leader',
+        '2 nights accommodation (Cradle Mountain cabin + Hobart suite)',
+        'National park & listed entry fees on the itinerary',
+        'Flight timing guidance (self-booked flights)',
+      ],
+      th: [
+        'กลุ่มส่วนตัวสูงสุด 5 ท่าน',
+        'รถร่วมสำหรับเส้นทาง Launceston → Hobart',
+        'ช่างภาพมืออาชีพ / Trip Leader',
+        'ที่พัก 2 คืน (cabin Cradle Mountain + suite Hobart)',
+        'ค่าเข้าอุทยานและสถานที่ตามแผนทริป',
+        'คำแนะนำเวลาเที่ยวบิน (จองตั๋วเอง)',
+      ],
+    },
+    excludes: {
+      en: [
+        'Flights (not included — arrive Launceston before 08:30 Day 1; depart Hobart after 18:30 Day 3)',
+        'Meals and personal snacks',
+        'Travel insurance',
+      ],
+      th: [
+        'ตั๋วเครื่องบิน (ไม่รวม — ถึง Launceston ก่อน 08:30 วัน 1 ออกจาก Hobart หลัง 18:30 วัน 3)',
+        'อาหารและของว่างส่วนตัว',
+        'ประกันการเดินทาง',
+      ],
+    },
+    accommodationNote: {
+      en: 'Night 1: Discovery Parks – Cradle Mountain (Standard Cabin). Night 2: Rydges Hobart (One-Bedroom Suite).',
+      th: 'คืน 1: Discovery Parks – Cradle Mountain (Standard Cabin) คืน 2: Rydges Hobart (One-Bedroom Suite)',
+    },
+  },
   'BER-3D2N': {
     tagline: {
       en: 'South coast with your crew — we handle transport & timing, you get the dramatic shots.',
