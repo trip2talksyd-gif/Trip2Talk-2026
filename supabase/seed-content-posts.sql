@@ -39,7 +39,7 @@ values
 รอบนี้แสงใต้ Tasmania สวยแบบไม่ต้องแต่ง — อากาศเปิด ไฟลากยาวไปถึงขอบฟ้า
 ที่นั่งเหลือน้อยแล้ว ใครอยากไปกับทริปนี้ คุยพี่แสนได้เลยนะ
 $cap1$,
-    array['https://placehold.co/600x400']::text[],
+    array[]::text[], -- real photos: upload via Content Review (+ เพิ่มรูป)
     null
   ),
 
@@ -56,7 +56,7 @@ $cap1$,
 
 เพื่อนๆ ชอบถ่ายแนวไหนมากกว่ากัน — แสงอุ่นตอนเย็น หรือไฟเย็นหลังฝนแบบนี้?
 $cap2$,
-    array['https://placehold.co/600x400']::text[],
+    array[]::text[], -- real photos: upload via Content Review (+ เพิ่มรูป)
     null
   ),
 
@@ -73,7 +73,7 @@ Trip Leader ยืนดูเงาบนขอบฟ้าก่อนจะ�
 
 ใครเคยตื่นมาลุ้นแสงแบบนี้บ้าง เล่าให้ฟังหน่อยได้ไหม?
 $cap3$,
-    array['https://placehold.co/600x400']::text[],
+    array[]::text[], -- real photos: upload via Content Review (+ เพิ่มรูป)
     'SEED_MAKE_TEST_PAGE_ID'
   );
 

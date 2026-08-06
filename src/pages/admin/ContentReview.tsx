@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Download, ExternalLink, Loader2 } from 'lucide-react'
+import { Check, Download, ExternalLink, ImagePlus, Loader2 } from 'lucide-react'
 import {
   approveContentPost,
   fetchDraftContentPosts,
@@ -9,6 +9,7 @@ import {
   listTripPhotoUrls,
   markContentPostPosted,
   rejectContentPost,
+  uploadContentPhoto,
 } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { ContentPost } from '../../types/tour'
@@ -28,6 +29,17 @@ import {
 } from '../../components/app/staffUi'
 
 const MAX_PHOTOS = 4
+
+/** AI / seed drafts sometimes ship a dead gray placeholder — not a real photo. */
+function isUsablePhotoUrl(url: string | null | undefined): boolean {
+  const u = (url ?? '').trim()
+  if (!u) return false
+  if (/placehold\.co/i.test(u)) return false
+  if (/via\.placeholder\.com/i.test(u)) return false
+  if (/dummyimage\.com/i.test(u)) return false
+  if (/picsum\.photos/i.test(u)) return false
+  return true
+}
 
 type CardDraft = {
   selectedHeadline: string
@@ -51,14 +63,14 @@ function initialDraft(post: ContentPost): CardDraft {
     post.selected_headline && options.includes(post.selected_headline)
       ? post.selected_headline
       : (options[0] ?? '')
-  const seedPhotos = (post.photo_urls ?? []).slice(0, MAX_PHOTOS)
+  const seedPhotos = (post.photo_urls ?? []).filter(isUsablePhotoUrl).slice(0, MAX_PHOTOS)
   const noTrip = !post.trip_id
   const needsStoragePicker = !noTrip
   return {
     selectedHeadline,
     caption: post.caption_fb ?? '',
     selectedUrls: seedPhotos,
-    availableUrls: noTrip ? [...new Set(post.photo_urls ?? [])] : [],
+    availableUrls: noTrip ? [...new Set(seedPhotos)] : [],
     photosLoading: needsStoragePicker,
     busy: false,
   }
@@ -220,9 +232,12 @@ function ReviewCard({
 }) {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
   const tour = post.tours
   const noTrip = !post.trip_id
   const isManual = isManualTargetAccount(post.target_account)
+  const canAddMore = draft.selectedUrls.length < MAX_PHOTOS
 
   useEffect(() => {
     if (noTrip || !post.trip_id) {
@@ -236,19 +251,21 @@ function ReviewCard({
 
     ;(async () => {
       try {
-        const urls = await listTripPhotoUrls(tripId)
+        const urls = (await listTripPhotoUrls(tripId)).filter(isUsablePhotoUrl)
         if (cancelled) return
-        const merged = [...new Set([...seedSelected, ...urls])]
+        const merged = [...new Set([...seedSelected, ...urls].filter(isUsablePhotoUrl))]
         onDraftChange({
           availableUrls: merged,
           photosLoading: false,
+          // Keep seed selection even when Storage folder is empty (common —
+          // trip photos often live under Photos/… not trip-photos/{uuid}/).
           selectedUrls: seedSelected.filter((u) => merged.includes(u)),
         })
       } catch (err) {
         console.error('[ContentReview] listTripPhotoUrls failed:', err)
         if (cancelled) return
         onDraftChange({
-          availableUrls: seedSelected,
+          availableUrls: seedSelected.filter(isUsablePhotoUrl),
           photosLoading: false,
         })
         toast('โหลดรูปทริปไม่สำเร็จ', 'error')
@@ -272,6 +289,48 @@ function ReviewCard({
       return
     }
     onDraftChange({ selectedUrls: [...draft.selectedUrls, url] })
+  }
+
+  async function handleUploadFiles(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []).filter((f) => f.type.startsWith('image/'))
+    e.target.value = ''
+    if (!files.length) {
+      toast('กรุณาเลือกรูปภาพ', 'error')
+      return
+    }
+
+    const slots = MAX_PHOTOS - draft.selectedUrls.length
+    if (slots <= 0) {
+      toast(`เลือกได้สูงสุด ${MAX_PHOTOS} รูป`, 'info')
+      return
+    }
+
+    const toUpload = files.slice(0, slots)
+    if (files.length > slots) {
+      toast(`อัปโหลดได้เพิ่มอีก ${slots} รูป (สูงสุด ${MAX_PHOTOS})`, 'info')
+    }
+
+    setUploading(true)
+    try {
+      const uploaded: string[] = []
+      for (const file of toUpload) {
+        uploaded.push(await uploadContentPhoto(file))
+      }
+      onDraftChange({
+        availableUrls: [...new Set([...draft.availableUrls, ...uploaded])],
+        selectedUrls: [...draft.selectedUrls, ...uploaded],
+      })
+      toast(`เพิ่มแล้ว ${uploaded.length} รูป`, 'success')
+    } catch (err) {
+      console.error('[ContentReview] upload failed:', err)
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast('อัปโหลดรูปไม่สำเร็จ ลองอีกครั้ง', 'error')
+    } finally {
+      setUploading(false)
+    }
   }
 
   async function handleReject() {
@@ -415,15 +474,35 @@ function ReviewCard({
           <span className="text-sm font-medium text-cream-muted">
             รูปภาพ <span className="text-cream-muted/70">(1–{MAX_PHOTOS})</span>
           </span>
-          <span className="text-xs text-cream-muted">
+          <span
+            className={`text-xs ${
+              draft.selectedUrls.length >= 1 ? 'text-teal-400' : 'text-coral'
+            }`}
+          >
             เลือกแล้ว {draft.selectedUrls.length}/{MAX_PHOTOS}
           </span>
         </div>
-        {!noTrip && (post.photo_urls?.length ?? 0) === 0 && (
-          <p className="mt-1.5 text-xs text-cream-muted">
-            ร่างจาก AI ยังไม่มีรูป — เลือกจากโฟลเดอร์ trip-photos ของทริปนี้
+        <p className="mt-1.5 text-xs text-cream-muted">
+          {noTrip
+            ? 'แตะรูปเพื่อเลือก/ยกเลิก หรือกด + เพิ่มรูป เพื่ออัปโหลดจากเครื่อง'
+            : 'เลือกจากแกลเลอรีทริป (ถ้ามี) หรือกด + เพิ่มรูป เพื่ออัปโหลดจากเครื่อง'}
+        </p>
+        {!noTrip && (post.photo_urls?.length ?? 0) === 0 && draft.availableUrls.length === 0 && (
+          <p className="mt-1 text-xs text-cream-muted">
+            ร่างจาก AI ยังไม่มีรูป — อัปโหลดรูป หรือใส่รูปใน Storage แล้วรีเฟรช
           </p>
         )}
+
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="sr-only"
+          disabled={draft.busy || uploading || !canAddMore}
+          onChange={(e) => void handleUploadFiles(e)}
+        />
+
         {draft.photosLoading ? (
           <div
             className="mt-3 flex items-center justify-center gap-2 py-8 text-sm text-cream-muted"
@@ -433,40 +512,74 @@ function ReviewCard({
             <Loader2 className="h-5 w-5 animate-spin text-gold" aria-hidden />
             กำลังโหลดรูปจาก Storage…
           </div>
-        ) : draft.availableUrls.length === 0 ? (
-          <p className="mt-3 text-sm text-cream-muted">
-            {noTrip
-              ? 'ยังไม่มีรูปในร่างนี้'
-              : 'ไม่พบรูปใน trip-photos ของทริปนี้ — อัปโหลดรูปเข้า Storage ก่อนแล้วรีเฟรช'}
-          </p>
         ) : (
           <ul className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
             {draft.availableUrls.map((url) => {
               const checked = draft.selectedUrls.includes(url)
               return (
                 <li key={url}>
-                  <label
-                    className={`relative block cursor-pointer overflow-hidden rounded-editorial border transition-colors ${
-                      checked ? 'border-gold ring-1 ring-gold/40' : 'border-white/8'
+                  <button
+                    type="button"
+                    onClick={() => togglePhoto(url)}
+                    aria-pressed={checked}
+                    className={`relative block w-full cursor-pointer overflow-hidden rounded-editorial border transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 ${
+                      checked
+                        ? 'border-gold ring-1 ring-gold/40'
+                        : 'border-white/8 hover:border-gold/40'
                     }`}
                   >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => togglePhoto(url)}
-                      className="absolute left-2 top-2 z-10 accent-[var(--color-gold,#D4A853)]"
-                    />
                     <img
                       src={url}
                       alt=""
                       loading="lazy"
-                      className="aspect-square w-full object-cover"
+                      className="aspect-[3/2] w-full bg-near-black-green object-cover"
                     />
-                  </label>
+                    <span
+                      className={`absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-md border text-[10px] ${
+                        checked
+                          ? 'border-gold bg-gold text-near-black-green'
+                          : 'border-white/40 bg-near-black-green/70 text-cream'
+                      }`}
+                      aria-hidden
+                    >
+                      {checked ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : null}
+                    </span>
+                    <span className="sr-only">{checked ? 'ยกเลิกเลือก' : 'เลือก'}รูปนี้</span>
+                  </button>
                 </li>
               )
             })}
+
+            {canAddMore ? (
+              <li>
+                <button
+                  type="button"
+                  disabled={draft.busy || uploading}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex aspect-[3/2] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-editorial border border-dashed border-gold/50 bg-gold/5 px-3 text-center transition-colors hover:border-gold hover:bg-gold/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold/60 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {uploading ? (
+                    <>
+                      <Loader2 className="h-7 w-7 animate-spin text-gold" aria-hidden />
+                      <span className="text-xs font-medium text-cream-muted">กำลังอัปโหลด…</span>
+                    </>
+                  ) : (
+                    <>
+                      <ImagePlus className="h-7 w-7 text-gold" aria-hidden />
+                      <span className="text-sm font-medium text-gold">+ เพิ่มรูป</span>
+                      <span className="text-[10px] text-cream-muted">Add photo · จากเครื่อง</span>
+                    </>
+                  )}
+                </button>
+              </li>
+            ) : null}
           </ul>
+        )}
+
+        {!draft.photosLoading && draft.selectedUrls.length < 1 && (
+          <p className="mt-2 text-xs text-coral" role="alert">
+            กรุณาเลือก 1–{MAX_PHOTOS} รูป
+          </p>
         )}
       </div>
 
@@ -481,9 +594,15 @@ function ReviewCard({
         </button>
         <button
           type="button"
-          disabled={draft.busy}
+          disabled={
+            draft.busy ||
+            uploading ||
+            !draft.selectedHeadline.trim() ||
+            draft.selectedUrls.length < 1 ||
+            draft.selectedUrls.length > MAX_PHOTOS
+          }
           onClick={handleApprove}
-          className="rounded-editorial border border-gold/40 bg-gold/15 px-4 py-2.5 text-sm font-medium text-gold transition-colors hover:bg-gold/25 disabled:opacity-50"
+          className="rounded-editorial border border-gold/40 bg-gold/15 px-4 py-2.5 text-sm font-medium text-gold transition-colors hover:bg-gold/25 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isManual ? 'Approve (manual post)' : 'Approve & publish to Page'}
         </button>
