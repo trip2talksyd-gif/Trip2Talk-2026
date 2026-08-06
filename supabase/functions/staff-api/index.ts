@@ -184,8 +184,10 @@ const ACTION_ROLES: Record<string, Role[]> = {
   create_booking_manual: ['OWNER', 'MANAGER', 'CASHIER'],
   mark_attendance: ['OWNER', 'MANAGER', 'GUIDE'],
   year_summary: ['OWNER', 'MANAGER'],
-  delete_tour: ['OWNER', 'MANAGER'],
+  delete_tour: ['OWNER'],
   update_tour_status: ['OWNER', 'MANAGER'],
+  archive_tour: ['OWNER'],
+  unarchive_tour: ['OWNER'],
   update_tour_itinerary: ['OWNER', 'MANAGER'],
   record_payment: ['OWNER', 'MANAGER', 'CASHIER'],
   list_payments_for_booking: ['OWNER', 'MANAGER', 'CASHIER'],
@@ -1442,9 +1444,9 @@ Deno.serve(async (req) => {
       }
 
       case 'delete_tour': {
-        // Permanent delete — only for trips that never had a real booking
-        // (test/example rows). Anything with bookings must be kept for tax
-        // records, so we refuse rather than cascade-delete.
+        // Permanent delete — OWNER only, and only for trips that never had a
+        // real booking (test/example rows). Anything with bookings must be
+        // archived instead so tax/audit history stays intact.
         const { id } = params as { id: string }
         if (!id) return json({ error: 'invalid_params' }, 400)
 
@@ -1463,15 +1465,64 @@ Deno.serve(async (req) => {
         return json({ ok: true })
       }
 
+      case 'archive_tour': {
+        // Soft-hide — OWNER only. Keeps the row + bookings; removes from
+        // public listings and default staff "Upcoming" lists.
+        const { id } = params as { id: string }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+
+        const { data, error } = await admin
+          .from('tours')
+          .update({ status: 'archived' })
+          .eq('id', id)
+          .select()
+          .single()
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'unarchive_tour': {
+        // Restore archived trip to a live listing status (default confirmed).
+        const { id, status } = params as { id: string; status?: string }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+        const next = status && ['draft', 'published', 'confirmed', 'completed'].includes(status)
+          ? status
+          : 'confirmed'
+
+        const { data: existing, error: existingError } = await admin
+          .from('tours')
+          .select('id, status')
+          .eq('id', id)
+          .maybeSingle()
+        if (existingError) throw existingError
+        if (!existing) return json({ error: 'not_found' }, 404)
+        if (String(existing.status).toLowerCase() !== 'archived') {
+          return json({ error: 'not_archived' }, 409)
+        }
+
+        const { data, error } = await admin
+          .from('tours')
+          .update({ status: next })
+          .eq('id', id)
+          .select()
+          .single()
+        if (error) throw error
+        return json({ data })
+      }
+
       case 'update_tour_status': {
         // Soft-cancel/restore — keeps the row (and any bookings) intact for
         // accounting/tax records, unlike delete_tour. Used when a trip can't
         // run (weather, not enough people, etc.) so it should disappear from
         // public listings and staff dropdowns without losing its history.
+        // Prefer archive_tour / unarchive_tour for OWNER housekeeping archives.
         const { id, status } = params as { id: string; status: string }
         if (!id || !status) return json({ error: 'invalid_params' }, 400)
-        const allowed = ['draft', 'published', 'confirmed', 'completed', 'cancelled']
+        const allowed = ['draft', 'published', 'confirmed', 'completed', 'cancelled', 'archived']
         if (!allowed.includes(status)) return json({ error: 'invalid_status' }, 400)
+        if (status === 'archived' && session.role !== 'OWNER') {
+          return json({ error: 'forbidden' }, 403)
+        }
 
         const { data, error } = await admin
           .from('tours')

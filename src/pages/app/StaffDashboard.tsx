@@ -1,21 +1,28 @@
 import { useEffect, useMemo, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
+  Archive,
   Camera,
   CreditCard,
   FileCheck,
   MapPin,
   Mountain,
   Plane,
+  RotateCcw,
   Send,
+  Trash2,
   Trees,
 } from 'lucide-react'
 import {
+  archiveTour,
+  deleteTour,
   fetchConfirmedTours,
   fetchBookingsForTour,
+  fetchToursAdmin,
   listWaiversForTour,
   markAttendance,
   seatsRemaining,
+  unarchiveTour,
   updateBookingDetails,
   cancelBooking,
   isBookingCancelled,
@@ -26,6 +33,7 @@ import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import CancelBookingDialog from '../../components/app/CancelBookingDialog'
+import ArchiveTourDialog from '../../components/app/ArchiveTourDialog'
 import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
 import TripDaySafetyQuickView from '../../components/app/TripDaySafetyQuickView'
 import {
@@ -39,8 +47,10 @@ import {
 } from '../../components/app/staffUi'
 
 type ManifestFilter = 'active' | 'cancelled' | 'all'
+type TourListTab = 'upcoming' | 'archived'
 
 const CAN_CANCEL_ROLES = new Set(['OWNER', 'MANAGER', 'CASHIER'])
+const CAN_ADMIN_LIST_ROLES = new Set(['OWNER', 'MANAGER'])
 
 /** Destination-themed accent for tour cards (dark staff shell). */
 function tripTheme(tripCode: string): { bar: string; iconBg: string; Icon: typeof Camera } {
@@ -100,9 +110,12 @@ export default function StaffDashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [filter, setFilter] = useState<ManifestFilter>('active')
+  const [tourTab, setTourTab] = useState<TourListTab>('upcoming')
   const staffName = sessionStorage.getItem('staff_name') ?? 'Staff'
   const staffRole = sessionStorage.getItem('staff_role')
   const canCancel = staffRole ? CAN_CANCEL_ROLES.has(staffRole) : false
+  const isOwner = staffRole === 'OWNER'
+  const canAdminList = staffRole ? CAN_ADMIN_LIST_ROLES.has(staffRole) : false
 
   // Inline "แก้ไข" flow for fixing a typo'd name/phone/email on a booking —
   // does not touch payment status, so it's safe to edit anytime, then
@@ -116,6 +129,12 @@ export default function StaffDashboard() {
 
   const [cancelling, setCancelling] = useState<TourBooking | null>(null)
   const [cancelSubmitting, setCancelSubmitting] = useState(false)
+
+  const [tourAction, setTourAction] = useState<{
+    tour: Tour
+    mode: 'archive' | 'unarchive' | 'delete'
+  } | null>(null)
+  const [tourActionSubmitting, setTourActionSubmitting] = useState(false)
 
   function openEdit(booking: TourBooking) {
     setEditingId(booking.id)
@@ -185,15 +204,53 @@ export default function StaffDashboard() {
   const load = useCallback(() => {
     setLoading(true)
     setError('')
-    fetchConfirmedTours()
+    const loader = canAdminList ? fetchToursAdmin() : fetchConfirmedTours()
+    loader
       .then(setTours)
       .catch(() => setError('Could not load tours'))
       .finally(() => setLoading(false))
-  }, [])
+  }, [canAdminList])
 
   useEffect(() => {
     load()
   }, [load])
+
+  async function confirmTourAction() {
+    if (!tourAction || !isOwner) return
+    setTourActionSubmitting(true)
+    const { tour, mode } = tourAction
+    try {
+      if (mode === 'archive') {
+        const updated = await archiveTour(tour.id)
+        setTours((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
+        if (selected?.id === tour.id) setSelected(null)
+        toast('Archived trip', 'success')
+      } else if (mode === 'unarchive') {
+        const updated = await unarchiveTour(tour.id, 'confirmed')
+        setTours((prev) => prev.map((t) => (t.id === updated.id ? updated : t)))
+        toast('Restored trip', 'success')
+      } else {
+        await deleteTour(tour.id)
+        setTours((prev) => prev.filter((t) => t.id !== tour.id))
+        if (selected?.id === tour.id) setSelected(null)
+        toast('Deleted trip', 'success')
+      }
+      setTourAction(null)
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      const msg = err instanceof Error ? err.message : ''
+      if (msg.includes('has_bookings')) {
+        toast('Cannot delete — trip has bookings. Archive instead.', 'error')
+      } else {
+        toast(mode === 'delete' ? 'Delete failed' : mode === 'archive' ? 'Archive failed' : 'Restore failed', 'error')
+      }
+    } finally {
+      setTourActionSubmitting(false)
+    }
+  }
 
   useEffect(() => {
     if (!selected) {
@@ -227,7 +284,13 @@ export default function StaffDashboard() {
   }
 
   const today = new Date().toISOString().slice(0, 10)
-  const upcoming = tours.filter((t) => t.departure_date && t.departure_date >= today)
+  const liveStatuses = new Set(['confirmed', 'published', 'active'])
+  const upcoming = tours.filter((t) => {
+    const s = (t.status ?? '').toLowerCase()
+    return liveStatuses.has(s) && t.departure_date && t.departure_date >= today
+  })
+  const archived = tours.filter((t) => (t.status ?? '').toLowerCase() === 'archived')
+  const visibleTours = tourTab === 'archived' ? archived : upcoming
 
   const filteredManifest = useMemo(() => {
     if (filter === 'all') return manifest
@@ -272,50 +335,124 @@ export default function StaffDashboard() {
 
         {!loading && !error && (
           <section>
-            <h2 className="text-sm font-medium text-cream-muted">Upcoming tours</h2>
-            <ul className="mt-4 space-y-3">
-              {upcoming.map((tour) => {
-                const theme = tripTheme(tour.trip_code)
-                const TripIcon = theme.Icon
-                const selectedCard = selected?.id === tour.id
-                const left = seatsRemaining(tour)
-                return (
-                  <li key={tour.id}>
-                    <button
-                      type="button"
-                      onClick={() => setSelected(tour)}
-                      className={`group w-full overflow-hidden rounded-2xl border text-left shadow-[0_12px_28px_-18px_rgba(0,0,0,0.65)] transition-[border-color,background-color,transform] active:scale-[0.99] ${
-                        selectedCard
-                          ? 'border-teal-500/50 bg-surface-card ring-1 ring-teal-500/30'
-                          : 'border-white/8 bg-surface-card/70 hover:border-white/18 hover:bg-surface-card'
-                      }`}
-                    >
-                      <div className={`h-1 w-full ${theme.bar}`} />
-                      <div className="px-4 py-3.5">
-                        <div className="flex items-start gap-3">
-                          <span
-                            className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${theme.iconBg}`}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h2 className="text-sm font-medium text-cream-muted">
+                {tourTab === 'archived' ? 'Archived tours' : 'Upcoming tours'}
+              </h2>
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => setTourTab('upcoming')}
+                  className={tourTab === 'upcoming' ? staffTabActiveClass : staffTabIdleClass}
+                >
+                  Upcoming ({upcoming.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setTourTab('archived')}
+                  className={tourTab === 'archived' ? staffTabActiveClass : staffTabIdleClass}
+                >
+                  Archived ({archived.length})
+                </button>
+              </div>
+            </div>
+            {visibleTours.length === 0 ? (
+              <p className="mt-4 text-sm text-cream-muted">
+                {tourTab === 'archived' ? 'No archived tours' : 'No upcoming tours'}
+              </p>
+            ) : (
+              <ul className="mt-4 space-y-3">
+                {visibleTours.map((tour) => {
+                  const theme = tripTheme(tour.trip_code)
+                  const TripIcon = theme.Icon
+                  const selectedCard = selected?.id === tour.id
+                  const left = seatsRemaining(tour)
+                  return (
+                    <li key={tour.id}>
+                      <div
+                        className={`group relative w-full overflow-hidden rounded-3xl border text-left shadow-[0_12px_28px_-18px_rgba(0,0,0,0.65)] transition-[border-color,background-color] ${
+                          selectedCard
+                            ? 'border-teal-500/50 bg-surface-card ring-1 ring-teal-500/30'
+                            : 'border-white/8 bg-surface-card/70'
+                        }`}
+                      >
+                        <div className={`h-1 w-full ${theme.bar}`} />
+                        <div className="flex items-stretch">
+                          <button
+                            type="button"
+                            onClick={() => setSelected(tour)}
+                            className="min-w-0 flex-1 px-4 py-3.5 text-left transition-colors hover:bg-white/[0.03] active:scale-[0.99]"
                           >
-                            <TripIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
-                          </span>
-                          <div className="min-w-0 flex-1">
-                            <p className="font-serif text-[15px] leading-snug text-cream sm:text-base">
-                              {tour.name_en}
-                            </p>
-                            <p className="mt-1 text-xs text-cream-muted">{tour.departure_date}</p>
-                            <SeatsProgress
-                              booked={tour.booked_seats}
-                              max={tour.max_seats}
-                              left={left}
-                            />
-                          </div>
+                            <div className="flex items-start gap-3">
+                              <span
+                                className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${theme.iconBg}`}
+                              >
+                                <TripIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+                              </span>
+                              <div className="min-w-0 flex-1">
+                                <p className="font-serif text-[15px] leading-snug text-cream sm:text-base">
+                                  {tour.name_en}
+                                </p>
+                                <p className="mt-1 text-xs text-cream-muted">
+                                  {tour.trip_code} · {tour.departure_date}
+                                </p>
+                                <SeatsProgress
+                                  booked={tour.booked_seats}
+                                  max={tour.max_seats}
+                                  left={left}
+                                />
+                              </div>
+                            </div>
+                          </button>
+                          {isOwner && (
+                            <div className="flex shrink-0 flex-col justify-center gap-1 border-l border-white/8 px-2 py-2">
+                              {tourTab === 'upcoming' ? (
+                                <button
+                                  type="button"
+                                  title="Archive trip"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setTourAction({ tour, mode: 'archive' })
+                                  }}
+                                  className="rounded-xl p-2 text-cream-muted transition-colors hover:bg-amber/15 hover:text-amber"
+                                >
+                                  <Archive className="h-4 w-4" strokeWidth={2} aria-hidden />
+                                </button>
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    title="Restore trip"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setTourAction({ tour, mode: 'unarchive' })
+                                    }}
+                                    className="rounded-xl p-2 text-cream-muted transition-colors hover:bg-teal-500/15 hover:text-teal-400"
+                                  >
+                                    <RotateCcw className="h-4 w-4" strokeWidth={2} aria-hidden />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    title="Delete permanently (only if zero bookings ever)"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      setTourAction({ tour, mode: 'delete' })
+                                    }}
+                                    className="rounded-xl p-2 text-cream-muted transition-colors hover:bg-coral/15 hover:text-coral"
+                                  >
+                                    <Trash2 className="h-4 w-4" strokeWidth={2} aria-hidden />
+                                  </button>
+                                </>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
-                    </button>
-                  </li>
-                )
-              })}
-            </ul>
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
           </section>
         )}
 
@@ -494,6 +631,16 @@ export default function StaffDashboard() {
           submitting={cancelSubmitting}
           onConfirm={confirmCancel}
           onClose={() => !cancelSubmitting && setCancelling(null)}
+        />
+      )}
+
+      {tourAction && (
+        <ArchiveTourDialog
+          tour={tourAction.tour}
+          mode={tourAction.mode}
+          submitting={tourActionSubmitting}
+          onConfirm={() => void confirmTourAction()}
+          onClose={() => !tourActionSubmitting && setTourAction(null)}
         />
       )}
     </div>

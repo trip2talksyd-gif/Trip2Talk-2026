@@ -138,7 +138,11 @@ export default function TripManagerPage() {
   // Past trips are hidden by default so the list doesn't grow forever, but
   // "แสดงทริปเก่า" reveals full history any time, e.g. at tax time.
   const allTours = useMemo(
-    () => tours.filter((t) => t.status.toLowerCase() !== 'cancelled'),
+    () =>
+      tours.filter((t) => {
+        const s = t.status.toLowerCase()
+        return s !== 'cancelled' && s !== 'archived'
+      }),
     [tours],
   )
   const pastCount = useMemo(() => allTours.filter((t) => !isUpcoming(t)).length, [allTours])

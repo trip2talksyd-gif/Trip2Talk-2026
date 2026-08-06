@@ -1,5 +1,11 @@
 export type TripType = 'oneday' | 'overnight' | 'multiday'
-export type TourStatus = 'draft' | 'published' | 'confirmed' | 'completed' | 'cancelled'
+export type TourStatus =
+  | 'draft'
+  | 'published'
+  | 'confirmed'
+  | 'completed'
+  | 'cancelled'
+  | 'archived'
 
 /** DB / admin itinerary day — bilingual simple day card (optional override of CMS). */
 export type TourItineraryDay = {

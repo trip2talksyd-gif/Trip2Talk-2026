@@ -193,9 +193,10 @@ export async function fetchAllTours(): Promise<Tour[]> {
       logSupabaseError('fetchAllTours', error)
       throw error
     }
-    const tours = sortByDepartureDate(normalizeTours(data as TourRow[])).filter(
-      (t) => statusLower(t) !== 'cancelled',
-    )
+    const tours = sortByDepartureDate(normalizeTours(data as TourRow[])).filter((t) => {
+      const s = statusLower(t)
+      return s !== 'cancelled' && s !== 'archived'
+    })
     return tours
   } catch (err) {
     if (!(err && typeof err === 'object' && 'code' in err)) {
@@ -936,9 +937,25 @@ export function isBookingCancelled(b: Pick<TourBooking, 'cancelled_at' | 'bookin
 /** Soft-cancels or restores a tour by flipping its status — unlike
  * deleteTour(), this keeps the row (and any bookings) intact for
  * accounting/tax records, just hides it from public listings and staff
- * dropdowns. Pass 'published' to undo an accidental cancel. */
+ * dropdowns. Pass 'published' to undo an accidental cancel.
+ * Prefer archiveTour() for OWNER housekeeping (status=archived). */
 export async function updateTourStatus(id: string, status: TourStatus): Promise<Tour> {
   const row = await callStaffApi<TourRow>('update_tour_status', { id, status })
+  return normalizeTours([row])[0]
+}
+
+/** OWNER-only soft archive — hides trip from Upcoming / public lists, keeps history. */
+export async function archiveTour(id: string): Promise<Tour> {
+  const row = await callStaffApi<TourRow>('archive_tour', { id })
+  return normalizeTours([row])[0]
+}
+
+/** OWNER-only restore from archived → confirmed (or optional status). */
+export async function unarchiveTour(
+  id: string,
+  status: 'draft' | 'published' | 'confirmed' | 'completed' = 'confirmed',
+): Promise<Tour> {
+  const row = await callStaffApi<TourRow>('unarchive_tour', { id, status })
   return normalizeTours([row])[0]
 }
 
