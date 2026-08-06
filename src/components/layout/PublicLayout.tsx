@@ -6,9 +6,7 @@ import InstallPrompt from '../InstallPrompt'
 import PublicFooter from './PublicFooter'
 import BottomNav from './BottomNav'
 import OfflineBanner from './OfflineBanner'
-
-const TRIP2TALK_LOGO_URL =
-  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Logo/Trip2talk%20(1).png'
+import BrandLogo from '../brand/BrandLogo'
 
 const menuLinks = [
   { to: '/trips', key: 'nav.trips' as const },
@@ -50,12 +48,13 @@ export default function PublicLayout() {
               isHome ? 'text-cream' : 'text-teal-800'
             }`}
           >
-            <img
-              src={TRIP2TALK_LOGO_URL}
-              alt=""
-              className="h-[30px] w-[30px] shrink-0 rounded-full object-cover sm:h-[34px] sm:w-[34px]"
+            <BrandLogo
+              size="md"
+              tone={isHome ? 'dark' : 'light'}
+              withWordmark
+              decorative
+              wordmarkClassName={isHome ? 'text-cream' : 'text-teal-800'}
             />
-            <span className="truncate">Trip2Talk</span>
           </Link>
 
           <nav className="hidden flex-1 items-center justify-center gap-6 lg:flex">

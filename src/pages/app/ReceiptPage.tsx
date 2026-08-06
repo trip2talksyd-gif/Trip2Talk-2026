@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useToast } from '../../components/ui/Toast'
 import { PAYID_OPTIONS } from '../../data/paymentDetails'
+import { BRAND_BADGE_PNG_SRC } from '../../data/brand'
 import {
   StaffButton,
   staffShellClass,
@@ -64,8 +65,7 @@ const SELLER = {
   address: '11a Edinburgh Rd, Forestville, Sydney NSW 2087, Australia',
   phone: '+61 452 044 382',
   email: 'trip2talksyd@gmail.com',
-  logoSrc:
-    'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Logo/Trip2talk%20(1).png',
+  logoSrc: BRAND_BADGE_PNG_SRC,
 }
 
 // Bank details shown in the invoice footer — the NAB PayID matches the

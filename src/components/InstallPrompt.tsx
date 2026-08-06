@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Download, X } from 'lucide-react'
 import { useLang } from '../hooks/useLang'
+import BrandLogo from './brand/BrandLogo'
 
 const DISMISS_KEY = 'trip2talk_install_dismissed'
 
@@ -68,9 +69,7 @@ export default function InstallPrompt() {
   return (
     <div className="fixed bottom-[4.5rem] left-0 right-0 z-[90] mx-auto max-w-2xl px-4">
       <div className="flex items-center gap-3 rounded-xl border border-teal-700/20 bg-white p-3 shadow-lg ring-1 ring-black/5">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-teal-900 text-sm font-bold text-white">
-          T2T
-        </div>
+        <BrandLogo size="md" tone="light" decorative />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold text-ink">{title}</p>
           <p className="text-xs text-gray-500">{subtitle}</p>

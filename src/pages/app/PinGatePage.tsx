@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Lock } from 'lucide-react'
 import { verifyStaffPin } from '../../lib/toursApi'
 import type { StaffRole } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
 import { setStaffSession } from '../../lib/supabaseStaff'
 import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
 import { staffShellClass } from '../../components/app/staffUi'
+import BrandLogo from '../../components/brand/BrandLogo'
 
 const MAX_ATTEMPTS = 3
 const LOCKOUT_MS = 30_000
@@ -128,9 +128,7 @@ export default function PinGatePage() {
 
       <div className="liquid-glass relative w-full max-w-xs rounded-2xl p-8">
         <div className="flex flex-col items-center">
-          <div className="liquid-glass rounded-full p-4 ring-1 ring-white/10">
-            <Lock className="h-8 w-8 text-gold" />
-          </div>
+          <BrandLogo size="xl" tone="dark" />
           <h1 className="mt-5 font-serif text-xl text-cream">{t('pin.welcome')}</h1>
           <p className="mt-1 text-sm text-cream-muted">Enter 4-digit PIN</p>
 

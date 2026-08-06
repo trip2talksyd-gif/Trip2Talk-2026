@@ -10,13 +10,21 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // Registration lives in src/pwa.ts via virtual:pwa-register (reload + update checks).
       injectRegister: null,
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
+      includeAssets: [
+        'favicon.ico',
+        'favicon-16.png',
+        'favicon-32.png',
+        'apple-touch-icon.png',
+        'brand/trip2talk-badge.png',
+        'brand/trip2talk-badge.webp',
+        'brand/trip2talk-og.jpg',
+      ],
       manifest: {
         name: 'Trip2Talk - Thai Photo Tours Australia',
         short_name: 'Trip2Talk',
         description: 'Private photo journeys for Thai travelers in Australia',
-        theme_color: '#1a7a4a',
-        background_color: '#ffffff',
+        theme_color: '#16262b',
+        background_color: '#16262b',
         display: 'standalone',
         start_url: '/',
         icons: [
