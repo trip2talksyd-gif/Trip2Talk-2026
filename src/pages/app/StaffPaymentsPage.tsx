@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Trash2 } from 'lucide-react'
 import {
   addPendingInstallment,
+  deletePaymentInstallment,
   fetchCustomerLoyalty,
   fetchPaymentsForBooking,
   fetchTourByCode,
@@ -28,6 +30,8 @@ import {
   StaffInput,
 } from '../../components/app/staffUi'
 
+const CAN_DELETE_INSTALLMENT = new Set(['OWNER', 'MANAGER'])
+
 function progressLabel(booking: TourBooking, payments: BookingPayment[]): string {
   const paid = payments.filter((p) => p.status === 'paid' || (!p.status && p.paid_at))
   const plan = booking.payment_plan_installments ?? Math.max(payments.length, 1)
@@ -42,6 +46,9 @@ export default function StaffPaymentsPage() {
   const { tt } = useLang()
   const { toast } = useToast()
   const navigate = useNavigate()
+  const staffRole = sessionStorage.getItem('staff_role') ?? ''
+  const canDeleteInstallment = CAN_DELETE_INSTALLMENT.has(staffRole)
+
   const [query, setQuery] = useState('')
   const [rows, setRows] = useState<CustomerPaymentSearchRow[]>([])
   const [loading, setLoading] = useState(false)
@@ -52,6 +59,10 @@ export default function StaffPaymentsPage() {
   const [addLabel, setAddLabel] = useState('')
   const [addDue, setAddDue] = useState('')
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<{
+    booking: TourBooking
+    payment: BookingPayment
+  } | null>(null)
 
   const title = tt('staff.payments.title')
   const searchBi = tt('staff.payments.search')
@@ -175,6 +186,32 @@ export default function StaffPaymentsPage() {
     }
   }
 
+  async function handleConfirmDelete() {
+    if (!pendingDelete || !canDeleteInstallment) return
+    const { booking, payment } = pendingDelete
+    setBusyId(payment.id)
+    try {
+      const result = await deletePaymentInstallment(payment.id)
+      setRows((prev) =>
+        prev.map((r) =>
+          r.booking.id === booking.id
+            ? { booking: result.booking, payments: result.payments }
+            : r,
+        ),
+      )
+      setPendingDelete(null)
+      toast('Installment deleted / ลบงวดแล้ว', 'success')
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast('Could not delete installment', 'error')
+    } finally {
+      setBusyId(null)
+    }
+  }
+
   return (
     <div className={staffShellClass}>
       <StaffPageHeader
@@ -244,7 +281,7 @@ export default function StaffPaymentsPage() {
                           key={p.id}
                           className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-near-black-green/50 px-2.5 py-2 text-[11px]"
                         >
-                          <div>
+                          <div className="min-w-0 flex-1">
                             <p className="font-semibold text-cream">
                               #{p.installment_no} {p.label ?? 'Payment'} · {formatAud(p.amount_aud)}
                             </p>
@@ -254,15 +291,29 @@ export default function StaffPaymentsPage() {
                               {p.receipt_invoice_number ? ` · ${p.receipt_invoice_number}` : ''}
                             </p>
                           </div>
-                          {(p.status === 'pending' || p.status === 'overdue') && (
-                            <StaffButton
-                              disabled={busyId === p.id}
-                              onClick={() => void handleMarkPaid(booking, p)}
-                              className="w-auto px-2.5 py-1 text-[10px] uppercase"
-                            >
-                              Mark paid
-                            </StaffButton>
-                          )}
+                          <div className="flex shrink-0 items-center gap-1.5">
+                            {(p.status === 'pending' || p.status === 'overdue') && (
+                              <StaffButton
+                                disabled={busyId === p.id}
+                                onClick={() => void handleMarkPaid(booking, p)}
+                                className="w-auto px-2.5 py-1 text-[10px] uppercase"
+                              >
+                                Mark paid
+                              </StaffButton>
+                            )}
+                            {canDeleteInstallment && (
+                              <button
+                                type="button"
+                                title="Delete installment / ลบงวด"
+                                aria-label={`Delete installment #${p.installment_no}`}
+                                disabled={busyId === p.id}
+                                onClick={() => setPendingDelete({ booking, payment: p })}
+                                className="rounded-lg p-1.5 text-cream-muted transition-colors hover:bg-coral/15 hover:text-coral disabled:opacity-50"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+                              </button>
+                            )}
+                          </div>
                         </div>
                       ))}
 
@@ -305,6 +356,59 @@ export default function StaffPaymentsPage() {
           })}
         </ul>
       </StaffMain>
+
+      {pendingDelete && (
+        <div
+          className="staff-shell fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 text-cream sm:items-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-installment-title"
+          onClick={() => (busyId ? undefined : setPendingDelete(null))}
+        >
+          <div
+            className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-near-black-green p-4 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="delete-installment-title" className="font-serif text-lg text-cream">
+              Delete installment #{pendingDelete.payment.installment_no} —{' '}
+              {formatAud(pendingDelete.payment.amount_aud)}?
+            </h2>
+            <p className="mt-1 font-thai text-sm text-cream-muted">ยืนยันลบงวดชำระนี้?</p>
+            <p className="mt-2 text-xs text-cream-muted">
+              This cannot be undone. Invoice number stays in the audit log only — PDF files are not
+              auto-deleted.
+              <span className="mt-1 block font-thai">
+                ลบแล้วกู้คืนไม่ได้ · เลขใบเสร็จเก็บใน audit · ไม่ลบไฟล์ PDF อัตโนมัติ
+              </span>
+            </p>
+            <p className="mt-2 text-[11px] text-cream-muted">
+              {pendingDelete.payment.label ?? 'Payment'}
+              {pendingDelete.payment.receipt_invoice_number
+                ? ` · ${pendingDelete.payment.receipt_invoice_number}`
+                : ''}
+            </p>
+            <div className="mt-4 flex gap-2">
+              <StaffButton
+                type="button"
+                variant="danger"
+                disabled={busyId === pendingDelete.payment.id}
+                onClick={() => void handleConfirmDelete()}
+                className="min-h-11 flex-1 bg-coral px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-coral/90"
+              >
+                {busyId === pendingDelete.payment.id ? 'Deleting…' : 'Delete / ลบ'}
+              </StaffButton>
+              <StaffButton
+                type="button"
+                variant="secondary"
+                disabled={busyId === pendingDelete.payment.id}
+                onClick={() => setPendingDelete(null)}
+              >
+                Cancel
+              </StaffButton>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

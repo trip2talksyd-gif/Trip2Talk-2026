@@ -784,6 +784,21 @@ export async function updateInstallment(params: {
   return callStaffApi<BookingPayment>('update_installment', params)
 }
 
+export type DeletePaymentInstallmentResult = {
+  deleted_id: string
+  booking: TourBooking
+  payments: BookingPayment[]
+}
+
+/** OWNER/MANAGER — hard-delete one installment; recalculates booking paid total. */
+export async function deletePaymentInstallment(
+  paymentId: string,
+): Promise<DeletePaymentInstallmentResult> {
+  return callStaffApi<DeletePaymentInstallmentResult>('delete_payment_installment', {
+    paymentId,
+  })
+}
+
 export type InstallmentIncomeSummary = {
   total_aud: number
   count: number
