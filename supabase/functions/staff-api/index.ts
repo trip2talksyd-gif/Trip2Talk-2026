@@ -732,7 +732,7 @@ Deno.serve(async (req) => {
       }
 
       case 'list_photos_pending': {
-        // Trips that have departed (or are past) but photos not marked delivered.
+        // Ended trips with highlight and/or full album still outstanding.
         const today = new Date().toISOString().slice(0, 10)
         const { data: tours, error: tErr } = await admin
           .from('tours')
@@ -759,11 +759,13 @@ Deno.serve(async (req) => {
 
         const { data: bookings, error } = await admin
           .from('tour_bookings')
-          .select('id, trip_code, first_name_en, last_name_en, email, phone, photos_delivered, photos_delivered_at, gallery_link, booking_status, cancelled_at')
+          .select(
+            'id, trip_code, first_name_en, last_name_en, email, phone, photos_delivered, photos_delivered_at, highlight_photos_delivered, highlight_photos_delivered_at, full_photos_delivered, full_photos_delivered_at, gallery_link, booking_status, cancelled_at',
+          )
           .in('trip_code', endedCodes)
-          .eq('photos_delivered', false)
           .is('cancelled_at', null)
           .neq('booking_status', 'cancelled')
+          .or('highlight_photos_delivered.eq.false,full_photos_delivered.eq.false')
         if (error) throw error
 
         return json({
@@ -775,16 +777,25 @@ Deno.serve(async (req) => {
       }
 
       case 'mark_photos_delivered': {
-        const { bookingId, galleryLink, tripCode, allOnTrip } = params as {
+        const { bookingId, galleryLink, tripCode, allOnTrip, stage } = params as {
           bookingId?: string
           galleryLink?: string
           tripCode?: string
           allOnTrip?: boolean
+          stage?: 'highlight' | 'full'
         }
         const now = new Date().toISOString()
-        const payload: Record<string, unknown> = {
-          photos_delivered: true,
-          photos_delivered_at: now,
+        const which = stage === 'highlight' ? 'highlight' : 'full'
+        const payload: Record<string, unknown> = {}
+        if (which === 'highlight') {
+          payload.highlight_photos_delivered = true
+          payload.highlight_photos_delivered_at = now
+        } else {
+          payload.full_photos_delivered = true
+          payload.full_photos_delivered_at = now
+          // Keep legacy flag for Phase H review cron (fires after full delivery).
+          payload.photos_delivered = true
+          payload.photos_delivered_at = now
         }
         if (typeof galleryLink === 'string' && galleryLink.trim()) {
           payload.gallery_link = galleryLink.trim()
