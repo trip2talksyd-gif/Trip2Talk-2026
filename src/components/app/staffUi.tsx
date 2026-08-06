@@ -10,7 +10,7 @@ import BrandLogo from '../brand/BrandLogo'
 
 /** Root class for every /app/* page — enables shared form chrome in index.css */
 export const staffShellClass =
-  'staff-shell relative min-h-svh overflow-x-hidden bg-near-black-green text-cream'
+  'staff-shell relative flex h-full max-h-full flex-col overflow-hidden bg-near-black-green text-cream'
 
 export const staffCardClass =
   'staff-card relative overflow-hidden rounded-2xl border border-white/[0.09] bg-gradient-to-br from-[#2a4249]/90 via-surface-card/95 to-teal-900/90 shadow-[0_18px_40px_-22px_rgba(0,0,0,0.8),inset_0_1px_0_0_rgba(255,255,255,0.07)]'
@@ -56,7 +56,7 @@ export function StaffPageHeader({
   children?: ReactNode
 }) {
   return (
-    <header className="staff-page-header relative overflow-hidden border-b border-white/10 px-4 pb-5 pt-4">
+    <header className="staff-page-header relative shrink-0 overflow-hidden border-b border-white/10 px-4 pb-5 pt-4">
       <div
         className="pointer-events-none absolute inset-0 bg-gradient-to-br from-teal-700/30 via-transparent to-teal-500/[0.08]"
         aria-hidden
@@ -88,7 +88,10 @@ export function StaffPageHeader({
 
 export function StaffMain({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
-    <main className={`relative mx-auto max-w-2xl space-y-7 px-4 py-7 ${className}`.trim()}>
+    <main
+      className={`app-scroll relative mx-auto w-full max-w-2xl space-y-7 px-4 py-7 ${className}`.trim()}
+      data-app-scroll
+    >
       {children}
     </main>
   )

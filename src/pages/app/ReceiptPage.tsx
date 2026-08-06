@@ -183,12 +183,12 @@ export default function ReceiptPage() {
   if (!data) {
     return (
       <div className={staffShellClass}>
-        <header className="border-b border-white/8 px-4 py-4">
+        <header className="shrink-0 border-b border-white/8 px-4 py-4">
           <Link to="/app/cashier" className="text-sm text-teal-500 hover:text-teal-400">
             ← กลับไป Cashier POS
           </Link>
         </header>
-        <main className="mx-auto max-w-md px-4 py-6">
+        <main className="app-scroll mx-auto w-full max-w-md px-4 py-6" data-app-scroll>
           <p className="text-sm text-cream-muted">ไม่พบข้อมูลใบเสร็จ</p>
         </main>
       </div>
@@ -197,12 +197,13 @@ export default function ReceiptPage() {
 
   return (
     <div className={`${staffShellClass} print:bg-white print:text-black`}>
-      <header className="border-b border-white/8 px-4 py-4 print:hidden">
+      <header className="shrink-0 border-b border-white/8 px-4 py-4 print:hidden">
         <button type="button" onClick={() => navigate(-1)} className="text-sm text-teal-500 hover:text-teal-400">
           ← ย้อนกลับ
         </button>
       </header>
 
+      <div className="app-scroll" data-app-scroll>
       <div className="mx-auto max-w-md space-y-3 px-4 py-6 print:hidden">
         <StaffButton onClick={handleDownloadImage} disabled={downloading}>
           {downloading ? 'กำลังสร้างรูป...' : '📥 ดาวน์โหลดรูปใบเสร็จ (ส่ง FB ได้เลย)'}
@@ -361,6 +362,7 @@ export default function ReceiptPage() {
         <div className="border-t border-black/10 px-6 py-3 text-center text-xs text-black/50">
           Thank you for choosing Trip2Talk 🙏
         </div>
+      </div>
       </div>
     </div>
   )
