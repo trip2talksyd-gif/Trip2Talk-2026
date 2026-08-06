@@ -59,6 +59,7 @@ export default function StaffWaiverAssistPage() {
   const [confirmed, setConfirmed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [selectedWaiverId, setSelectedWaiverId] = useState<string | null>(null)
   const isOwner = sessionStorage.getItem('staff_role') === 'OWNER'
 
   const clauses = WAIVER_CLAUSES[locale]
@@ -96,10 +97,12 @@ export default function StaffWaiverAssistPage() {
     if (!tripCode) {
       setBookings([])
       setWaivers([])
+      setSelectedWaiverId(null)
       return
     }
     const tour = tours.find((t) => t.trip_code === tripCode)
     if (!tour) return
+    setSelectedWaiverId(null)
     Promise.all([fetchBookingsForTour(tour.id), listWaiversForTour(tripCode)])
       .then(([b, w]) => {
         setBookings(b)
@@ -203,6 +206,7 @@ export default function StaffWaiverAssistPage() {
     try {
       await deleteWaiverSignature(w.id)
       setWaivers((prev) => prev.filter((x) => x.id !== w.id))
+      if (selectedWaiverId === w.id) setSelectedWaiverId(null)
       if (w.booking_id) {
         const stillLinked = waivers.some(
           (x) => x.id !== w.id && x.booking_id === w.booking_id,
@@ -395,27 +399,38 @@ export default function StaffWaiverAssistPage() {
         {tripCode && staffWaivers.length > 0 && (
           <section>
             <StaffSectionTitle>Staff-filled waivers for {tripCode}</StaffSectionTitle>
-            <ul className="mt-2 space-y-2">
-              {staffWaivers.map((w) => {
+            {(() => {
+              const selected = selectedWaiverId
+                ? staffWaivers.find((w) => w.id === selectedWaiverId)
+                : null
+
+              if (selected) {
                 const linked =
-                  bookings.find((b) => b.id === w.booking_id) ??
+                  bookings.find((b) => b.id === selected.booking_id) ??
                   bookings.find(
                     (b) =>
                       `${b.first_name_en} ${b.last_name_en}`.trim().toLowerCase() ===
-                      w.signed_name.trim().toLowerCase(),
+                      selected.signed_name.trim().toLowerCase(),
                   )
                 const email = linked?.email ?? null
                 return (
-                  <li key={w.id}>
+                  <div className="mt-2 space-y-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedWaiverId(null)}
+                      className="text-sm font-medium text-teal-500 transition-colors hover:text-teal-400"
+                    >
+                      ← Back to list
+                    </button>
                     <StaffCard>
                       <div className="flex items-start justify-between gap-2">
-                        <p className="min-w-0 text-sm text-cream">{w.signed_name}</p>
+                        <p className="min-w-0 text-sm text-cream">{selected.signed_name}</p>
                         {isOwner && (
                           <button
                             type="button"
                             title="Delete waiver record (OWNER)"
-                            disabled={deletingId === w.id}
-                            onClick={() => void handleDeleteWaiver(w)}
+                            disabled={deletingId === selected.id}
+                            onClick={() => void handleDeleteWaiver(selected)}
                             className="shrink-0 rounded-xl p-2 text-cream-muted transition-colors hover:bg-coral/15 hover:text-coral disabled:opacity-50"
                           >
                             <Trash2 className="h-4 w-4" strokeWidth={2} aria-hidden />
@@ -424,14 +439,16 @@ export default function StaffWaiverAssistPage() {
                       </div>
                       <div className="mt-1.5">
                         <StaffFilledWaiverBadge
-                          staffName={w.staff_fill_staff_name}
-                          authorizedAt={w.staff_fill_authorized_at ?? w.signed_at}
-                          note={w.staff_fill_authorization_note}
+                          staffName={selected.staff_fill_staff_name}
+                          authorizedAt={
+                            selected.staff_fill_authorized_at ?? selected.signed_at
+                          }
+                          note={selected.staff_fill_authorization_note}
                         />
                       </div>
-                      {w.staff_fill_authorization_note && (
+                      {selected.staff_fill_authorization_note && (
                         <p className="mt-1.5 text-[11px] text-cream-muted">
-                          {w.staff_fill_authorization_note}
+                          {selected.staff_fill_authorization_note}
                         </p>
                       )}
                       {linked ? (
@@ -470,16 +487,44 @@ export default function StaffWaiverAssistPage() {
                         </p>
                       )}
                       <StaffWaiverConfirmActions
-                        waiver={w}
+                        waiver={selected}
                         tripName={selectedTour?.name_en}
                         departureDate={selectedTour?.departure_date}
                         customerEmail={email}
                       />
                     </StaffCard>
-                  </li>
+                  </div>
                 )
-              })}
-            </ul>
+              }
+
+              return (
+                <ul className="mt-2 space-y-2">
+                  {staffWaivers.map((w) => (
+                    <li key={w.id}>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedWaiverId(w.id)}
+                        className="w-full text-left"
+                      >
+                        <StaffCard className="transition-colors hover:border-teal-500/35">
+                          <p className="text-sm text-cream">{w.signed_name}</p>
+                          <div className="mt-1.5">
+                            <StaffFilledWaiverBadge
+                              staffName={w.staff_fill_staff_name}
+                              authorizedAt={w.staff_fill_authorized_at ?? w.signed_at}
+                              note={w.staff_fill_authorization_note}
+                            />
+                          </div>
+                          <p className="mt-2 text-[11px] font-medium text-teal-500">
+                            Open confirmation →
+                          </p>
+                        </StaffCard>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )
+            })()}
           </section>
         )}
       </StaffMain>
