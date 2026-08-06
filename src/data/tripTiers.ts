@@ -20,10 +20,11 @@ export const PREMIUM_TRIP_CODES = [
   'MEL-4D3N',
   'ULU-4D3N',
   'NZ-6D5N',
+  'NZ-10D9N',
 ] as const
 
 /** Premium trips where guests self-book flights (pack callout must not say we arrange flights). */
-export const PREMIUM_SELF_FLIGHT_CODES = ['TAS-SP-3D2N'] as const
+export const PREMIUM_SELF_FLIGHT_CODES = ['TAS-SP-3D2N', 'NZ-10D9N'] as const
 
 export function isPremiumTrip(tripCode: string): boolean {
   const template =
