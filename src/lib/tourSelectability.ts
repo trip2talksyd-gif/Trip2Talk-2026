@@ -111,3 +111,30 @@ export function deriveDatedTripCode(
     : `${abbr}${d1}_${MONTH_ABBRS[end.getUTCMonth()]}${d2}`
   return `${base}-${suffix}`
 }
+
+/**
+ * Infer start travel date (YYYY-MM-DD) from a day-window trip code like
+ * ULU-4D3N-SEP26_29 → 2026-09-26. Returns null for month-only / undated codes.
+ */
+export function parseTravelDateFromTripCode(
+  tripCode: string,
+  now: Date = new Date(),
+): string | null {
+  const parts = tripCode.trim().toUpperCase().split('-').filter(Boolean)
+  const last = parts[parts.length - 1]
+  if (!last || !DAY_RANGE_SUFFIX_RE.test(last)) return null
+  const m = last.match(/^([A-Z]{3})(\d{1,2})_/)
+  if (!m) return null
+  const monthIdx = (MONTH_ABBRS as readonly string[]).indexOf(m[1])
+  if (monthIdx < 0) return null
+  const day = Number(m[2])
+  if (!Number.isFinite(day) || day < 1 || day > 31) return null
+
+  let year = now.getFullYear()
+  const candidate = new Date(Date.UTC(year, monthIdx, day))
+  const cutoff = new Date(now)
+  cutoff.setMonth(cutoff.getMonth() - 2)
+  if (candidate.getTime() < cutoff.getTime()) year += 1
+
+  return `${year}-${String(monthIdx + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+}

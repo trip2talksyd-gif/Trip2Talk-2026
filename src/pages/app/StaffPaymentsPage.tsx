@@ -8,12 +8,16 @@ import {
   fetchPaymentsForBooking,
   fetchTourByCode,
   formatAud,
+  formatTravelDateLabel,
   recordPayment,
+  resolveBookingTravelDate,
   searchCustomerPayments,
+  updateBookingDetails,
   updateInstallment,
   type CustomerLoyalty,
   type CustomerPaymentSearchRow,
 } from '../../lib/toursApi'
+import { parseTravelDateFromTripCode } from '../../lib/tourSelectability'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
@@ -134,6 +138,35 @@ export default function StaffPaymentsPage() {
     }
   }
 
+  async function openInvoice(booking: TourBooking, payment: BookingPayment) {
+    let tripName = booking.trip_code
+    let tourDeparture: string | null = null
+    try {
+      const tour = await fetchTourByCode(booking.trip_code)
+      tripName = tour?.name_en ?? booking.trip_code
+      tourDeparture = tour?.departure_date ?? null
+    } catch {
+      /* receipt still works */
+    }
+    navigate('/app/receipt', {
+      state: {
+        bookingReference: booking.booking_reference,
+        customerName: `${booking.first_name_en} ${booking.last_name_en}`,
+        customerEmail: booking.email,
+        tripName,
+        tripCode: booking.trip_code,
+        departureDate: resolveBookingTravelDate(booking, tourDeparture),
+        amountPaid: Number(payment.amount_aud),
+        paymentMethod: payment.payment_method ?? 'payid',
+        bookingStatus: booking.booking_status,
+        installmentNo: payment.installment_no,
+        installmentPlan: booking.payment_plan_installments,
+        priceAud: null,
+        balanceRemaining: null,
+      },
+    })
+  }
+
   async function handleMarkPaid(booking: TourBooking, payment: BookingPayment) {
     setBusyId(payment.id)
     try {
@@ -152,10 +185,10 @@ export default function StaffPaymentsPage() {
       let tripName = booking.trip_code
       try {
         const tour = await fetchTourByCode(booking.trip_code)
-        departureDate = tour?.departure_date ?? null
+        departureDate = resolveBookingTravelDate(booking, tour?.departure_date ?? null)
         tripName = tour?.name_en ?? booking.trip_code
       } catch {
-        /* receipt still works without tour metadata */
+        departureDate = resolveBookingTravelDate(booking, null)
       }
       // Hand off to tax invoice page for this installment
       navigate('/app/receipt', {
@@ -263,11 +296,29 @@ export default function StaffPaymentsPage() {
                       {booking.booking_status}
                     </p>
                     <p className="mt-1 text-[11px] text-teal-500">{progressLabel(booking, payments)}</p>
+                    <p className="mt-0.5 text-[10px] text-cream-muted">
+                      Travel Date:{' '}
+                      {formatTravelDateLabel(resolveBookingTravelDate(booking, null)) ?? '—'}
+                    </p>
                   </button>
 
                   {open && (
                     <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
                       <LoyaltyBlock booking={booking} />
+                      <TravelDateEditor
+                        booking={booking}
+                        busy={busyId === booking.id}
+                        onBusy={(v) => setBusyId(v ? booking.id : null)}
+                        onUpdated={(next) => {
+                          setRows((prev) =>
+                            prev.map((r) =>
+                              r.booking.id === booking.id ? { ...r, booking: next } : r,
+                            ),
+                          )
+                        }}
+                        onSessionExpired={() => navigate('/app')}
+                        toast={toast}
+                      />
                       {booking.referred_by_booking_id && (
                         <p className="text-[10px] text-cream-muted">
                           Referred by booking: {booking.referred_by_booking_id.slice(0, 8)}…
@@ -299,6 +350,16 @@ export default function StaffPaymentsPage() {
                                 className="w-auto px-2.5 py-1 text-[10px] uppercase"
                               >
                                 Mark paid
+                              </StaffButton>
+                            )}
+                            {(p.status === 'paid' || (!p.status && p.paid_at)) && (
+                              <StaffButton
+                                variant="secondary"
+                                disabled={busyId === p.id}
+                                onClick={() => void openInvoice(booking, p)}
+                                className="w-auto px-2.5 py-1 text-[10px] uppercase"
+                              >
+                                Invoice
                               </StaffButton>
                             )}
                             {canDeleteInstallment && (
@@ -409,6 +470,106 @@ export default function StaffPaymentsPage() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function TravelDateEditor({
+  booking,
+  busy,
+  onBusy,
+  onUpdated,
+  onSessionExpired,
+  toast,
+}: {
+  booking: TourBooking
+  busy: boolean
+  onBusy: (v: boolean) => void
+  onUpdated: (b: TourBooking) => void
+  onSessionExpired: () => void
+  toast: (msg: string, type?: 'success' | 'error' | 'info') => void
+}) {
+  const [tourDeparture, setTourDeparture] = useState<string | null>(null)
+  const derived =
+    tourDeparture ||
+    parseTravelDateFromTripCode(booking.trip_code) ||
+    ''
+  const initial =
+    booking.travel_date?.slice(0, 10) || derived || ''
+  const [value, setValue] = useState(initial)
+  const dirty = (value || '') !== (booking.travel_date?.slice(0, 10) || '')
+
+  useEffect(() => {
+    let cancelled = false
+    fetchTourByCode(booking.trip_code)
+      .then((t) => {
+        if (!cancelled) setTourDeparture(t?.departure_date?.slice(0, 10) ?? null)
+      })
+      .catch(() => {
+        if (!cancelled) setTourDeparture(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [booking.trip_code])
+
+  useEffect(() => {
+    setValue(booking.travel_date?.slice(0, 10) || derived || '')
+  }, [booking.id, booking.travel_date, derived])
+
+  async function save() {
+    onBusy(true)
+    try {
+      const next = await updateBookingDetails(booking.id, {
+        travel_date: value.trim() ? value.trim().slice(0, 10) : null,
+      })
+      onUpdated(next)
+      toast('Travel date saved / บันทึกวันเดินทางแล้ว', 'success')
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        onSessionExpired()
+        return
+      }
+      toast('Could not save travel date', 'error')
+    } finally {
+      onBusy(false)
+    }
+  }
+
+  const preview = formatTravelDateLabel(value || derived) ?? '—'
+
+  return (
+    <div className="rounded-lg border border-white/10 bg-near-black-green/40 px-2.5 py-2">
+      <p className="text-[11px] font-semibold text-cream">
+        Travel Date / วันเดินทาง
+        <span className="ml-2 font-normal text-cream-muted">→ {preview}</span>
+      </p>
+      <p className="mt-0.5 text-[10px] text-cream-muted">
+        Manual override for invoices. Prefills from tour or trip-code when possible.
+      </p>
+      <div className="mt-2 flex flex-wrap items-center gap-2">
+        <StaffInput
+          type="date"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          className="max-w-[11rem] text-xs"
+          disabled={busy}
+        />
+        <StaffButton
+          variant="secondary"
+          disabled={busy || !dirty}
+          onClick={() => void save()}
+          className="w-auto px-2.5 py-1 text-[10px] uppercase"
+        >
+          Save date
+        </StaffButton>
+        {!booking.travel_date && derived && (
+          <span className="text-[10px] text-cream-muted">Suggested: {formatTravelDateLabel(derived)}</span>
+        )}
+        {booking.travel_date && (
+          <span className="text-[10px] text-teal-500">Manual override set</span>
+        )}
+      </div>
     </div>
   )
 }
