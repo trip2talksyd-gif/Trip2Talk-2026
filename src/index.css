@@ -1770,6 +1770,23 @@
 }
 
 /* ---------- Staff /app/* dark shell (shared form + card chrome) ---------- */
+.staff-shell {
+  background-color: var(--teal-900);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 0% -10%, rgba(46, 77, 83, 0.55), transparent 55%),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(233, 147, 90, 0.12), transparent 50%),
+    radial-gradient(ellipse 50% 35% at 50% 100%, rgba(32, 54, 60, 0.8), transparent 60%);
+}
+
+.staff-shell .staff-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+  pointer-events: none;
+}
+
 .staff-shell .staff-control,
 .staff-shell input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='hidden']):not([type='range']):not([type='submit']):not([type='button']):not([type='reset']):not(.staff-check),
 .staff-shell select,
