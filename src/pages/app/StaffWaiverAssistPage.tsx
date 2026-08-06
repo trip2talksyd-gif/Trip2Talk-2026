@@ -14,6 +14,7 @@ import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
+import StaffWaiverConfirmActions from '../../components/app/StaffWaiverConfirmActions'
 import {
   staffShellClass,
   StaffPageHeader,
@@ -178,6 +179,7 @@ export default function StaffWaiverAssistPage() {
   }
 
   const staffWaivers = waivers.filter((w) => w.filled_by_staff)
+  const selectedTour = tours.find((t) => t.trip_code === tripCode) ?? null
 
   return (
     <div className={staffShellClass}>
@@ -346,25 +348,34 @@ export default function StaffWaiverAssistPage() {
           <section>
             <StaffSectionTitle>Staff-filled waivers for {tripCode}</StaffSectionTitle>
             <ul className="mt-2 space-y-2">
-              {staffWaivers.map((w) => (
-                <li key={w.id}>
-                  <StaffCard>
-                    <p className="text-sm text-cream">{w.signed_name}</p>
-                    <div className="mt-1.5">
-                      <StaffFilledWaiverBadge
-                        staffName={w.staff_fill_staff_name}
-                        authorizedAt={w.staff_fill_authorized_at ?? w.signed_at}
-                        note={w.staff_fill_authorization_note}
+              {staffWaivers.map((w) => {
+                const linked = bookings.find((b) => b.id === w.booking_id)
+                const email = linked?.email ?? null
+                return (
+                  <li key={w.id}>
+                    <StaffCard>
+                      <p className="text-sm text-cream">{w.signed_name}</p>
+                      <div className="mt-1.5">
+                        <StaffFilledWaiverBadge
+                          staffName={w.staff_fill_staff_name}
+                          authorizedAt={w.staff_fill_authorized_at ?? w.signed_at}
+                          note={w.staff_fill_authorization_note}
+                        />
+                      </div>
+                      {w.staff_fill_authorization_note && (
+                        <p className="mt-1.5 text-[11px] text-cream-muted">
+                          {w.staff_fill_authorization_note}
+                        </p>
+                      )}
+                      <StaffWaiverConfirmActions
+                        waiver={w}
+                        tripName={selectedTour?.name_en}
+                        customerEmail={email}
                       />
-                    </div>
-                    {w.staff_fill_authorization_note && (
-                      <p className="mt-1.5 text-[11px] text-cream-muted">
-                        {w.staff_fill_authorization_note}
-                      </p>
-                    )}
-                  </StaffCard>
-                </li>
-              ))}
+                    </StaffCard>
+                  </li>
+                )
+              })}
             </ul>
           </section>
         )}
