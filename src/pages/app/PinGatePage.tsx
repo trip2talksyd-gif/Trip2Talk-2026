@@ -114,7 +114,7 @@ export default function PinGatePage() {
   const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', 'back'] as const
 
   return (
-    <div className={`${staffShellClass} relative flex flex-col items-center justify-center px-4`}>
+    <div className={`${staffShellClass} relative`}>
       <div
         className="fixed inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url(${PIN_GATE_BG_SRC})` }}
@@ -125,6 +125,10 @@ export default function PinGatePage() {
         aria-hidden
       />
 
+      <div
+        className="app-scroll flex min-h-full flex-col items-center justify-center px-4"
+        data-app-scroll
+      >
       <div className="liquid-glass relative w-full max-w-xs rounded-2xl p-8">
         <div className="flex flex-col items-center">
           <BrandLogo size="xl" tone="dark" />
@@ -173,6 +177,7 @@ export default function PinGatePage() {
             </div>
           </form>
         </div>
+      </div>
       </div>
     </div>
   )

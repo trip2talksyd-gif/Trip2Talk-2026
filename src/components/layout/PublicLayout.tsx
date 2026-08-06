@@ -32,13 +32,17 @@ export default function PublicLayout() {
   const isHome = location.pathname === '/'
 
   return (
-    <div className={`flex min-h-svh flex-col ${isHome ? 'bg-teal-900' : 'bg-cream'}`}>
+    <div
+      className={`flex h-full max-h-full flex-col overflow-hidden ${
+        isHome ? 'bg-teal-900' : 'bg-cream'
+      }`}
+    >
       <OfflineBanner />
       <header
         className={
           isHome
-            ? 'sticky top-0 z-50 border-b border-white/8 bg-teal-900/95 backdrop-blur'
-            : 'sticky top-0 z-50 border-b border-line bg-card/95 backdrop-blur'
+            ? 'z-50 shrink-0 border-b border-white/8 bg-teal-900/95 backdrop-blur'
+            : 'z-50 shrink-0 border-b border-line bg-card/95 backdrop-blur'
         }
       >
         <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-10 lg:py-[18px]">
@@ -187,21 +191,23 @@ export default function PublicLayout() {
         )}
       </header>
 
-      <main
-        className={`mx-auto w-full flex-1 px-4 pt-4 sm:px-6 ${
-          isHome
-            ? 'max-w-[1280px] pb-4 text-cream lg:px-10'
-            : 'max-w-[1280px] pb-24 text-ink lg:px-10'
-        }`}
-      >
-        <Outlet />
-      </main>
+      <div className="app-scroll" data-app-scroll>
+        <main
+          className={`mx-auto w-full flex-1 px-4 pt-4 sm:px-6 ${
+            isHome
+              ? 'max-w-[1280px] pb-4 text-cream lg:px-10'
+              : 'max-w-[1280px] pb-24 text-ink lg:px-10'
+          }`}
+        >
+          <Outlet />
+        </main>
+
+        <PublicFooter />
+      </div>
 
       <BottomNav />
 
       <InstallPrompt />
-
-      <PublicFooter />
     </div>
   )
 }

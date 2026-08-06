@@ -33,8 +33,17 @@ export default function GalleryLightbox({ photos, initialIndex, onClose }: Props
   }, [onClose, prev, next])
 
   useEffect(() => {
+    const ports = document.querySelectorAll<HTMLElement>('[data-app-scroll]')
+    ports.forEach((el) => {
+      el.dataset.prevOverflow = el.style.overflow
+      el.style.overflow = 'hidden'
+    })
     document.body.style.overflow = 'hidden'
     return () => {
+      ports.forEach((el) => {
+        el.style.overflow = el.dataset.prevOverflow || ''
+        delete el.dataset.prevOverflow
+      })
       document.body.style.overflow = ''
     }
   }, [])

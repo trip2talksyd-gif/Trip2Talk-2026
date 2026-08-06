@@ -67,7 +67,9 @@ createRoot(document.getElementById('root')!).render(
     <RootErrorBoundary>
       <LangProvider>
         <ToastProvider>
-          <App />
+          <div className="h-full min-h-0 overflow-hidden">
+            <App />
+          </div>
         </ToastProvider>
       </LangProvider>
     </RootErrorBoundary>
