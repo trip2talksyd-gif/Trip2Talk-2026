@@ -21,7 +21,10 @@ export const staffChipClass =
   'inline-flex min-h-11 items-center gap-2 rounded-full border border-white/12 bg-gradient-to-b from-white/[0.07] to-surface-card/80 px-3.5 py-2 text-xs font-medium text-cream shadow-[0_8px_18px_-14px_rgba(0,0,0,0.7)] transition-[transform,border-color,background-color,box-shadow] duration-150 hover:-translate-y-0.5 hover:border-teal-500/40 hover:bg-teal-800/70 hover:shadow-[0_12px_24px_-14px_rgba(0,0,0,0.75)] active:translate-y-0 active:scale-[0.98]'
 
 export const staffChipHighlightClass =
-  'inline-flex min-h-12 items-center gap-2.5 rounded-full bg-gradient-to-br from-teal-400 via-teal-500 to-amber px-4 py-2.5 text-sm font-semibold text-near-black-green shadow-[0_12px_28px_-8px_rgba(233,147,90,0.7),0_0_24px_-6px_rgba(239,165,101,0.45),inset_0_1px_0_0_rgba(255,255,255,0.35)] transition-[transform,filter,box-shadow] duration-150 hover:-translate-y-0.5 hover:brightness-[1.04] hover:shadow-[0_16px_32px_-8px_rgba(233,147,90,0.8),0_0_28px_-4px_rgba(239,165,101,0.5)] active:translate-y-0 active:scale-[0.98]'
+  'inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2.5 rounded-full bg-gradient-to-br from-teal-400 via-teal-500 to-amber px-5 py-3.5 text-sm font-semibold text-near-black-green shadow-[0_14px_32px_-8px_rgba(233,147,90,0.75),0_0_28px_-4px_rgba(239,165,101,0.5),inset_0_1px_0_0_rgba(255,255,255,0.35)] transition-[transform,filter,box-shadow] duration-150 hover:-translate-y-0.5 hover:brightness-[1.04] hover:shadow-[0_18px_36px_-8px_rgba(233,147,90,0.85),0_0_32px_-2px_rgba(239,165,101,0.55)] active:translate-y-0 active:scale-[0.98]'
+
+export const staffActionTileClass =
+  'flex min-h-[4.5rem] flex-col items-start justify-center gap-2 rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.07] via-surface-card/80 to-teal-900/70 px-3.5 py-3 text-left shadow-[0_12px_28px_-18px_rgba(0,0,0,0.75),inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-[transform,border-color,background-color,box-shadow] duration-150 hover:-translate-y-0.5 hover:border-teal-500/35 hover:shadow-[0_16px_32px_-16px_rgba(0,0,0,0.8)] active:translate-y-0 active:scale-[0.98]'
 
 export const staffBtnPrimaryClass =
   'inline-flex min-h-11 w-full items-center justify-center rounded-full bg-gradient-to-br from-teal-400 via-teal-500 to-amber px-4 py-2.5 text-sm font-bold text-near-black-green shadow-[0_10px_24px_-8px_rgba(233,147,90,0.65),inset_0_1px_0_0_rgba(255,255,255,0.28)] transition-[opacity,transform,filter] duration-150 hover:brightness-[1.03] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-none'
@@ -112,11 +115,14 @@ export function StaffStatCard({
   value,
   icon,
   tone = 'default',
+  /** 0–1 share vs this month’s peer metrics (real relative bar — not decorative filler). */
+  barRatio,
 }: {
   label: string
   value: string
   icon?: ReactNode
   tone?: 'default' | 'muted' | 'positive' | 'negative'
+  barRatio?: number
 }) {
   const valueTone =
     tone === 'positive'
@@ -129,12 +135,12 @@ export function StaffStatCard({
 
   const barTone =
     tone === 'positive'
-      ? 'from-teal-400/80 to-teal-500/20'
+      ? 'from-teal-400 to-teal-500/40'
       : tone === 'negative'
-        ? 'from-coral/80 to-coral/15'
+        ? 'from-coral to-coral/35'
         : tone === 'muted'
-          ? 'from-cream/35 to-cream/5'
-          : 'from-teal-500/70 to-teal-500/10'
+          ? 'from-cream/50 to-cream/10'
+          : 'from-teal-400 to-teal-500/35'
 
   const iconWrap =
     tone === 'negative'
@@ -143,8 +149,11 @@ export function StaffStatCard({
         ? 'bg-white/8 text-cream-muted ring-white/10'
         : 'bg-teal-500/15 text-teal-400 ring-teal-500/25'
 
+  const ratio = Math.max(0, Math.min(1, barRatio ?? 0))
+  const barPct = `${Math.round(ratio * 100)}%`
+
   return (
-    <StaffCard padding={false} className="p-3.5 sm:p-4">
+    <StaffCard padding={false} className="rounded-3xl p-3.5 sm:p-4">
       <div className="flex items-start justify-between gap-2">
         <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-cream-muted/90">
           {label}
@@ -162,13 +171,37 @@ export function StaffStatCard({
       >
         {value}
       </p>
-      <div
-        className={`mt-3.5 h-1 w-full overflow-hidden rounded-full bg-white/[0.06]`}
-        aria-hidden
-      >
-        <div className={`h-full w-2/3 rounded-full bg-gradient-to-r ${barTone}`} />
+      <div className="mt-3.5 flex h-14 items-end gap-1" aria-hidden>
+        <div className="relative h-full w-full overflow-hidden rounded-xl bg-white/[0.05] ring-1 ring-white/[0.06]">
+          <div
+            className={`absolute inset-x-1 bottom-1 rounded-lg bg-gradient-to-t ${barTone} transition-[height] duration-500`}
+            style={{ height: `calc(${barPct} - 0px)`, minHeight: ratio > 0 ? '6px' : '0px' }}
+          />
+        </div>
       </div>
     </StaffCard>
+  )
+}
+
+/** Dense quick-action tile for secondary ops links (2-col grids). */
+export function StaffActionTile({
+  to,
+  icon,
+  label,
+  className = '',
+}: {
+  to: string
+  icon: ReactNode
+  label: string
+  className?: string
+}) {
+  return (
+    <Link to={to} className={`${staffActionTileClass} ${className}`.trim()}>
+      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-500/15 text-teal-400 ring-1 ring-teal-500/25">
+        {icon}
+      </span>
+      <span className="text-xs font-medium leading-snug text-cream">{label}</span>
+    </Link>
   )
 }
 

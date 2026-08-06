@@ -31,6 +31,7 @@ import { DashboardCardSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import {
   StaffActionChip,
+  StaffActionTile,
   StaffCard,
   StaffMain,
   StaffPageHeader,
@@ -165,29 +166,39 @@ export default function OwnerDashboard() {
   const primaryActions = NAV_LINKS.filter((link) => link.highlighted)
   const secondaryActions = NAV_LINKS.filter((link) => !link.highlighted)
 
+  // Relative bar heights: money metrics share an AUD scale; bookings uses its own
+  // count scale against the busiest of {count, 1} so 0 stays empty and N fills
+  // honestly vs this month only (no fabricated history).
+  const moneyPeak = Math.max(revenue, expenseTotal, Math.abs(netProfit), 1)
+  const bookingPeak = Math.max(activeBookings.length, 1)
+
   const stats = [
     {
       label: 'Bookings (month)',
       value: String(activeBookings.length),
       tone: 'default' as const,
+      barRatio: activeBookings.length / bookingPeak,
       icon: <CalendarDays className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
     },
     {
       label: 'Revenue',
       value: formatAud(revenue),
       tone: 'default' as const,
+      barRatio: revenue / moneyPeak,
       icon: <Banknote className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
     },
     {
       label: 'Expenses',
       value: formatAud(expenseTotal),
       tone: 'muted' as const,
+      barRatio: expenseTotal / moneyPeak,
       icon: <Receipt className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
     },
     {
       label: 'Net profit',
       value: formatAud(netProfit),
       tone: netProfit >= 0 ? ('positive' as const) : ('negative' as const),
+      barRatio: Math.abs(netProfit) / moneyPeak,
       icon:
         netProfit >= 0 ? (
           <TrendingUp className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />
@@ -256,6 +267,7 @@ export default function OwnerDashboard() {
                     value={card.value}
                     tone={card.tone}
                     icon={card.icon}
+                    barRatio={card.barRatio}
                   />
                 ))}
               </div>
@@ -271,12 +283,11 @@ export default function OwnerDashboard() {
                     icon={link.icon}
                     label={link.label}
                     highlighted
-                    className="w-full justify-center sm:w-auto sm:justify-start"
                   />
                 ))}
-                <div className="flex flex-wrap gap-2.5">
+                <div className="grid grid-cols-2 gap-2.5">
                   {secondaryActions.map((link) => (
-                    <StaffActionChip
+                    <StaffActionTile
                       key={link.to}
                       to={link.to}
                       icon={link.icon}
