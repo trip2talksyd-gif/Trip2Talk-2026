@@ -1,5 +1,6 @@
 /** Photo delivery SLAs from trip end date (inclusive calendar days). */
-export const HIGHLIGHT_DEADLINE_DAYS = 3
+/** Highlight window is 1–2 weeks; countdown uses the 2-week upper bound. */
+export const HIGHLIGHT_DEADLINE_DAYS = 14
 /** Hard deadline for full album (14–30 window; UI counts to 30). */
 export const FULL_ALBUM_DEADLINE_DAYS = 30
 

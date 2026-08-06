@@ -866,7 +866,7 @@ export async function markPhotosDelivered(params: {
   tripCode?: string
   galleryLink?: string
   allOnTrip?: boolean
-  /** highlight = 3-day SLA; full = 30-day hard deadline (+ syncs legacy photos_delivered). */
+  /** highlight = 1–2 week SLA; full = 30-day hard deadline (+ syncs legacy photos_delivered). */
   stage?: PhotoDeliveryStage
 }): Promise<unknown> {
   return callStaffApi('mark_photos_delivered', params)
