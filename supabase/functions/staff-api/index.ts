@@ -162,7 +162,7 @@ async function publishToFacebookPage(opts: {
 }
 
 const CONTENT_POST_SELECT =
-  'id, trip_id, post_type, status, headline_options, selected_headline, caption_fb, caption_ig, caption_line, photo_urls, page_id, target_account, group_id, posted_at, facebook_post_id, facebook_post_url, created_at, updated_at, tours:trip_id (id, trip_code, name_en, name_th, departure_date, max_seats, booked_seats)'
+  'id, trip_id, post_type, status, headline_options, selected_headline, caption_fb, caption_ig, caption_line, photo_urls, page_id, target_account, group_id, posted_at, facebook_post_id, facebook_post_url, created_at, updated_at, tours:trip_id (id, trip_code, name_en, name_th, departure_date, max_seats, booked_seats, cover_image_url)'
 
 
 type Role = 'OWNER' | 'MANAGER' | 'GUIDE' | 'CASHIER'
@@ -1821,6 +1821,21 @@ Deno.serve(async (req) => {
         }
         if (!Array.isArray(photo_urls) || photo_urls.length < 1 || photo_urls.length > 4) {
           return json({ error: 'invalid_params' }, 400)
+        }
+        const badPhoto = photo_urls.find(
+          (u) =>
+            typeof u !== 'string' ||
+            !/^https?:\/\//i.test(u.trim()) ||
+            /placehold\.co|via\.placeholder\.com|dummyimage\.com|picsum\.photos/i.test(u),
+        )
+        if (badPhoto) {
+          return json(
+            {
+              error: 'invalid_photo_urls',
+              hint: 'photo_urls must be real https image URLs (placeholders not allowed)',
+            },
+            400,
+          )
         }
 
         const account = existing.target_account as ContentTargetAccount

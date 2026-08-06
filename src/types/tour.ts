@@ -298,5 +298,6 @@ export interface ContentPost {
     departure_date: string | null
     max_seats: number
     booked_seats: number
+    cover_image_url?: string | null
   } | null
 }
