@@ -1,5 +1,7 @@
 import type { BilingualList } from './tripDetails'
 
+import { resolveTemplateTripCode } from '../lib/tripCode'
+
 export type PackingClimate = 'cold' | 'desert' | 'coastal' | 'general'
 
 export type PackingGuide = {
@@ -124,6 +126,7 @@ export const PACKING_GUIDES: Record<string, PackingGuide> = {
   'TAS-3D2N': { climate: 'cold', groups: coldWeather },
   'TAS-LH-4D3N': { climate: 'cold', groups: coldWeather },
   'TAS-SU-4D3N': { climate: 'cold', groups: coldWeather },
+  'TAS-SP-3D2N': { climate: 'cold', groups: coldWeather },
   'ULU-4D3N': { climate: 'desert', groups: desert },
   'MEL-4D3N': { climate: 'coastal', groups: coastal },
   'BER-3D2N': { climate: 'coastal', groups: coastal },
@@ -137,5 +140,8 @@ export const PACKING_GUIDES: Record<string, PackingGuide> = {
 }
 
 export function getPackingGuide(tripCode: string): PackingGuide {
-  return PACKING_GUIDES[tripCode.toUpperCase()] ?? { climate: 'general', groups: general }
+  const code = tripCode.toUpperCase()
+  if (PACKING_GUIDES[code]) return PACKING_GUIDES[code]
+  const template = resolveTemplateTripCode(tripCode, Object.keys(PACKING_GUIDES))
+  return (template && PACKING_GUIDES[template]) || { climate: 'general', groups: general }
 }

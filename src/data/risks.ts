@@ -146,6 +146,7 @@ export const MIN_PAX_RULES: Record<string, number> = {
   'TAS-3D2N': 3,
   'TAS-LH-4D3N': 3,
   'TAS-SU-4D3N': 3,
+  'TAS-SP-3D2N': 3,
   'ULU-4D3N': 3,
   'MEL-4D3N': 3,
   'BER-3D2N': 2,

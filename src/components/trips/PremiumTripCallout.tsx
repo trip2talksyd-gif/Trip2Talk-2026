@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Camera, Luggage } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
-import { PREMIUM_MODEL_CALLOUT, PREMIUM_PACK_CALLOUT } from '../../data/tripTiers'
+import { PREMIUM_MODEL_CALLOUT, premiumPackCalloutFor } from '../../data/tripTiers'
 
 type Props = {
   tripCode: string
@@ -9,6 +9,7 @@ type Props = {
 
 export default function PremiumTripCallout({ tripCode }: Props) {
   const { lang } = useLang()
+  const pack = premiumPackCalloutFor(tripCode)
 
   return (
     <div className="space-y-3">
@@ -27,7 +28,7 @@ export default function PremiumTripCallout({ tripCode }: Props) {
       <div className="flex gap-3 rounded-editorial border border-line bg-mint-100 p-4">
         <Luggage className="mt-0.5 h-5 w-5 shrink-0 text-teal-700" />
         <p className="text-sm leading-relaxed text-ink/80">
-          {lang === 'th' ? PREMIUM_PACK_CALLOUT.th : PREMIUM_PACK_CALLOUT.en}{' '}
+          {lang === 'th' ? pack.th : pack.en}{' '}
           <Link
             to={`/trips/${tripCode}/prep`}
             className="font-medium text-teal-700 underline underline-offset-2"
