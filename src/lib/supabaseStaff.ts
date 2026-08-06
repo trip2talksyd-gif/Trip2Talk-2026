@@ -32,6 +32,35 @@ export class StaffSessionExpiredError extends Error {
   }
 }
 
+/** Non-2xx staff-api response with parsed JSON body (when available). */
+export class StaffApiError extends Error {
+  readonly status: number
+  readonly action: string
+  readonly code?: string
+  readonly detail?: string
+  readonly hint?: string
+
+  constructor(
+    action: string,
+    status: number,
+    body: { error?: string; detail?: string; hint?: string; message?: string } | null,
+  ) {
+    const code = body?.error
+    const detail = body?.detail || body?.message
+    const hint = body?.hint || undefined
+    const msg =
+      detail?.trim() ||
+      (code ? `staff-api "${action}" failed: ${code}` : `staff-api "${action}" failed: ${status}`)
+    super(msg)
+    this.name = 'StaffApiError'
+    this.status = status
+    this.action = action
+    this.code = code
+    this.detail = detail
+    this.hint = hint
+  }
+}
+
 /**
  * Calls the staff-api Edge Function with the current session token.
  * Staff-only reads/writes that are not yet on direct authenticated PostgREST
@@ -60,8 +89,24 @@ export async function callStaffApi<T = unknown>(
     clearStaffSession()
     throw new StaffSessionExpiredError()
   }
-  if (!res.ok) throw new Error(`staff-api "${action}" failed: ${res.status}`)
 
-  const body = await res.json()
-  return (body.data ?? body) as T
+  type ApiBody = {
+    data?: T
+    error?: string
+    detail?: string
+    hint?: string
+    message?: string
+  }
+  let body: ApiBody | null = null
+  try {
+    body = (await res.json()) as ApiBody
+  } catch {
+    body = null
+  }
+
+  if (!res.ok) {
+    throw new StaffApiError(action, res.status, body)
+  }
+
+  return (body?.data ?? body) as T
 }

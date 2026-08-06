@@ -417,7 +417,11 @@ function ReviewCard({
         navigate('/app')
         return
       }
-      toast('อนุมัติไม่สำเร็จ ลองอีกครั้ง', 'error')
+      const msg =
+        err instanceof Error && err.message.trim()
+          ? err.message.trim()
+          : 'อนุมัติไม่สำเร็จ ลองอีกครั้ง'
+      toast(msg.length > 220 ? `${msg.slice(0, 217)}…` : msg, 'error')
       onDraftChange({ busy: false })
       onRestore()
     }
