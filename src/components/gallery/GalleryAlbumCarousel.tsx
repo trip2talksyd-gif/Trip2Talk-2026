@@ -113,7 +113,13 @@ export default function GalleryAlbumCarousel({
       </div>
 
       <div className="relative px-3 pb-5 pt-5 sm:px-5 sm:pb-6 sm:pt-6">
-        <div className="relative mx-auto h-[min(62vw,420px)] max-w-5xl sm:h-[380px] md:h-[420px]">
+        {/* Aspect-locked stage: every slide is 4:5 with object-cover (no native ratio spill). */}
+        <div className="relative mx-auto w-full max-w-5xl">
+          <div
+            className="mx-auto aspect-[4/5] w-[min(88vw,400px)] opacity-0 md:w-[min(48vw,420px)]"
+            aria-hidden
+          />
+          <div className="absolute inset-0">
           {albums.map((album, i) => {
             const offset = relativeOffset(i, active, len)
             const abs = Math.abs(offset)
@@ -128,7 +134,7 @@ export default function GalleryAlbumCarousel({
             return (
               <article
                 key={album.id}
-                className={`absolute left-1/2 top-0 h-full w-[min(88vw,520px)] -translate-x-1/2 transition-[transform,opacity,filter] duration-500 ease-out ${visibilityClass}`}
+                className={`absolute left-1/2 top-0 aspect-[4/5] w-[min(88vw,400px)] -translate-x-1/2 transition-[transform,opacity,filter] duration-500 ease-out md:w-[min(48vw,420px)] ${visibilityClass}`}
                 style={{
                   zIndex: 20 - abs,
                   transform: `translateX(calc(-50% + ${offset * 58}%)) scale(${
@@ -151,7 +157,7 @@ export default function GalleryAlbumCarousel({
                   <img
                     src={photoSrc(album.hero)}
                     alt={`${album.nameEn} — ${album.taglineEn}`}
-                    className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                    className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
                     loading={i === 0 ? 'eager' : 'lazy'}
                     draggable={false}
                   />
@@ -211,6 +217,7 @@ export default function GalleryAlbumCarousel({
               </button>
             </>
           )}
+          </div>
         </div>
 
         {len > 1 && (

@@ -6,11 +6,21 @@ import {
   GALLERY_PHOTOS,
   photoSrc,
   type GalleryFilter,
+  type GalleryPhoto,
 } from '../../data/galleryPhotos'
 import { getGalleryAlbums } from '../../data/galleryAlbums'
 import GalleryAlbumCarousel from '../../components/gallery/GalleryAlbumCarousel'
 import GalleryLightbox from '../../components/gallery/GalleryLightbox'
 import BiText from '../../components/ui/BiText'
+
+/** Short location tag for caption chips, e.g. "Ben Lomond · TAS" → BEN LOMOND */
+function locationTag(photo: GalleryPhoto): string {
+  const raw = photo.location.split(/[·,]/)[0]?.trim() ?? ''
+  return raw
+    .replace(/\s+/g, ' ')
+    .slice(0, 22)
+    .toUpperCase()
+}
 
 export default function GalleryPage() {
   const { tt } = useLang()
@@ -107,29 +117,33 @@ export default function GalleryPage() {
                 </span>
               </div>
             ) : (
-              <div className="grid grid-cols-3 gap-[5px] sm:grid-cols-4 sm:gap-1.5 md:grid-cols-5">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5 md:grid-cols-4 lg:grid-cols-5">
                 {items.map((photo, idx) => {
                   const caption = `${photo.caption_en} / ${photo.caption_th}`
-                  const tall = idx % 7 === 0
+                  const tag = locationTag(photo)
                   return (
                     <button
                       key={photo.id}
                       type="button"
                       onClick={() => setLightboxIndex(idx)}
-                      className={`overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600 ${
-                        tall ? 'row-span-2' : ''
-                      }`}
+                      className="group relative aspect-square overflow-hidden rounded-xl bg-teal-900/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
                     >
                       <img
                         src={photoSrc(photo)}
                         alt={caption}
                         loading="lazy"
-                        className={`w-full object-cover ${
-                          tall
-                            ? 'h-[164px] sm:h-[200px]'
-                            : 'h-[78px] sm:h-[110px]'
-                        }`}
+                        className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.04]"
                       />
+                      <span
+                        className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 via-black/25 to-transparent"
+                        aria-hidden
+                      />
+                      <span className="absolute inset-x-1.5 bottom-1.5 truncate rounded-full bg-cream/93 px-2 py-[3px] text-left text-[8px] font-bold leading-tight tracking-wide text-ink shadow-[0_4px_10px_-4px_rgba(0,0,0,0.45)] sm:inset-x-2 sm:bottom-2 sm:px-2.5 sm:text-[9px]">
+                        {photo.caption_en}
+                        {tag ? (
+                          <span className="font-extrabold text-teal-800"> #{tag}</span>
+                        ) : null}
+                      </span>
                     </button>
                   )
                 })}
