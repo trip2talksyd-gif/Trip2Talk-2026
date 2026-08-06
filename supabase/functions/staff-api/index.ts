@@ -79,6 +79,125 @@ function resolvePageCredentials(account: ContentTargetAccount): {
   return null
 }
 
+/**
+ * If the stored secret is a User token, exchange it for the Page token via
+ * /me/accounts (required for /{page-id}/photos). Falls back to the stored token.
+ */
+async function resolvePublishAccessToken(
+  pageId: string,
+  accessToken: string,
+): Promise<{ token: string; source: 'page_secret' | 'exchanged_from_user' }> {
+  // Already a Page token when /me identity matches the Page id
+  try {
+    const meRes = await fetch(
+      `${GRAPH_BASE}/me?fields=id&access_token=${encodeURIComponent(accessToken)}`,
+    )
+    const meJson = (await meRes.json()) as { id?: string; error?: unknown }
+    if (meJson.id && meJson.id === pageId) {
+      return { token: accessToken, source: 'page_secret' }
+    }
+  } catch {
+    // continue — try exchange
+  }
+
+  try {
+    const accRes = await fetch(
+      `${GRAPH_BASE}/me/accounts?fields=id,access_token&access_token=${encodeURIComponent(accessToken)}`,
+    )
+    const accJson = (await accRes.json()) as {
+      data?: Array<{ id?: string; access_token?: string }>
+      error?: { message?: string }
+    }
+    const match = (accJson.data ?? []).find((p) => p.id === pageId && p.access_token)
+    if (match?.access_token) {
+      return { token: match.access_token, source: 'exchanged_from_user' }
+    }
+    if (accJson.error?.message) {
+      console.warn('[staff-api] /me/accounts failed', accJson.error.message)
+    }
+  } catch (err) {
+    console.warn('[staff-api] page token exchange failed', err)
+  }
+
+  return { token: accessToken, source: 'page_secret' }
+}
+
+type GraphErrorBody = {
+  error?: {
+    message?: string
+    type?: string
+    code?: number
+    error_subcode?: number
+    fbtrace_id?: string
+  }
+}
+
+class FacebookPublishError extends Error {
+  readonly fbCode?: number
+  readonly fbSubcode?: number
+  readonly hint?: string
+
+  constructor(message: string, opts?: { fbCode?: number; fbSubcode?: number; hint?: string }) {
+    super(message)
+    this.name = 'FacebookPublishError'
+    this.fbCode = opts?.fbCode
+    this.fbSubcode = opts?.fbSubcode
+    this.hint = opts?.hint
+  }
+}
+
+function formatGraphFailure(
+  endpoint: string,
+  payload: GraphErrorBody,
+  pageId: string,
+): FacebookPublishError {
+  const err = payload.error
+  const fbMsg = err?.message?.trim() || JSON.stringify(payload)
+  const code = err?.code
+  const sub = err?.error_subcode
+  let hint: string | undefined
+  // #100 / #33 = object missing or token lacks permission for this Page
+  if (code === 100 || sub === 33) {
+    hint =
+      `Token cannot post to Page ${pageId}. Use a long-lived Page access token ` +
+      `(from /me/accounts for this Page), not a short-lived User token. ` +
+      `Needs pages_manage_posts + pages_read_engagement.`
+  } else if (code === 190) {
+    hint = 'Access token expired or invalid — generate a new long-lived Page token.'
+  } else if (/url|image|picture|download|fetch/i.test(fbMsg)) {
+    hint =
+      'Facebook could not fetch the image URL — use a public https image (e.g. content-photos bucket).'
+  }
+  return new FacebookPublishError(`Facebook rejected the post: ${fbMsg}`, {
+    fbCode: code,
+    fbSubcode: sub,
+    hint,
+  })
+}
+
+async function graphPostJson(
+  url: string,
+  body: URLSearchParams,
+): Promise<Record<string, unknown>> {
+  let res: Response
+  try {
+    res = await fetch(url, { method: 'POST', body })
+  } catch (netErr) {
+    throw new FacebookPublishError(
+      `Facebook rejected the post: network error calling Graph API (${netErr instanceof Error ? netErr.message : String(netErr)})`,
+    )
+  }
+  let jsonRes: Record<string, unknown>
+  try {
+    jsonRes = (await res.json()) as Record<string, unknown>
+  } catch {
+    throw new FacebookPublishError(
+      `Facebook rejected the post: non-JSON response (HTTP ${res.status})`,
+    )
+  }
+  return jsonRes
+}
+
 /** Official Graph Page publish — /photos (album) → /feed. Never used for groups. */
 async function publishToFacebookPage(opts: {
   pageId: string
@@ -97,7 +216,32 @@ async function publishToFacebookPage(opts: {
 
   const images = opts.imageUrls.filter((u) => /^https?:\/\//i.test(u))
   if (images.length === 0) {
-    throw new Error('Graph publish requires public https image URLs')
+    throw new FacebookPublishError(
+      'Facebook rejected the post: Graph publish requires public https image URLs',
+      { hint: 'Select or upload at least one real photo URL before approving.' },
+    )
+  }
+
+  // Preflight: confirm token can see this Page (catches User-token / wrong-page early)
+  const resolved = await resolvePublishAccessToken(opts.pageId, opts.accessToken)
+  const accessToken = resolved.token
+  if (resolved.source === 'exchanged_from_user') {
+    console.log('[staff-api] Using Page token exchanged from User token via /me/accounts')
+  }
+
+  try {
+    const probeUrl =
+      `${GRAPH_BASE}/${opts.pageId}?fields=id,name&access_token=${encodeURIComponent(accessToken)}`
+    const probeRes = await fetch(probeUrl)
+    const probeJson = (await probeRes.json()) as GraphErrorBody & { id?: string; name?: string }
+    if (probeJson.error || !probeJson.id) {
+      throw formatGraphFailure(`GET /${opts.pageId}`, probeJson, opts.pageId)
+    }
+  } catch (err) {
+    if (err instanceof FacebookPublishError) throw err
+    throw new FacebookPublishError(
+      `Facebook rejected the post: could not verify Page access (${err instanceof Error ? err.message : String(err)})`,
+    )
   }
 
   // Single photo — published photo endpoint
@@ -106,16 +250,12 @@ async function publishToFacebookPage(opts: {
     body.set('url', images[0])
     body.set('caption', opts.message)
     body.set('published', 'true')
-    body.set('access_token', opts.accessToken)
-    const res = await fetch(`${GRAPH_BASE}/${opts.pageId}/photos`, {
-      method: 'POST',
-      body,
-    })
-    const jsonRes = (await res.json()) as { id?: string; post_id?: string; error?: unknown }
+    body.set('access_token', accessToken)
+    const jsonRes = await graphPostJson(`${GRAPH_BASE}/${opts.pageId}/photos`, body)
     if (!jsonRes.id && !jsonRes.post_id) {
-      throw new Error(`Graph /photos failed: ${JSON.stringify(jsonRes)}`)
+      throw formatGraphFailure('/photos', jsonRes as GraphErrorBody, opts.pageId)
     }
-    const postId = jsonRes.post_id || jsonRes.id!
+    const postId = String(jsonRes.post_id || jsonRes.id)
     return {
       facebook_post_id: postId,
       facebook_post_url: `https://www.facebook.com/${opts.pageId}/posts/${postId}`,
@@ -128,16 +268,12 @@ async function publishToFacebookPage(opts: {
     const body = new URLSearchParams()
     body.set('url', url)
     body.set('published', 'false')
-    body.set('access_token', opts.accessToken)
-    const uploadRes = await fetch(`${GRAPH_BASE}/${opts.pageId}/photos`, {
-      method: 'POST',
-      body,
-    })
-    const uploadJson = (await uploadRes.json()) as { id?: string; error?: unknown }
+    body.set('access_token', accessToken)
+    const uploadJson = await graphPostJson(`${GRAPH_BASE}/${opts.pageId}/photos`, body)
     if (!uploadJson.id) {
-      throw new Error(`Graph photo upload failed: ${JSON.stringify(uploadJson)}`)
+      throw formatGraphFailure('/photos (upload)', uploadJson as GraphErrorBody, opts.pageId)
     }
-    mediaFbids.push(uploadJson.id)
+    mediaFbids.push(String(uploadJson.id))
   }
 
   const feedBody = new URLSearchParams()
@@ -146,17 +282,13 @@ async function publishToFacebookPage(opts: {
     'attached_media',
     JSON.stringify(mediaFbids.map((media_fbid) => ({ media_fbid }))),
   )
-  feedBody.set('access_token', opts.accessToken)
-  const postRes = await fetch(`${GRAPH_BASE}/${opts.pageId}/feed`, {
-    method: 'POST',
-    body: feedBody,
-  })
-  const postJson = (await postRes.json()) as { id?: string; error?: unknown }
+  feedBody.set('access_token', accessToken)
+  const postJson = await graphPostJson(`${GRAPH_BASE}/${opts.pageId}/feed`, feedBody)
   if (!postJson.id) {
-    throw new Error(`Graph /feed failed: ${JSON.stringify(postJson)}`)
+    throw formatGraphFailure('/feed', postJson as GraphErrorBody, opts.pageId)
   }
   return {
-    facebook_post_id: postJson.id,
+    facebook_post_id: String(postJson.id),
     facebook_post_url: `https://www.facebook.com/${postJson.id}`,
   }
 }
@@ -214,6 +346,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   update_content_post: ['OWNER'],
   mark_content_post_posted: ['OWNER'],
   insert_content_post: ['OWNER'],
+  probe_facebook_page_creds: ['OWNER'],
 }
 
 /**
@@ -2050,12 +2183,19 @@ Deno.serve(async (req) => {
           })
         } catch (graphErr) {
           console.error('[staff-api] Graph publish failed', graphErr)
+          const detail =
+            graphErr instanceof Error ? graphErr.message : String(graphErr)
+          const hint =
+            graphErr instanceof FacebookPublishError ? graphErr.hint : undefined
+          // 422 (not 502): Facebook rejected the post — avoid looking like a gateway crash
           return json(
             {
               error: 'graph_publish_failed',
-              detail: graphErr instanceof Error ? graphErr.message : String(graphErr),
+              detail,
+              hint: hint ?? null,
+              message: hint ? `${detail} (${hint})` : detail,
             },
-            502,
+            422,
           )
         }
 
@@ -2163,6 +2303,94 @@ Deno.serve(async (req) => {
           .single()
         if (error) throw error
         return json({ data })
+      }
+
+      case 'probe_facebook_page_creds': {
+        // OWNER diagnostics — never returns the raw token.
+        const account = ((params as { account?: string }).account ||
+          'trip2talk_page') as ContentTargetAccount
+        if (!VALID_TARGET_ACCOUNTS.includes(account) || isManualTargetAccount(account)) {
+          return json({ error: 'invalid_params' }, 400)
+        }
+        const creds = resolvePageCredentials(account)
+        if (!creds) {
+          return json(
+            {
+              error: 'meta_credentials_missing',
+              account,
+              page_id_set: false,
+              token_set: false,
+            },
+            503,
+          )
+        }
+        const tokenTail = creds.accessToken.slice(-6)
+        const meRes = await fetch(
+          `${GRAPH_BASE}/me?fields=id,name&access_token=${encodeURIComponent(creds.accessToken)}`,
+        )
+        const meJson = (await meRes.json()) as {
+          id?: string
+          name?: string
+          error?: { message?: string; code?: number; error_subcode?: number }
+        }
+        const pageRes = await fetch(
+          `${GRAPH_BASE}/${creds.pageId}?fields=id,name&access_token=${encodeURIComponent(creds.accessToken)}`,
+        )
+        const pageJson = (await pageRes.json()) as {
+          id?: string
+          name?: string
+          error?: { message?: string; code?: number; error_subcode?: number }
+        }
+        const accountsRes = await fetch(
+          `${GRAPH_BASE}/me/accounts?fields=id,name,access_token,tasks&access_token=${encodeURIComponent(creds.accessToken)}`,
+        )
+        const accountsJson = (await accountsRes.json()) as {
+          data?: Array<{ id?: string; name?: string; tasks?: string[]; access_token?: string }>
+          error?: { message?: string; code?: number }
+        }
+        const pages = (accountsJson.data ?? []).map((p) => ({
+          id: p.id,
+          name: p.name,
+          tasks: p.tasks ?? [],
+          has_page_token: Boolean(p.access_token),
+          is_configured_page: p.id === creds.pageId,
+        }))
+        const configured = pages.find((p) => p.is_configured_page)
+        const looksLikeUserToken = Boolean(meJson.id && meJson.id !== creds.pageId)
+        return json({
+          data: {
+            account,
+            configured_page_id: creds.pageId,
+            token_tail: tokenTail,
+            token_length: creds.accessToken.length,
+            looks_like_user_token: looksLikeUserToken,
+            me: meJson.error
+              ? { ok: false, error: meJson.error.message, code: meJson.error.code }
+              : { ok: true, id: meJson.id, name: meJson.name },
+            page: pageJson.error
+              ? {
+                  ok: false,
+                  error: pageJson.error.message,
+                  code: pageJson.error.code,
+                  error_subcode: pageJson.error.error_subcode,
+                }
+              : { ok: true, id: pageJson.id, name: pageJson.name },
+            managed_pages: pages,
+            accounts_error: accountsJson.error?.message ?? null,
+            configured_page_tasks: configured?.tasks ?? null,
+            can_publish: Boolean(
+              pageJson.id &&
+                !pageJson.error &&
+                (!looksLikeUserToken ||
+                  configured?.tasks?.some((t) =>
+                    ['CREATE_CONTENT', 'MANAGE', 'MODERATE'].includes(t),
+                  )),
+            ),
+            hint: looksLikeUserToken
+              ? 'Secret looks like a User token. Paste the Page access_token from Graph /me/accounts for this Page into FACEBOOK_PAGE_ACCESS_TOKEN_TRIP2TALK.'
+              : null,
+          },
+        })
       }
 
       default:
