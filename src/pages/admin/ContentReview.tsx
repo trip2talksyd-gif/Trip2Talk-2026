@@ -18,6 +18,7 @@ import {
   targetAccountLabel,
   targetAccountOpenUrl,
 } from '../../data/facebookDestinations'
+import { getGalleryPhotosForTrip, photoSrc } from '../../data/galleryPhotos'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { useToast } from '../../components/ui/Toast'
 import {
@@ -30,15 +31,29 @@ import {
 
 const MAX_PHOTOS = 4
 
-/** AI / seed drafts sometimes ship a dead gray placeholder — not a real photo. */
+/** Seed drafts used placehold.co — never treat those as publishable photos. */
 function isUsablePhotoUrl(url: string | null | undefined): boolean {
   const u = (url ?? '').trim()
   if (!u) return false
+  if (!/^https?:\/\//i.test(u)) return false
   if (/placehold\.co/i.test(u)) return false
   if (/via\.placeholder\.com/i.test(u)) return false
   if (/dummyimage\.com/i.test(u)) return false
   if (/picsum\.photos/i.test(u)) return false
   return true
+}
+
+/** Real destination gallery + trip cover for Content Review photo picking. */
+function galleryUrlsForTrip(tripCode: string | null | undefined, coverUrl?: string | null): string[] {
+  const urls: string[] = []
+  if (isUsablePhotoUrl(coverUrl)) urls.push(coverUrl!.trim())
+  if (tripCode) {
+    for (const photo of getGalleryPhotosForTrip(tripCode)) {
+      const src = photoSrc(photo)
+      if (isUsablePhotoUrl(src)) urls.push(src)
+    }
+  }
+  return [...new Set(urls)]
 }
 
 type CardDraft = {
@@ -246,29 +261,35 @@ function ReviewCard({
     }
 
     let cancelled = false
-    const seedSelected = draft.selectedUrls
+    const seedSelected = draft.selectedUrls.filter(isUsablePhotoUrl)
     const tripId = post.trip_id
+    const tripCode = tour?.trip_code
+    const coverUrl = tour?.cover_image_url ?? null
+    const fromGallery = galleryUrlsForTrip(tripCode, coverUrl)
 
     ;(async () => {
       try {
-        const urls = (await listTripPhotoUrls(tripId)).filter(isUsablePhotoUrl)
+        const fromStorage = (await listTripPhotoUrls(tripId)).filter(isUsablePhotoUrl)
         if (cancelled) return
-        const merged = [...new Set([...seedSelected, ...urls].filter(isUsablePhotoUrl))]
+        const merged = [...new Set([...seedSelected, ...fromGallery, ...fromStorage])]
         onDraftChange({
           availableUrls: merged,
           photosLoading: false,
-          // Keep seed selection even when Storage folder is empty (common —
-          // trip photos often live under Photos/… not trip-photos/{uuid}/).
           selectedUrls: seedSelected.filter((u) => merged.includes(u)),
         })
       } catch (err) {
         console.error('[ContentReview] listTripPhotoUrls failed:', err)
         if (cancelled) return
+        // Gallery still works even if Storage list fails
+        const merged = [...new Set([...seedSelected, ...fromGallery])]
         onDraftChange({
-          availableUrls: seedSelected.filter(isUsablePhotoUrl),
+          availableUrls: merged,
           photosLoading: false,
+          selectedUrls: seedSelected.filter((u) => merged.includes(u)),
         })
-        toast('โหลดรูปทริปไม่สำเร็จ', 'error')
+        if (fromGallery.length === 0) {
+          toast('โหลดรูปทริปไม่สำเร็จ', 'error')
+        }
       }
     })()
 
@@ -276,9 +297,13 @@ function ReviewCard({
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [post.trip_id, noTrip])
+  }, [post.trip_id, noTrip, tour?.trip_code, tour?.cover_image_url])
 
   function togglePhoto(url: string) {
+    if (!isUsablePhotoUrl(url)) {
+      toast('รูปนี้ใช้ไม่ได้ — เลือกรูปจริงจากแกลเลอรีหรืออัปโหลด', 'error')
+      return
+    }
     const has = draft.selectedUrls.includes(url)
     if (has) {
       onDraftChange({ selectedUrls: draft.selectedUrls.filter((u) => u !== url) })
@@ -356,8 +381,9 @@ function ReviewCard({
       toast('กรุณาเลือกหัวข้อ', 'error')
       return
     }
-    if (draft.selectedUrls.length < 1 || draft.selectedUrls.length > MAX_PHOTOS) {
-      toast(`กรุณาเลือก 1–${MAX_PHOTOS} รูป`, 'error')
+    const realPhotos = draft.selectedUrls.filter(isUsablePhotoUrl)
+    if (realPhotos.length < 1 || realPhotos.length > MAX_PHOTOS) {
+      toast(`กรุณาเลือก 1–${MAX_PHOTOS} รูปจริงจากแกลเลอรีหรืออัปโหลด`, 'error')
       return
     }
 
@@ -367,7 +393,7 @@ function ReviewCard({
       const result = await approveContentPost(post.id, {
         selected_headline: draft.selectedHeadline.trim(),
         caption_fb: draft.caption,
-        photo_urls: draft.selectedUrls,
+        photo_urls: realPhotos,
       })
 
       if (isManualTargetAccount(result.target_account ?? post.target_account)) {
@@ -377,7 +403,7 @@ function ReviewCard({
           status: 'approved_pending_manual_post',
           selected_headline: draft.selectedHeadline.trim(),
           caption_fb: draft.caption,
-          photo_urls: draft.selectedUrls,
+          photo_urls: realPhotos,
           target_account: result.target_account ?? post.target_account,
         })
       } else if (result.status === 'posted') {
@@ -485,7 +511,7 @@ function ReviewCard({
         <p className="mt-1.5 text-xs text-cream-muted">
           {noTrip
             ? 'แตะรูปเพื่อเลือก/ยกเลิก หรือกด + เพิ่มรูป เพื่ออัปโหลดจากเครื่อง'
-            : 'เลือกจากแกลเลอรีทริป (ถ้ามี) หรือกด + เพิ่มรูป เพื่ออัปโหลดจากเครื่อง'}
+            : 'แตะเลือกรูปจริงจากแกลเลอรีทริป (หรือกด + เพิ่มรูป จากเครื่อง) — ห้ามใช้ placeholder'}
         </p>
         {!noTrip && (post.photo_urls?.length ?? 0) === 0 && draft.availableUrls.length === 0 && (
           <p className="mt-1 text-xs text-cream-muted">
@@ -598,8 +624,8 @@ function ReviewCard({
             draft.busy ||
             uploading ||
             !draft.selectedHeadline.trim() ||
-            draft.selectedUrls.length < 1 ||
-            draft.selectedUrls.length > MAX_PHOTOS
+            draft.selectedUrls.filter(isUsablePhotoUrl).length < 1 ||
+            draft.selectedUrls.filter(isUsablePhotoUrl).length > MAX_PHOTOS
           }
           onClick={handleApprove}
           className="rounded-editorial border border-gold/40 bg-gold/15 px-4 py-2.5 text-sm font-medium text-gold transition-colors hover:bg-gold/25 disabled:cursor-not-allowed disabled:opacity-50"
