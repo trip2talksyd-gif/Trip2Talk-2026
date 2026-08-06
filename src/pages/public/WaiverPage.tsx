@@ -49,6 +49,9 @@ export default function WaiverPage() {
   const [flightNationality, setFlightNationality] = useState('')
   const [flightFf, setFlightFf] = useState('')
 
+  /** NZ trips need passport + nationality for international flights; AU domestic does not. */
+  const needsFlightPassport = tripCode.startsWith('NZ')
+
   const allChecked = clausesEn.every((c) => checked[c.id])
   const nameValid = signedName.trim().length >= 3
   const emergencyOk =
@@ -59,8 +62,9 @@ export default function WaiverPage() {
     (flightFirst.trim().length >= 1 &&
       flightLast.trim().length >= 1 &&
       Boolean(flightDob) &&
-      flightPassport.trim().length >= 5 &&
-      flightNationality.trim().length >= 2)
+      (!needsFlightPassport ||
+        (flightPassport.trim().length >= 5 &&
+          flightNationality.trim().length >= 2)))
 
   const title = tt('waiver.title')
   const signPh = tt('waiver.signName')
@@ -530,7 +534,8 @@ export default function WaiverPage() {
                 </label>
                 <label className="block">
                   <span className="text-[10px] font-semibold text-ink">
-                    {flightPassBi.en} *
+                    {flightPassBi.en}
+                    {needsFlightPassport ? ' *' : ''}
                     <span className="mt-px block font-thai font-medium text-ink-soft">
                       {flightPassBi.th}
                     </span>
@@ -544,7 +549,8 @@ export default function WaiverPage() {
                 </label>
                 <label className="block">
                   <span className="text-[10px] font-semibold text-ink">
-                    {flightNatBi.en} *
+                    {flightNatBi.en}
+                    {needsFlightPassport ? ' *' : ''}
                     <span className="mt-px block font-thai font-medium text-ink-soft">
                       {flightNatBi.th}
                     </span>
