@@ -43,7 +43,7 @@ export default function TripBookButton({
         </span>
       )
     }
-    if (reason === 'no_date') {
+    if (reason === 'no_date' || reason === 'template') {
       return (
         <a
           href={FACEBOOK_MESSENGER_URL}

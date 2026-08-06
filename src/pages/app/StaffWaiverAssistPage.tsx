@@ -9,6 +9,7 @@ import {
   listWaiversForTour,
   uploadWaiverAuthEvidence,
 } from '../../lib/toursApi'
+import { isSelectableBookableTour } from '../../lib/tourSelectability'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import { WAIVER_CLAUSES } from '../../data/risks'
 import type { Tour, TourBooking, WaiverSignature } from '../../types/tour'
@@ -68,7 +69,14 @@ export default function StaffWaiverAssistPage() {
     setError('')
     fetchToursAdmin()
       .then((list) =>
-        setTours(list.filter((t) => t.status.toLowerCase() !== 'cancelled')),
+        setTours(
+          list.filter(
+            (t) =>
+              t.status.toLowerCase() !== 'cancelled' &&
+              t.status.toLowerCase() !== 'archived' &&
+              isSelectableBookableTour(t),
+          ),
+        ),
       )
       .catch((err) => {
         if (err instanceof StaffSessionExpiredError) {

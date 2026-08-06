@@ -8,6 +8,7 @@ import {
   cancelBooking,
   isBookingCancelled,
 } from '../../lib/toursApi'
+import { isSelectableBookableTour } from '../../lib/tourSelectability'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { Tour, TourBooking } from '../../types/tour'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
@@ -145,7 +146,12 @@ export default function CashierPOS() {
   }
 
   const bookableTours = useMemo(
-    () => tours.filter((tr) => ['published', 'confirmed', 'active', 'draft'].includes(tr.status.toLowerCase())),
+    () =>
+      tours.filter(
+        (tr) =>
+          ['published', 'confirmed', 'active', 'draft'].includes(tr.status.toLowerCase()) &&
+          isSelectableBookableTour(tr),
+      ),
     [tours],
   )
 
