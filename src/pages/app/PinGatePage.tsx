@@ -4,15 +4,14 @@ import { verifyStaffPin } from '../../lib/toursApi'
 import type { StaffRole } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
 import { setStaffSession } from '../../lib/supabaseStaff'
-import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
 import { staffShellClass } from '../../components/app/staffUi'
 import BrandLogo from '../../components/brand/BrandLogo'
 
 const MAX_ATTEMPTS = 3
 const LOCKOUT_MS = 30_000
 
-const AURORA_BG = GALLERY_PHOTOS.find((p) => p.id === 'tas-002')
-const AURORA_BG_SRC = AURORA_BG ? photoSrc(AURORA_BG) : ''
+/** Full-bleed PIN gate background (night sky / Milky Way). */
+const PIN_GATE_BG_SRC = '/brand/pin-gate-bg.webp'
 
 function redirectForRole(role: StaffRole): string {
   switch (role) {
@@ -118,7 +117,7 @@ export default function PinGatePage() {
     <div className={`${staffShellClass} relative flex flex-col items-center justify-center px-4`}>
       <div
         className="fixed inset-0 bg-cover bg-center"
-        style={AURORA_BG_SRC ? { backgroundImage: `url(${AURORA_BG_SRC})` } : undefined}
+        style={{ backgroundImage: `url(${PIN_GATE_BG_SRC})` }}
         aria-hidden
       />
       <div
