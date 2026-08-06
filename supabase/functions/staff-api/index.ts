@@ -194,6 +194,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   search_customer_payments: ['OWNER', 'MANAGER', 'CASHIER'],
   add_pending_installment: ['OWNER', 'MANAGER', 'CASHIER'],
   update_installment: ['OWNER', 'MANAGER', 'CASHIER'],
+  delete_payment_installment: ['OWNER', 'MANAGER'],
   installment_income_summary: ['OWNER'],
   update_booking_details: ['OWNER', 'MANAGER', 'CASHIER'],
   cancel_booking: ['OWNER', 'MANAGER', 'CASHIER'],
@@ -1323,6 +1324,115 @@ Deno.serve(async (req) => {
         }
 
         return json({ data: updated })
+      }
+
+      case 'delete_payment_installment': {
+        // OWNER/MANAGER only — hard-delete installment row for corrections/reprints.
+        // Does NOT delete any generated invoice PDF/file (receipt is client-side;
+        // receipt_invoice_number is only a string on this row).
+        const { paymentId } = params as { paymentId?: string }
+        if (!paymentId) return json({ error: 'invalid_params' }, 400)
+
+        const { data: existing, error: fetchErr } = await admin
+          .from('booking_payments')
+          .select('*')
+          .eq('id', paymentId)
+          .maybeSingle()
+        if (fetchErr) throw fetchErr
+        if (!existing) return json({ error: 'not_found' }, 404)
+
+        const bookingId = String(existing.booking_id)
+        const amountAud = Number(existing.amount_aud ?? 0)
+        const installmentNo = Number(existing.installment_no ?? 0)
+        const receiptNo =
+          typeof existing.receipt_invoice_number === 'string'
+            ? existing.receipt_invoice_number
+            : null
+
+        const { error: delErr } = await admin
+          .from('booking_payments')
+          .delete()
+          .eq('id', paymentId)
+        if (delErr) throw delErr
+
+        // Recalc booking paid total from remaining paid installments
+        const { data: allPays, error: sumErr } = await admin
+          .from('booking_payments')
+          .select('amount_aud, status')
+          .eq('booking_id', bookingId)
+        if (sumErr) throw sumErr
+        const paidTotal = (allPays ?? [])
+          .filter((row: { status?: string }) => row.status === 'paid')
+          .reduce((s: number, row: { amount_aud: number }) => s + Number(row.amount_aud ?? 0), 0)
+
+        const { data: booking } = await admin
+          .from('tour_bookings')
+          .select('id, tour_id, amount_paid_aud, booking_status')
+          .eq('id', bookingId)
+          .maybeSingle()
+        let priceAud = 0
+        if (booking?.tour_id) {
+          const { data: tour } = await admin
+            .from('tours')
+            .select('price_aud')
+            .eq('id', booking.tour_id)
+            .maybeSingle()
+          priceAud = tour ? Number(tour.price_aud ?? 0) : 0
+        }
+        const newStatus =
+          paidTotal <= 0
+            ? 'pending_payment'
+            : priceAud > 0 && paidTotal >= priceAud
+              ? 'fully_paid'
+              : 'deposit_paid'
+
+        const { data: updatedBooking, error: bookErr } = await admin
+          .from('tour_bookings')
+          .update({ amount_paid_aud: paidTotal, booking_status: newStatus })
+          .eq('id', bookingId)
+          .select('*')
+          .single()
+        if (bookErr) throw bookErr
+
+        const staffId =
+          typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+        const { error: auditErr } = await admin.from('staff_financial_audit').insert({
+          staff_id: staffId,
+          staff_role: session.role ?? null,
+          staff_name: session.full_name ?? null,
+          action: 'delete_payment_installment',
+          entity_type: 'booking_payment',
+          entity_id: paymentId,
+          booking_id: bookingId,
+          amount_aud: amountAud,
+          installment_no: installmentNo,
+          receipt_invoice_number: receiptNo,
+          detail: {
+            label: existing.label ?? null,
+            status: existing.status ?? null,
+            paid_at: existing.paid_at ?? null,
+            payment_method: existing.payment_method ?? null,
+          },
+        })
+        if (auditErr) {
+          // Deletion already committed — surface audit failure in logs but still return success
+          console.error('[delete_payment_installment] audit insert failed', auditErr)
+        }
+
+        const { data: payments, error: listErr } = await admin
+          .from('booking_payments')
+          .select('*')
+          .eq('booking_id', bookingId)
+          .order('installment_no', { ascending: true })
+        if (listErr) throw listErr
+
+        return json({
+          data: {
+            deleted_id: paymentId,
+            booking: updatedBooking,
+            payments: payments ?? [],
+          },
+        })
       }
 
       case 'installment_income_summary': {
