@@ -73,7 +73,14 @@ export default function QuickPost() {
       } catch (err) {
         console.error('[QuickPost] generate-caption failed:', err)
         if (err instanceof StaffSessionExpiredError) throw err
-        toast('สร้างแคปชันไม่สำเร็จ ลองอีกครั้ง', 'error')
+        const raw = err instanceof Error ? err.message : ''
+        const captionMsg =
+          raw === 'missing_anthropic_api_key'
+            ? 'ยังไม่ได้ตั้ง ANTHROPIC_API_KEY ใน Edge Secrets — ติดต่อเจ้าของระบบ'
+            : raw && !/^generate-caption failed:\s*\d+$/i.test(raw)
+              ? `สร้างแคปชันไม่สำเร็จ: ${raw}`
+              : 'สร้างแคปชันไม่สำเร็จ ลองอีกครั้ง'
+        toast(captionMsg, 'error')
         setPhase('idle')
         return
       }
