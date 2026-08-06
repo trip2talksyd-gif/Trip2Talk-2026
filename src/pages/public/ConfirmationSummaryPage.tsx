@@ -7,9 +7,7 @@ import { formatDate } from '../../lib/toursApi'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import BiText from '../../components/ui/BiText'
 import { useToast } from '../../components/ui/Toast'
-
-const LOGO =
-  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Logo/Trip2talk%20(1).png'
+import BrandLogo from '../../components/brand/BrandLogo'
 
 /**
  * Customer Confirmation Summary — DISTINCT from Tax Invoice.
@@ -145,7 +143,7 @@ export default function ConfirmationSummaryPage() {
         className="rounded-2xl border border-line bg-white p-5 text-ink shadow-sm"
       >
         <div className="flex items-center gap-3 border-b border-line pb-4">
-          <img src={LOGO} alt="Trip2Talk" className="h-12 w-12 object-contain" />
+          <BrandLogo size="lg" tone="light" />
           <div>
             <BiText
               as="h1"

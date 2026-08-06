@@ -6,6 +6,7 @@ import type {
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from 'react'
+import BrandLogo from '../brand/BrandLogo'
 
 /** Root class for every /app/* page — enables shared form chrome in index.css */
 export const staffShellClass =
@@ -62,13 +63,18 @@ export function StaffPageHeader({
       />
       <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-teal-500/10 blur-3xl" aria-hidden />
       <div className="relative">
-        <Link
-          to={backTo}
-          className="text-sm font-medium text-teal-500 transition-colors hover:text-teal-400"
-        >
-          {backLabel}
-        </Link>
-        <h1 className="mt-2.5 font-serif text-2xl font-semibold tracking-tight text-cream sm:text-[1.65rem]">
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <Link to="/app" className="min-w-0" aria-label="Trip2Talk staff home">
+            <BrandLogo size="sm" tone="dark" withWordmark decorative wordmarkClassName="text-cream" />
+          </Link>
+          <Link
+            to={backTo}
+            className="shrink-0 text-sm font-medium text-teal-500 transition-colors hover:text-teal-400"
+          >
+            {backLabel}
+          </Link>
+        </div>
+        <h1 className="mt-0.5 font-serif text-2xl font-semibold tracking-tight text-cream sm:text-[1.65rem]">
           {title}
         </h1>
         {subtitle ? (

@@ -7,9 +7,7 @@ import {
   FACEBOOK_MESSENGER_URL,
 } from '../../data/contactChannels'
 import type { TranslationKey } from '../../i18n/translations'
-
-const TRIP2TALK_LOGO_URL =
-  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Logo/Trip2talk%20(1).png'
+import BrandLogo from '../brand/BrandLogo'
 
 const STREET_ADDRESS = '33/14 Jubilee Ave, Warriewood NSW 2102'
 const ABN = 'ABN 81 951 461 769'
@@ -51,12 +49,7 @@ export default function PublicFooter() {
         <div className="grid gap-8 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:gap-8">
           <div>
             <div className="mb-2 flex items-center gap-2 font-thai text-[17px] font-bold text-white">
-              <img
-                src={TRIP2TALK_LOGO_URL}
-                alt=""
-                className="h-[26px] w-[26px] shrink-0 rounded-full object-cover"
-              />
-              Trip2Talk
+              <BrandLogo size="sm" tone="dark" withWordmark decorative wordmarkClassName="text-white" />
             </div>
             <p className="max-w-[260px] text-[11.5px] leading-[1.7] text-[#a9c4bd]">
               {t('footer.tagline.line1')} {t('footer.tagline.line2')}
