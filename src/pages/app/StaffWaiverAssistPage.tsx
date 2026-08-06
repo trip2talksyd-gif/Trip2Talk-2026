@@ -389,7 +389,13 @@ export default function StaffWaiverAssistPage() {
             <StaffSectionTitle>Staff-filled waivers for {tripCode}</StaffSectionTitle>
             <ul className="mt-2 space-y-2">
               {staffWaivers.map((w) => {
-                const linked = bookings.find((b) => b.id === w.booking_id)
+                const linked =
+                  bookings.find((b) => b.id === w.booking_id) ??
+                  bookings.find(
+                    (b) =>
+                      `${b.first_name_en} ${b.last_name_en}`.trim().toLowerCase() ===
+                      w.signed_name.trim().toLowerCase(),
+                  )
                 const email = linked?.email ?? null
                 return (
                   <li key={w.id}>
@@ -420,9 +426,45 @@ export default function StaffWaiverAssistPage() {
                           {w.staff_fill_authorization_note}
                         </p>
                       )}
+                      {linked ? (
+                        <div className="mt-2 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-2">
+                          <p className="text-[10px] font-medium uppercase tracking-wide text-cream-muted">
+                            Safety Info (staff only) / ข้อมูลความปลอดภัย — ไม่ส่งให้ลูกค้า
+                          </p>
+                          <dl className="mt-1.5 space-y-1 text-[11px] text-cream/90">
+                            <div>
+                              <dt className="inline text-cream-muted">Emergency: </dt>
+                              <dd className="inline">
+                                {(linked.emergency_contact_name ?? '').trim() || '—'}
+                                {(linked.emergency_contact_phone ?? '').trim()
+                                  ? ` · ${linked.emergency_contact_phone}`
+                                  : ''}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="inline text-cream-muted">Allergies: </dt>
+                              <dd className="inline">
+                                {(linked.allergies ?? '').trim() || '—'}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="inline text-cream-muted">Medical: </dt>
+                              <dd className="inline">
+                                {(linked.medical_conditions ?? '').trim() || '—'}
+                              </dd>
+                            </div>
+                          </dl>
+                        </div>
+                      ) : (
+                        <p className="mt-2 text-[10px] text-cream-muted">
+                          No linked booking — Safety Info not available here (see trip-day safety
+                          view if booked under another name).
+                        </p>
+                      )}
                       <StaffWaiverConfirmActions
                         waiver={w}
                         tripName={selectedTour?.name_en}
+                        departureDate={selectedTour?.departure_date}
                         customerEmail={email}
                       />
                     </StaffCard>
