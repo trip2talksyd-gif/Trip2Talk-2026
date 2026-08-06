@@ -123,6 +123,7 @@ const general: PackingGuide['groups'] = [
 
 export const PACKING_GUIDES: Record<string, PackingGuide> = {
   'NZ-6D5N': { climate: 'cold', groups: coldWeather },
+  'NZ-10D9N': { climate: 'cold', groups: coldWeather },
   'TAS-3D2N': { climate: 'cold', groups: coldWeather },
   'TAS-LH-4D3N': { climate: 'cold', groups: coldWeather },
   'TAS-SU-4D3N': { climate: 'cold', groups: coldWeather },

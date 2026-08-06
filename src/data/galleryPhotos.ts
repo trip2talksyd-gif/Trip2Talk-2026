@@ -532,6 +532,7 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
 export const TRIP_GALLERY_CATEGORY: Record<string, GalleryCategory> = {
   'NZ-6D5N': 'new-zealand',
   'NZ-6D5N-NOV': 'new-zealand',
+  'NZ-10D9N': 'new-zealand',
   'TAS-3D2N': 'tasmania',
   'TAS-LH-4D3N': 'tasmania',
   'TAS-LH-3D2N-WIN': 'tasmania',

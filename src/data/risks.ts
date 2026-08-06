@@ -143,6 +143,7 @@ export const SAFETY_WARNINGS: Record<string, { en: string[]; th: string[] }> = {
 
 export const MIN_PAX_RULES: Record<string, number> = {
   'NZ-6D5N': 3,
+  'NZ-10D9N': 4,
   'TAS-3D2N': 3,
   'TAS-LH-4D3N': 3,
   'TAS-SU-4D3N': 3,

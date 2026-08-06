@@ -1240,6 +1240,333 @@ export const TRIP_ITINERARIES: Record<string, TripItinerary> = {
       },
     ],
   },
+  'NZ-10D9N': {
+    detailed: true,
+    headerNote: {
+      en: '10 days / 9 nights — North + South Island grand photo road trip (Auckland → Christchurch → Queenstown). Standard rate listed for groups of 4–6. Flights not included.',
+      th: '10 วัน 9 คืน — ทริปถ่ายภาพใหญ่เกาะเหนือ+เกาะใต้ (Auckland → Christchurch → Queenstown) ราคามาตรฐานสำหรับกลุ่ม 4–6 ท่าน ไม่รวมตั๋วเครื่องบิน',
+    },
+    days: [
+      {
+        day: 1,
+        title: {
+          en: 'Day 1 — Auckland Arrival & Mt. Eden Twilight',
+          th: 'วัน 1 — ถึง Auckland & พลบค่ำที่ Mt. Eden',
+        },
+        subtitle: {
+          en: 'Auckland city exploration & harbour twilight',
+          th: 'สำรวจเมือง Auckland และถ่ายพลบค่ำริมท่าเรือ',
+        },
+        events: [
+          {
+            time: 'Arrival',
+            category: 'flight',
+            description: {
+              en: 'Fly into Auckland (AKL) — private SUV pickup into the city',
+              th: 'บินเข้า Auckland (AKL) — รถ SUV ส่วนตัวรับเข้าเมือง',
+            },
+          },
+          {
+            time: 'Golden hour',
+            category: 'activity',
+            description: {
+              en: 'Mt. Eden volcanic crater lookout — 360° golden hour view over Auckland',
+              th: 'จุดชมปล่องภูเขาไฟ Mt. Eden — มุมมอง 360° ช่วง Golden hour ทั่ว Auckland',
+            },
+          },
+          {
+            time: 'Twilight',
+            category: 'activity',
+            description: {
+              en: 'Street photography at Auckland Harbour Bridge & Westhaven Marina',
+              th: 'ถ่ายสตรีทที่ Auckland Harbour Bridge และ Westhaven Marina',
+            },
+          },
+        ],
+        note: { en: 'Stay: Auckland', th: 'ที่พัก: Auckland' },
+      },
+      {
+        day: 2,
+        title: {
+          en: 'Day 2 — Hobbiton to Taranaki',
+          th: 'วัน 2 — Hobbiton สู่ Taranaki',
+        },
+        subtitle: {
+          en: 'Auckland → Hobbiton Movie Set → New Plymouth',
+          th: 'Auckland → Hobbiton Movie Set → New Plymouth',
+        },
+        events: [
+          {
+            time: 'Morning',
+            category: 'activity',
+            description: {
+              en: 'Drive to Matamata — Hobbiton Movie Set portraits at hobbit-hole doors and the stone bridge',
+              th: 'ขับรถไป Matamata — ถ่ายพอร์ตเทรต Hobbiton ที่ประตูบ้านฮอบบิทและสะพานหิน',
+            },
+          },
+          {
+            time: 'Afternoon',
+            category: 'activity',
+            description: {
+              en: 'Continue to the Taranaki region — Cape Egmont Lighthouse with snow-capped Mt. Taranaki behind it',
+              th: 'ต่อไปยังแคว้น Taranaki — ประภาคาร Cape Egmont พร้อม Mt. Taranaki ยอดหิมะเป็นฉากหลัง',
+            },
+          },
+        ],
+        note: { en: 'Stay: New Plymouth', th: 'ที่พัก: New Plymouth' },
+      },
+      {
+        day: 3,
+        title: {
+          en: 'Day 3 — Pouakai Tarns & Fly South',
+          th: 'วัน 3 — Pouakai Tarns และบินลงใต้',
+        },
+        subtitle: {
+          en: 'Mt. Taranaki reflection → Auckland → Christchurch',
+          th: 'สะท้อน Mt. Taranaki → Auckland → Christchurch',
+        },
+        events: [
+          {
+            time: 'Daylight',
+            category: 'activity',
+            description: {
+              en: 'Hike to Pouakai Tarns for the signature Mt. Taranaki reflection — volcano mirrored on the tarn — plus drone footage',
+              th: 'เดินขึ้น Pouakai Tarns ถ่ายภาพสะท้อน Mt. Taranaki ลายเซ็น — ภูเขาไฟสะท้อนบนผิวน้ำ — พร้อมภาพโดรน',
+            },
+          },
+          {
+            time: 'Afternoon',
+            category: 'flight',
+            description: {
+              en: 'Drive to Auckland Airport, return Leg 1 rental car, fly to Christchurch (CHC), pick up Leg 2 rental car',
+              th: 'ขับรถไปสนามบิน Auckland คืนรถเช่าช่วงที่ 1 บินไป Christchurch (CHC) แล้วรับรถเช่าช่วงที่ 2',
+            },
+          },
+        ],
+        note: { en: 'Stay: Christchurch', th: 'ที่พัก: Christchurch' },
+      },
+      {
+        day: 4,
+        title: {
+          en: 'Day 4 — Lake Tekapo & Milky Way Hunt',
+          th: 'วัน 4 — Lake Tekapo และล่าทางช้างเผือก',
+        },
+        subtitle: {
+          en: 'Christchurch → Lake Tekapo — Church of the Good Shepherd',
+          th: 'Christchurch → Lake Tekapo — Church of the Good Shepherd',
+        },
+        events: [
+          {
+            time: 'Day',
+            category: 'activity',
+            description: {
+              en: 'Drive to turquoise Lake Tekapo — photograph the historic Church of the Good Shepherd',
+              th: 'ขับรถสู่ Lake Tekapo สีฟ้าอมเขียว — ถ่ายโบสถ์ประวัติศาสตร์ Church of the Good Shepherd',
+            },
+          },
+          {
+            time: 'Night',
+            category: 'activity',
+            description: {
+              en: 'Milky Way session at Mt. John Observatory inside an official dark sky reserve',
+              th: 'ถ่ายทางช้างเผือกที่ Mt. John Observatory ในเขตท้องฟ้ามืดอย่างเป็นทางการ',
+            },
+          },
+        ],
+        note: {
+          en: 'Stay: Lake Tekapo — pack warm layers for the night shoot',
+          th: 'ที่พัก: Lake Tekapo — เตรียมเสื้อกันหนาวสำหรับถ่ายกลางคืน',
+        },
+      },
+      {
+        day: 5,
+        title: {
+          en: 'Day 5 — Lake Pukaki to Aoraki/Mt. Cook',
+          th: 'วัน 5 — Lake Pukaki สู่ Aoraki/Mt. Cook',
+        },
+        subtitle: {
+          en: "Peter's Lookout & Hooker Valley Track",
+          th: "Peter's Lookout และเส้นทาง Hooker Valley",
+        },
+        events: [
+          {
+            time: 'Morning',
+            category: 'activity',
+            description: {
+              en: "Photograph Peter's Lookout — the road leading straight to Mt. Cook along Lake Pukaki",
+              th: "ถ่าย Peter's Lookout — ถนนมุ่งตรงสู่ Mt. Cook ตามแนว Lake Pukaki",
+            },
+          },
+          {
+            time: 'Afternoon',
+            category: 'activity',
+            description: {
+              en: 'Hike Hooker Valley Track — portraits on the swing bridges over the glacial river toward Hooker Lake',
+              th: 'เดิน Hooker Valley Track — ถ่ายพอร์ตเทรตบนสะพานแขวนข้ามแม่น้ำธารน้ำแข็งสู่ Hooker Lake',
+            },
+          },
+        ],
+        note: { en: 'Stay: Mt. Cook Village', th: 'ที่พัก: Mt. Cook Village' },
+      },
+      {
+        day: 6,
+        title: {
+          en: 'Day 6 — Lindis Pass to That Wanaka Tree',
+          th: 'วัน 6 — Lindis Pass สู่ That Wanaka Tree',
+        },
+        subtitle: {
+          en: 'Mt. Cook → Lindis Pass → Wanaka',
+          th: 'Mt. Cook → Lindis Pass → Wanaka',
+        },
+        events: [
+          {
+            time: 'Day',
+            category: 'activity',
+            description: {
+              en: 'Drive the golden tussock switchbacks of Lindis Pass to Wanaka',
+              th: 'ขับรถผ่านทางโค้งหญ้าทัสซ็อกสีทองของ Lindis Pass สู่ Wanaka',
+            },
+          },
+          {
+            time: 'Sunset',
+            category: 'activity',
+            description: {
+              en: 'Sunset at That Wanaka Tree — the iconic lone tree standing in the lake',
+              th: 'พระอาทิตย์ตกที่ That Wanaka Tree — ต้นไม้โดดเดี่ยวในทะเลสาบ',
+            },
+          },
+        ],
+        note: { en: 'Stay: Wanaka', th: 'ที่พัก: Wanaka' },
+      },
+      {
+        day: 7,
+        title: {
+          en: 'Day 7 — Crown Range to Te Anau',
+          th: 'วัน 7 — Crown Range สู่ Te Anau',
+        },
+        subtitle: {
+          en: 'Wanaka → Crown Range Road → Arrowtown → Te Anau',
+          th: 'Wanaka → Crown Range Road → Arrowtown → Te Anau',
+        },
+        events: [
+          {
+            time: 'Day',
+            category: 'activity',
+            description: {
+              en: 'Drive the high-altitude Crown Range Road — stop in historic gold-mining Arrowtown',
+              th: 'ขับรถขึ้น Crown Range Road ที่สูง — แวะ Arrowtown เมืองเก่าเหมืองทอง',
+            },
+          },
+          {
+            time: 'Evening',
+            category: 'activity',
+            description: {
+              en: 'Continue to Te Anau — calm evening reflections on Lake Te Anau, gateway to Fiordland',
+              th: 'ต่อไป Te Anau — สะท้อนน้ำยามเย็นบน Lake Te Anau ประตูสู่ Fiordland',
+            },
+          },
+        ],
+        note: { en: 'Stay: Te Anau', th: 'ที่พัก: Te Anau' },
+      },
+      {
+        day: 8,
+        title: {
+          en: 'Day 8 — Milford Sound to Queenstown',
+          th: 'วัน 8 — Milford Sound สู่ Queenstown',
+        },
+        subtitle: {
+          en: 'Milford Road, Mirror Lakes & Fjords Cruise',
+          th: 'ถนน Milford Mirror Lakes และล่องเรือฟยord',
+        },
+        events: [
+          {
+            time: 'Morning',
+            category: 'activity',
+            description: {
+              en: 'Drive Milford Road — Mirror Lakes and the wide grasslands of Eglinton Valley',
+              th: 'ขับรถตามถนน Milford — Mirror Lakes และทุ่งหญ้ากว้างของ Eglinton Valley',
+            },
+          },
+          {
+            time: 'Midday',
+            category: 'activity',
+            description: {
+              en: 'Milford Sound Fjords Cruise — cliffs, waterfalls, Mitre Peak, mist and wildlife',
+              th: 'ล่องเรือฟยord Milford Sound — หน้าผา น้ำตก Mitre Peak หมอก และสัตว์ป่า',
+            },
+          },
+          {
+            time: 'Evening',
+            category: 'activity',
+            description: {
+              en: 'Continue to Queenstown',
+              th: 'ต่อไปยัง Queenstown',
+            },
+          },
+        ],
+        note: { en: 'Stay: Queenstown', th: 'ที่พัก: Queenstown' },
+      },
+      {
+        day: 9,
+        title: {
+          en: 'Day 9 — Road to Paradise & Skyline Twilight',
+          th: 'วัน 9 — Road to Paradise และพลบค่ำ Skyline',
+        },
+        subtitle: {
+          en: 'Queenstown → Glenorchy → Skyline Gondola',
+          th: 'Queenstown → Glenorchy → Skyline Gondola',
+        },
+        events: [
+          {
+            time: 'Day',
+            category: 'activity',
+            description: {
+              en: 'Drive along Lake Wakatipu to Glenorchy — Road to Paradise and its historic wooden bridges',
+              th: 'ขับรถตาม Lake Wakatipu ไป Glenorchy — Road to Paradise และสะพานไม้โบราณ',
+            },
+          },
+          {
+            time: 'Evening',
+            category: 'activity',
+            description: {
+              en: 'Skyline Gondola twilight view over Queenstown and the lake',
+              th: 'ขึ้น Skyline Gondola มอง Queenstown และทะเลสาบช่วงพลบค่ำ',
+            },
+          },
+        ],
+        note: { en: 'Stay: Queenstown', th: 'ที่พัก: Queenstown' },
+      },
+      {
+        day: 10,
+        title: {
+          en: 'Day 10 — Queenstown Farewell & Departure',
+          th: 'วัน 10 — ลา Queenstown และออกเดินทาง',
+        },
+        subtitle: {
+          en: 'Lakeside last frames → Queenstown Airport (ZQN)',
+          th: 'เก็บภาพสุดท้ายริมทะเลสาบ → สนามบิน Queenstown (ZQN)',
+        },
+        events: [
+          {
+            time: 'Morning',
+            category: 'activity',
+            description: {
+              en: 'Lakeside last-capture stroll in Queenstown — optional light shopping',
+              th: 'เดินเก็บภาพสุดท้ายริมทะเลสาบที่ Queenstown — ช้อปเบาๆ ได้ตามสะดวก',
+            },
+          },
+          {
+            time: 'Departure',
+            category: 'flight',
+            description: {
+              en: 'Transfer to Queenstown Airport (ZQN), return rental car, fly home',
+              th: 'ไปสนามบิน Queenstown (ZQN) คืนรถเช่า แล้วบินกลับบ้าน',
+            },
+          },
+        ],
+      },
+    ],
+  },
   'NZ-6D5N': {
     detailed: true,
     headerNote: {

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import type { Tour } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
 import { getUnbookableReason, isTourBookable } from '../../lib/toursApi'
+import { FACEBOOK_MESSENGER_URL } from '../../data/contactChannels'
 import FlipText from '../ui/FlipText'
 
 type Props = {
@@ -40,6 +41,21 @@ export default function TripBookButton({
         >
           {t('btn.tripCancelled')}
         </span>
+      )
+    }
+    if (reason === 'no_date') {
+      return (
+        <a
+          href={FACEBOOK_MESSENGER_URL}
+          target="_blank"
+          rel="noreferrer"
+          className={`block w-full rounded-[13px] border border-teal-600/40 bg-teal-500/10 py-3 text-center text-[12.5px] font-bold text-teal-800 ${className}`}
+        >
+          {lang === 'th' ? 'สอบถามวันเดินทาง' : 'Inquire for dates'}
+          <span className="mt-0.5 block font-thai text-[10px] font-medium opacity-85">
+            {lang === 'th' ? 'ยังไม่มีรอบที่เปิดจอง' : 'No departure scheduled yet'}
+          </span>
+        </a>
       )
     }
     return (

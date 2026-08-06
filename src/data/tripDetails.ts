@@ -135,6 +135,68 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
       th: ['ตั๋วเครื่องบิน (เราช่วยจอง)', 'ค่าอาหาร', 'ประกันการเดินทาง'],
     },
   },
+  'NZ-10D9N': {
+    tagline: {
+      en: 'Grand North + South Island photo road trip — Hobbiton, Mt. Taranaki, Tekapo Milky Way, Mt. Cook, Milford Sound & Queenstown. 10 days / 9 nights.',
+      th: 'ทริปถ่ายภาพใหญ่เกาะเหนือ+เกาะใต้ — Hobbiton Mt. Taranaki ทางช้างเผือก Tekapo Mt. Cook Milford Sound และ Queenstown 10 วัน 9 คืน',
+    },
+    highlights: {
+      en: [
+        'Hobbiton Movie Set portraits',
+        'Pouakai Tarns — Mt. Taranaki reflection',
+        'Lake Tekapo Milky Way at Mt. John',
+        'Aoraki/Mt. Cook Hooker Valley',
+        'Milford Sound Fjords Cruise',
+        'Glenorchy Road to Paradise & Skyline Gondola',
+      ],
+      th: [
+        'พอร์ตเทรต Hobbiton Movie Set',
+        'Pouakai Tarns — สะท้อน Mt. Taranaki',
+        'ทางช้างเผือก Lake Tekapo ที่ Mt. John',
+        'Aoraki/Mt. Cook เส้นทาง Hooker Valley',
+        'ล่องเรือฟยord Milford Sound',
+        'Road to Paradise Glenorchy และ Skyline Gondola',
+      ],
+    },
+    includes: {
+      en: [
+        'Private SUV/van with fuel, parking, and one-way rental fees for all 10 days',
+        'Professional photographer (10+ years) — composition, portraits, camera settings & Milky Way sessions',
+        '9 nights accommodation (shared dorm / motel style)',
+        'Hobbiton Movie Set tickets',
+        'Milford Sound Fjords Cruise tickets',
+        'Skyline Gondola tickets',
+        'Free flight booking coordination assistance',
+      ],
+      th: [
+        'รถ SUV/van ส่วนตัว รวมน้ำมัน ที่จอด และค่าเช่ารถขาเดียวตลอด 10 วัน',
+        'ช่างภาพมืออาชีพ (ประสบการณ์ 10+ ปี) — จัดองค์ประกอบ พอร์ตเทรต ตั้งค่ากล้อง และเซสชันทางช้างเผือก',
+        'ที่พัก 9 คืน (แบบแชร์ dorm / โมเต็ล)',
+        'ตั๋ว Hobbiton Movie Set',
+        'ตั๋วล่องเรือฟยord Milford Sound',
+        'ตั๋ว Skyline Gondola',
+        'ช่วยประสานจองตั๋วเครื่องบินฟรี',
+      ],
+    },
+    excludes: {
+      en: [
+        'International flights and domestic Auckland → Christchurch (self-booked; domestic often around AUD 100–150)',
+        'All meals',
+        'Personal travel insurance',
+        'Optional private room upgrade (+AUD 450–650 / person for 9 nights)',
+      ],
+      th: [
+        'ตั๋วบินระหว่างประเทศ และในประเทศ Auckland → Christchurch (จองเอง — ในประเทศมักราว AUD 100–150)',
+        'อาหารทุกมื้อ',
+        'ประกันการเดินทางส่วนตัว',
+        'อัปเกรดห้องส่วนตัว (เพิ่ม AUD 450–650 / คน สำหรับ 9 คืน)',
+      ],
+    },
+    accommodationNote: {
+      en: 'Standard stay is shared dorm/motel style for 9 nights. Prefer a private room? Ask us about the optional upgrade (+AUD 450–650 / person). Prefer a smaller private group of 2–3? Contact us for private guaranteed departure pricing.',
+      th: 'ที่พักมาตรฐานเป็นแบบแชร์ dorm/โมเต็ล 9 คืน ต้องการห้องส่วนตัว? สอบถามอัปเกรด (เพิ่ม AUD 450–650 / คน) อยากกลุ่มเล็กส่วนตัว 2–3 ท่าน? ติดต่อเราสำหรับราคา Private Guarantee',
+    },
+  },
   'TAS-3D2N': {
     tagline: {
       en: 'Arrive in Hobart, we handle the rest — aurora hunts, Bruny Island, MONA. Just pack and go.',
