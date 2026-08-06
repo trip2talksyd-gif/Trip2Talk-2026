@@ -115,7 +115,7 @@ export interface TourBooking {
   cancel_reason?: string | null
   photos_delivered?: boolean | null
   photos_delivered_at?: string | null
-  /** Highlight album SLA (within 3 days of trip end). */
+  /** Highlight album SLA (within 1–2 weeks of trip end). */
   highlight_photos_delivered?: boolean | null
   highlight_photos_delivered_at?: string | null
   /** Full album SLA (hard deadline 30 days after trip end). */

@@ -188,10 +188,10 @@ export default function PhotosDeliveryPage() {
         title="Photo delivery"
         subtitle={
           <>
-            Highlight within 3 days of trip end · Full album within 30 days (hard deadline). Most
+            Highlight within 1–2 weeks of trip end · Full album within 30 days (hard deadline). Most
             urgent first. Full delivery starts the review-request window.
             <span className="mt-0.5 block font-thai">
-              ไฮไลท์ภายใน 3 วัน · อัลบั้มเต็มภายใน 30 วัน — เรียงตามความเร่งด่วน
+              ไฮไลท์ภายใน 1–2 สัปดาห์ · อัลบั้มเต็มภายใน 30 วัน — เรียงตามความเร่งด่วน
             </span>
           </>
         }

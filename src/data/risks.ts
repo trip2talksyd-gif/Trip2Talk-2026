@@ -189,7 +189,7 @@ export const WAIVER_CLAUSES = {
     {
       id: 'photo_delivery',
       title: 'Photo Delivery Timeline',
-      text: 'Highlight photos will be delivered within 3 days of trip completion. The full photo gallery will be delivered within 14–30 days of trip completion.',
+      text: 'Highlight photos will be delivered within at least 1–2 weeks of trip completion. The full photo gallery will be delivered within 14–30 days of trip completion.',
     },
   ],
   th: [
@@ -221,7 +221,7 @@ export const WAIVER_CLAUSES = {
     {
       id: 'photo_delivery',
       title: 'กำหนดส่งภาพถ่าย',
-      text: 'ภาพไฮไลท์จะจัดส่งภายใน 3 วันหลังจบทริป ส่วนอัลบั้มภาพทั้งหมดจะจัดส่งภายใน 14–30 วันหลังจบทริป',
+      text: 'ภาพไฮไลท์จะจัดส่งภายในอย่างน้อย 1–2 สัปดาห์หลังจบทริป ส่วนอัลบั้มภาพทั้งหมดจะจัดส่งภายใน 14–30 วันหลังจบทริป',
     },
   ],
 }
