@@ -355,6 +355,11 @@ export async function listWaiversForTour(tripCode: string): Promise<WaiverSignat
   return callStaffApi<WaiverSignature[]>('list_waivers_for_tour', { tripCode })
 }
 
+/** OWNER-only hard delete of a waiver_signatures row (test/duplicate cleanup). */
+export async function deleteWaiverSignature(id: string): Promise<void> {
+  await callStaffApi('delete_waiver_signature', { id })
+}
+
 /** Evidence screenshot for staff-assisted waiver — same payment-slips bucket pattern. */
 export async function uploadWaiverAuthEvidence(file: File, tripCode: string): Promise<string> {
   const ext = file.name.split('.').pop() ?? 'jpg'

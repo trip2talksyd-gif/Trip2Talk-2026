@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Trash2 } from 'lucide-react'
 import {
   createWaiverStaffAssisted,
+  deleteWaiverSignature,
   fetchBookingsForTour,
   fetchToursAdmin,
   listWaiversForTour,
@@ -55,6 +57,8 @@ export default function StaffWaiverAssistPage() {
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null)
   const [confirmed, setConfirmed] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const isOwner = sessionStorage.getItem('staff_role') === 'OWNER'
 
   const clauses = WAIVER_CLAUSES[locale]
   const allClausesChecked = clauses.every((c) => checked[c.id])
@@ -180,6 +184,42 @@ export default function StaffWaiverAssistPage() {
 
   const staffWaivers = waivers.filter((w) => w.filled_by_staff)
   const selectedTour = tours.find((t) => t.trip_code === tripCode) ?? null
+
+  async function handleDeleteWaiver(w: WaiverSignature) {
+    if (!isOwner) return
+    const ok = window.confirm(
+      `Delete this waiver record for ${w.signed_name}? This cannot be undone.`,
+    )
+    if (!ok) return
+    setDeletingId(w.id)
+    try {
+      await deleteWaiverSignature(w.id)
+      setWaivers((prev) => prev.filter((x) => x.id !== w.id))
+      if (w.booking_id) {
+        const stillLinked = waivers.some(
+          (x) => x.id !== w.id && x.booking_id === w.booking_id,
+        )
+        if (!stillLinked) {
+          setBookings((prev) =>
+            prev.map((b) =>
+              b.id === w.booking_id
+                ? { ...b, waiver_signed: false, waiver_signed_at: null }
+                : b,
+            ),
+          )
+        }
+      }
+      toast('Deleted waiver record', 'success')
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast('Delete failed', 'error')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   return (
     <div className={staffShellClass}>
@@ -354,7 +394,20 @@ export default function StaffWaiverAssistPage() {
                 return (
                   <li key={w.id}>
                     <StaffCard>
-                      <p className="text-sm text-cream">{w.signed_name}</p>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="min-w-0 text-sm text-cream">{w.signed_name}</p>
+                        {isOwner && (
+                          <button
+                            type="button"
+                            title="Delete waiver record (OWNER)"
+                            disabled={deletingId === w.id}
+                            onClick={() => void handleDeleteWaiver(w)}
+                            className="shrink-0 rounded-xl p-2 text-cream-muted transition-colors hover:bg-coral/15 hover:text-coral disabled:opacity-50"
+                          >
+                            <Trash2 className="h-4 w-4" strokeWidth={2} aria-hidden />
+                          </button>
+                        )}
+                      </div>
                       <div className="mt-1.5">
                         <StaffFilledWaiverBadge
                           staffName={w.staff_fill_staff_name}
