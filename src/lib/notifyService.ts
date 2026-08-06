@@ -172,3 +172,113 @@ export function buildWaitlistSpot(opts: {
     gmailUrl: gmailCompose(opts.customerEmail, subject, `${bodyEn}\n\n---\n${bodyTh}`),
   }
 }
+
+/** Staff-assisted waiver proof — copy/paste into Messenger (or open Gmail). Not an outbound-queue kind. */
+export type WaiverConfirmDraft = {
+  subject: string
+  bodyEn: string
+  bodyTh: string
+  /** EN + TH block ready for clipboard paste into Messenger */
+  clipboardText: string
+  messengerUrl: string
+  gmailUrl: string
+}
+
+function formatWhen(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString('en-AU', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  } catch {
+    return iso
+  }
+}
+
+/**
+ * Bilingual confirmation that a waiver was completed (including staff-filled disclosure).
+ * Matches free-tier outbound: staff copy text → paste in Messenger / open Gmail compose.
+ */
+export function buildWaiverStaffConfirmation(opts: {
+  customerName: string
+  tripCode: string
+  tripName?: string | null
+  signedAt: string
+  filledByStaffName?: string | null
+  clauseTitlesEn: string[]
+  clauseTitlesTh: string[]
+  authorizationNote?: string | null
+  customerEmail?: string | null
+}): WaiverConfirmDraft {
+  const when = formatWhen(opts.signedAt)
+  const tripLabel = opts.tripName?.trim()
+    ? `${opts.tripName.trim()} (${opts.tripCode})`
+    : opts.tripCode
+  const staff = opts.filledByStaffName?.trim() || 'Trip2Talk staff'
+  const clausesEn =
+    opts.clauseTitlesEn.length > 0
+      ? opts.clauseTitlesEn.map((t) => `• ${t}`).join('\n')
+      : '• (see Trip2Talk waiver terms)'
+  const clausesTh =
+    opts.clauseTitlesTh.length > 0
+      ? opts.clauseTitlesTh.map((t) => `• ${t}`).join('\n')
+      : '• (ดูข้อตกลง waiver ของ Trip2Talk)'
+
+  const subject = `Waiver confirmation — ${opts.tripCode} — Trip2Talk`
+
+  const bodyEn = [
+    `Hi ${opts.customerName},`,
+    '',
+    'This confirms your Trip2Talk liability waiver was completed.',
+    '',
+    `Trip: ${tripLabel}`,
+    `Signed name: ${opts.customerName}`,
+    `Completed at: ${when}`,
+    `Filled by staff (on your request): ${staff}`,
+    '',
+    'Agreed terms:',
+    clausesEn,
+    ...(opts.authorizationNote?.trim()
+      ? ['', `Staff note on file: ${opts.authorizationNote.trim()}`]
+      : []),
+    '',
+    'Keep this message as your confirmation. If anything looks wrong, reply on Messenger.',
+    '',
+    'Trip2Talk team',
+  ].join('\n')
+
+  const bodyTh = [
+    `สวัสดีคุณ ${opts.customerName}`,
+    '',
+    'ยืนยันว่า waiver (เอกสารยินยอม/สละสิทธิ์) ของคุณกับ Trip2Talk เสร็จแล้วครับ',
+    '',
+    `ทริป: ${tripLabel}`,
+    `ชื่อที่ลงนาม: ${opts.customerName}`,
+    `เวลาที่กรอก: ${when}`,
+    `กรอกโดยเจ้าหน้าที่ (ตามที่คุณขอ): ${staff}`,
+    '',
+    'ข้อตกลงที่ยอมรับ:',
+    clausesTh,
+    ...(opts.authorizationNote?.trim()
+      ? ['', `บันทึกของเจ้าหน้าที่: ${opts.authorizationNote.trim()}`]
+      : []),
+    '',
+    'เก็บข้อความนี้ไว้เป็นหลักฐาน หากมีส่วนใดไม่ถูกต้อง ทัก Messenger กลับมาได้เลย',
+    '',
+    'ทีม Trip2Talk',
+  ].join('\n')
+
+  const clipboardText = `${bodyEn}\n\n---\n${bodyTh}`
+
+  return {
+    subject,
+    bodyEn,
+    bodyTh,
+    clipboardText,
+    messengerUrl: FACEBOOK_MESSENGER_URL,
+    gmailUrl: gmailCompose(opts.customerEmail, subject, clipboardText),
+  }
+}
