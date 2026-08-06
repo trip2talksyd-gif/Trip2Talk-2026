@@ -7,6 +7,7 @@ import {
   recordPayment,
   cancelBooking,
   isBookingCancelled,
+  resolveBookingTravelDate,
 } from '../../lib/toursApi'
 import { isSelectableBookableTour } from '../../lib/tourSelectability'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
@@ -121,7 +122,10 @@ export default function CashierPOS() {
             customerEmail: email.trim() || null,
             tripName: tour?.name_en ?? tripCode,
             tripCode,
-            departureDate: tour?.departure_date ?? null,
+            departureDate: resolveBookingTravelDate(
+              { travel_date: booking.travel_date, trip_code: tripCode },
+              tour?.departure_date,
+            ),
             amountPaid: paidAmount,
             paymentMethod,
             bookingStatus,
@@ -208,7 +212,7 @@ export default function CashierPOS() {
           customerEmail: booking.email || null,
           tripName: tour?.name_en ?? booking.trip_code,
           tripCode: booking.trip_code,
-          departureDate: tour?.departure_date ?? null,
+          departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
           amountPaid: amount,
           paymentMethod: payMethod,
           bookingStatus: result.booking_status,

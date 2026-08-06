@@ -1,7 +1,7 @@
 import { supabase, supabaseConfig } from './supabase'
 import { callStaffApi, clearStaffSession, StaffSessionExpiredError } from './supabaseStaff'
 import { SeatsFullError } from '../types/errors'
-import { deriveDatedTripCode, isSelectableBookableTour } from './tourSelectability'
+import { deriveDatedTripCode, isSelectableBookableTour, parseTravelDateFromTripCode } from './tourSelectability'
 import type {
   BookingPayment,
   ComplianceItem,
@@ -967,9 +967,46 @@ export async function fetchOwnerOpsMetrics(): Promise<OwnerOpsMetrics> {
  * payment amounts, status, or seat counts. Pass only the fields to change. */
 export async function updateBookingDetails(
   id: string,
-  fields: { first_name_en?: string; last_name_en?: string; phone?: string; email?: string },
+  fields: {
+    first_name_en?: string
+    last_name_en?: string
+    phone?: string
+    email?: string
+    /** YYYY-MM-DD or null to clear */
+    travel_date?: string | null
+  },
 ): Promise<TourBooking> {
   return callStaffApi<TourBooking>('update_booking_details', { id, ...fields })
+}
+
+/**
+ * Travel date for invoices/receipts.
+ * Priority: booking.travel_date (manual) → tourDeparture → parse from trip code.
+ */
+export function resolveBookingTravelDate(
+  booking: Pick<TourBooking, 'travel_date' | 'trip_code'>,
+  tourDepartureDate?: string | null,
+): string | null {
+  const manual = booking.travel_date?.trim()?.slice(0, 10)
+  if (manual) return manual
+  const fromTour = tourDepartureDate?.trim()?.slice(0, 10)
+  if (fromTour) return fromTour
+  return parseTravelDateFromTripCode(booking.trip_code)
+}
+
+/** Display form for invoice Travel Date column (en-AU long month). */
+export function formatTravelDateLabel(isoDate: string | null | undefined): string | null {
+  if (!isoDate?.trim()) return null
+  const d = isoDate.trim().slice(0, 10)
+  try {
+    return new Date(`${d}T00:00:00`).toLocaleDateString('en-AU', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    })
+  } catch {
+    return d
+  }
 }
 
 /** Soft-cancels a booking (keeps the row). Sets cancelled_at / cancelled_by /

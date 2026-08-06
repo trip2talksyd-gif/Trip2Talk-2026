@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useToast } from '../../components/ui/Toast'
 import { PAYID_OPTIONS } from '../../data/paymentDetails'
 import { BRAND_BADGE_PNG_SRC } from '../../data/brand'
+import { formatTravelDateLabel } from '../../lib/toursApi'
 import {
   StaffButton,
   staffShellClass,
@@ -118,6 +119,7 @@ export default function ReceiptPage() {
   }
 
   const isInstallment = (data?.installmentPlan ?? 1) > 1
+  const travelDateLabel = formatTravelDateLabel(data?.departureDate) ?? data?.departureDate ?? null
 
   function buildEmailParts(d: ReceiptData) {
     const subject = `Trip2Talk Tax Invoice — ${d.bookingReference ?? ''}`.trim()
@@ -135,7 +137,7 @@ export default function ReceiptPage() {
       '',
       `Invoice: ${d.bookingReference ?? '—'}`,
       `Trip: ${d.tripName} (${d.tripCode})`,
-      d.departureDate ? `Travel Date: ${d.departureDate}` : '',
+      d.departureDate ? `Travel Date: ${formatTravelDateLabel(d.departureDate) ?? d.departureDate}` : '',
       `Amount: ${formatAudCents(d.amountPaid)}${installmentLine}`,
       '',
       '(Please attach the receipt image — download it above first, then attach it here.)',
@@ -295,7 +297,7 @@ export default function ReceiptPage() {
                     </p>
                   )}
                 </td>
-                <td className="py-2.5 pr-2 align-top text-xs text-black/70">{data.departureDate ?? '—'}</td>
+                <td className="py-2.5 pr-2 align-top text-xs text-black/70">{travelDateLabel ?? '—'}</td>
                 <td className="py-2.5 text-right align-top font-medium text-black">
                   {formatAudCents(data.amountPaid)}
                 </td>

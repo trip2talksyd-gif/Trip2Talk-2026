@@ -102,6 +102,11 @@ export interface TourBooking {
   slip_url: string | null
   booking_reference: string | null
   booked_at: string
+  /**
+   * Staff-set travel/departure date (YYYY-MM-DD). When present, invoices use
+   * this instead of tours.departure_date or trip-code derivation.
+   */
+  travel_date?: string | null
   /** Soft-cancel timestamp — row is kept for tax/audit; null = active. */
   cancelled_at?: string | null
   /** Staff name or id who cancelled. */

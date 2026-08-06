@@ -1539,21 +1539,41 @@ Deno.serve(async (req) => {
         // Fixes typos entered at booking time (name/phone/email) — does NOT
         // touch payment amounts, status, or seat counts. Staff use this when
         // a customer's name was misspelled so the tax invoice/receipt can be
-        // reissued correctly.
-        const { id, first_name_en, last_name_en, phone, email } = params as {
+        // reissued correctly. Also supports travel_date override for invoices.
+        const { id, first_name_en, last_name_en, phone, email, travel_date } = params as {
           id: string
           first_name_en?: string
           last_name_en?: string
           phone?: string
           email?: string
+          travel_date?: string | null
         }
         if (!id) return json({ error: 'invalid_params' }, 400)
+
+        const { data: existing, error: existingErr } = await admin
+          .from('tour_bookings')
+          .select('id, travel_date, first_name_en, last_name_en, phone, email, trip_code')
+          .eq('id', id)
+          .maybeSingle()
+        if (existingErr) throw existingErr
+        if (!existing) return json({ error: 'not_found' }, 404)
 
         const payload: Record<string, unknown> = {}
         if (first_name_en !== undefined) payload.first_name_en = first_name_en.trim()
         if (last_name_en !== undefined) payload.last_name_en = last_name_en.trim()
         if (phone !== undefined) payload.phone = phone.trim()
         if (email !== undefined) payload.email = email.trim()
+        if (travel_date !== undefined) {
+          if (travel_date === null || travel_date === '') {
+            payload.travel_date = null
+          } else {
+            const d = String(travel_date).trim().slice(0, 10)
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+              return json({ error: 'invalid_travel_date' }, 400)
+            }
+            payload.travel_date = d
+          }
+        }
 
         if (Object.keys(payload).length === 0) return json({ error: 'invalid_params' }, 400)
 
@@ -1564,6 +1584,35 @@ Deno.serve(async (req) => {
           .select()
           .single()
         if (error) throw error
+
+        if (travel_date !== undefined) {
+          const oldVal =
+            existing.travel_date != null ? String(existing.travel_date).slice(0, 10) : null
+          const newVal =
+            data.travel_date != null ? String(data.travel_date).slice(0, 10) : null
+          if (oldVal !== newVal) {
+            const staffId =
+              typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+            const { error: auditErr } = await admin.from('staff_financial_audit').insert({
+              staff_id: staffId,
+              staff_role: session.role ?? null,
+              staff_name: session.full_name ?? null,
+              action: 'update_booking_travel_date',
+              entity_type: 'tour_booking',
+              entity_id: id,
+              booking_id: id,
+              detail: {
+                trip_code: existing.trip_code ?? null,
+                old_travel_date: oldVal,
+                new_travel_date: newVal,
+              },
+            })
+            if (auditErr) {
+              console.error('[update_booking_details] travel_date audit failed', auditErr)
+            }
+          }
+        }
+
         return json({ data })
       }
 
