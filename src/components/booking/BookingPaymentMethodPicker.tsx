@@ -1,6 +1,7 @@
 import { CreditCard, Landmark } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { formatAud } from '../../lib/toursApi'
+import SquareAcceptedPaymentIcons from './SquareAcceptedPaymentIcons'
 
 export type CustomerPaymentChoice = 'payid' | 'square'
 
@@ -28,6 +29,7 @@ export default function BookingPaymentMethodPicker({
     subTh: string
     icon: typeof Landmark
     recommended?: boolean
+    showBrandIcons?: boolean
   }[] = [
     {
       id: 'payid',
@@ -45,6 +47,7 @@ export default function BookingPaymentMethodPicker({
       subEn: `Secure Square checkout for ${formatAud(depositAud)}. Card processing fees apply.`,
       subTh: `ชำระผ่าน Square ${formatAud(depositAud)} — บัตรเครดิต/เดบิต หรือ Afterpay (มีค่าธรรมเนียม)`,
       icon: CreditCard,
+      showBrandIcons: true,
     },
   ]
 
@@ -94,6 +97,7 @@ export default function BookingPaymentMethodPicker({
                   <span className="mt-0.5 block text-[10.5px] leading-snug text-ink-soft">
                     {lang === 'th' ? opt.subTh : opt.subEn}
                   </span>
+                  {opt.showBrandIcons ? <SquareAcceptedPaymentIcons /> : null}
                 </span>
               </label>
             </li>
