@@ -1385,7 +1385,13 @@ export async function generateCaption(
       anthropic_type?: string | null
     }
     if (body?.error === 'anthropic_failed') {
-      const detail = [body.anthropic_status, body.anthropic_type].filter(Boolean).join(' ')
+      const detail = [
+        body.anthropic_status,
+        body.anthropic_type,
+        (body as { anthropic_message?: string | null }).anthropic_message,
+      ]
+        .filter(Boolean)
+        .join(' — ')
       throw new Error(detail ? `anthropic_failed (${detail})` : 'anthropic_failed')
     }
     throw new Error(body?.error ?? `generate-caption failed: ${res.status}`)

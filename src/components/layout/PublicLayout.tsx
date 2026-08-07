@@ -41,8 +41,8 @@ export default function PublicLayout() {
       <header
         className={
           isHome
-            ? 'z-50 shrink-0 border-b border-white/8 bg-teal-900/95 backdrop-blur'
-            : 'z-50 shrink-0 border-b border-line bg-card/95 backdrop-blur'
+            ? 'z-50 shrink-0 border-b border-white/8 bg-teal-900/95 pt-[env(safe-area-inset-top)] backdrop-blur'
+            : 'z-50 shrink-0 border-b border-line bg-card/95 pt-[env(safe-area-inset-top)] backdrop-blur'
         }
       >
         <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-10 lg:py-[18px]">
