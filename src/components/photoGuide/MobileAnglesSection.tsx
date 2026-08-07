@@ -65,14 +65,14 @@ function AngleMediaCarousel({ photos, alt }: { photos: GalleryPhoto[]; alt: stri
 
         {len > 1 && (
           <>
-            <span className="absolute right-2.5 top-2.5 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold tabular-nums text-[#f5f5f0]">
+            <span className="absolute right-2.5 top-2.5 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold tabular-nums text-white">
               {index + 1}/{len}
             </span>
             <button
               type="button"
               aria-label="Previous photo"
               onClick={() => go(index - 1)}
-              className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-[#f5f5f0] backdrop-blur-sm"
+              className="absolute left-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm"
             >
               <ChevronLeft className="h-4 w-4" strokeWidth={2.25} />
             </button>
@@ -80,7 +80,7 @@ function AngleMediaCarousel({ photos, alt }: { photos: GalleryPhoto[]; alt: stri
               type="button"
               aria-label="Next photo"
               onClick={() => go(index + 1)}
-              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-[#f5f5f0] backdrop-blur-sm"
+              className="absolute right-2 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur-sm"
             >
               <ChevronRight className="h-4 w-4" strokeWidth={2.25} />
             </button>
@@ -136,9 +136,9 @@ function AngleCard({
       <span className="font-serif text-[15px] font-light tracking-wide text-coral" aria-hidden>
         {angle.n}
       </span>
-      <h3 className="mt-2 font-serif text-[17px] font-normal leading-snug tracking-wide text-[#f5f5f0] sm:text-[18px]">
+      <h3 className="mt-2 font-serif text-[17px] font-normal leading-snug tracking-wide text-white sm:text-[18px]">
         {angle.titleEn}
-        <span className="mt-1 block font-thai text-[13px] font-medium tracking-normal text-[#f5f5f0]/75">
+        <span className="mt-1 block font-thai text-[14px] font-medium tracking-normal text-white/80">
           {angle.titleTh}
         </span>
       </h3>
@@ -149,22 +149,22 @@ function AngleCard({
         </div>
       )}
 
-      <p className="mt-4 text-[13.5px] leading-[1.65] text-[#f5f5f0]/68">
+      <p className="mt-4 text-base leading-[1.65] text-white/80">
         {angle.bodyEn}
-        <span className="mt-1.5 block font-thai text-[12.5px] font-medium leading-[1.65] text-[#f5f5f0]/55">
+        <span className="mt-1.5 block font-thai text-[15px] font-medium leading-[1.65] text-white/75">
           {angle.bodyTh}
         </span>
       </p>
-      <p className="mt-3 text-[12px] leading-[1.55]">
+      <p className="mt-3 leading-[1.6]">
         <span className="font-extrabold uppercase tracking-[0.06em] text-coral">
           {tipLabel.en}
-          <span className="ml-1 font-thai text-[11px] font-bold normal-case tracking-normal opacity-90">
+          <span className="ml-1 font-thai text-[12px] font-bold normal-case tracking-normal text-coral/90">
             {tipLabel.th}
           </span>
         </span>
-        <span className="mt-1 block text-[12.5px] leading-[1.55] text-[#f5f5f0]/65">
+        <span className="mt-1 block text-[14.5px] leading-[1.65] text-white/70">
           {angle.tipEn}
-          <span className="mt-1 block font-thai text-[12px] font-medium text-[#f5f5f0]/5">
+          <span className="mt-1 block font-thai text-[14px] font-medium leading-[1.65] text-white/65">
             {angle.tipTh}
           </span>
         </span>
@@ -222,15 +222,15 @@ function TripCrossSellBanner() {
             en={title.en}
             th={title.th}
             serif
-            className="mt-1 text-[16px] text-[#f5f5f0] sm:text-[17px]"
-            thClassName="mt-0.5 block font-thai text-[13px] font-medium text-[#f5f5f0]/75"
+            className="mt-1 text-[16px] text-white sm:text-[17px]"
+            thClassName="mt-0.5 block font-thai text-[14px] font-medium text-white/80"
           />
           <BiText
             as="p"
             en={sub.en}
             th={sub.th}
-            className="mt-1.5 text-[12.5px] leading-relaxed text-[#f5f5f0]/65"
-            thClassName="mt-1 block font-thai text-[11.5px] font-medium text-[#f5f5f0]/5"
+            className="mt-1.5 text-[14px] leading-[1.65] text-white/70"
+            thClassName="mt-1 block font-thai text-[13px] font-medium leading-[1.65] text-white/65"
           />
         </div>
 
@@ -317,15 +317,15 @@ export default function MobileAnglesSection() {
         en={titleBi.en}
         th={titleBi.th}
         serif
-        className="mt-3 text-[28px] font-normal leading-tight tracking-tight text-[#f5f5f0] sm:text-[34px]"
-        thClassName="mt-2 block font-thai text-[16px] font-medium text-[#f5f5f0]/80 sm:text-[18px]"
+        className="mt-3 text-[28px] font-normal leading-tight tracking-tight text-white sm:text-[34px]"
+        thClassName="mt-2 block font-thai text-[17px] font-medium text-white/85 sm:text-[19px]"
       />
       <BiText
         as="p"
         en={introBi.en}
         th={introBi.th}
-        className="mt-4 max-w-xl text-[14px] leading-[1.7] text-[#f5f5f0]/70"
-        thClassName="mt-2 block font-thai text-[13px] font-medium leading-[1.7] text-[#f5f5f0]/60"
+        className="mt-4 max-w-xl text-base leading-[1.7] text-white/80"
+        thClassName="mt-2 block font-thai text-[15px] font-medium leading-[1.7] text-white/75"
       />
     </>
   )
@@ -349,17 +349,17 @@ export default function MobileAnglesSection() {
                     type="button"
                     onClick={() => scrollToAngle(angle.n)}
                     className={`flex w-full items-baseline gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
-                      isActive ? 'bg-white/10 text-[#f5f5f0]' : 'text-white/40 hover:text-white/70'
+                      isActive ? 'bg-white/10 text-white' : 'text-white/55 hover:text-white/80'
                     }`}
                   >
-                    <span className={`font-serif text-[13px] ${isActive ? 'text-coral' : ''}`}>
+                    <span className={`font-serif text-[14px] ${isActive ? 'text-coral' : ''}`}>
                       {angle.n}
                     </span>
                     <span className="min-w-0">
-                      <span className="block text-[13px] font-medium leading-snug">
+                      <span className="block text-[15px] font-medium leading-snug">
                         {angle.titleEn}
                       </span>
-                      <span className="mt-0.5 block font-thai text-[11px] opacity-80">
+                      <span className="mt-0.5 block font-thai text-[13px] text-white/70">
                         {angle.titleTh}
                       </span>
                     </span>
@@ -367,10 +367,10 @@ export default function MobileAnglesSection() {
                 )
               })}
             </nav>
-            <p className="mt-6 hidden items-center gap-1.5 text-[11px] text-white/35 lg:mt-auto lg:flex">
+            <p className="mt-6 hidden items-center gap-1.5 text-[12px] text-white/55 lg:mt-auto lg:flex">
               <MapPin className="h-3 w-3 text-coral" aria-hidden />
               Scroll to explore each angle
-              <span className="font-thai opacity-90"> · เลื่อนดูทีละมุม</span>
+              <span className="font-thai text-white/55"> · เลื่อนดูทีละมุม</span>
             </p>
           </div>
         </aside>

@@ -236,15 +236,15 @@ export default function CameraGuidePage() {
                   as="h3"
                   en={mode.nameEn}
                   th={mode.nameTh}
-                  className="mt-2.5 text-[13px] font-semibold leading-snug text-ink"
-                  thClassName="mt-0.5 block font-thai text-[11.5px] font-medium text-ink-soft"
+                  className="mt-2.5 text-[14px] font-semibold leading-snug text-ink"
+                  thClassName="mt-0.5 block font-thai text-[13px] font-medium text-ink-soft"
                 />
                 <BiText
                   as="p"
                   en={mode.bodyEn}
                   th={mode.bodyTh}
-                  className="mt-1.5 text-[11.5px] leading-[1.55] text-ink-soft"
-                  thClassName="mt-1 block font-thai text-[10.5px] font-medium text-ink-soft/90"
+                  className="mt-1.5 text-[13.5px] leading-[1.6] text-ink"
+                  thClassName="mt-1 block font-thai text-[13px] font-medium leading-[1.6] text-ink-soft"
                 />
 
                 <div className="mt-3 rounded-[10px] bg-mint-100/80 px-3 py-2.5">
@@ -258,8 +258,8 @@ export default function CameraGuidePage() {
                     as="p"
                     en={mode.bestEn}
                     th={mode.bestTh}
-                    className="mt-1 text-[11.5px] leading-[1.5] text-ink"
-                    thClassName="mt-0.5 block font-thai text-[10.5px] font-medium text-ink-soft"
+                    className="mt-1 text-[13.5px] leading-[1.55] text-ink"
+                    thClassName="mt-0.5 block font-thai text-[13px] font-medium leading-[1.55] text-ink-soft"
                   />
                 </div>
 
