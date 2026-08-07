@@ -8,6 +8,7 @@ import {
 } from '../../data/contactChannels'
 import type { TranslationKey } from '../../i18n/translations'
 import BrandLogo from '../brand/BrandLogo'
+import { FooterPaymentIcons } from '../booking/SquareAcceptedPaymentIcons'
 
 const STREET_ADDRESS = '33/14 Jubilee Ave, Warriewood NSW 2102'
 const ABN = 'ABN 81 951 461 769'
@@ -45,7 +46,6 @@ export default function PublicFooter() {
   return (
     <footer className="site-footer bg-teal-900 px-6 pb-6 pt-10 text-[#cfe4de] sm:px-10">
       <div className="mx-auto max-w-[1150px]">
-        {/* .sf-grid */}
         <div className="grid gap-8 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:gap-8">
           <div>
             <div className="mb-2 flex items-center gap-2 font-thai text-[17px] font-bold text-white">
@@ -77,6 +77,12 @@ export default function PublicFooter() {
                 {t(key)}
               </Link>
             ))}
+            <div className="mt-3">
+              <p className="mb-1.5 text-[9px] font-bold uppercase tracking-[0.06em] text-[#7a9791]">
+                {lang === 'th' ? 'รับชำระ' : 'We accept'}
+              </p>
+              <FooterPaymentIcons />
+            </div>
           </div>
 
           <div>
@@ -99,7 +105,6 @@ export default function PublicFooter() {
           </div>
         </div>
 
-        {/* .social-block — 80x80 fold-corner tiles */}
         <div className="mt-10 text-center">
           <h3 className="font-serif text-[15.5px] text-white">
             {t('footer.social.label')}
@@ -132,7 +137,6 @@ export default function PublicFooter() {
           </div>
         </div>
 
-        {/* .sf-bottom */}
         <div className="mt-10 flex flex-wrap items-center justify-between gap-2.5 border-t border-white/10 pt-[18px] text-[10.5px] text-[#7a9791]">
           <span>
             {t('footer.copyright')} · {ABN}

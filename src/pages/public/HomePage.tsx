@@ -18,6 +18,7 @@ const HERO_VIDEO_URL =
 export default function HomePage() {
   const { tt } = useLang()
   const [destBlurbs, setDestBlurbs] = useState<{ en: string; th: string } | null>(null)
+  const [heroVideoOk, setHeroVideoOk] = useState(true)
 
   useEffect(() => {
     let cancelled = false
@@ -53,15 +54,18 @@ export default function HomePage() {
   return (
     <div className="-mx-4 space-y-0">
       <section className="relative flex min-h-[92svh] w-full flex-col overflow-hidden bg-teal-900">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          className="absolute inset-0 z-0 h-full w-full object-cover"
-          src={HERO_VIDEO_URL}
-        />
+        {heroVideoOk ? (
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 z-0 h-full w-full object-cover"
+            src={HERO_VIDEO_URL}
+            onError={() => setHeroVideoOk(false)}
+          />
+        ) : null}
         <div
           className="absolute inset-0 z-[1]"
           style={{
