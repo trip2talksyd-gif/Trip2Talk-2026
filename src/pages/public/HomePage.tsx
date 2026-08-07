@@ -76,27 +76,27 @@ export default function HomePage() {
           aria-hidden
         />
 
-        <div className="relative z-[2] mx-auto flex w-full max-w-[300px] flex-1 flex-col justify-end px-5 pb-4 pt-16 sm:max-w-md">
-          <p className="mb-2.5 self-center rounded-full border border-white/25 bg-white/14 px-[11px] py-1 text-center text-[8.5px] leading-[1.4] text-cream backdrop-blur-[6px]">
+        <div className="relative z-[2] mx-auto flex w-full max-w-[260px] flex-1 flex-col justify-end px-5 pb-3 pt-14 sm:max-w-sm">
+          <p className="mb-1.5 self-center rounded-full border border-white/25 bg-white/14 px-[11px] py-1 text-center text-[8.5px] leading-[1.4] text-cream backdrop-blur-[6px]">
             {badge.en}
             <span className="mt-0.5 block font-thai text-[7.5px] opacity-85">{badge.th}</span>
           </p>
 
-          <h1 className="m-0 text-center font-serif text-[22px] leading-[1.22] text-cream sm:text-[28px]">
+          <h1 className="m-0 text-center font-serif text-[19px] leading-[1.2] text-cream sm:text-[24px]">
             {en1.en} <em className="not-italic text-mint-200">{en2.en}</em>
           </h1>
-          <p className="mb-[7px] mt-0.5 text-center font-thai text-[10.5px] text-mint-200 sm:text-[13px]">
+          <p className="mb-1 mt-0 text-center font-thai text-[9.5px] leading-[1.35] text-mint-200 sm:text-[11.5px]">
             {th1.th} {th2.th}
           </p>
 
-          <p className="mb-[3px] text-center text-[9.5px] leading-[1.5] text-[#dff5ea] sm:text-[12px]">
+          <p className="mb-0.5 max-w-[220px] self-center text-center text-[8.5px] leading-[1.45] text-[#dff5ea] sm:max-w-[260px] sm:text-[11px]">
             {subtitleEn}
           </p>
-          <p className="mb-[11px] text-center font-thai text-[8.5px] text-[#bfe9d0] sm:text-[11px]">
+          <p className="mb-2 max-w-[220px] self-center text-center font-thai text-[8px] leading-[1.45] text-[#bfe9d0] sm:max-w-[260px] sm:text-[10px]">
             {subtitleTh}
           </p>
 
-          <div className="mb-3 flex gap-1.5 rounded-full border border-white/20 bg-white/12 p-[5px]">
+          <div className="mb-2 flex gap-1.5 rounded-full border border-white/20 bg-white/12 p-[5px]">
             <Link to="/trips" className="btn-embossed cta-shine">
               {explore.en}
               <span className="mt-0.5 block font-thai text-[7.5px] font-medium opacity-85">
@@ -112,7 +112,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="relative z-[2] mx-auto mb-2.5 w-full max-w-[300px] px-5 sm:max-w-md">
+        <div className="relative z-[2] mx-auto mb-2 w-full max-w-[260px] px-5 sm:max-w-sm">
           <Link
             to="/photo-guide"
             className="flex items-center gap-2.5 rounded-[14px] border border-white/28 bg-white/14 px-3 py-2.5 backdrop-blur-[6px]"
