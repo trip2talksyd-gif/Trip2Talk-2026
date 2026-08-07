@@ -1,9 +1,29 @@
 import { Link } from 'react-router-dom'
-import { Check } from 'lucide-react'
+import {
+  Check,
+  CircleDot,
+  Crosshair,
+  Grid3x3,
+  Square,
+  SunMedium,
+  type LucideIcon,
+} from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
-import { CAMERA_GEAR, CAMERA_SETTINGS } from '../../data/photoGuideContent'
+import {
+  CAMERA_GEAR,
+  CAMERA_METERING_MODES,
+  CAMERA_SETTINGS,
+} from '../../data/photoGuideContent'
 import PhotoSlideshow, { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
 import BiText from '../../components/ui/BiText'
+
+const METERING_ICONS: Record<(typeof CAMERA_METERING_MODES)[number]['id'], LucideIcon> = {
+  multi: Grid3x3,
+  center: CircleDot,
+  average: Square,
+  highlight: SunMedium,
+  spot: Crosshair,
+}
 
 export default function CameraGuidePage() {
   const { tt } = useLang()
@@ -14,6 +34,11 @@ export default function CameraGuidePage() {
   const examplesBi = tt('photoGuide.camera.examples')
   const disclaimerBi = tt('photoGuide.camera.disclaimer')
   const gearBi = tt('photoGuide.camera.gear')
+  const meteringTitleBi = tt('photoGuide.camera.metering.title')
+  const meteringIntroBi = tt('photoGuide.camera.metering.intro')
+  const bestForBi = tt('photoGuide.camera.metering.bestFor')
+  const menuBi = tt('photoGuide.camera.metering.menu')
+  const swipeBi = tt('photoGuide.camera.metering.swipe')
   const colScene = tt('photoGuide.camera.table.scene')
   const colAperture = tt('photoGuide.camera.table.aperture')
   const colShutter = tt('photoGuide.camera.table.shutter')
@@ -171,6 +196,87 @@ export default function CameraGuidePage() {
         className="!mt-1.5 text-[11px] text-ink-soft"
         thClassName="mt-0.5 block font-thai text-[10px] font-medium text-ink-soft/90"
       />
+
+      <section>
+        <BiText
+          as="h2"
+          en={meteringTitleBi.en}
+          th={meteringTitleBi.th}
+          serif
+          className="text-[15.5px] text-ink sm:text-lg"
+          thClassName="mt-0.5 block font-thai text-[12px] font-medium text-ink-soft"
+        />
+        <BiText
+          as="p"
+          en={meteringIntroBi.en}
+          th={meteringIntroBi.th}
+          className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-ink-soft"
+          thClassName="mt-1 block font-thai text-[12px] font-medium text-ink-soft/90"
+        />
+        <p className="mt-3 text-[11px] font-semibold text-teal-700 sm:hidden">
+          {swipeBi.en}
+          <span className="mt-0.5 block font-thai text-[10px] font-medium opacity-85">
+            {swipeBi.th}
+          </span>
+        </p>
+
+        {/* Mobile: thumb-scroll snap cards · sm+: responsive grid */}
+        <div className="hide-scrollbar -mx-4 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:mt-4 sm:grid sm:snap-none sm:grid-cols-2 sm:gap-4 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+          {CAMERA_METERING_MODES.map((mode) => {
+            const Icon = METERING_ICONS[mode.id]
+            return (
+              <article
+                key={mode.id}
+                className="w-[min(82vw,300px)] shrink-0 snap-start rounded-[14px] border border-line bg-card p-4 pb-[18px] shadow-[0_8px_18px_-12px_rgba(15,28,30,0.25)] sm:w-auto"
+              >
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-700 text-cream">
+                  <Icon className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+                </span>
+                <BiText
+                  as="h3"
+                  en={mode.nameEn}
+                  th={mode.nameTh}
+                  className="mt-2.5 text-[13px] font-semibold leading-snug text-ink"
+                  thClassName="mt-0.5 block font-thai text-[11.5px] font-medium text-ink-soft"
+                />
+                <BiText
+                  as="p"
+                  en={mode.bodyEn}
+                  th={mode.bodyTh}
+                  className="mt-1.5 text-[11.5px] leading-[1.55] text-ink-soft"
+                  thClassName="mt-1 block font-thai text-[10.5px] font-medium text-ink-soft/90"
+                />
+
+                <div className="mt-3 rounded-[10px] bg-mint-100/80 px-3 py-2.5">
+                  <p className="text-[9.5px] font-extrabold uppercase tracking-[0.05em] text-coral">
+                    {bestForBi.en}
+                    <span className="ml-1.5 font-thai normal-case tracking-normal opacity-90">
+                      {bestForBi.th}
+                    </span>
+                  </p>
+                  <BiText
+                    as="p"
+                    en={mode.bestEn}
+                    th={mode.bestTh}
+                    className="mt-1 text-[11.5px] leading-[1.5] text-ink"
+                    thClassName="mt-0.5 block font-thai text-[10.5px] font-medium text-ink-soft"
+                  />
+                </div>
+
+                <p className="mt-3 text-[9.5px] font-extrabold uppercase tracking-[0.05em] text-teal-600">
+                  {menuBi.en}
+                  <span className="ml-1.5 font-thai normal-case tracking-normal opacity-85">
+                    {menuBi.th}
+                  </span>
+                </p>
+                <p className="mt-1 break-words font-mono text-[10.5px] leading-relaxed text-ink-soft">
+                  {mode.menuPath}
+                </p>
+              </article>
+            )
+          })}
+        </div>
+      </section>
 
       <section>
         <BiText

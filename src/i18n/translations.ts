@@ -318,6 +318,11 @@ export type TranslationKey =
   | 'photoGuide.camera.table.notes'
   | 'photoGuide.camera.disclaimer'
   | 'photoGuide.camera.gear'
+  | 'photoGuide.camera.metering.title'
+  | 'photoGuide.camera.metering.intro'
+  | 'photoGuide.camera.metering.bestFor'
+  | 'photoGuide.camera.metering.menu'
+  | 'photoGuide.camera.metering.swipe'
   | 'photoGuide.mobile.eyebrow'
   | 'photoGuide.mobile.title'
   | 'photoGuide.mobile.sub'
@@ -806,6 +811,12 @@ const en: Map = {
   'photoGuide.camera.disclaimer':
     'Starting points only — adjust for your specific lens and camera’s low-light performance.',
   'photoGuide.camera.gear': 'Beginner gear checklist',
+  'photoGuide.camera.metering.title': 'Metering Mode',
+  'photoGuide.camera.metering.intro':
+    "Choosing the right metering mode changes how your camera reads light. Here are the 5 you'll actually use.",
+  'photoGuide.camera.metering.bestFor': 'Best for',
+  'photoGuide.camera.metering.menu': 'Menu path',
+  'photoGuide.camera.metering.swipe': 'Swipe for more modes →',
   'photoGuide.mobile.eyebrow': 'Photo Guide · Mobile Photography',
   'photoGuide.mobile.title': 'Mobile Photography Guide',
   'photoGuide.mobile.sub':
@@ -1301,6 +1312,12 @@ const th: Map = {
   'photoGuide.camera.disclaimer':
     'เป็นค่าเริ่มต้นเท่านั้น ปรับตามเลนส์และกล้องของแต่ละคน',
   'photoGuide.camera.gear': 'อุปกรณ์เบื้องต้นที่ควรมี',
+  'photoGuide.camera.metering.title': 'โหมดวัดแสง',
+  'photoGuide.camera.metering.intro':
+    'เลือกโหมดวัดแสงให้ถูก กล้องจะอ่านแสงต่างกันไป นี่คือ 5 โหมดที่ใช้บ่อยที่สุด',
+  'photoGuide.camera.metering.bestFor': 'เหมาะกับ',
+  'photoGuide.camera.metering.menu': 'เส้นทางเมนู',
+  'photoGuide.camera.metering.swipe': 'ปัดดูโหมดถัดไป →',
   'photoGuide.mobile.eyebrow': 'คลังเคล็ดลับ · มือถือ',
   'photoGuide.mobile.title': 'คู่มือถ่ายภาพด้วยมือถือ',
   'photoGuide.mobile.sub':

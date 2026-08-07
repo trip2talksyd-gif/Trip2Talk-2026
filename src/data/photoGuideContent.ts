@@ -168,6 +168,64 @@ export const CAMERA_SETTINGS = [
   },
 ] as const
 
+export const CAMERA_METERING_MODES = [
+  {
+    id: 'multi',
+    nameEn: 'Multi Metering (Matrix / Evaluative)',
+    nameTh: 'วัดแสงหลายจุด (มัลติ)',
+    bodyEn:
+      'Splits the frame into zones and averages them intelligently, factoring in focus point and scene type.',
+    bodyTh:
+      'แบ่งเฟรมเป็นหลายโซนแล้วประมวลผลค่าแสงโดยรวม โดยพิจารณาจุดโฟกัสและลักษณะฉากด้วย',
+    bestEn: 'Everyday, general-purpose shooting — the safest default for most scenes.',
+    bestTh: 'ถ่ายทั่วไปในชีวิตประจำวัน เป็นโหมดเริ่มต้นที่ปลอดภัยที่สุดสำหรับแทบทุกฉาก',
+    menuPath: 'Menu → Camera Settings → Metering Mode → Multi',
+  },
+  {
+    id: 'center',
+    nameEn: 'Center-Weighted Metering',
+    nameTh: 'วัดแสงกลางภาพ',
+    bodyEn: 'Measures light from the center of the frame, giving priority to the middle.',
+    bodyTh: 'วัดแสงจากพื้นที่ตรงกลางเฟรมเป็นหลัก',
+    bestEn: 'Portraits and centered subjects — gives a reliable, consistent exposure.',
+    bestTh: 'พอร์ตเทรตหรือตัวแบบอยู่กลางภาพ ให้ค่าแสงสม่ำเสมอและคาดเดาได้',
+    menuPath: 'Menu → Camera Settings → Metering Mode → Center',
+  },
+  {
+    id: 'average',
+    nameEn: 'Entire Screen Average Metering',
+    nameTh: 'วัดแสงเฉลี่ยทั้งภาพ',
+    bodyEn:
+      'Averages the light across the entire frame equally, with no weighting toward center or subject.',
+    bodyTh: 'เฉลี่ยค่าแสงจากทั้งเฟรมเท่าๆ กัน ไม่เน้นน้ำหนักที่จุดกลางหรือตัวแบบ',
+    bestEn: 'Evenly lit scenes and landscapes where light is consistent across the frame.',
+    bestTh: 'ฉากที่แสงสม่ำเสมอทั่วภาพ เช่น วิวทิวทัศน์กลางวันที่ไม่มีคอนทราสต์จัด',
+    menuPath: 'Menu → Camera Settings → Metering Mode → Average',
+  },
+  {
+    id: 'highlight',
+    nameEn: 'Highlight-Weighted Metering',
+    nameTh: 'วัดแสงจากไฮไลท์',
+    bodyEn: 'Exposes for the brightest part of the scene to protect highlight detail.',
+    bodyTh: 'วัดแสงจากจุดที่สว่างที่สุดในภาพ เพื่อรักษารายละเอียดส่วนสว่าง',
+    bestEn: 'Sunrises, sunsets, and backlit shots — prevents blown-out skies.',
+    bestTh: 'พระอาทิตย์ขึ้น-ตก และภาพย้อนแสง ป้องกันท้องฟ้าขาวโพลน',
+    menuPath: 'Menu → Camera Settings → Metering Mode → Highlight',
+  },
+  {
+    id: 'spot',
+    nameEn: 'Spot Metering',
+    nameTh: 'วัดแสงเฉพาะจุด',
+    bodyEn: 'Measures light from one small, specific point you choose.',
+    bodyTh: 'วัดแสงจากจุดเล็กๆ ที่เลือกเท่านั้น',
+    bestEn:
+      'Tricky lighting where you need precise exposure on one subject. Tip: combine with AE Lock, then recompose.',
+    bestTh:
+      'สภาพแสงซับซ้อนที่ต้องการความแม่นยำที่ตัวแบบ เคล็ดลับ: ใช้คู่กับ AE Lock แล้วจัดองค์ประกอบใหม่',
+    menuPath: 'Menu → Camera Settings → Metering Mode → Spot',
+  },
+] as const
+
 export const CAMERA_GEAR = [
   {
     en: 'Tripod (even a mini one)',

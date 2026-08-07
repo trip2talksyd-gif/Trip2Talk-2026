@@ -22,16 +22,17 @@ const HUB_CARDS = [
   },
   {
     to: '/photo-guide/camera',
-    badgeEn: '7 scenes',
-    badgeTh: '7 ฉาก',
+    badgeEn: '7 scenes · 5 modes',
+    badgeTh: '7 ฉาก · 5 โหมด',
     badgeClass: 'bg-teal-800',
     tagEn: 'For beginner photographers',
     tagTh: 'มือใหม่กล้องใหญ่',
     titleEn: 'Camera Settings Guide',
     titleTh: 'คู่มือตั้งค่ากล้อง',
     bodyEn:
-      'Aperture, shutter & ISO cheat-sheet for morning light through to stars, the Milky Way and aurora hunts.',
-    bodyTh: 'รูรับแสง ชัตเตอร์ และ ISO จากแสงเช้าถึงดาว ทางช้างเผือก และแสงใต้',
+      'Aperture, shutter & ISO cheat-sheet — plus metering modes for morning light through to stars, Milky Way and aurora.',
+    bodyTh:
+      'รูรับแสง ชัตเตอร์ ISO และโหมดวัดแสง จากแสงเช้าถึงดาว ทางช้างเผือก และแสงใต้',
     photoId: 'nz-001',
   },
   {
