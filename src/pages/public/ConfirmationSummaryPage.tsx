@@ -18,7 +18,15 @@ export default function ConfirmationSummaryPage() {
   const { toast } = useToast()
   const [params] = useSearchParams()
   const ref = params.get('ref') ?? undefined
-  const data = useMemo(() => getConfirmationSummary(ref), [ref])
+  const squareReturn = params.get('square') === '1'
+  const data = useMemo(() => {
+    const summary = getConfirmationSummary(ref)
+    if (!summary) return null
+    if (squareReturn && !summary.depositPaid) {
+      return { ...summary, depositPaid: true }
+    }
+    return summary
+  }, [ref, squareReturn])
   const cardRef = useRef<HTMLDivElement>(null)
   const [downloading, setDownloading] = useState(false)
 
@@ -114,6 +122,15 @@ export default function ConfirmationSummaryPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-3 pb-8">
+      {squareReturn && (
+        <div className="rounded-xl border border-teal-600/40 bg-mint-100 px-3 py-2.5 text-[12px] text-ink">
+          <BiText
+            en="Thanks — Square reported a successful payment. Your deposit checklist is marked paid (staff ledger updates via webhook within a minute)."
+            th="ขอบคุณ — Square ยืนยันการชำระแล้ว รายการมัดจำถูกทำเครื่องหมายว่าจ่ายแล้ว (ระบบอัปเดตเลเจอร์ภายในประมาณ 1 นาที)"
+            thClassName="mt-0.5 block font-thai text-[11px] text-ink-soft"
+          />
+        </div>
+      )}
       <div className="flex flex-wrap gap-2 print:hidden">
         <button
           type="button"

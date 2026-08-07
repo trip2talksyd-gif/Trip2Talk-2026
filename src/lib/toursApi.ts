@@ -1302,6 +1302,52 @@ export async function uploadContentPhoto(file: File): Promise<string> {
   return data.publicUrl
 }
 
+export type SquareCheckoutResult = {
+  url: string
+  payment_link_id: string | null
+  order_id: string | null
+  amount_aud: number
+  booking_reference: string
+}
+
+/** Creates a Square hosted Payment Link for a booking deposit (card / Afterpay). */
+export async function createSquareCheckout(input: {
+  booking_reference: string
+  buyer_email?: string
+  buyer_phone?: string
+  redirect_base?: string
+}): Promise<SquareCheckoutResult> {
+  const res = await fetch(`${supabaseConfig.url}/functions/v1/square-create-checkout`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseConfig.anonKey,
+      Authorization: `Bearer ${supabaseConfig.anonKey}`,
+    },
+    body: JSON.stringify({
+      booking_reference: input.booking_reference,
+      buyer_email: input.buyer_email,
+      buyer_phone: input.buyer_phone,
+      redirect_base: input.redirect_base ?? window.location.origin,
+    }),
+  })
+
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const msg =
+      typeof body?.message === 'string' && body.message.trim()
+        ? body.message
+        : typeof body?.error === 'string'
+          ? body.error
+          : `square-create-checkout failed: ${res.status}`
+    throw new Error(msg)
+  }
+  if (typeof body?.url !== 'string' || !body.url) {
+    throw new Error('Square checkout URL missing')
+  }
+  return body as SquareCheckoutResult
+}
+
 export type GenerateCaptionResult = {
   headline_options: string[]
   caption_fb: string

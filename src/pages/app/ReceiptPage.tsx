@@ -40,6 +40,8 @@ const PAYMENT_METHOD_LABEL: Record<string, string> = {
   payid: 'PayID',
   bank_transfer: 'Bank Transfer',
   manual: 'Other',
+  square: 'Card/Afterpay via Square',
+  afterpay: 'Afterpay via Square',
 }
 
 const STATUS_LABEL: Record<string, string> = {
@@ -344,9 +346,23 @@ export default function ReceiptPage() {
             <p className="font-bold" style={{ color: ACCENT }}>
               Payment Details
             </p>
-            <p className="mt-1 text-black/70">{PAYMENT_BANK.bankEn}</p>
-            <p className="text-black/70">PayID: {PAYMENT_BANK.payIdDisplay}</p>
-            <p className="text-black/70">Account Name: {PAYMENT_BANK.accountName}</p>
+            {data.paymentMethod === 'square' || data.paymentMethod === 'afterpay' ? (
+              <>
+                <p className="mt-1 text-black/70">Paid via Square</p>
+                <p className="text-black/70">
+                  {data.paymentMethod === 'afterpay'
+                    ? 'Afterpay'
+                    : 'Card / Afterpay'}
+                </p>
+                <p className="text-black/70">Trip2Talk · Chapter 99 Photography</p>
+              </>
+            ) : (
+              <>
+                <p className="mt-1 text-black/70">{PAYMENT_BANK.bankEn}</p>
+                <p className="text-black/70">PayID: {PAYMENT_BANK.payIdDisplay}</p>
+                <p className="text-black/70">Account Name: {PAYMENT_BANK.accountName}</p>
+              </>
+            )}
           </div>
           <div className="text-right">
             <p className="font-bold" style={{ color: ACCENT }}>
