@@ -166,7 +166,15 @@ export default function BookingPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setTouched(true)
-    if (!tour || !isValid) return
+    if (!tour || !isValid) {
+      toast(
+        lang === 'th'
+          ? 'กรุณากรอกข้อมูลที่จำเป็นให้ครบก่อนชำระมัดจำ'
+          : 'Please complete the required booking fields before paying the deposit.',
+        'error',
+      )
+      return
+    }
 
     setSubmitting(true)
 
@@ -274,10 +282,16 @@ export default function BookingPage() {
         } catch (squareErr) {
           console.error('[BookingPage] Square checkout failed:', squareErr)
           const detail = squareErr instanceof Error ? squareErr.message : ''
+          const missingConfig =
+            /square_not_configured|SQUARE_ACCESS_TOKEN|SQUARE_LOCATION_ID/i.test(detail)
           toast(
-            lang === 'th'
-              ? `จองไว้แล้ว แต่เปิดชำระบัตรไม่สำเร็จ — ใช้ PayID ได้ตามปกติ${detail ? ` (${detail})` : ''}`
-              : `Booking saved, but card checkout failed — you can still pay by PayID${detail ? ` (${detail})` : ''}`,
+            missingConfig
+              ? lang === 'th'
+                ? 'จองไว้แล้ว แต่ยังไม่ได้ตั้ง Square (ต้องใส่ SQUARE_ACCESS_TOKEN + SQUARE_LOCATION_ID) — ใช้ PayID ไปก่อนได้'
+                : 'Booking saved, but Square is not configured yet (need SQUARE_ACCESS_TOKEN + SQUARE_LOCATION_ID). You can still pay by PayID.'
+              : lang === 'th'
+                ? `จองไว้แล้ว แต่เปิดชำระบัตรไม่สำเร็จ — ใช้ PayID ได้ตามปกติ${detail ? ` (${detail})` : ''}`
+                : `Booking saved, but card checkout failed — you can still pay by PayID${detail ? ` (${detail})` : ''}`,
             'error',
           )
           setSquareRedirecting(false)
@@ -682,7 +696,7 @@ export default function BookingPage() {
       <div className="flow-bar sticky bottom-0 -mx-4 !pb-[max(18px,env(safe-area-inset-bottom))] sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
         <button
           type="submit"
-          disabled={submitting || squareRedirecting || !isValid}
+          disabled={submitting || squareRedirecting}
           className="book-btn flip-cta cta-shine w-full disabled:opacity-50"
         >
           {submitting || squareRedirecting
