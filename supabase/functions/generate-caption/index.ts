@@ -145,7 +145,22 @@ Deno.serve(async (req) => {
     if (!anthropicRes.ok) {
       const errText = await anthropicRes.text()
       console.error('[generate-caption] Anthropic error', anthropicRes.status, errText)
-      return json({ error: 'anthropic_failed' }, 502)
+      // Surface status + short Anthropic error type (never the API key).
+      let anthropicType: string | undefined
+      try {
+        const parsed = JSON.parse(errText) as { error?: { type?: string; message?: string } }
+        anthropicType = parsed?.error?.type
+      } catch {
+        /* ignore */
+      }
+      return json(
+        {
+          error: 'anthropic_failed',
+          anthropic_status: anthropicRes.status,
+          anthropic_type: anthropicType ?? null,
+        },
+        502,
+      )
     }
 
     const anthropicBody = await anthropicRes.json()

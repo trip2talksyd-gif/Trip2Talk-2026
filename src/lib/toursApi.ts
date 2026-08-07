@@ -1379,7 +1379,15 @@ export async function generateCaption(
     throw new StaffSessionExpiredError()
   }
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
+    const body = (await res.json().catch(() => ({}))) as {
+      error?: string
+      anthropic_status?: number
+      anthropic_type?: string | null
+    }
+    if (body?.error === 'anthropic_failed') {
+      const detail = [body.anthropic_status, body.anthropic_type].filter(Boolean).join(' ')
+      throw new Error(detail ? `anthropic_failed (${detail})` : 'anthropic_failed')
+    }
     throw new Error(body?.error ?? `generate-caption failed: ${res.status}`)
   }
 
