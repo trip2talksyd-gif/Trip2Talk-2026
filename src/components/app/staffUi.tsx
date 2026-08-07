@@ -56,7 +56,7 @@ export function StaffPageHeader({
   children?: ReactNode
 }) {
   return (
-    <header className="staff-page-header relative shrink-0 overflow-hidden border-b border-white/10 px-4 pb-5 pt-4">
+    <header className="staff-page-header relative shrink-0 overflow-hidden border-b border-white/10 px-4 pb-5 pt-[max(1rem,env(safe-area-inset-top))]">
       <div
         className="pointer-events-none absolute inset-0 bg-gradient-to-br from-teal-700/30 via-transparent to-teal-500/[0.08]"
         aria-hidden

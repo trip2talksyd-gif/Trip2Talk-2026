@@ -126,7 +126,7 @@ export default function PinGatePage() {
       />
 
       <div
-        className="app-scroll flex min-h-full flex-col items-center justify-center px-4"
+        className="app-scroll flex min-h-full flex-col items-center justify-center px-4 pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]"
         data-app-scroll
       >
       <div className="liquid-glass relative w-full max-w-xs rounded-2xl p-8">
