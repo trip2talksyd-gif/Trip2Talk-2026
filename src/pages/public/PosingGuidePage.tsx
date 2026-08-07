@@ -44,28 +44,30 @@ export default function PosingGuidePage() {
           th={titleBi.th}
           serif
           className="mt-1 text-2xl text-ink sm:text-3xl"
-          thClassName="mt-1 block font-thai text-[15px] font-medium text-ink-soft sm:text-lg"
+          thClassName="mt-1 block font-thai text-[16px] font-medium text-ink-soft sm:text-lg"
         />
         <BiText
           as="p"
           en={subBi.en}
           th={subBi.th}
-          className="mt-2 max-w-2xl text-sm leading-relaxed text-ink-soft"
-          thClassName="mt-1.5 block font-thai text-[12.5px] font-medium text-ink-soft/90"
+          className="mt-2 max-w-2xl text-base leading-[1.65] text-ink"
+          thClassName="mt-1.5 block font-thai text-[14px] font-medium leading-[1.65] text-ink-soft"
         />
       </header>
 
       <div className="old-album-wrap">
         <div className="oa-label">
           <div>
-            <b>
+            <b className="!text-[14px]">
               {albumBi.en}
-              <span className="oa-sub">{albumBi.th}</span>
+              <span className="oa-sub !text-[12.5px]">{albumBi.th}</span>
             </b>
           </div>
-          <small>
+          <small className="!text-[12px]">
             {swipeBi.en}
-            <span className="block font-thai text-[9px] font-medium opacity-85">{swipeBi.th}</span>
+            <span className="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft">
+              {swipeBi.th}
+            </span>
           </small>
         </div>
         <div className="gallery-scroll-wrap">
@@ -88,31 +90,31 @@ export default function PosingGuidePage() {
           en={posesBi.en}
           th={posesBi.th}
           serif
-          className="text-[15.5px] text-ink sm:text-lg"
-          thClassName="mt-0.5 block font-thai text-[12px] font-medium text-ink-soft"
+          className="text-lg text-ink sm:text-xl"
+          thClassName="mt-0.5 block font-thai text-[13.5px] font-medium text-ink-soft"
         />
         <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {POSING_TIPS.map((p) => (
             <article
               key={p.n}
-              className="rounded-[14px] border border-line bg-card p-4 pb-[18px] shadow-[0_8px_18px_-12px_rgba(15,28,30,0.25)]"
+              className="rounded-[14px] border border-line bg-card p-4 pb-5 shadow-[0_8px_18px_-12px_rgba(15,28,30,0.25)] sm:p-5"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-700 text-xs font-extrabold text-cream">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-700 text-[13px] font-extrabold text-cream">
                 {p.n}
               </span>
               <BiText
                 as="h3"
                 en={p.titleEn}
                 th={p.titleTh}
-                className="mt-2.5 text-[13px] font-semibold text-ink"
-                thClassName="mt-0.5 block font-thai text-[11.5px] font-medium text-ink-soft"
+                className="mt-3 text-[15px] font-semibold leading-snug text-ink"
+                thClassName="mt-1 block font-thai text-[13.5px] font-medium text-ink-soft"
               />
               <BiText
                 as="p"
                 en={p.bodyEn}
                 th={p.bodyTh}
-                className="mt-1 text-[11.5px] leading-[1.55] text-ink-soft"
-                thClassName="mt-1 block font-thai text-[10.5px] font-medium text-ink-soft/90"
+                className="mt-1.5 text-[13.5px] leading-[1.65] text-ink"
+                thClassName="mt-1 block font-thai text-[12.5px] font-medium leading-[1.65] text-ink-soft"
               />
             </article>
           ))}
@@ -125,15 +127,15 @@ export default function PosingGuidePage() {
           en={seasonTitleBi.en}
           th={seasonTitleBi.th}
           serif
-          className="text-[15.5px] text-ink sm:text-lg"
-          thClassName="mt-0.5 block font-thai text-[12px] font-medium text-ink-soft"
+          className="text-lg text-ink sm:text-xl"
+          thClassName="mt-0.5 block font-thai text-[13.5px] font-medium text-ink-soft"
         />
         <BiText
           as="p"
           en={seasonSubBi.en}
           th={seasonSubBi.th}
-          className="mt-1 text-xs text-ink-soft"
-          thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft/90"
+          className="mt-1 text-[13.5px] leading-[1.6] text-ink-soft"
+          thClassName="mt-0.5 block font-thai text-[12.5px] font-medium leading-[1.6] text-ink-soft"
         />
         <div className="mt-4 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
           {SEASON_CARDS.map((s) => (
@@ -141,9 +143,9 @@ export default function PosingGuidePage() {
               key={s.trip}
               className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${s.gradient} p-4 text-cream`}
             >
-              <p className="text-[9px] uppercase tracking-[0.05em] opacity-85">
+              <p className="text-[10.5px] uppercase tracking-[0.05em] opacity-90">
                 {s.monthsEn}
-                <span className="mt-0.5 block font-thai normal-case tracking-normal opacity-90">
+                <span className="mt-0.5 block font-thai text-[10px] normal-case tracking-normal opacity-95">
                   {s.monthsTh}
                 </span>
               </p>
@@ -152,8 +154,8 @@ export default function PosingGuidePage() {
                 en={s.titleEn}
                 th={s.titleTh}
                 serif
-                className="mb-px mt-1 text-sm"
-                thClassName="mt-0.5 block font-thai text-[11px] font-medium opacity-95"
+                className="mb-px mt-1 text-[15px]"
+                thClassName="mt-0.5 block font-thai text-[12.5px] font-medium opacity-95"
               />
               <div className="my-2.5 flex gap-1.5">
                 {s.swatches.map((c) => (
@@ -168,10 +170,10 @@ export default function PosingGuidePage() {
                 as="p"
                 en={s.bodyEn}
                 th={s.bodyTh}
-                className="text-[10px] leading-[1.5] opacity-95"
-                thClassName="mt-1 block font-thai text-[9.5px] font-medium opacity-90"
+                className="text-[12px] leading-[1.55] opacity-95"
+                thClassName="mt-1 block font-thai text-[11.5px] font-medium leading-[1.55] opacity-90"
               />
-              <span className="mt-2.5 inline-block rounded-full bg-white/20 px-2 py-[3px] text-[9px] font-extrabold">
+              <span className="mt-2.5 inline-block rounded-full bg-white/20 px-2 py-[3px] text-[10px] font-extrabold">
                 {s.trip}
               </span>
             </article>
@@ -184,12 +186,12 @@ export default function PosingGuidePage() {
           as="p"
           en={quoteBi.en}
           th={quoteBi.th}
-          className="m-0 mb-2.5 text-sm italic leading-[1.7]"
-          thClassName="mt-2 block font-thai text-[12px] font-medium not-italic opacity-95"
+          className="m-0 mb-2.5 text-base italic leading-[1.7]"
+          thClassName="mt-2 block font-thai text-[13.5px] font-medium not-italic opacity-95"
         />
-        <footer className="text-[11.5px] font-bold not-italic opacity-90">
+        <footer className="text-[13px] font-bold not-italic opacity-90">
           — {quoteByBi.en}
-          <span className="mt-0.5 block font-thai text-[10.5px] font-medium opacity-85">
+          <span className="mt-0.5 block font-thai text-[12px] font-medium opacity-85">
             {quoteByBi.th}
           </span>
         </footer>

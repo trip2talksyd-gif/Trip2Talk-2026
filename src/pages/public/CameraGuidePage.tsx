@@ -134,15 +134,15 @@ export default function CameraGuidePage() {
           as="p"
           en={subBi.en}
           th={subBi.th}
-          className="mt-2 max-w-2xl text-sm text-ink-soft"
-          thClassName="mt-1.5 block font-thai text-[12.5px] font-medium text-ink-soft/90"
+          className="mt-2 max-w-2xl text-base leading-[1.65] text-ink"
+          thClassName="mt-1.5 block font-thai text-[14px] font-medium leading-[1.65] text-ink-soft"
         />
       </header>
 
       <div>
-        <p className="mb-1.5 text-[11px] font-bold uppercase tracking-[0.04em] text-teal-700">
+        <p className="mb-1.5 text-[12.5px] font-bold uppercase tracking-[0.04em] text-teal-700">
           {examplesBi.en}
-          <span className="mt-0.5 block font-thai text-[10px] font-medium normal-case tracking-normal opacity-85">
+          <span className="mt-0.5 block font-thai text-[11.5px] font-medium normal-case tracking-normal text-ink-soft">
             {examplesBi.th}
           </span>
         </p>
@@ -150,16 +150,16 @@ export default function CameraGuidePage() {
       </div>
 
       <div className="hide-scrollbar -mx-4 overflow-x-auto px-4">
-        <table className="w-full min-w-[640px] border-collapse text-left">
+        <table className="w-full min-w-[680px] border-collapse text-left">
           <thead>
             <tr>
               {tableHeads.map((head) => (
                 <th
                   key={head.en}
-                  className="border-b-2 border-line px-3 py-2 text-[9.5px] font-semibold uppercase tracking-[0.05em] text-ink-soft"
+                  className="border-b-2 border-line px-3 py-2.5 text-[11px] font-semibold uppercase tracking-[0.05em] text-ink-soft"
                 >
                   {head.en}
-                  <span className="mt-0.5 block font-thai text-[9px] font-medium normal-case tracking-normal opacity-85">
+                  <span className="mt-0.5 block font-thai text-[10.5px] font-medium normal-case tracking-normal text-ink-soft">
                     {head.th}
                   </span>
                 </th>
@@ -169,18 +169,18 @@ export default function CameraGuidePage() {
           <tbody>
             {CAMERA_SETTINGS.map((row) => (
               <tr key={row.sceneEn} className="border-b border-line align-top last:border-b-0">
-                <td className="whitespace-nowrap px-3 py-[11px] text-[11.5px] font-bold text-ink">
+                <td className="whitespace-nowrap px-3 py-3.5 text-[13.5px] font-bold leading-snug text-ink">
                   {row.sceneEn}
-                  <span className="mt-0.5 block font-thai text-[10.5px] font-medium text-ink-soft">
+                  <span className="mt-1 block font-thai text-[12.5px] font-medium text-ink-soft">
                     {row.sceneTh}
                   </span>
                 </td>
-                <td className="px-3 py-[11px] text-[11.5px] font-bold text-teal-700">{row.f}</td>
-                <td className="px-3 py-[11px] text-[11.5px] text-ink">{row.shutter}</td>
-                <td className="px-3 py-[11px] text-[11.5px] text-ink">{row.iso}</td>
-                <td className="px-3 py-[11px] text-[10.5px] leading-relaxed text-ink-soft">
+                <td className="px-3 py-3.5 text-[13.5px] font-bold text-teal-700">{row.f}</td>
+                <td className="px-3 py-3.5 text-[13.5px] text-ink">{row.shutter}</td>
+                <td className="px-3 py-3.5 text-[13.5px] text-ink">{row.iso}</td>
+                <td className="px-3 py-3.5 text-[12.5px] leading-[1.6] text-ink">
                   {row.noteEn}
-                  <span className="mt-1 block font-thai text-[10px] font-medium text-ink-soft/90">
+                  <span className="mt-1 block font-thai text-[12px] font-medium leading-[1.6] text-ink-soft">
                     {row.noteTh}
                   </span>
                 </td>
@@ -193,8 +193,8 @@ export default function CameraGuidePage() {
         as="p"
         en={disclaimerBi.en}
         th={disclaimerBi.th}
-        className="!mt-1.5 text-[11px] text-ink-soft"
-        thClassName="mt-0.5 block font-thai text-[10px] font-medium text-ink-soft/90"
+        className="!mt-1.5 text-[12.5px] leading-[1.55] text-ink-soft"
+        thClassName="mt-0.5 block font-thai text-[11.5px] font-medium text-ink-soft"
       />
 
       <section>
@@ -203,19 +203,19 @@ export default function CameraGuidePage() {
           en={meteringTitleBi.en}
           th={meteringTitleBi.th}
           serif
-          className="text-[15.5px] text-ink sm:text-lg"
-          thClassName="mt-0.5 block font-thai text-[12px] font-medium text-ink-soft"
+          className="text-lg text-ink sm:text-xl"
+          thClassName="mt-0.5 block font-thai text-[13.5px] font-medium text-ink-soft"
         />
         <BiText
           as="p"
           en={meteringIntroBi.en}
           th={meteringIntroBi.th}
-          className="mt-1.5 max-w-2xl text-[13px] leading-relaxed text-ink-soft"
-          thClassName="mt-1 block font-thai text-[12px] font-medium text-ink-soft/90"
+          className="mt-1.5 max-w-2xl text-[15px] leading-[1.65] text-ink"
+          thClassName="mt-1 block font-thai text-[14px] font-medium leading-[1.65] text-ink-soft"
         />
-        <p className="mt-3 text-[11px] font-semibold text-teal-700 sm:hidden">
+        <p className="mt-3 text-[12.5px] font-semibold text-teal-700 sm:hidden">
           {swipeBi.en}
-          <span className="mt-0.5 block font-thai text-[10px] font-medium opacity-85">
+          <span className="mt-0.5 block font-thai text-[11.5px] font-medium text-ink-soft">
             {swipeBi.th}
           </span>
         </p>
@@ -227,7 +227,7 @@ export default function CameraGuidePage() {
             return (
               <article
                 key={mode.id}
-                className="w-[min(82vw,300px)] shrink-0 snap-start rounded-[14px] border border-line bg-card p-4 pb-[18px] shadow-[0_8px_18px_-12px_rgba(15,28,30,0.25)] sm:w-auto"
+                className="w-[min(82vw,300px)] shrink-0 snap-start rounded-[14px] border border-line bg-card p-4 pb-5 shadow-[0_8px_18px_-12px_rgba(15,28,30,0.25)] sm:w-auto sm:p-5"
               >
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-teal-700 text-cream">
                   <Icon className="h-4 w-4" strokeWidth={2.25} aria-hidden />
@@ -236,21 +236,21 @@ export default function CameraGuidePage() {
                   as="h3"
                   en={mode.nameEn}
                   th={mode.nameTh}
-                  className="mt-2.5 text-[14px] font-semibold leading-snug text-ink"
-                  thClassName="mt-0.5 block font-thai text-[13px] font-medium text-ink-soft"
+                  className="mt-2.5 text-[15.5px] font-semibold leading-snug text-ink"
+                  thClassName="mt-1 block font-thai text-[14px] font-medium text-ink-soft"
                 />
                 <BiText
                   as="p"
                   en={mode.bodyEn}
                   th={mode.bodyTh}
-                  className="mt-1.5 text-[13.5px] leading-[1.6] text-ink"
-                  thClassName="mt-1 block font-thai text-[13px] font-medium leading-[1.6] text-ink-soft"
+                  className="mt-1.5 text-[15px] leading-[1.65] text-ink"
+                  thClassName="mt-1 block font-thai text-[14px] font-medium leading-[1.65] text-ink-soft"
                 />
 
-                <div className="mt-3 rounded-[10px] bg-mint-100/80 px-3 py-2.5">
-                  <p className="text-[9.5px] font-extrabold uppercase tracking-[0.05em] text-coral">
+                <div className="mt-3 rounded-[10px] bg-mint-100 px-3 py-2.5">
+                  <p className="text-[11px] font-extrabold uppercase tracking-[0.05em] text-coral">
                     {bestForBi.en}
-                    <span className="ml-1.5 font-thai normal-case tracking-normal opacity-90">
+                    <span className="ml-1.5 font-thai text-[10.5px] normal-case tracking-normal text-coral/90">
                       {bestForBi.th}
                     </span>
                   </p>
@@ -258,18 +258,18 @@ export default function CameraGuidePage() {
                     as="p"
                     en={mode.bestEn}
                     th={mode.bestTh}
-                    className="mt-1 text-[13.5px] leading-[1.55] text-ink"
-                    thClassName="mt-0.5 block font-thai text-[13px] font-medium leading-[1.55] text-ink-soft"
+                    className="mt-1 text-[14.5px] leading-[1.6] text-ink"
+                    thClassName="mt-0.5 block font-thai text-[13.5px] font-medium leading-[1.6] text-ink"
                   />
                 </div>
 
-                <p className="mt-3 text-[9.5px] font-extrabold uppercase tracking-[0.05em] text-teal-600">
+                <p className="mt-3 text-[11px] font-extrabold uppercase tracking-[0.05em] text-teal-700">
                   {menuBi.en}
-                  <span className="ml-1.5 font-thai normal-case tracking-normal opacity-85">
+                  <span className="ml-1.5 font-thai text-[10.5px] normal-case tracking-normal text-teal-700/90">
                     {menuBi.th}
                   </span>
                 </p>
-                <p className="mt-1 break-words font-mono text-[10.5px] leading-relaxed text-ink-soft">
+                <p className="mt-1 break-words font-mono text-[12.5px] leading-[1.55] text-ink">
                   {mode.menuPath}
                 </p>
               </article>
@@ -284,12 +284,12 @@ export default function CameraGuidePage() {
           en={gearBi.en}
           th={gearBi.th}
           serif
-          className="text-[15.5px] text-ink sm:text-lg"
-          thClassName="mt-0.5 block font-thai text-[12px] font-medium text-ink-soft"
+          className="text-lg text-ink sm:text-xl"
+          thClassName="mt-0.5 block font-thai text-[13.5px] font-medium text-ink-soft"
         />
         <ul className="mt-3 grid gap-[11px] sm:grid-cols-2">
           {CAMERA_GEAR.map((item) => (
-            <li key={item.en} className="flex items-start gap-2 text-[12.5px] leading-[1.5]">
+            <li key={item.en} className="flex items-start gap-2 text-[14px] leading-[1.55]">
               <span className="mt-px flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[6px] bg-mint-100 text-teal-700">
                 <Check className="h-3 w-3" strokeWidth={2.5} />
               </span>
@@ -297,7 +297,7 @@ export default function CameraGuidePage() {
                 en={item.en}
                 th={item.th}
                 className="font-semibold text-ink"
-                thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+                thClassName="mt-0.5 block font-thai text-[13px] font-medium text-ink-soft"
               />
             </li>
           ))}
