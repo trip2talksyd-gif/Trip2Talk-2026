@@ -15,6 +15,7 @@ const PRIVATE_ADDON = 500
 export default function HomeFeaturesSection() {
   const { t, tt } = useLang()
   const [privateOn, setPrivateOn] = useState(true)
+  const [videoOk, setVideoOk] = useState(true)
   const total = BASE_PRICE + (privateOn ? PRIVATE_ADDON : 0)
 
   const features = [
@@ -44,15 +45,19 @@ export default function HomeFeaturesSection() {
             thClassName="mt-1 block font-thai text-base font-medium text-teal-700 sm:text-lg"
           />
 
-          <div className="relative mt-5 aspect-[16/10] overflow-hidden rounded-2xl sm:mt-6 sm:aspect-[21/9] md:rounded-3xl">
-            <video
-              className="absolute inset-0 h-full w-full object-cover"
-              src={HERO_MEDIA}
-              autoPlay
-              loop
-              muted
-              playsInline
-            />
+          <div className="relative mt-5 aspect-[16/10] overflow-hidden rounded-2xl bg-teal-900 sm:mt-6 sm:aspect-[21/9] md:rounded-3xl">
+            {videoOk ? (
+              <video
+                className="absolute inset-0 h-full w-full object-cover"
+                src={HERO_MEDIA}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                onError={() => setVideoOk(false)}
+              />
+            ) : null}
             <div
               className="absolute inset-0"
               style={{
