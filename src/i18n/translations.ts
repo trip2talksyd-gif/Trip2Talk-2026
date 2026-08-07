@@ -328,6 +328,14 @@ export type TranslationKey =
   | 'photoGuide.mobile.sub'
   | 'photoGuide.mobile.landscape'
   | 'photoGuide.mobile.portrait'
+  | 'photoGuide.mobile.angles.title'
+  | 'photoGuide.mobile.angles.intro'
+  | 'photoGuide.mobile.angles.tip'
+  | 'photoGuide.mobile.angles.eyebrow'
+  | 'photoGuide.mobile.angles.cta.eyebrow'
+  | 'photoGuide.mobile.angles.cta.title'
+  | 'photoGuide.mobile.angles.cta.sub'
+  | 'photoGuide.mobile.angles.cta.button'
   | 'photoGuide.follow'
   | 'favorites.saved'
   | 'favorites.savedTripsLabel'
@@ -823,6 +831,16 @@ const en: Map = {
     'No extra gear needed — simple landscape and portrait techniques any trip customer can use with just their phone.',
   'photoGuide.mobile.landscape': 'Landscape',
   'photoGuide.mobile.portrait': 'Portrait / People',
+  'photoGuide.mobile.angles.eyebrow': 'On location',
+  'photoGuide.mobile.angles.title': 'Angles to Try',
+  'photoGuide.mobile.angles.intro':
+    "Before we reach each spot, know these 8 angles — our photographer will call them out, and you'll already know what to do.",
+  'photoGuide.mobile.angles.tip': 'Tip',
+  'photoGuide.mobile.angles.cta.eyebrow': 'Recommended trips',
+  'photoGuide.mobile.angles.cta.title': 'Where should you shoot this?',
+  'photoGuide.mobile.angles.cta.sub':
+    'Pick the trip that matches the style you just read about — our photographers take you straight to the best spots.',
+  'photoGuide.mobile.angles.cta.button': 'Find your trip →',
   'photoGuide.follow': 'Follow Trip2Talk',
   'favorites.saved': 'saved',
   'favorites.savedTripsLabel': 'saved trips',
@@ -1324,6 +1342,16 @@ const th: Map = {
     'ไม่ต้องมีอุปกรณ์เพิ่ม — เทคนิคทิวทัศน์และพอร์ตเทรตที่ลูกทริปใช้ได้แค่ด้วยมือถือ',
   'photoGuide.mobile.landscape': 'ถ่ายวิว',
   'photoGuide.mobile.portrait': 'ถ่ายคน',
+  'photoGuide.mobile.angles.eyebrow': 'ระหว่างทริป',
+  'photoGuide.mobile.angles.title': 'มุมถ่ายที่ควรลอง',
+  'photoGuide.mobile.angles.intro':
+    'ก่อนถึงแต่ละจุดถ่ายภาพ รู้จัก 8 มุมนี้ไว้ก่อน — ช่างภาพจะบอกชื่อมุม แล้วคุณจะรู้ทันทีว่าต้องทำอะไร',
+  'photoGuide.mobile.angles.tip': 'เคล็ดลับ',
+  'photoGuide.mobile.angles.cta.eyebrow': 'ทริปแนะนำ',
+  'photoGuide.mobile.angles.cta.title': 'อยากถ่ายภาพแบบนี้ที่ไหนดี?',
+  'photoGuide.mobile.angles.cta.sub':
+    'เลือกทริปที่เหมาะกับสไตล์ภาพที่คุณชอบ มีช่างภาพมืออาชีพพาไปยังจุดถ่ายภาพที่ดีที่สุด',
+  'photoGuide.mobile.angles.cta.button': 'เลือกทริปของคุณ →',
   'photoGuide.follow': 'ติดตามเรา',
   'favorites.saved': 'บันทึกไว้',
   'favorites.savedTripsLabel': 'ทริป',

@@ -330,3 +330,93 @@ export const MOBILE_PORTRAIT_TIPS = [
     thBody: 'สำหรับช็อตที่มีการเคลื่อนไหว',
   },
 ] as const
+
+/** Editorial “angles to try” list — mobile guide dark section. */
+export const MOBILE_ANGLES = [
+  {
+    n: '01',
+    titleEn: 'Wide Establishing Shot',
+    titleTh: 'มุมกว้างเก็บบรรยากาศ',
+    bodyEn:
+      'Step back and capture the whole scene — sky, land, and you as one small part of something bigger.',
+    bodyTh:
+      'ถอยออกมาไกลๆ เก็บทั้งฉากในเฟรมเดียว ทั้งท้องฟ้า ผืนดิน และตัวคุณเป็นส่วนเล็กๆ ของภาพใหญ่',
+    tipEn: 'Turn on grid lines and place the horizon on the top or bottom third.',
+    tipTh: 'เปิดเส้นกริดในกล้อง แล้ววางเส้นขอบฟ้าไว้ที่ 1 ใน 3 บนหรือล่างของภาพ',
+    photoIds: ['nz-001', 'nz-013', 'tas-003'] as const,
+  },
+  {
+    n: '02',
+    titleEn: 'Low-Angle Hero Shot',
+    titleTh: 'มุมต่ำเน้นความยิ่งใหญ่',
+    bodyEn:
+      'Crouch down and shoot upward — it makes you look larger than life against the landscape.',
+    bodyTh: 'ย่อตัวลงต่ำแล้วถ่ายเงยขึ้น ทำให้ตัวแบบดูยิ่งใหญ่เมื่อเทียบกับฉากหลัง',
+    tipEn: 'Works best with dramatic skies or rock formations like Uluru.',
+    tipTh: 'เหมาะกับฉากที่มีท้องฟ้าดราม่าติกหรือภูเขาหินอย่างอูลูรู',
+    photoIds: ['ulu-001', 'ulu-002', 'tas-002'] as const,
+  },
+  {
+    n: '03',
+    titleEn: 'Leading Lines',
+    titleTh: 'เส้นนำสายตา',
+    bodyEn: 'Find a road, fence, or shoreline that draws the eye straight to you.',
+    bodyTh: 'หาถนน รั้ว หรือแนวชายฝั่งที่นำสายตาพุ่งตรงไปยังตัวแบบ',
+    tipEn: 'Stand at the start of the line, not beside it.',
+    tipTh: 'ยืนที่จุดเริ่มต้นของเส้นนำสายตา ไม่ใช่ยืนข้างๆ',
+    photoIds: ['syd-011', 'nsw-010', 'ber-001'] as const,
+  },
+  {
+    n: '04',
+    titleEn: 'Off-Center Framing',
+    titleTh: 'จัดองค์ประกอบสามส่วน',
+    bodyEn: 'Stand slightly off-center instead of dead-center — it feels more natural and cinematic.',
+    bodyTh:
+      'ยืนเยื้องจากกึ่งกลางเล็กน้อย แทนที่จะอยู่ตรงกลางเป๊ะ ให้ความรู้สึกเป็นธรรมชาติและซีนีมาติกกว่า',
+    tipEn: "Use your phone's grid overlay and line up on an intersection point.",
+    tipTh: 'เปิดเส้นกริดในมือถือแล้วยืนตรงจุดตัดของเส้น',
+    photoIds: ['syd-015', 'syd-012', 'nsw-006'] as const,
+  },
+  {
+    n: '05',
+    titleEn: 'Reflection Shot',
+    titleTh: 'ภาพสะท้อน',
+    bodyEn: 'Look for still water, glass, or wet sand after rain to double the scene.',
+    bodyTh: 'มองหาผิวน้ำนิ่ง กระจก หรือพื้นทรายเปียกหลังฝนตก เพื่อสร้างภาพสะท้อนคู่ตัวแบบ',
+    tipEn: 'Get the phone as close to the reflective surface as possible.',
+    tipTh: 'ยื่นมือถือให้ใกล้ผิวสะท้อนมากที่สุดเท่าที่ทำได้',
+    photoIds: ['ber-002', 'ber-003', 'nz-014'] as const,
+  },
+  {
+    n: '06',
+    titleEn: 'Silhouette',
+    titleTh: 'ภาพเงาย้อนแสง',
+    bodyEn:
+      'Shoot toward the sun at golden hour and expose for the sky — you become a striking outline.',
+    bodyTh: 'ถ่ายย้อนแสงตอนโกลเด้นอาวร์ วัดแสงที่ท้องฟ้า ตัวแบบจะกลายเป็นเงาดำที่โดดเด่น',
+    tipEn: 'Tap the sky on screen to set exposure, then hold to lock it.',
+    tipTh: 'แตะที่ท้องฟ้าเพื่อวัดแสง แล้วกดค้างเพื่อล็อกค่าแสง',
+    photoIds: ['tas-002', 'ulu-003', 'nz-015'] as const,
+  },
+  {
+    n: '07',
+    titleEn: 'Walking Away',
+    titleTh: 'เดินนำสายตา',
+    bodyEn: 'Walk ahead mid-stride, looking out — it reads as candid, not posed.',
+    bodyTh: 'เดินนำไปข้างหน้า มองออกไปไกลๆ ให้ความรู้สึกเป็นธรรมชาติ ไม่เหมือนโพสท่า',
+    tipEn: 'Ask your photographer to shoot in burst mode to catch the most natural stride.',
+    tipTh: 'ให้ช่างภาพถ่ายแบบต่อเนื่อง (burst) เพื่อจับจังหวะการเดินที่เป็นธรรมชาติที่สุด',
+    photoIds: ['syd-009', 'nsw-007', 'nz-016'] as const,
+  },
+  {
+    n: '08',
+    titleEn: 'Detail / Close-Up',
+    titleTh: 'ภาพระยะใกล้เก็บรายละเอียด',
+    bodyEn:
+      'Zoom into texture — hands, boots, fabric, or a local detail — to round out the story.',
+    bodyTh: 'ถ่ายซูมเข้าไปที่พื้นผิว มือ รองเท้า ผ้า หรือรายละเอียดท้องถิ่น เพื่อเติมเต็มเรื่องราว',
+    tipEn: 'Use portrait/macro mode if your phone has it for a soft blurred background.',
+    tipTh: 'ใช้โหมดพอร์ตเทรตหรือมาโครถ้ามือถือรองรับ เพื่อให้ฉากหลังเบลอนุ่มๆ',
+    photoIds: ['mel-001', 'mel-002', 'ber-004'] as const,
+  },
+] as const

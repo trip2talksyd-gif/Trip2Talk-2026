@@ -3,6 +3,7 @@ import { useLang } from '../../hooks/useLang'
 import { enabledSocialProfiles } from '../../data/contactChannels'
 import { MOBILE_LANDSCAPE_TIPS, MOBILE_PORTRAIT_TIPS } from '../../data/photoGuideContent'
 import PhotoSlideshow, { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
+import MobileAnglesSection from '../../components/photoGuide/MobileAnglesSection'
 import { photoSrc } from '../../data/galleryPhotos'
 import BiText from '../../components/ui/BiText'
 
@@ -270,6 +271,8 @@ export default function MobileGuidePage() {
           />
         </section>
       </div>
+
+      <MobileAnglesSection />
 
       <GuideFollowSocial />
     </div>
