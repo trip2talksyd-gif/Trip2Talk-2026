@@ -6,6 +6,7 @@ import CountUpStat from '../../components/ui/CountUpStat'
 import TripTypeCategories from '../../components/trips/TripTypeCategories'
 import HomeHowItWorks from '../../components/trips/HomeHowItWorks'
 import HomeFeaturesSection from '../../components/trips/HomeFeaturesSection'
+import HomePositioningSection from '../../components/trips/HomePositioningSection'
 import HomeTripShowcase from '../../components/trips/HomeTripShowcase'
 import HomeCtaFaq from '../../components/trips/HomeCtaFaq'
 import { fetchConfirmedTours } from '../../lib/toursApi'
@@ -164,6 +165,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      <HomePositioningSection />
       <TripTypeCategories />
       <HomeHowItWorks />
       <HomeFeaturesSection />
