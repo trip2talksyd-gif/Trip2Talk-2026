@@ -3,9 +3,13 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Check } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import BookingJourneyTimeline from '../../components/booking/BookingJourneyTimeline'
+import BookingPaymentMethodPicker, {
+  type CustomerPaymentChoice,
+} from '../../components/booking/BookingPaymentMethodPicker'
 import PayIdDepositPanel from '../../components/booking/PayIdDepositPanel'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import {
+  createSquareCheckout,
   fetchTourByCode,
   formatAud,
   formatDate,
@@ -86,6 +90,8 @@ export default function BookingPage() {
   const [touched, setTouched] = useState(false)
   const [reference, setReference] = useState('')
   const [slipFile, setSlipFile] = useState<File | null>(null)
+  const [paymentChoice, setPaymentChoice] = useState<CustomerPaymentChoice>('payid')
+  const [squareRedirecting, setSquareRedirecting] = useState(false)
   const [installmentPlan, setInstallmentPlan] = useState<1 | 2 | 4>(1)
 
   const [form, setForm] = useState<FormState>(() => {
@@ -169,7 +175,7 @@ export default function BookingPage() {
 
     try {
       let slipUrl: string | null = null
-      if (slipFile) {
+      if (paymentChoice === 'payid' && slipFile) {
         try {
           slipUrl = await uploadPaymentSlip(slipFile, bookingRef)
         } catch {
@@ -230,7 +236,7 @@ export default function BookingPage() {
         waiver_signed_at: waiver?.signedAt ?? new Date().toISOString(),
         booking_status: 'pending_payment',
         amount_paid_aud: 0,
-        payment_method: 'payid',
+        payment_method: paymentChoice === 'square' ? 'square' : 'payid',
         source: 'website',
         slip_url: slipUrl,
         booking_reference: bookingRef,
@@ -253,6 +259,32 @@ export default function BookingPage() {
         facebookMessagePending: true,
         createdAt: new Date().toISOString(),
       })
+
+      if (paymentChoice === 'square') {
+        setSquareRedirecting(true)
+        try {
+          const checkout = await createSquareCheckout({
+            booking_reference: bookingRef,
+            buyer_email: form.email.trim(),
+            buyer_phone: normalizeAuMobile(form.phone),
+            redirect_base: window.location.origin,
+          })
+          window.location.assign(checkout.url)
+          return
+        } catch (squareErr) {
+          console.error('[BookingPage] Square checkout failed:', squareErr)
+          const detail = squareErr instanceof Error ? squareErr.message : ''
+          toast(
+            lang === 'th'
+              ? `จองไว้แล้ว แต่เปิดชำระบัตรไม่สำเร็จ — ใช้ PayID ได้ตามปกติ${detail ? ` (${detail})` : ''}`
+              : `Booking saved, but card checkout failed — you can still pay by PayID${detail ? ` (${detail})` : ''}`,
+            'error',
+          )
+          setSquareRedirecting(false)
+          setReference(bookingRef)
+          return
+        }
+      }
 
       setReference(bookingRef)
       toast(t('toast.bookingSuccess'), 'success')
@@ -614,31 +646,58 @@ export default function BookingPage() {
       </div>
       )}
 
-      <PayIdDepositPanel variant="booking" />
+      <BookingPaymentMethodPicker
+        value={paymentChoice}
+        onChange={setPaymentChoice}
+        depositAud={depositDue}
+        disabled={submitting || squareRedirecting}
+      />
 
-      <label className="mt-1 block cursor-pointer rounded-[12px] border-[1.5px] border-dashed border-line bg-white p-4 text-center text-[11.5px] text-ink-soft">
-        {t('booking.uploadSlip')}
-        <input
-          type="file"
-          accept="image/*,.pdf"
-          className="sr-only"
-          onChange={(e) => setSlipFile(e.target.files?.[0] ?? null)}
-        />
-        {slipFile && <p className="mt-1 text-[10.5px] text-ink">{slipFile.name}</p>}
-      </label>
+      {paymentChoice === 'payid' && (
+        <>
+          <PayIdDepositPanel variant="booking" />
+
+          <label className="mt-1 block cursor-pointer rounded-[12px] border-[1.5px] border-dashed border-line bg-white p-4 text-center text-[11.5px] text-ink-soft">
+            {t('booking.uploadSlip')}
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              className="sr-only"
+              onChange={(e) => setSlipFile(e.target.files?.[0] ?? null)}
+            />
+            {slipFile && <p className="mt-1 text-[10.5px] text-ink">{slipFile.name}</p>}
+          </label>
+        </>
+      )}
+
+      {paymentChoice === 'square' && (
+        <p className="rounded-xl border border-line bg-white px-3 py-2.5 text-[11px] leading-relaxed text-ink-soft">
+          {lang === 'th'
+            ? 'กดปุ่มด้านล่างเพื่อเปิดหน้าชำระเงิน Square (บัตรหรือ Afterpay) — ที่นั่งถูกจองไว้แล้วก่อนไปหน้าชำระ หากชำระไม่สำเร็จ ยังโอน PayID ได้'
+            : 'Tap below to open Square’s secure checkout (card or Afterpay). Your seat is reserved first; if checkout fails you can still pay by PayID.'}
+        </p>
+      )}
 
       {/* Sticky Pay Deposit bar — mockup's white bar with top hairline above the CTA */}
       <div className="flow-bar sticky bottom-0 -mx-4 !pb-[max(18px,env(safe-area-inset-bottom))] sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
         <button
           type="submit"
-          disabled={submitting || !isValid}
+          disabled={submitting || squareRedirecting || !isValid}
           className="book-btn flip-cta cta-shine w-full disabled:opacity-50"
         >
-          {submitting
-            ? t('common.loading')
-            : lang === 'th'
-              ? `ชำระมัดจำ ${formatAud(depositDue)}`
-              : `Pay Deposit — ${formatAud(depositDue)}`}
+          {submitting || squareRedirecting
+            ? squareRedirecting
+              ? lang === 'th'
+                ? 'กำลังเปิด Square…'
+                : 'Opening Square…'
+              : t('common.loading')
+            : paymentChoice === 'square'
+              ? lang === 'th'
+                ? `ไปชำระบัตร / Afterpay ${formatAud(depositDue)}`
+                : `Pay card / Afterpay — ${formatAud(depositDue)}`
+              : lang === 'th'
+                ? `ชำระมัดจำ ${formatAud(depositDue)}`
+                : `Pay Deposit — ${formatAud(depositDue)}`}
         </button>
       </div>
     </form>

@@ -231,13 +231,23 @@ export function PaymentMethodsPage() {
         </p>
         <p className="mt-1 text-ink-soft">
           {lang === 'th'
-            ? 'ปกติ $100 AUD × จำนวนผู้เดินทาง (ตามที่แสดงในหน้าทริป) โอนผ่าน PayID ด้านล่าง แล้วอัปโหลดสลิปในหน้าจอง'
-            : 'Typically $100 AUD × travellers (as shown on the trip). Pay via PayID below, then upload your slip on the booking page.'}
+            ? 'ปกติ $100 AUD × จำนวนผู้เดินทาง (ตามที่แสดงในหน้าทริป) — แนะนำโอน PayID (ไม่มีค่าธรรมเนียม) หรือจ่ายบัตร/Afterpay ผ่าน Square ในหน้าจอง'
+            : 'Typically $100 AUD × travellers (as shown on the trip). PayID is recommended (no fees); card / Afterpay via Square is also available on the booking page.'}
         </p>
       </div>
 
       <PayIdDepositPanel variant="page" />
 
+      <div className="rounded-xl border border-line bg-card p-4">
+        <p className="font-semibold text-ink">
+          {lang === 'th' ? 'บัตรเครดิต / Afterpay (Square)' : 'Card / Afterpay (Square)'}
+        </p>
+        <p className="mt-1 text-sm text-ink-soft">
+          {lang === 'th'
+            ? 'เลือก “Pay by card / Afterpay” ในหน้าจองเพื่อเปิดหน้าชำระ Square — มีค่าธรรมเนียมตามบัตร/Afterpay'
+            : 'Choose “Pay by card / Afterpay” on the booking form to open Square’s hosted checkout. Card/Afterpay processing fees apply.'}
+        </p>
+      </div>
       <p>
         We only collect a deposit to secure your seat — the remaining balance is arranged directly
         with our team, in 2–4 flexible installments.
