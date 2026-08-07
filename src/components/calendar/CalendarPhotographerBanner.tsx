@@ -1,4 +1,4 @@
-import { Camera, Shirt, Images } from 'lucide-react'
+import { Camera, Car, Images } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import type { TranslationKey } from '../../i18n/translations'
 import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
@@ -12,7 +12,7 @@ const FEATURES: { icon: typeof Camera; title: TranslationKey; desc: TranslationK
     desc: 'calendar.photo.feature.1.desc',
   },
   {
-    icon: Shirt,
+    icon: Car,
     title: 'calendar.photo.feature.2.title',
     desc: 'calendar.photo.feature.2.desc',
   },

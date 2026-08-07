@@ -55,8 +55,8 @@ export default function PublicFooter() {
               {t('footer.tagline.line1')} {t('footer.tagline.line2')}
               <span className="mt-1.5 block font-thai text-[11px] text-[#7a9791]">
                 {lang === 'th'
-                  ? 'ทริปถ่ายภาพทั่วออสเตรเลียและนิวซีแลนด์ พร้อมช่างภาพและทีมสไตล์ลิ่งทุกทริป'
-                  : 'Photo trips across Australia & New Zealand — a pro photographer and styling team on every trip.'}
+                  ? 'ทริปถ่ายภาพทั่วออสเตรเลียและนิวซีแลนด์ พร้อมช่างภาพมืออาชีพที่เป็นทั้ง Trip Leader และคนขับทุกทริป'
+                  : 'Photo trips across Australia & New Zealand — one pro photographer who guides and drives every trip.'}
               </span>
             </p>
           </div>

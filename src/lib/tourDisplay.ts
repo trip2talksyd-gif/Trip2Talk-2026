@@ -152,8 +152,8 @@ export function heroDestinationBlurbs(destinations: string[]): { en: string; th:
   const thList = thNames.join(' · ')
 
   return {
-    en: `Photo trips to ${enList} — fully arranged, with a photographer & styling team the whole way.`,
-    th: `ทริปถ่ายภาพ ${thList} จองครบ จบทุกขั้นตอน มีช่างภาพและทีมสไตล์ลิ่งดูแลตลอดทริป`,
+    en: `Photo trips to ${enList} — fully arranged, with a professional photographer guiding and driving you the whole way.`,
+    th: `ทริปถ่ายภาพ ${thList} จองครบ จบทุกขั้นตอน มีช่างภาพมืออาชีพประสบการณ์กว่า 10 ปี เป็นทั้ง Trip Leader และคนขับพาคุณไปตลอดทริป`,
   }
 }
 
