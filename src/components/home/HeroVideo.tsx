@@ -6,11 +6,12 @@ import {
   useRef,
   useState,
 } from 'react'
+import { useLang } from '../../hooks/useLang'
 
-/** Hero reel — H.264/AAC web encode (Chrome-safe).
+/** Hero reel — H.264 web encode (Chrome-safe).
  * Original upload at public-media/VDO/Hero_cover01.mp4 was HEVC/H.265 which
  * Chrome often cannot decode (silent poster-only failure). Keep the original
- * in Storage as archive; serve this H.264 1080p cut for playback. */
+ * in Storage as archive; serve this H.264 cut for playback. */
 export const HERO_VIDEO_SRC = '/hero/Hero_cover01_web.mp4'
 
 /** Night-sky still while the reel buffers / if media truly fails. */
@@ -70,16 +71,22 @@ function prefersReducedMotion(): boolean {
  *
  * Important: this layer is `pointer-events-none` so it can never freeze the UI.
  * Scrubbing is driven by the parent via `setPointerX`.
+ * Reduced-motion users get a manual Play control (pointer-events-auto) instead of autoplay.
  */
 const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
   { className = '' },
   ref,
 ) {
+  const { tt } = useLang()
+  const playBi = tt('hero.playVideo')
+
   const containerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const [playing, setPlaying] = useState(false)
   const [mediaFailed, setMediaFailed] = useState(false)
   const [failReason, setFailReason] = useState<string | null>(null)
+  const [reducedMotionOn, setReducedMotionOn] = useState(false)
+  const [needsTapToPlay, setNeedsTapToPlay] = useState(false)
 
   const currentRate = useRef(1)
   const targetRate = useRef(1)
@@ -213,35 +220,36 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
   useImperativeHandle(ref, () => ({ whoosh, setPointerX }), [whoosh, setPointerX])
 
   useEffect(() => {
-    reducedMotion.current = prefersReducedMotion()
-    interactive.current = !reducedMotion.current
-    if (reducedMotion.current) {
-      setFailReason('prefers-reduced-motion — poster only')
-      setMediaFailed(true)
-      return
-    }
-
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const onChange = () => {
-      reducedMotion.current = mq.matches
-      interactive.current = !mq.matches
-      if (mq.matches) {
+    const applyRm = (on: boolean) => {
+      reducedMotion.current = on
+      interactive.current = !on
+      setReducedMotionOn(on)
+      if (on) {
         stopRaf(rafId)
         stopRaf(leaveRaf)
         stopRaf(whooshRaf)
         applyRate(1)
+        // Don't autoplay — keep video mounted and offer tap-to-play.
         videoRef.current?.pause()
-        setMediaFailed(true)
+        setPlaying(false)
+        setNeedsTapToPlay(true)
+        setMediaFailed(false)
+        setFailReason(null)
+      } else {
+        setNeedsTapToPlay(false)
       }
     }
+
+    applyRm(prefersReducedMotion())
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = () => applyRm(mq.matches)
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [applyRate, stopRaf])
 
-  // Try autoplay once enough data is buffered — never permanently kill the
-  // video on a transient play() rejection (AbortError / NotAllowedError race).
+  // Autoplay path (skipped when reduced-motion wants a manual tap).
   useEffect(() => {
-    if (mediaFailed || reducedMotion.current) return
+    if (mediaFailed || reducedMotion.current || needsTapToPlay) return
     const v = videoRef.current
     if (!v) return
 
@@ -264,7 +272,7 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
     }
 
     const tryPlay = async () => {
-      if (cancelled || !v) return
+      if (cancelled || !v || reducedMotion.current) return
       attempts += 1
       try {
         v.defaultMuted = true
@@ -273,13 +281,15 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
         await v.play()
         if (!cancelled) setPlaying(true)
       } catch (err) {
-        // Retry a few times as the file buffers; only then surface failure.
         if (!cancelled && attempts < 6) {
           window.setTimeout(() => {
             void tryPlay()
           }, 400 * attempts)
         } else if (!cancelled) {
-          markFailed('autoplay failed after retries', err)
+          // Fall back to tap-to-play instead of killing the reel entirely.
+          console.warn('[HeroVideo] autoplay blocked — offering tap to play', err)
+          setNeedsTapToPlay(true)
+          setPlaying(false)
         }
       }
     }
@@ -296,7 +306,6 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
       markFailed(`media element error (code ${code ?? '?'}: ${msg})`)
     }
 
-    // Prefer codecs Chrome can always decode (H.264). Empty string = no support.
     const h264 = v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')
     if (!h264) {
       markFailed('browser reports no H.264/MP4 support')
@@ -307,8 +316,6 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
     v.addEventListener('playing', onPlaying)
     v.addEventListener('error', onError)
 
-    // Kick off load immediately (don't wait for IntersectionObserver — home
-    // hero is always the first paint and IO + overflow parents were flaky).
     v.load()
     void tryPlay()
 
@@ -326,20 +333,55 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
         /* ignore */
       }
     }
-  }, [mediaFailed, stopRaf])
+  }, [mediaFailed, needsTapToPlay, stopRaf])
+
+  // Keep video loadable under reduced-motion so tap-to-play is instant.
+  useEffect(() => {
+    if (!needsTapToPlay || mediaFailed) return
+    const v = videoRef.current
+    if (!v) return
+    const onError = () => {
+      const code = v.error?.code
+      const msg = v.error?.message || 'unknown'
+      console.error('[HeroVideo] media element error', { code, msg, src: HERO_VIDEO_SRC })
+      setFailReason(`media element error (code ${code ?? '?'}: ${msg})`)
+      setMediaFailed(true)
+    }
+    v.addEventListener('error', onError)
+    if (v.readyState < 2) v.load()
+    return () => v.removeEventListener('error', onError)
+  }, [needsTapToPlay, mediaFailed])
+
+  const handleManualPlay = useCallback(async () => {
+    const v = videoRef.current
+    if (!v || mediaFailed) return
+    try {
+      v.defaultMuted = true
+      v.muted = true
+      v.playsInline = true
+      await v.play()
+      setPlaying(true)
+      setNeedsTapToPlay(false)
+    } catch (err) {
+      console.error('[HeroVideo] manual play failed', err)
+      setFailReason('manual play failed')
+      setMediaFailed(true)
+    }
+  }, [mediaFailed])
 
   const showPoster = !playing || mediaFailed
+  const showPlayButton = needsTapToPlay && !mediaFailed && !playing
 
   return (
     <div
       ref={containerRef}
-      className={`pointer-events-none absolute inset-0 z-0 h-full w-full overflow-hidden ${className}`.trim()}
-      aria-hidden={!mediaFailed}
+      className={`absolute inset-0 z-0 h-full w-full overflow-hidden ${className}`.trim()}
+      aria-hidden={mediaFailed && !showPlayButton}
     >
       <img
         src={HERO_POSTER_SRC}
         alt=""
-        className={`absolute inset-0 h-full max-h-full w-full max-w-full object-cover object-center transition-opacity duration-700 ${
+        className={`pointer-events-none absolute inset-0 h-full max-h-full w-full max-w-full object-cover object-center transition-opacity duration-700 ${
           showPoster ? 'opacity-100' : 'opacity-0'
         }`}
         decoding="async"
@@ -349,12 +391,12 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
       {!mediaFailed && (
         <video
           ref={videoRef}
-          className={`absolute inset-0 h-full max-h-full w-full max-w-full object-cover object-center transition-opacity duration-700 ${
+          className={`pointer-events-none absolute inset-0 h-full max-h-full w-full max-w-full object-cover object-center transition-opacity duration-700 ${
             playing ? 'opacity-100' : 'opacity-0'
           }`}
           src={HERO_VIDEO_SRC}
           poster={HERO_POSTER_SRC}
-          autoPlay
+          autoPlay={!reducedMotionOn && !needsTapToPlay}
           muted
           loop
           playsInline
@@ -363,12 +405,34 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
       )}
 
       <div
-        className="absolute inset-0 z-[1]"
+        className="pointer-events-none absolute inset-0 z-[1]"
         style={{
           background:
             'linear-gradient(180deg, rgba(15,26,29,.45) 0%, rgba(15,26,29,.2) 32%, rgba(15,26,29,.78) 68%, rgba(15,26,29,.96) 100%)',
         }}
       />
+
+      {showPlayButton ? (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            void handleManualPlay()
+          }}
+          className="pointer-events-auto absolute bottom-[22%] left-1/2 z-[3] flex -translate-x-1/2 items-center gap-2 rounded-full border border-cream/35 bg-teal-darker/85 px-5 py-3 text-cream shadow-[0_10px_28px_rgba(0,0,0,0.35)] backdrop-blur-sm transition hover:bg-teal-dark md:bottom-[18%]"
+          aria-label={`${playBi.en} / ${playBi.th}`}
+        >
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-orange text-teal-darker">
+            <svg viewBox="0 0 24 24" className="ml-0.5 h-4 w-4" fill="currentColor" aria-hidden>
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </span>
+          <span className="text-left leading-tight">
+            <span className="block text-[13px] font-semibold">{playBi.en}</span>
+            <span className="mt-0.5 block font-thai text-[11px] text-cream/75">{playBi.th}</span>
+          </span>
+        </button>
+      ) : null}
 
       {mediaFailed && failReason && import.meta.env.DEV ? (
         <div

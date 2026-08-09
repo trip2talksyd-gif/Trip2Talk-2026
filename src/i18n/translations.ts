@@ -503,6 +503,7 @@ export type TranslationKey =
   | 'discover.emptyTitle'
   | 'discover.emptyBody'
   | 'discover.clearFilters'
+  | 'hero.playVideo'
   | 'spot.back'
   | 'spot.bestTime'
   | 'spot.morning'
@@ -1069,6 +1070,7 @@ const en: Map = {
   'discover.emptyTitle': 'No spots match',
   'discover.emptyBody': 'Try another chip or clear your search to see more places to shoot.',
   'discover.clearFilters': 'Clear filters',
+  'hero.playVideo': 'Play hero video',
   'spot.back': 'Back',
   'spot.bestTime': 'Best time to shoot',
   'spot.morning': 'Morning',
@@ -1633,6 +1635,7 @@ const th: Map = {
   'discover.emptyTitle': 'ไม่พบมุมถ่ายที่ตรงเงื่อนไข',
   'discover.emptyBody': 'ลองเปลี่ยนหมวด หรือล้างการค้นหา เพื่อดูมุมถ่ายอื่น',
   'discover.clearFilters': 'ล้างตัวกรอง',
+  'hero.playVideo': 'เล่นวิดีโอหน้าแรก',
   'spot.back': 'กลับ',
   'spot.bestTime': 'เวลาที่ดีที่สุดในการถ่าย',
   'spot.morning': 'เช้า',
