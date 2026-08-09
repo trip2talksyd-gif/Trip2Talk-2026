@@ -1709,6 +1709,28 @@
   }
 }
 
+/* /trips immersive picker — remount name/meta fade */
+@keyframes tripPickerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.trip-picker-fade {
+  animation: tripPickerFadeIn 500ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trip-picker-fade {
+    animation: none;
+  }
+}
+
 /* Shot slideshow dots — mockup .ss-dots */
 .ss-dots {
   display: flex;
