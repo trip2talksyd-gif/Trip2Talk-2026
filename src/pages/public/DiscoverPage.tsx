@@ -11,6 +11,7 @@ import {
   type DiscoverSpot,
 } from '../../data/discoverFeed'
 import { photoThumbSrc } from '../../data/galleryPhotos'
+import { librarySlugForGalleryPhotoId } from '../../lib/photoSpotsApi'
 import { TEAM_MEMBERS } from '../../data/teamMembers'
 import TeamAvatar from '../../components/about/TeamAvatar'
 import { useLang } from '../../hooks/useLang'
@@ -380,7 +381,7 @@ function NearbyCard({
           </span>
           <CircleBtn
             label={`${openBi.en}: ${spot.titleEn}`}
-            to="/gallery"
+            to={`/discover/spot/${librarySlugForGalleryPhotoId(spot.id) ?? spot.id}`}
             className="h-5 w-5 bg-teal-dark text-orange-soft"
           >
             <ChevronRightIcon className="h-2.5 w-2.5" />

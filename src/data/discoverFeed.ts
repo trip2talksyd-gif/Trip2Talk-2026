@@ -166,7 +166,8 @@ function interleaveByCategory(photos: GalleryPhoto[]): GalleryPhoto[] {
   return out
 }
 
-/** Curated Discover feed from existing gallery + camera-guide settings (no mock photos). */
+/** Curated Discover feed from existing gallery + camera-guide settings (no mock photos).
+ *  Photo Spot Library detail lives in photoSpotsApi / photo_spots — keep this slicer stable. */
 export function getDiscoverSpots(): DiscoverSpot[] {
   // Prefer Storage-hosted photos so thumb transforms work; keep a stable order.
   const preferred = GALLERY_PHOTOS.filter((p) => Boolean(p.url))

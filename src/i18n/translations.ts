@@ -503,6 +503,26 @@ export type TranslationKey =
   | 'discover.emptyTitle'
   | 'discover.emptyBody'
   | 'discover.clearFilters'
+  | 'spot.back'
+  | 'spot.bestTime'
+  | 'spot.morning'
+  | 'spot.evening'
+  | 'spot.night'
+  | 'spot.access'
+  | 'spot.privateCar'
+  | 'spot.publicTransport'
+  | 'spot.gear'
+  | 'spot.gearLandscape'
+  | 'spot.gearPortrait'
+  | 'spot.openMaps'
+  | 'spot.cta'
+  | 'spot.ctaSoon'
+  | 'spot.missing'
+  | 'spot.librarySoon'
+  | 'spot.drone'
+  | 'spot.droneAllowed'
+  | 'spot.droneRestricted'
+  | 'spot.droneProhibited'
   | 'nav.appTabs'
   | 'experience.badge'
   | 'experience.title'
@@ -1045,10 +1065,30 @@ const en: Map = {
   'discover.back': 'Back',
   'discover.favorite': 'Save favorite',
   'discover.unfavorite': 'Remove favorite',
-  'discover.openSpot': 'Open in gallery',
+  'discover.openSpot': 'Open spot',
   'discover.emptyTitle': 'No spots match',
   'discover.emptyBody': 'Try another chip or clear your search to see more places to shoot.',
   'discover.clearFilters': 'Clear filters',
+  'spot.back': 'Back',
+  'spot.bestTime': 'Best time to shoot',
+  'spot.morning': 'Morning',
+  'spot.evening': 'Evening',
+  'spot.night': 'Night',
+  'spot.access': 'How to get there',
+  'spot.privateCar': 'Private car',
+  'spot.publicTransport': 'Public transport',
+  'spot.gear': 'Gear for beginners',
+  'spot.gearLandscape': 'Landscape',
+  'spot.gearPortrait': 'Portrait',
+  'spot.openMaps': 'Open in Google Maps',
+  'spot.cta': 'Join a Trip2Talk trip to this spot',
+  'spot.ctaSoon': 'Trip package link coming soon — Saen is confirming the tour code.',
+  'spot.missing': 'This photo spot is not in the library yet.',
+  'spot.librarySoon': 'Full timing, access, and gear tips for this frame are coming soon.',
+  'spot.drone': 'Drone rules',
+  'spot.droneAllowed': 'Drone allowed',
+  'spot.droneRestricted': 'Drone restricted',
+  'spot.droneProhibited': 'Drone prohibited — legal ban',
   'experience.badge': 'Experience',
   'experience.title': 'Stories from the road',
   'experience.body':
@@ -1589,10 +1629,30 @@ const th: Map = {
   'discover.back': 'กลับ',
   'discover.favorite': 'บันทึกรายการโปรด',
   'discover.unfavorite': 'ลบออกจากรายการโปรด',
-  'discover.openSpot': 'เปิดในแกลเลอรี',
+  'discover.openSpot': 'เปิดมุมถ่าย',
   'discover.emptyTitle': 'ไม่พบมุมถ่ายที่ตรงเงื่อนไข',
   'discover.emptyBody': 'ลองเปลี่ยนหมวด หรือล้างการค้นหา เพื่อดูมุมถ่ายอื่น',
   'discover.clearFilters': 'ล้างตัวกรอง',
+  'spot.back': 'กลับ',
+  'spot.bestTime': 'เวลาที่ดีที่สุดในการถ่าย',
+  'spot.morning': 'เช้า',
+  'spot.evening': 'เย็น',
+  'spot.night': 'กลางคืน',
+  'spot.access': 'ไปยังไง',
+  'spot.privateCar': 'รถส่วนตัว',
+  'spot.publicTransport': 'ขนส่งสาธารณะ',
+  'spot.gear': 'อุปกรณ์สำหรับมือใหม่',
+  'spot.gearLandscape': 'วิวทิวทัศน์',
+  'spot.gearPortrait': 'พอร์ตเทรต',
+  'spot.openMaps': 'เปิดใน Google Maps',
+  'spot.cta': 'ไปกับทริป Trip2Talk ที่พิกัดนี้',
+  'spot.ctaSoon': 'ลิงก์แพ็กเกจทริปกำลังมา — พี่แสนกำลังยืนยันรหัสทริป',
+  'spot.missing': 'มุมถ่ายนี้ยังไม่อยู่ในคลังข้อมูล',
+  'spot.librarySoon': 'รายละเอียดเวลา เส้นทาง และอุปกรณ์สำหรับเฟรมนี้กำลังมาเร็วๆ นี้',
+  'spot.drone': 'กฎโดรน',
+  'spot.droneAllowed': 'บินโดรนได้',
+  'spot.droneRestricted': 'บินโดรนแบบจำกัด',
+  'spot.droneProhibited': 'ห้ามโดรน — ผิดกฎหมาย',
   'experience.badge': 'ประสบการณ์',
   'experience.title': 'เรื่องราวจากทริปถ่ายภาพ',
   'experience.body': 'เร็วๆ นี้ — รีลทริป ไฮไลท์รายวัน และโมเมนต์จากทริปจริง',

@@ -10,6 +10,7 @@ import GalleryPage from './pages/public/GalleryPage'
 import PricingPage from './pages/public/PricingPage'
 import AboutPage from './pages/public/AboutPage'
 import DiscoverPage from './pages/public/DiscoverPage'
+import SpotDetailPage from './pages/public/SpotDetailPage'
 import ExperiencePage from './pages/public/ExperiencePage'
 import WaiverPage from './pages/public/WaiverPage'
 import BookingPage from './pages/public/BookingPage'
@@ -60,6 +61,7 @@ export default function App() {
         <Route element={<PublicLayout />}>
           <Route index element={<HomePage />} />
           <Route path="discover" element={<DiscoverPage />} />
+          <Route path="discover/spot/:id" element={<SpotDetailPage />} />
           <Route path="experience" element={<ExperiencePage />} />
           <Route path="trips" element={<TripsPage />} />
           <Route path="trips/:tripCode" element={<TripDetailPage />} />
