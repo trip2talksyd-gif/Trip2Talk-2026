@@ -34,30 +34,26 @@ export default function PublicLayout() {
   return (
     <div
       className={`flex h-full max-h-full flex-col overflow-hidden ${
-        isHome ? 'bg-teal-900' : 'bg-cream'
+        isHome ? 'bg-[#0a1214]' : 'bg-cream'
       }`}
     >
       <OfflineBanner />
+
+      {!isHome && (
       <header
-        className={
-          isHome
-            ? 'z-50 shrink-0 border-b border-white/8 bg-teal-900/95 pt-[env(safe-area-inset-top)] backdrop-blur'
-            : 'z-50 shrink-0 border-b border-line bg-card/95 pt-[env(safe-area-inset-top)] backdrop-blur'
-        }
+        className="z-50 shrink-0 border-b border-line bg-card/95 pt-[env(safe-area-inset-top)] backdrop-blur"
       >
         <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-3 px-4 py-3 sm:px-6 lg:px-10 lg:py-[18px]">
           <Link
             to="/"
-            className={`flex min-w-0 items-center gap-2 font-thai text-base font-bold sm:gap-2.5 sm:text-lg ${
-              isHome ? 'text-cream' : 'text-teal-800'
-            }`}
+            className="flex min-w-0 items-center gap-2 font-thai text-base font-bold text-teal-800 sm:gap-2.5 sm:text-lg"
           >
             <BrandLogo
               size="md"
-              tone={isHome ? 'dark' : 'light'}
+              tone="light"
               withWordmark
               decorative
-              wordmarkClassName={isHome ? 'text-cream' : 'text-teal-800'}
+              wordmarkClassName="text-teal-800"
             />
           </Link>
 
@@ -71,13 +67,7 @@ export default function PublicLayout() {
                   to={to}
                   className={({ isActive }) =>
                     `text-[12.5px] font-semibold leading-snug transition-colors ${
-                      isHome
-                        ? isActive
-                          ? 'text-teal-400'
-                          : 'text-cream/65 hover:text-cream'
-                        : isActive
-                          ? 'text-teal-700'
-                          : 'text-ink-soft hover:text-ink'
+                      isActive ? 'text-teal-700' : 'text-ink-soft hover:text-ink'
                     }`
                   }
                 >
@@ -90,24 +80,14 @@ export default function PublicLayout() {
             <div
               role="group"
               aria-label="Language"
-              className={
-                isHome
-                  ? 'inline-flex rounded-full border border-teal-400/40 p-[3px] text-[10px] font-bold'
-                  : 'inline-flex rounded-full border border-line bg-mint-100 p-[3px] text-[10px] font-bold'
-              }
+              className="inline-flex rounded-full border border-line bg-mint-100 p-[3px] text-[10px] font-bold"
             >
               <button
                 type="button"
                 onClick={() => setLang('en')}
                 aria-pressed={lang === 'en'}
                 className={`rounded-full px-2.5 py-1 transition-colors ${
-                  lang === 'en'
-                    ? isHome
-                      ? 'bg-teal-400 text-teal-900'
-                      : 'bg-teal-500 text-cream'
-                    : isHome
-                      ? 'text-teal-400/80 hover:text-teal-400'
-                      : 'text-teal-800'
+                  lang === 'en' ? 'bg-teal-500 text-cream' : 'text-teal-800'
                 }`}
               >
                 EN
@@ -117,13 +97,7 @@ export default function PublicLayout() {
                 onClick={() => setLang('th')}
                 aria-pressed={lang === 'th'}
                 className={`rounded-full px-2.5 py-1 transition-colors ${
-                  lang === 'th'
-                    ? isHome
-                      ? 'bg-teal-400 text-teal-900'
-                      : 'bg-teal-500 text-cream'
-                    : isHome
-                      ? 'text-teal-400/80 hover:text-teal-400'
-                      : 'text-teal-800'
+                  lang === 'th' ? 'bg-teal-500 text-cream' : 'text-teal-800'
                 }`}
               >
                 TH
@@ -135,13 +109,9 @@ export default function PublicLayout() {
               aria-label={t('nav.account')}
               className={({ isActive }) =>
                 `rounded-editorial p-2 ${
-                  isHome
-                    ? isActive
-                      ? 'text-teal-400'
-                      : 'text-cream/70 hover:bg-white/5 hover:text-cream'
-                    : isActive
-                      ? 'text-teal-700'
-                      : 'text-ink-soft hover:bg-mint-100 hover:text-ink'
+                  isActive
+                    ? 'text-teal-700'
+                    : 'text-ink-soft hover:bg-mint-100 hover:text-ink'
                 }`
               }
             >
@@ -159,9 +129,7 @@ export default function PublicLayout() {
             <button
               type="button"
               onClick={() => setMenuOpen((o) => !o)}
-              className={`rounded-editorial p-2 lg:hidden ${
-                isHome ? 'text-cream hover:bg-white/5' : 'text-ink hover:bg-mint-100'
-              }`}
+              className="rounded-editorial p-2 text-ink hover:bg-mint-100 lg:hidden"
               aria-label="Menu"
             >
               {menuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -170,11 +138,7 @@ export default function PublicLayout() {
         </div>
 
         {menuOpen && (
-          <nav
-            className={`border-t px-4 py-3 lg:hidden ${
-              isHome ? 'border-white/8' : 'border-line bg-card'
-            }`}
-          >
+          <nav className="border-t border-line bg-card px-4 py-3 lg:hidden">
             <ul className="space-y-1">
               {menuLinks.map(({ to, key }) => (
                 <li key={to}>
@@ -183,13 +147,7 @@ export default function PublicLayout() {
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
                       `block rounded-editorial px-3 py-2 text-sm ${
-                        isHome
-                          ? isActive
-                            ? 'font-medium text-teal-400'
-                            : 'text-cream/65'
-                          : isActive
-                            ? 'font-medium text-teal-700'
-                            : 'text-ink-soft'
+                        isActive ? 'font-medium text-teal-700' : 'text-ink-soft'
                       }`
                     }
                   >
@@ -201,22 +159,25 @@ export default function PublicLayout() {
           </nav>
         )}
       </header>
+      )}
 
-      <div className="app-scroll" data-app-scroll>
-        <main
-          className={`mx-auto w-full flex-1 px-4 pt-4 sm:px-6 ${
-            isHome
-              ? 'max-w-[1280px] pb-4 text-cream lg:px-10'
-              : 'max-w-[1280px] pb-24 text-ink lg:px-10'
-          }`}
-        >
+      {isHome ? (
+        <div className="min-h-0 flex-1 overflow-hidden">
           <Outlet />
-        </main>
+        </div>
+      ) : (
+        <>
+          <div className="app-scroll" data-app-scroll>
+            <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-24 pt-4 text-ink sm:px-6 lg:px-10">
+              <Outlet />
+            </main>
 
-        <PublicFooter />
-      </div>
+            <PublicFooter />
+          </div>
 
-      <BottomNav />
+          <BottomNav />
+        </>
+      )}
 
       <InstallPrompt />
     </div>
