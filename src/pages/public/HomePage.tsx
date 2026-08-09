@@ -17,7 +17,7 @@ const HERO_VIDEO_URL =
   'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/VDO/Tasmania_cover.mp4'
 
 export default function HomePage() {
-  const { tt } = useLang()
+  const { tt, lang } = useLang()
   const [destBlurbs, setDestBlurbs] = useState<{ en: string; th: string } | null>(null)
   const [heroVideoOk, setHeroVideoOk] = useState(true)
 
@@ -78,35 +78,64 @@ export default function HomePage() {
 
         <div className="relative z-[2] mx-auto flex w-full max-w-[260px] flex-1 flex-col justify-end px-5 pb-3 pt-14 sm:max-w-sm">
           <p className="mb-1.5 self-center rounded-full border border-white/25 bg-white/14 px-[11px] py-1 text-center text-[8.5px] leading-[1.4] text-cream backdrop-blur-[6px]">
-            {badge.en}
-            <span className="mt-0.5 block font-thai text-[7.5px] opacity-85">{badge.th}</span>
+            {lang === 'th' ? badge.th : badge.en}
+            <span
+              className={`mt-0.5 block text-[7.5px] opacity-85 ${lang === 'en' ? 'font-thai' : ''}`}
+            >
+              {lang === 'th' ? badge.en : badge.th}
+            </span>
           </p>
 
-          <h1 className="m-0 text-center font-serif text-[19px] leading-[1.2] text-cream sm:text-[24px]">
-            {en1.en} <em className="not-italic text-mint-200">{en2.en}</em>
-          </h1>
-          <p className="mb-1 mt-0 text-center font-thai text-[9.5px] leading-[1.35] text-mint-200 sm:text-[11.5px]">
-            {th1.th} {th2.th}
-          </p>
+          {lang === 'en' ? (
+            <>
+              <h1 className="m-0 text-center font-serif text-[19px] leading-[1.2] text-cream sm:text-[24px]">
+                {en1.en} <em className="not-italic text-mint-200">{en2.en}</em>
+              </h1>
+              <p className="mb-1 mt-0 text-center font-thai text-[9.5px] leading-[1.35] text-mint-200 sm:text-[11.5px]">
+                {th1.th} {th2.th}
+              </p>
+            </>
+          ) : (
+            <>
+              <h1 className="m-0 text-center font-thai text-[19px] font-bold leading-[1.2] text-cream sm:text-[24px]">
+                {th1.th} {th2.th}
+              </h1>
+              <p className="mb-1 mt-0 text-center font-serif text-[9.5px] leading-[1.35] text-mint-200 sm:text-[11.5px]">
+                {en1.en} {en2.en}
+              </p>
+            </>
+          )}
 
           <p className="mb-0.5 max-w-[220px] self-center text-center text-[8.5px] leading-[1.45] text-[#dff5ea] sm:max-w-[260px] sm:text-[11px]">
-            {subtitleEn}
+            {lang === 'th' ? subtitleTh : subtitleEn}
           </p>
-          <p className="mb-2 max-w-[220px] self-center text-center font-thai text-[8px] leading-[1.45] text-[#bfe9d0] sm:max-w-[260px] sm:text-[10px]">
-            {subtitleTh}
+          <p
+            className={`mb-2 max-w-[220px] self-center text-center text-[8px] leading-[1.45] text-[#bfe9d0] sm:max-w-[260px] sm:text-[10px] ${
+              lang === 'en' ? 'font-thai' : ''
+            }`}
+          >
+            {lang === 'th' ? subtitleEn : subtitleTh}
           </p>
 
           <div className="mb-2 flex gap-1.5 rounded-full border border-white/20 bg-white/12 p-[5px]">
             <Link to="/trips" className="btn-embossed cta-shine">
-              {explore.en}
-              <span className="mt-0.5 block font-thai text-[7.5px] font-medium opacity-85">
-                {explore.th}
+              {lang === 'th' ? explore.th : explore.en}
+              <span
+                className={`mt-0.5 block text-[7.5px] font-medium opacity-85 ${
+                  lang === 'en' ? 'font-thai' : ''
+                }`}
+              >
+                {lang === 'th' ? explore.en : explore.th}
               </span>
             </Link>
             <Link to="/gallery" className="btn-embossed-ghost">
-              {gallery.en}
-              <span className="mt-0.5 block font-thai text-[7.5px] font-medium opacity-85">
-                {gallery.th}
+              {lang === 'th' ? gallery.th : gallery.en}
+              <span
+                className={`mt-0.5 block text-[7.5px] font-medium opacity-85 ${
+                  lang === 'en' ? 'font-thai' : ''
+                }`}
+              >
+                {lang === 'th' ? gallery.en : gallery.th}
               </span>
             </Link>
           </div>
@@ -121,8 +150,18 @@ export default function HomePage() {
               <Camera className="h-3.5 w-3.5 text-cream" strokeWidth={2.25} />
             </span>
             <span className="min-w-0 flex-1 leading-[1.3]">
-              <span className="block text-[9.5px] font-bold text-cream">{promoTitle.en}</span>
-              <span className="block font-thai text-[8px] text-[#d9f5e4]">{promoTitle.th}</span>
+              <span
+                className={`block text-[9.5px] font-bold text-cream ${
+                  lang === 'th' ? 'font-thai' : ''
+                }`}
+              >
+                {lang === 'th' ? promoTitle.th : promoTitle.en}
+              </span>
+              <span
+                className={`block text-[8px] text-[#d9f5e4] ${lang === 'en' ? 'font-thai' : ''}`}
+              >
+                {lang === 'th' ? promoTitle.en : promoTitle.th}
+              </span>
             </span>
             <ArrowRight className="h-3 w-3 shrink-0 text-cream/80" />
           </Link>
@@ -134,9 +173,13 @@ export default function HomePage() {
               <CountUpStat end={13} />
             </p>
             <p className="mt-px text-[6.5px] uppercase leading-[1.3] tracking-[0.06em] text-[#cfe9d8]">
-              {tripsLabel.en}
-              <span className="block font-thai text-[8.5px] normal-case opacity-85">
-                {tripsLabel.th}
+              {lang === 'th' ? tripsLabel.th : tripsLabel.en}
+              <span
+                className={`block text-[8.5px] normal-case opacity-85 ${
+                  lang === 'en' ? 'font-thai' : ''
+                }`}
+              >
+                {lang === 'th' ? tripsLabel.en : tripsLabel.th}
               </span>
             </p>
           </div>
@@ -145,9 +188,13 @@ export default function HomePage() {
               <CountUpStat end={6} />
             </p>
             <p className="mt-px text-[6.5px] uppercase leading-[1.3] tracking-[0.06em] text-[#cfe9d8]">
-              {groupLabel.en}
-              <span className="block font-thai text-[8.5px] normal-case opacity-85">
-                {groupLabel.th}
+              {lang === 'th' ? groupLabel.th : groupLabel.en}
+              <span
+                className={`block text-[8.5px] normal-case opacity-85 ${
+                  lang === 'en' ? 'font-thai' : ''
+                }`}
+              >
+                {lang === 'th' ? groupLabel.en : groupLabel.th}
               </span>
             </p>
           </div>
@@ -156,9 +203,13 @@ export default function HomePage() {
               <CountUpStat end={10} suffix="+" />
             </p>
             <p className="mt-px text-[6.5px] uppercase leading-[1.3] tracking-[0.06em] text-[#cfe9d8]">
-              {photoLabel.en}
-              <span className="block font-thai text-[8.5px] normal-case opacity-85">
-                {photoLabel.th}
+              {lang === 'th' ? photoLabel.th : photoLabel.en}
+              <span
+                className={`block text-[8.5px] normal-case opacity-85 ${
+                  lang === 'en' ? 'font-thai' : ''
+                }`}
+              >
+                {lang === 'th' ? photoLabel.en : photoLabel.th}
               </span>
             </p>
           </div>

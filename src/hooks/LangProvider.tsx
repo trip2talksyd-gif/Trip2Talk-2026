@@ -1,4 +1,11 @@
-import { createContext, useCallback, useMemo, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
 import { translations, type Lang, type TranslationKey } from '../i18n/translations'
 
 export type LangContextValue = {
@@ -7,7 +14,7 @@ export type LangContextValue = {
   toggleLang: () => void
   /** Active-language string (legacy / form chrome). Prefer `tt` for bilingual UI. */
   t: (key: TranslationKey) => string
-  /** Always returns both EN + TH — mockup bilingual pattern (show together). */
+  /** Always returns both EN + TH — pair for bilingual UI; order via BiText / lang. */
   tt: (key: TranslationKey) => { en: string; th: string }
 }
 
@@ -16,8 +23,12 @@ export const LangContext = createContext<LangContextValue | null>(null)
 const STORAGE_KEY = 'trip2talk_lang'
 
 function readStoredLang(): Lang {
-  const stored = localStorage.getItem(STORAGE_KEY)
-  return stored === 'en' ? 'en' : 'th'
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return stored === 'en' ? 'en' : 'th'
+  } catch {
+    return 'th'
+  }
 }
 
 export function LangProvider({ children }: { children: ReactNode }) {
@@ -25,12 +36,28 @@ export function LangProvider({ children }: { children: ReactNode }) {
 
   const setLang = useCallback((next: Lang) => {
     setLangState(next)
-    localStorage.setItem(STORAGE_KEY, next)
+    try {
+      localStorage.setItem(STORAGE_KEY, next)
+    } catch {
+      /* ignore quota / private mode */
+    }
   }, [])
 
+  useEffect(() => {
+    document.documentElement.lang = lang === 'th' ? 'th' : 'en'
+  }, [lang])
+
   const toggleLang = useCallback(() => {
-    setLang(lang === 'th' ? 'en' : 'th')
-  }, [lang, setLang])
+    setLangState((prev) => {
+      const next: Lang = prev === 'th' ? 'en' : 'th'
+      try {
+        localStorage.setItem(STORAGE_KEY, next)
+      } catch {
+        /* ignore */
+      }
+      return next
+    })
+  }, [])
 
   const t = useCallback(
     (key: TranslationKey) => translations[lang][key] ?? translations.en[key] ?? key,

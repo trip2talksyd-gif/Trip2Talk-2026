@@ -1,6 +1,7 @@
 import { Compass, Heart, Luggage, MessageCircle, User } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
+import { useLang } from '../../hooks/useLang'
 
 /** Booking / waiver / prep flows own the bottom of the screen — no dock there. */
 const FLOW_ROUTE_PREFIXES = ['/waiver', '/booking', '/trip-prep', '/waitlist']
@@ -20,6 +21,7 @@ const ITEMS = [
 
 export default function BottomNav() {
   const { pathname } = useLocation()
+  const { lang } = useLang()
 
   // Hidden on Home — would sit on top of the hero video (matches mockup `.home-screen .bottom-nav`).
   if (pathname === '/') return null
@@ -41,10 +43,18 @@ export default function BottomNav() {
       >
         {ITEMS.map((item) => {
           const Icon = item.icon
+          const primary = lang === 'th' ? item.th : item.en
+          const secondary = lang === 'th' ? item.en : item.th
           const label = (
             <span className="mt-0.5 block max-w-[52px] truncate text-center text-[7px] font-bold leading-[1.15]">
-              {item.en}
-              <span className="block font-thai text-[6px] font-medium opacity-85">{item.th}</span>
+              {primary}
+              <span
+                className={`block text-[6px] font-medium opacity-85 ${
+                  lang === 'en' ? 'font-thai' : ''
+                }`}
+              >
+                {secondary}
+              </span>
             </span>
           )
 

@@ -26,7 +26,7 @@ const menuLinks = [
 const desktopNavOrder = ['/trips', '/gallery', '/photo-guide', '/calendar', '/pricing', '/about']
 
 export default function PublicLayout() {
-  const { t, toggleLang, lang } = useLang()
+  const { t, setLang, lang } = useLang()
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
   const isHome = location.pathname === '/'
@@ -87,37 +87,48 @@ export default function PublicLayout() {
           </nav>
 
           <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
-            <button
-              type="button"
-              onClick={toggleLang}
+            <div
+              role="group"
+              aria-label="Language"
               className={
                 isHome
-                  ? 'rounded-full border border-teal-400/40 px-3 py-1 text-xs font-medium text-teal-400'
+                  ? 'inline-flex rounded-full border border-teal-400/40 p-[3px] text-[10px] font-bold'
                   : 'inline-flex rounded-full border border-line bg-mint-100 p-[3px] text-[10px] font-bold'
               }
-              aria-label={t('lang.toggle')}
             >
-              {isHome ? (
-                t('lang.toggle')
-              ) : (
-                <>
-                  <span
-                    className={`rounded-full px-2.5 py-1 ${
-                      lang === 'en' ? 'bg-teal-500 text-cream' : 'text-teal-800'
-                    }`}
-                  >
-                    EN
-                  </span>
-                  <span
-                    className={`rounded-full px-2.5 py-1 ${
-                      lang === 'th' ? 'bg-teal-500 text-cream' : 'text-teal-800'
-                    }`}
-                  >
-                    TH
-                  </span>
-                </>
-              )}
-            </button>
+              <button
+                type="button"
+                onClick={() => setLang('en')}
+                aria-pressed={lang === 'en'}
+                className={`rounded-full px-2.5 py-1 transition-colors ${
+                  lang === 'en'
+                    ? isHome
+                      ? 'bg-teal-400 text-teal-900'
+                      : 'bg-teal-500 text-cream'
+                    : isHome
+                      ? 'text-teal-400/80 hover:text-teal-400'
+                      : 'text-teal-800'
+                }`}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLang('th')}
+                aria-pressed={lang === 'th'}
+                className={`rounded-full px-2.5 py-1 transition-colors ${
+                  lang === 'th'
+                    ? isHome
+                      ? 'bg-teal-400 text-teal-900'
+                      : 'bg-teal-500 text-cream'
+                    : isHome
+                      ? 'text-teal-400/80 hover:text-teal-400'
+                      : 'text-teal-800'
+                }`}
+              >
+                TH
+              </button>
+            </div>
 
             <NavLink
               to="/account"

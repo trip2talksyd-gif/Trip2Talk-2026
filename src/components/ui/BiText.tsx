@@ -1,4 +1,6 @@
-/** Bilingual EN+TH stack — matches Home hero / mockup pattern (both always visible). */
+import { useLang } from '../../hooks/useLang'
+
+/** Bilingual EN+TH stack — primary line follows active language preference. */
 type Props = {
   en: string
   th: string
@@ -10,18 +12,32 @@ type Props = {
   serif?: boolean
 }
 
+const DEFAULT_SECONDARY =
+  'mt-0.5 block font-thai text-[0.82em] font-medium text-ink-soft'
+
 export default function BiText({
   en,
   th,
   as: Tag = 'span',
   className = '',
-  thClassName = 'mt-0.5 block font-thai text-[0.82em] font-medium text-ink-soft',
+  thClassName = DEFAULT_SECONDARY,
   serif = false,
 }: Props) {
+  const { lang } = useLang()
+  const primary = lang === 'th' ? th : en
+  const secondary = lang === 'th' ? en : th
+  const primaryIsThai = lang === 'th'
+  const secondaryIsThai = lang !== 'th'
+  const secondaryBase = thClassName.replace(/\bfont-thai\b/g, '').replace(/\s+/g, ' ').trim()
+
   return (
-    <Tag className={`${serif ? 'font-serif' : ''} ${className}`.trim()}>
-      {en}
-      <span className={thClassName}>{th}</span>
+    <Tag
+      className={`${serif && !primaryIsThai ? 'font-serif' : ''} ${primaryIsThai ? 'font-thai' : ''} ${className}`.trim()}
+    >
+      {primary}
+      <span className={`${secondaryBase} ${secondaryIsThai ? 'font-thai' : ''}`.trim()}>
+        {secondary}
+      </span>
     </Tag>
   )
 }
