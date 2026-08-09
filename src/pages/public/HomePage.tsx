@@ -87,7 +87,7 @@ export default function HomePage() {
 
   return (
     <section
-      className="home-nexum relative h-screen w-full overflow-hidden bg-[#0a1214] font-[Geist,-apple-system,BlinkMacSystemFont,sans-serif] antialiased"
+      className="home-nexum relative grid h-[100dvh] max-h-[100dvh] w-full grid-cols-1 grid-rows-1 overflow-hidden bg-[#0a1214] font-[Geist,-apple-system,BlinkMacSystemFont,sans-serif] antialiased md:max-h-[min(100dvh,900px)] md:h-[min(100dvh,900px)]"
       onMouseMove={(e) => heroVideoRef.current?.setPointerX(e.clientX)}
       onMouseLeave={() => heroVideoRef.current?.setPointerX(null)}
       onTouchMove={(e) => {
@@ -97,11 +97,14 @@ export default function HomePage() {
       onTouchEnd={() => heroVideoRef.current?.setPointerX(null)}
       onTouchCancel={() => heroVideoRef.current?.setPointerX(null)}
     >
-      <HeroVideo ref={heroVideoRef} />
+      {/* Grid cell locks height — video cannot inflate the section via intrinsic 16:9 size */}
+      <div className="relative col-start-1 row-start-1 min-h-0 min-w-0 overflow-hidden">
+        <HeroVideo ref={heroVideoRef} />
+      </div>
 
-      <div className="relative z-10 flex h-full flex-col">
-        {/* Top nav */}
-        <nav className="flex items-center justify-between px-5 pb-5 pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8 sm:pb-6 lg:px-12">
+      <div className="col-start-1 row-start-1 z-10 flex min-h-0 flex-col">
+        {/* Top nav — fixed chrome height; never shrinks with the video */}
+        <nav className="flex shrink-0 items-center justify-between px-5 pb-5 pt-[max(1.25rem,env(safe-area-inset-top))] sm:px-8 sm:pb-6 lg:px-12">
           <Link to="/" className="relative z-50 flex items-center gap-2">
             <picture>
               <source srcSet={BRAND_BADGE_SRC} type="image/webp" />
@@ -269,8 +272,8 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Bottom-anchored content */}
-        <div className="mt-auto flex flex-col gap-6 px-5 pb-8 sm:gap-8 sm:px-8 sm:pb-12 lg:flex-row lg:items-end lg:justify-between lg:px-12 lg:pb-16">
+        {/* Bottom-anchored content — lives in the constrained hero cell, not below the video */}
+        <div className="mt-auto flex min-h-0 flex-col gap-6 overflow-y-auto px-5 pb-8 sm:gap-8 sm:px-8 sm:pb-12 lg:flex-row lg:items-end lg:justify-between lg:px-12 lg:pb-16">
           <div className="max-w-xl">
             <h1 className="text-3xl font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl lg:text-[3.5rem]">
               {headline.primary}

@@ -33,3 +33,9 @@ supabase/seed/staff_profiles_seed.sql
 .vercel
 .cursor/
 dist_old_*/
+tmp_media/
+tmp_*.png
+tmp_*.webp
+tmp_*.zip
+tmp_*.sql
+tmp_*.mjs

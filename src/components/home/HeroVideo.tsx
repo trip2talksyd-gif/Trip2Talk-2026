@@ -7,9 +7,11 @@ import {
   useState,
 } from 'react'
 
-/** Hero reel — production Supabase `public-media` bucket (~51MB; stream, don't preload all). */
-export const HERO_VIDEO_SRC =
-  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/public-media/VDO/Hero_cover01.mp4'
+/** Hero reel — H.264/AAC web encode (Chrome-safe).
+ * Original upload at public-media/VDO/Hero_cover01.mp4 was HEVC/H.265 which
+ * Chrome often cannot decode (silent poster-only failure). Keep the original
+ * in Storage as archive; serve this H.264 1080p cut for playback. */
+export const HERO_VIDEO_SRC = '/hero/Hero_cover01_web.mp4'
 
 /** Night-sky still while the reel buffers / if media truly fails. */
 export const HERO_POSTER_SRC = '/brand/pin-gate-bg.webp'
@@ -77,6 +79,7 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
   const videoRef = useRef<HTMLVideoElement>(null)
   const [playing, setPlaying] = useState(false)
   const [mediaFailed, setMediaFailed] = useState(false)
+  const [failReason, setFailReason] = useState<string | null>(null)
 
   const currentRate = useRef(1)
   const targetRate = useRef(1)
@@ -213,6 +216,7 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
     reducedMotion.current = prefersReducedMotion()
     interactive.current = !reducedMotion.current
     if (reducedMotion.current) {
+      setFailReason('prefers-reduced-motion — poster only')
       setMediaFailed(true)
       return
     }
@@ -244,6 +248,21 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
     let cancelled = false
     let attempts = 0
 
+    const markFailed = (reason: string, err?: unknown) => {
+      if (cancelled) return
+      console.error('[HeroVideo]', reason, err ?? '', {
+        src: HERO_VIDEO_SRC,
+        networkState: v.networkState,
+        readyState: v.readyState,
+        mediaError: v.error
+          ? { code: v.error.code, message: v.error.message }
+          : null,
+      })
+      setFailReason(reason)
+      setMediaFailed(true)
+      setPlaying(false)
+    }
+
     const tryPlay = async () => {
       if (cancelled || !v) return
       attempts += 1
@@ -253,13 +272,14 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
         v.playsInline = true
         await v.play()
         if (!cancelled) setPlaying(true)
-      } catch {
-        // Retry a few times as the file buffers; only then keep the poster
-        // visible while the element stays mounted for a later user gesture.
+      } catch (err) {
+        // Retry a few times as the file buffers; only then surface failure.
         if (!cancelled && attempts < 6) {
           window.setTimeout(() => {
             void tryPlay()
           }, 400 * attempts)
+        } else if (!cancelled) {
+          markFailed('autoplay failed after retries', err)
         }
       }
     }
@@ -271,10 +291,16 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
       if (!cancelled) setPlaying(true)
     }
     const onError = () => {
-      if (!cancelled) {
-        setMediaFailed(true)
-        setPlaying(false)
-      }
+      const code = v.error?.code
+      const msg = v.error?.message || 'unknown'
+      markFailed(`media element error (code ${code ?? '?'}: ${msg})`)
+    }
+
+    // Prefer codecs Chrome can always decode (H.264). Empty string = no support.
+    const h264 = v.canPlayType('video/mp4; codecs="avc1.42E01E, mp4a.40.2"')
+    if (!h264) {
+      markFailed('browser reports no H.264/MP4 support')
+      return
     }
 
     v.addEventListener('canplay', onCanPlay)
@@ -307,13 +333,13 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
   return (
     <div
       ref={containerRef}
-      className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${className}`.trim()}
-      aria-hidden
+      className={`pointer-events-none absolute inset-0 z-0 h-full w-full overflow-hidden ${className}`.trim()}
+      aria-hidden={!mediaFailed}
     >
       <img
         src={HERO_POSTER_SRC}
         alt=""
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+        className={`absolute inset-0 h-full max-h-full w-full max-w-full object-cover object-center transition-opacity duration-700 ${
           showPoster ? 'opacity-100' : 'opacity-0'
         }`}
         decoding="async"
@@ -323,7 +349,7 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
       {!mediaFailed && (
         <video
           ref={videoRef}
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+          className={`absolute inset-0 h-full max-h-full w-full max-w-full object-cover object-center transition-opacity duration-700 ${
             playing ? 'opacity-100' : 'opacity-0'
           }`}
           src={HERO_VIDEO_SRC}
@@ -332,9 +358,7 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
           muted
           loop
           playsInline
-          // metadata only — full file is ~51MB; preload=auto was saturating the
-          // connection and made the hero look "frozen" on the poster.
-          preload="metadata"
+          preload="auto"
         />
       )}
 
@@ -345,6 +369,15 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
             'linear-gradient(180deg, rgba(15,26,29,.45) 0%, rgba(15,26,29,.2) 32%, rgba(15,26,29,.78) 68%, rgba(15,26,29,.96) 100%)',
         }}
       />
+
+      {mediaFailed && failReason && import.meta.env.DEV ? (
+        <div
+          role="status"
+          className="pointer-events-none absolute bottom-3 left-3 z-[2] max-w-sm rounded-md bg-black/70 px-3 py-2 text-[11px] leading-snug text-orange-soft"
+        >
+          Hero video failed: {failReason}
+        </div>
+      ) : null}
     </div>
   )
 })
