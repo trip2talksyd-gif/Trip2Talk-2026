@@ -110,10 +110,10 @@ export default function HomePage() {
                 alt=""
                 width={24}
                 height={24}
-                className="h-6 w-6 rounded-full object-cover ring-1 ring-black/20 lg:ring-white/40"
+                className="h-6 w-6 rounded-full object-cover ring-1 ring-white/40"
               />
             </picture>
-            <span className="text-lg font-semibold lowercase tracking-tight text-[#010101] lg:text-white">
+            <span className="text-lg font-semibold lowercase tracking-tight text-white">
               {BRAND_NAME.toLowerCase().replace(/\s/g, '')}
             </span>
           </Link>
@@ -172,7 +172,7 @@ export default function HomePage() {
 
           <button
             type="button"
-            className="relative z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-[#010101] backdrop-blur-lg md:hidden lg:text-white"
+            className="relative z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-lg md:hidden"
             aria-label={menuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((o) => !o)}
@@ -272,18 +272,18 @@ export default function HomePage() {
         {/* Bottom-anchored content */}
         <div className="mt-auto flex flex-col gap-6 px-5 pb-8 sm:gap-8 sm:px-8 sm:pb-12 lg:flex-row lg:items-end lg:justify-between lg:px-12 lg:pb-16">
           <div className="max-w-xl">
-            <h1 className="text-3xl font-semibold leading-[1.1] tracking-tight text-[#010101] sm:text-4xl lg:text-[3.5rem] lg:text-white">
+            <h1 className="text-3xl font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl lg:text-[3.5rem]">
               {headline.primary}
             </h1>
             <p
-              className={`mt-2 text-sm font-medium text-[#010101]/70 lg:text-white/70 ${
+              className={`mt-2 text-sm font-medium text-white/75 ${
                 lang === 'en' ? 'font-thai' : ''
               }`}
             >
               {headline.secondary}
             </p>
             <p
-              className={`mt-3 max-w-md text-sm leading-relaxed text-[#010101]/70 lg:text-white/70 ${
+              className={`mt-3 max-w-md text-sm leading-relaxed text-white/75 ${
                 lang === 'th' ? 'font-thai' : ''
               }`}
             >
@@ -318,12 +318,12 @@ export default function HomePage() {
             {/* Stats card */}
             <article className="flex flex-col justify-between rounded-2xl bg-white/10 p-5 backdrop-blur-lg sm:w-64 sm:p-6">
               <p
-                className="text-3xl font-normal tracking-tight text-[#010101] sm:text-4xl lg:text-white"
+                className="text-3xl font-normal tracking-tight text-white sm:text-4xl"
                 style={{ fontFamily: "'Silkscreen', cursive" }}
               >
                 10+
               </p>
-              <p className="mt-3 text-sm leading-relaxed text-[#010101]/70 sm:mt-4 lg:text-white/70">
+              <p className="mt-3 text-sm leading-relaxed text-white/75 sm:mt-4">
                 {statsBody}
               </p>
             </article>
@@ -331,12 +331,12 @@ export default function HomePage() {
             {/* Photographer / positioning card — real Trip2Talk copy, no invented guest quotes */}
             <article className="rounded-2xl bg-white/10 p-5 backdrop-blur-lg sm:w-64 sm:p-6">
               <div className="mb-3 flex items-center gap-2 sm:mb-4">
-                <span className="flex h-6 w-6 items-center justify-center rounded bg-[#010101] text-xs font-bold text-white lg:bg-black">
+                <span className="flex h-6 w-6 items-center justify-center rounded bg-black text-xs font-bold text-white">
                   T
                 </span>
-                <span className="text-sm font-semibold text-[#010101] lg:text-white">Trip2Talk</span>
+                <span className="text-sm font-semibold text-white">Trip2Talk</span>
               </div>
-              <p className="text-sm leading-relaxed text-[#010101]/80 lg:text-white/80">{quote}</p>
+              <p className="text-sm leading-relaxed text-white/80">{quote}</p>
               <div className="mt-4 flex items-center gap-3 sm:mt-5">
                 <picture>
                   <source srcSet={BRAND_BADGE_SRC} type="image/webp" />
@@ -349,8 +349,8 @@ export default function HomePage() {
                   />
                 </picture>
                 <div>
-                  <p className="text-sm font-semibold text-[#010101] lg:text-white">Saen</p>
-                  <p className="text-xs text-[#010101]/60 lg:text-white/60">
+                  <p className="text-sm font-semibold text-white">Saen</p>
+                  <p className="text-xs text-white/60">
                     {lang === 'th' ? 'Trip Leader · ช่างภาพ' : 'Trip Leader · Photographer'}
                   </p>
                 </div>

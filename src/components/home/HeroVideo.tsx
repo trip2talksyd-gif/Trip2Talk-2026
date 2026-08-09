@@ -342,7 +342,7 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
         className="absolute inset-0 z-[1]"
         style={{
           background:
-            'linear-gradient(180deg, rgba(15,26,29,.35) 0%, rgba(15,26,29,.08) 38%, rgba(15,26,29,.72) 72%, rgba(15,26,29,.92) 100%)',
+            'linear-gradient(180deg, rgba(15,26,29,.45) 0%, rgba(15,26,29,.2) 32%, rgba(15,26,29,.78) 68%, rgba(15,26,29,.96) 100%)',
         }}
       />
     </div>
