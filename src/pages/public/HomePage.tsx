@@ -1,14 +1,11 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ChevronDown, Menu, X } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { BRAND_BADGE_PNG_SRC, BRAND_BADGE_SRC, BRAND_NAME } from '../../data/brand'
 import { fetchConfirmedTours } from '../../lib/toursApi'
 import { heroDestinationBlurbs, uniqueTourDestinations } from '../../lib/tourDisplay'
-
-/** Trip2Talk hero reel — production Supabase project only. */
-const HERO_VIDEO_URL =
-  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/VDO/Tasmania_cover.mp4'
+import HeroVideo, { type HeroVideoHandle } from '../../components/home/HeroVideo'
 
 const CTA_GRADIENT = 'linear-gradient(to bottom, #2B2B2B, #101010)'
 
@@ -22,14 +19,16 @@ const NAV_LINKS = [
 export default function HomePage() {
   const { lang, setLang, tt } = useLang()
   const navigate = useNavigate()
+  const heroVideoRef = useRef<HeroVideoHandle>(null)
   const [menuOpen, setMenuOpen] = useState(false)
   const [query, setQuery] = useState('')
-  const [heroVideoOk, setHeroVideoOk] = useState(true)
   const [destBlurbs, setDestBlurbs] = useState<{ en: string; th: string } | null>(null)
 
   const subtitleFallback = tt('home.hero.subtitle')
   const subtitleEn = destBlurbs?.en ?? subtitleFallback.en
   const subtitleTh = destBlurbs?.th ?? subtitleFallback.th
+
+  const whoosh = () => heroVideoRef.current?.whoosh()
 
   useEffect(() => {
     document.title = 'Trip2Talk — Photo Trips in Australia'
@@ -57,11 +56,18 @@ export default function HomePage() {
     }
   }, [menuOpen])
 
+  const goTrips = (path = '/trips') => {
+    whoosh()
+    window.setTimeout(() => {
+      navigate(path)
+      setMenuOpen(false)
+    }, 280)
+  }
+
   const onCta = (e?: FormEvent) => {
     e?.preventDefault()
     const q = query.trim()
-    navigate(q ? `/trips?q=${encodeURIComponent(q)}` : '/trips')
-    setMenuOpen(false)
+    goTrips(q ? `/trips?q=${encodeURIComponent(q)}` : '/trips')
   }
 
   const headline =
@@ -81,20 +87,7 @@ export default function HomePage() {
 
   return (
     <section className="home-nexum relative h-screen w-full overflow-hidden bg-[#0a1214] font-[Geist,-apple-system,BlinkMacSystemFont,sans-serif] antialiased">
-      {heroVideoOk ? (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="metadata"
-          className="absolute inset-0 z-0 h-full w-full object-cover"
-          src={HERO_VIDEO_URL}
-          onError={() => setHeroVideoOk(false)}
-        />
-      ) : (
-        <div className="absolute inset-0 z-0 bg-[#0a1214]" aria-hidden />
-      )}
+      <HeroVideo ref={heroVideoRef} />
 
       <div className="relative z-10 flex h-full flex-col">
         {/* Top nav */}
@@ -156,6 +149,10 @@ export default function HomePage() {
 
             <Link
               to="/trips"
+              onClick={(e) => {
+                e.preventDefault()
+                goTrips('/trips')
+              }}
               className="flex items-center self-stretch rounded-full px-5 text-sm font-medium text-white transition-opacity hover:opacity-90"
               style={{ background: CTA_GRADIENT }}
             >
@@ -250,7 +247,10 @@ export default function HomePage() {
           >
             <Link
               to="/trips"
-              onClick={() => setMenuOpen(false)}
+              onClick={(e) => {
+                e.preventDefault()
+                goTrips('/trips')
+              }}
               className="flex w-full items-center justify-center rounded-full px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-90"
               style={{ background: CTA_GRADIENT }}
             >
