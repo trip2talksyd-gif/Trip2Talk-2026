@@ -14,6 +14,7 @@ import { photoThumbSrc } from '../../data/galleryPhotos'
 import { librarySlugForGalleryPhotoId } from '../../lib/photoSpotsApi'
 import { TEAM_MEMBERS } from '../../data/teamMembers'
 import TeamAvatar from '../../components/about/TeamAvatar'
+import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import { useLang } from '../../hooks/useLang'
 import type { TranslationKey } from '../../i18n/translations'
 import { supabase } from '../../lib/supabase'
@@ -282,7 +283,7 @@ function MasterpieceCard({
             <h2 className="font-display text-[17px] font-semibold leading-tight tracking-tight text-teal-darker">
               {spot.titleEn}
             </h2>
-            <p className="mt-1 font-thai text-[11px] text-ink-app/55">
+            <p className="mt-1 font-serif text-[11px] text-ink-app/55">
               {spot.location} · {spot.titleTh}
             </p>
           </div>
@@ -370,10 +371,10 @@ function NearbyCard({
       <div className="px-2.5 pb-2.5 pt-2">
         <h3 className="line-clamp-2 text-[10.5px] font-semibold leading-snug text-teal-darker">
           {spot.titleEn}
-          <span className="mt-0.5 block font-thai text-[10px] font-medium text-ink-app/55">
-            {spot.titleTh}
-          </span>
         </h3>
+        <p className="mt-0.5 line-clamp-2 font-serif text-[10px] font-medium text-ink-app/55">
+          {spot.titleTh}
+        </p>
         <div className="mt-1.5 flex items-center justify-between gap-2">
           <span className="inline-flex min-w-0 items-center gap-1 truncate text-[8.5px] text-teal-mid">
             <MetaIcon className="h-2.5 w-2.5 shrink-0" />
@@ -487,12 +488,14 @@ export default function DiscoverPage() {
                 {helloLine.th}
               </span>
             </p>
-            <h1 className="mt-0.5 font-display text-[19px] font-semibold leading-tight tracking-tight text-teal-darker">
-              {headlineBi.en}
-              <span className="mt-0.5 block font-thai text-sm font-medium text-ink-app/55">
-                {headlineBi.th}
-              </span>
-            </h1>
+            <BiDisplayHeading
+              en={headlineBi.en}
+              th={headlineBi.th}
+              as="h1"
+              className="mt-0.5"
+              enClassName="text-[19px] font-semibold leading-tight tracking-tight text-teal-darker"
+              thClassName="mt-0.5 text-sm font-medium text-ink-app/55"
+            />
           </div>
           {saen ? (
             <div className="h-[34px] w-[34px] shrink-0 overflow-hidden rounded-full border-[1.5px] border-orange">
@@ -565,12 +568,14 @@ export default function DiscoverPage() {
             <span className="flex h-14 w-14 items-center justify-center rounded-full bg-teal-soft text-teal-mid">
               <CompassEmptyIcon className="h-7 w-7" />
             </span>
-            <h2 className="mt-4 font-display text-xl font-semibold text-teal-darker">
-              {emptyTitle.en}
-              <span className="mt-1 block font-thai text-sm font-medium text-ink-app/55">
-                {emptyTitle.th}
-              </span>
-            </h2>
+            <BiDisplayHeading
+              en={emptyTitle.en}
+              th={emptyTitle.th}
+              as="h2"
+              className="mt-4"
+              enClassName="text-xl font-semibold text-teal-darker"
+              thClassName="mt-1 text-sm font-medium text-ink-app/55"
+            />
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-ink-app/70">
               {emptyBody.en}
               <span className="mt-1 block font-thai">{emptyBody.th}</span>
@@ -603,15 +608,15 @@ export default function DiscoverPage() {
 
             <section aria-labelledby="nearby-heading">
               <div className="mb-3 flex items-baseline justify-between gap-3">
-                <h2
+                <BiDisplayHeading
                   id="nearby-heading"
-                  className="font-display text-[15px] font-semibold tracking-tight text-teal-darker"
-                >
-                  {nearbyBi.en}
-                  <span className="mt-0.5 block font-thai text-[11px] font-medium text-ink-app/55">
-                    {nearbyBi.th}
-                  </span>
-                </h2>
+                  en={nearbyBi.en}
+                  th={nearbyBi.th}
+                  as="h2"
+                  className="min-w-0"
+                  enClassName="text-[15px] font-semibold tracking-tight text-teal-darker"
+                  thClassName="mt-0.5 text-[11px] font-medium text-ink-app/55"
+                />
                 <Link to="/gallery" className="text-[10px] font-bold text-orange-deep">
                   {seeAllBi.en}
                   <span className="ml-1 font-thai font-medium">{seeAllBi.th}</span>

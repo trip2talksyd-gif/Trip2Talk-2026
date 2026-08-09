@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { photoSrc, photoThumbSrc } from '../../data/galleryPhotos'
 import { getDiscoverSpots, type DiscoverSpot } from '../../data/discoverFeed'
+import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import { useLang } from '../../hooks/useLang'
 import { fetchPhotoSpotByKey, type PhotoSpotDetail } from '../../lib/photoSpotsApi'
 
@@ -93,12 +94,13 @@ function SectionCard({
 }) {
   return (
     <section className="rounded-[18px] border border-teal-dark/10 bg-white p-4 shadow-[0_6px_16px_rgba(18,47,42,0.06)]">
-      <h2 className="font-display text-[17px] font-semibold text-teal-darker">
-        {titleEn}
-        <span className="mt-0.5 block font-thai text-[13px] font-medium text-ink-app/55">
-          {titleTh}
-        </span>
-      </h2>
+      <BiDisplayHeading
+        en={titleEn}
+        th={titleTh}
+        as="h2"
+        enClassName="text-[17px] font-semibold text-teal-darker"
+        thClassName="mt-0.5 text-[13px] font-medium text-ink-app/55"
+      />
       <div className="mt-3 space-y-3">{children}</div>
     </section>
   )
@@ -253,12 +255,13 @@ export default function SpotDetailPage() {
           </div>
           <div className="relative z-[1] -mt-8 px-4">
             <header className="rounded-[18px] border border-teal-dark/10 bg-white px-4 py-4 shadow-[0_8px_20px_rgba(18,47,42,0.08)]">
-              <h1 className="font-display text-[22px] font-semibold text-teal-darker">
-                {galleryFallback.titleEn}
-                <span className="mt-1 block font-thai text-[15px] font-medium text-ink-app/60">
-                  {galleryFallback.titleTh}
-                </span>
-              </h1>
+              <BiDisplayHeading
+                en={galleryFallback.titleEn}
+                th={galleryFallback.titleTh}
+                as="h1"
+                enClassName="text-[22px] font-semibold text-teal-darker"
+                thClassName="mt-1 text-[15px] font-medium text-ink-app/60"
+              />
               <p className="mt-3 text-[13px] leading-relaxed text-ink-app/70">{soonBi.en}</p>
               <p className="mt-1 font-thai text-[12px] text-ink-app/50">{soonBi.th}</p>
               {galleryFallback.tripCode ? (
@@ -351,17 +354,18 @@ export default function SpotDetailPage() {
         <header className="rounded-[18px] border border-teal-dark/10 bg-white px-4 py-4 shadow-[0_8px_20px_rgba(18,47,42,0.08)]">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h1 className="font-display text-[22px] font-semibold leading-tight text-teal-darker">
-                {spot.title_en}
-                <span className="mt-1 block font-thai text-[15px] font-medium text-ink-app/60">
-                  {spot.title_th}
-                </span>
-              </h1>
+              <BiDisplayHeading
+                en={spot.title_en}
+                th={spot.title_th}
+                as="h1"
+                enClassName="text-[22px] font-semibold leading-tight text-teal-darker"
+                thClassName="mt-1 text-[15px] font-medium text-ink-app/60"
+              />
               <p className="mt-2 flex items-start gap-1.5 text-[12px] text-teal-mid">
                 <MapPinIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
                 <span>
                   {spot.location_en}
-                  <span className="mt-0.5 block font-thai text-[11px] text-ink-app/45">
+                  <span className="mt-0.5 block font-serif text-[11px] text-ink-app/45">
                     {spot.location_th}
                   </span>
                 </span>

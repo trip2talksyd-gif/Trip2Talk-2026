@@ -606,8 +606,11 @@ const en: Map = {
   'home.hero.title.line2': 'worth remembering',
   'home.hero.en.line1': 'Capture Moments',
   'home.hero.en.line2': 'Worth Showing Off',
-  'home.hero.th.line1': 'ออกไปเก็บภาพ',
-  'home.hero.th.line2': 'ที่ทุกคนอยากดู',
+  // Unicode escapes keep Thai combining marks (็ ี ่) safe from editor/encoding mangling.
+  'home.hero.th.line1':
+    '\u0E2D\u0E2D\u0E01\u0E44\u0E1B\u0E40\u0E01\u0E47\u0E1A\u0E20\u0E32\u0E1E', // ออกไปเก็บภาพ
+  'home.hero.th.line2':
+    '\u0E17\u0E35\u0E48\u0E17\u0E38\u0E01\u0E04\u0E19\u0E2D\u0E22\u0E32\u0E01\u0E14\u0E39', // ที่ทุกคนอยากดู
   'home.hero.subtitle':
     'Photo trips across Australia & New Zealand — fully arranged, with a professional photographer guiding and driving you the whole way.',
   'home.promo.eyebrow': "Let's Learn and Practice",
@@ -1172,8 +1175,10 @@ const th: Map = {
   'home.hero.title.line2': 'ที่คุณจะไม่มีวันลืม',
   'home.hero.en.line1': 'Capture Moments',
   'home.hero.en.line2': 'Worth Showing Off',
-  'home.hero.th.line1': 'ออกไปเก็บภาพ',
-  'home.hero.th.line2': 'ที่ทุกคนอยากดู',
+  'home.hero.th.line1':
+    '\u0E2D\u0E2D\u0E01\u0E44\u0E1B\u0E40\u0E01\u0E47\u0E1A\u0E20\u0E32\u0E1E', // ออกไปเก็บภาพ
+  'home.hero.th.line2':
+    '\u0E17\u0E35\u0E48\u0E17\u0E38\u0E01\u0E04\u0E19\u0E2D\u0E22\u0E32\u0E01\u0E14\u0E39', // ที่ทุกคนอยากดู
   'home.hero.subtitle':
     'ทริปถ่ายภาพทั่วออสเตรเลียและนิวซีแลนด์ จองครบ จบทุกขั้นตอน มีช่างภาพมืออาชีพประสบการณ์กว่า 10 ปี เป็นทั้ง Trip Leader และคนขับพาคุณไปตลอดทริป',
   'home.promo.eyebrow': 'Learn and Practice',

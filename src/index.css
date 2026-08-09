@@ -154,9 +154,19 @@
     font-family: 'Noto Serif Thai', Inter, serif;
   }
 
-  /* Mockup --font-th */
+  /* Latin display (Fraunces) — no Thai fonts in the stack */
+  .font-display {
+    font-family: Fraunces, Georgia, 'Times New Roman', serif;
+  }
+
+  /* Mockup --font-th (body/UI Thai). Always wins over inherited Fraunces/Geist. */
   .font-thai {
-    font-family: var(--font-th);
+    font-family: Sarabun, Prompt, 'Noto Serif Thai', sans-serif !important;
+  }
+
+  /* Thai display headings — use on sibling nodes next to .font-display, not nested */
+  .font-serif {
+    font-family: 'Noto Serif Thai', Sarabun, serif !important;
   }
 }
 

@@ -32,10 +32,12 @@ export default function BiText({
 
   return (
     <Tag
-      className={`${serif && !primaryIsThai ? 'font-serif' : ''} ${primaryIsThai ? 'font-thai' : ''} ${className}`.trim()}
+      className={`${serif && !primaryIsThai ? 'font-serif' : ''} ${primaryIsThai ? (serif ? 'font-serif' : 'font-thai') : ''} ${className}`.trim()}
     >
       {primary}
-      <span className={`${secondaryBase} ${secondaryIsThai ? 'font-thai' : ''}`.trim()}>
+      <span
+        className={`${secondaryBase} ${secondaryIsThai ? (serif ? 'font-serif' : 'font-thai') : ''}`.trim()}
+      >
         {secondary}
       </span>
     </Tag>

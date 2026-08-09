@@ -52,12 +52,15 @@ module.exports = {
       fontFamily: {
         // body/UI — mockup body { font-family: Inter, Sarabun }
         sans: ['Inter', 'Sarabun', 'system-ui', 'sans-serif'],
-        // Thai sub-lines — Discover uses Sarabun; Prompt kept for legacy pages
+        // Discover / app-mode display headings — LATIN ONLY.
+        // Never put Thai fonts in this stack: Fraunces has no Thai glyphs, and
+        // per-character fallback mid-word breaks Thai vowel/tone shaping.
+        // Thai display lines must use `font-serif` (Noto Serif Thai) on a sibling node.
+        display: ['Fraunces', 'Georgia', 'Times New Roman', 'serif'],
+        // Thai display headings (sibling to font-display, never nested under it)
+        // Body Thai UI lines use `thai` (Sarabun).
+        serif: ['"Noto Serif Thai"', 'Sarabun', 'serif'],
         thai: ['Sarabun', 'Prompt', 'Noto Serif Thai', 'sans-serif'],
-        // Headings — mockup h1,h2,h3 { Noto Serif Thai, Inter, serif }
-        serif: ['"Noto Serif Thai"', 'Inter', 'serif'],
-        // Discover / app-mode display headings
-        display: ['Fraunces', '"Noto Serif Thai"', 'Georgia', 'serif'],
         hand: ['Caveat', 'cursive'],
         mono: ['Inter', 'ui-monospace', 'monospace'],
       },
