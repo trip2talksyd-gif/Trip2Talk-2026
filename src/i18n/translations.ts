@@ -476,6 +476,38 @@ export type TranslationKey =
   | 'footer.subscribe.button'
   | 'footer.subscribe.toast'
   | 'footer.copyright'
+  | 'nav.discover'
+  | 'nav.experience'
+  | 'nav.packages'
+  | 'nav.thePro'
+  | 'discover.hello'
+  | 'discover.helloNamed'
+  | 'discover.headline'
+  | 'discover.search'
+  | 'discover.filter'
+  | 'discover.chip.all'
+  | 'discover.chip.aurora'
+  | 'discover.chip.portrait'
+  | 'discover.chip.nature'
+  | 'discover.masterpiece'
+  | 'discover.nearby'
+  | 'discover.seeAll'
+  | 'discover.loadMore'
+  | 'discover.cta'
+  | 'discover.ctaLead'
+  | 'discover.ctaBold'
+  | 'discover.back'
+  | 'discover.favorite'
+  | 'discover.unfavorite'
+  | 'discover.openSpot'
+  | 'discover.emptyTitle'
+  | 'discover.emptyBody'
+  | 'discover.clearFilters'
+  | 'nav.appTabs'
+  | 'experience.badge'
+  | 'experience.title'
+  | 'experience.body'
+  | 'experience.back'
 
 type Map = Record<TranslationKey, string>
 
@@ -988,6 +1020,40 @@ const en: Map = {
   'footer.subscribe.button': 'Open Trip2Talk on Facebook',
   'footer.subscribe.toast': "Thanks! We'll be in touch.",
   'footer.copyright': '© 2025 Trip2Talk. All rights reserved.',
+  'nav.discover': 'Discover',
+  'nav.experience': 'Experience',
+  'nav.packages': 'Packages',
+  'nav.thePro': 'The Pro',
+  'nav.appTabs': 'App tabs',
+  'discover.hello': 'Hello, traveler',
+  'discover.helloNamed': 'Hello, {name}',
+  'discover.headline': 'Where to shoot next?',
+  'discover.search': 'Search a spot or style',
+  'discover.filter': 'Filter spots',
+  'discover.chip.all': 'All',
+  'discover.chip.aurora': 'Aurora',
+  'discover.chip.portrait': 'Portrait',
+  'discover.chip.nature': 'Nature',
+  'discover.masterpiece': 'Masterpiece',
+  'discover.nearby': 'Nearby spots',
+  'discover.seeAll': 'See all',
+  'discover.loadMore': 'Load more spots',
+  'discover.cta':
+    'Want this shot without driving yourself? Let our photographer take you there.',
+  'discover.ctaLead': 'Want this shot without driving yourself?',
+  'discover.ctaBold': 'Let our photographer take you there.',
+  'discover.back': 'Back',
+  'discover.favorite': 'Save favorite',
+  'discover.unfavorite': 'Remove favorite',
+  'discover.openSpot': 'Open in gallery',
+  'discover.emptyTitle': 'No spots match',
+  'discover.emptyBody': 'Try another chip or clear your search to see more places to shoot.',
+  'discover.clearFilters': 'Clear filters',
+  'experience.badge': 'Experience',
+  'experience.title': 'Stories from the road',
+  'experience.body':
+    "Coming next — trip reels, day-by-day highlights, and guest moments from Saen's shoots.",
+  'experience.back': 'Back to Discover',
 }
 
 const th: Map = {
@@ -1499,6 +1565,38 @@ const th: Map = {
   'footer.subscribe.button': 'เปิดเพจ Trip2Talk',
   'footer.subscribe.toast': 'ขอบคุณ! เราจะติดต่อกลับเร็วๆ นี้',
   'footer.copyright': '© 2025 Trip2Talk. สงวนลิขสิทธิ์.',
+  'nav.discover': 'Discover',
+  'nav.experience': 'Experience',
+  'nav.packages': 'แพ็กเกจ',
+  'nav.thePro': 'The Pro',
+  'nav.appTabs': 'แท็บแอป',
+  'discover.hello': 'สวัสดีนักเดินทาง',
+  'discover.helloNamed': 'สวัสดี {name}',
+  'discover.headline': 'จะไปถ่ายที่ไหนต่อดี?',
+  'discover.search': 'ค้นหามุมถ่ายหรือสไตล์',
+  'discover.filter': 'กรองมุมถ่าย',
+  'discover.chip.all': 'ทั้งหมด',
+  'discover.chip.aurora': 'ออโรร่า',
+  'discover.chip.portrait': 'พอร์ตเทรต',
+  'discover.chip.nature': 'ธรรมชาติ',
+  'discover.masterpiece': 'ผลงานเด่น',
+  'discover.nearby': 'มุมถ่ายใกล้เคียง',
+  'discover.seeAll': 'ดูทั้งหมด',
+  'discover.loadMore': 'โหลดมุมถ่ายเพิ่ม',
+  'discover.cta': 'อยากได้มุมนี้แต่ไม่อยากขับรถเอง? ให้ช่างภาพของเราพาไปสิ',
+  'discover.ctaLead': 'อยากได้มุมนี้แต่ไม่อยากขับรถเอง?',
+  'discover.ctaBold': 'ให้ช่างภาพของเราพาไปสิ',
+  'discover.back': 'กลับ',
+  'discover.favorite': 'บันทึกรายการโปรด',
+  'discover.unfavorite': 'ลบออกจากรายการโปรด',
+  'discover.openSpot': 'เปิดในแกลเลอรี',
+  'discover.emptyTitle': 'ไม่พบมุมถ่ายที่ตรงเงื่อนไข',
+  'discover.emptyBody': 'ลองเปลี่ยนหมวด หรือล้างการค้นหา เพื่อดูมุมถ่ายอื่น',
+  'discover.clearFilters': 'ล้างตัวกรอง',
+  'experience.badge': 'ประสบการณ์',
+  'experience.title': 'เรื่องราวจากทริปถ่ายภาพ',
+  'experience.body': 'เร็วๆ นี้ — รีลทริป ไฮไลท์รายวัน และโมเมนต์จากทริปจริง',
+  'experience.back': 'กลับ Discover',
 }
 
 export const translations: Record<Lang, Map> = { en, th }

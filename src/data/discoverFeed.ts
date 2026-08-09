@@ -115,3 +115,32 @@ export function filterDiscoverSpots(spots: DiscoverSpot[], chip: DiscoverChip): 
   if (chip === 'all') return spots
   return spots.filter((s) => s.chip === chip)
 }
+
+/** Nearby row first-paint page size (~12 cards after Masterpiece). */
+export const DISCOVER_NEARBY_PAGE_SIZE = 12
+
+/** Soft cap for total Discover cards considered on first paint (hero + nearby). */
+export const DISCOVER_INITIAL_FEED_CAP = 15
+
+export type DiscoverPageSlice = {
+  items: DiscoverSpot[]
+  hasMore: boolean
+  nextOffset: number
+}
+
+/** Slice a spot list for Nearby pagination / lazy-append. */
+export function sliceDiscoverSpots(
+  spots: DiscoverSpot[],
+  offset: number,
+  limit: number = DISCOVER_NEARBY_PAGE_SIZE,
+): DiscoverPageSlice {
+  const safeOffset = Math.max(0, offset)
+  const safeLimit = Math.max(1, limit)
+  const items = spots.slice(safeOffset, safeOffset + safeLimit)
+  const nextOffset = safeOffset + items.length
+  return {
+    items,
+    hasMore: nextOffset < spots.length,
+    nextOffset,
+  }
+}

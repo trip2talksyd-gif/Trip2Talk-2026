@@ -644,21 +644,26 @@ export function photoSrc(photo: GalleryPhoto): string {
 }
 
 /**
- * Supabase Storage image transform URL for feed thumbnails.
+ * Supabase Storage image transform URL for feed thumbnails (WebP by default).
  * Falls back to the original URL when the asset is not a Storage object URL
  * (e.g. legacy base64) or when transforms are unavailable.
+ *
+ * Sizing targets (Trip2Talk-Media-Upload-Guide):
+ * - Masterpiece / hero ≈ width 1200, quality ~70 (≤350KB)
+ * - Nearby / gallery cards ≈ width 640–800, quality ~65–70 (≤200KB)
  */
 export function photoThumbSrc(
   photo: GalleryPhoto,
-  opts: { width?: number; quality?: number } = {},
+  opts: { width?: number; quality?: number; format?: 'webp' | 'origin' } = {},
 ): string {
   const src = photoSrc(photo)
   const width = opts.width ?? 720
   const quality = opts.quality ?? 70
+  const format = opts.format ?? 'webp'
   const marker = '/storage/v1/object/public/'
   const idx = src.indexOf(marker)
   if (idx === -1) return src
   const origin = src.slice(0, idx)
   const path = src.slice(idx + marker.length)
-  return `${origin}/storage/v1/render/image/public/${path}?width=${width}&quality=${quality}&resize=contain`
+  return `${origin}/storage/v1/render/image/public/${path}?width=${width}&quality=${quality}&resize=contain&format=${format}`
 }

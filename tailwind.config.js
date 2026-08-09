@@ -47,6 +47,7 @@ module.exports = {
         'brand-green-light': '#f7f5f0',
         'brand-dark': '#1b2a2c',
         amber: '#e8935a',
+        'amber-bg': '#faf1dc',
       },
       fontFamily: {
         // body/UI — mockup body { font-family: Inter, Sarabun }
