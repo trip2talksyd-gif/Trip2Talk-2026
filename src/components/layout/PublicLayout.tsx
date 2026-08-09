@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useLang } from '../../hooks/useLang'
 import InstallPrompt from '../InstallPrompt'
 import PublicFooter from './PublicFooter'
-import BottomNav from './BottomNav'
+import AppTabBar from './AppTabBar'
 import OfflineBanner from './OfflineBanner'
 import BrandLogo from '../brand/BrandLogo'
 
@@ -175,7 +175,7 @@ export default function PublicLayout() {
             <PublicFooter />
           </div>
 
-          <BottomNav />
+          <AppTabBar />
         </>
       )}
 

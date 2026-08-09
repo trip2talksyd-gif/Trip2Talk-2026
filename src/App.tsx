@@ -9,6 +9,8 @@ import CalendarPage from './pages/public/CalendarPage'
 import GalleryPage from './pages/public/GalleryPage'
 import PricingPage from './pages/public/PricingPage'
 import AboutPage from './pages/public/AboutPage'
+import DiscoverPage from './pages/public/DiscoverPage'
+import ExperiencePage from './pages/public/ExperiencePage'
 import WaiverPage from './pages/public/WaiverPage'
 import BookingPage from './pages/public/BookingPage'
 import WaitlistPage from './pages/public/WaitlistPage'
@@ -57,6 +59,8 @@ export default function App() {
       <Routes>
         <Route element={<PublicLayout />}>
           <Route index element={<HomePage />} />
+          <Route path="discover" element={<DiscoverPage />} />
+          <Route path="experience" element={<ExperiencePage />} />
           <Route path="trips" element={<TripsPage />} />
           <Route path="trips/:tripCode" element={<TripDetailPage />} />
           <Route path="trips/:tripCode/prep" element={<TripPrepPage />} />

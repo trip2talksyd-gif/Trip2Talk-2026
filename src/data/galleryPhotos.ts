@@ -642,3 +642,23 @@ export function photoSrc(photo: GalleryPhoto): string {
   _photoSrcCache.set(photo.id, src)
   return src
 }
+
+/**
+ * Supabase Storage image transform URL for feed thumbnails.
+ * Falls back to the original URL when the asset is not a Storage object URL
+ * (e.g. legacy base64) or when transforms are unavailable.
+ */
+export function photoThumbSrc(
+  photo: GalleryPhoto,
+  opts: { width?: number; quality?: number } = {},
+): string {
+  const src = photoSrc(photo)
+  const width = opts.width ?? 720
+  const quality = opts.quality ?? 70
+  const marker = '/storage/v1/object/public/'
+  const idx = src.indexOf(marker)
+  if (idx === -1) return src
+  const origin = src.slice(0, idx)
+  const path = src.slice(idx + marker.length)
+  return `${origin}/storage/v1/render/image/public/${path}?width=${width}&quality=${quality}&resize=contain`
+}
