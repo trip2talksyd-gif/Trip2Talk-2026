@@ -7,11 +7,11 @@ import {
   useState,
 } from 'react'
 
-/** Hero reel — production Supabase `public-media` bucket. */
+/** Hero reel — production Supabase `public-media` bucket (~51MB; stream, don't preload all). */
 export const HERO_VIDEO_SRC =
   'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/public-media/VDO/Hero_cover01.mp4'
 
-/** Night-sky still used while the reel buffers / if autoplay is blocked. */
+/** Night-sky still while the reel buffers / if media truly fails. */
 export const HERO_POSTER_SRC = '/brand/pin-gate-bg.webp'
 
 const RATE_MIN = 0.25
@@ -20,7 +20,7 @@ const POINTER_RATE_LEFT = 0.3
 const POINTER_RATE_CENTER = 1
 const POINTER_RATE_RIGHT = 2.5
 /** How quickly the live rate catches the pointer target (0–1 per frame). */
-const LERP_FACTOR = 0.12
+const LERP_FACTOR = 0.14
 const LEAVE_EASE_MS = 600
 const WHOOSH_PEAK = 3
 const WHOOSH_UP_MS = 250
@@ -29,6 +29,11 @@ const WHOOSH_DOWN_MS = 400
 export type HeroVideoHandle = {
   /** Brief CTA “whoosh”: ramp to ~3x then ease back to 1x. */
   whoosh: () => void
+  /**
+   * Drive scrubbing from the hero section (video layer is pointer-events-none
+   * so it never blocks nav/CTAs). Pass `null` on leave / touch end.
+   */
+  setPointerX: (clientX: number | null) => void
 }
 
 type Props = {
@@ -39,10 +44,7 @@ function clampRate(n: number) {
   return Math.min(RATE_MAX, Math.max(RATE_MIN, n))
 }
 
-/**
- * Map horizontal pointer position in [0, 1] → playbackRate.
- * Left edge ≈ 0.3x, center ≈ 1x, right edge ≈ 2.5x (piecewise linear).
- */
+/** Left ≈ 0.3x · center ≈ 1x · right ≈ 2.5x */
 function rateFromNormX(x: number): number {
   const t = Math.min(1, Math.max(0, x))
   if (t <= 0.5) {
@@ -54,15 +56,18 @@ function rateFromNormX(x: number): number {
 }
 
 function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  } catch {
+    return false
+  }
 }
 
 /**
  * Full-bleed hero background video with interactive playbackRate “speed ramp”.
  *
- * Pointer X → target rate (lerp each rAF). Leaving the area eases back to 1x.
- * `whoosh()` runs a short scripted ramp for CTA clicks (debounced / cancelable).
- * Reduced-motion users get a static poster (or 1x play with no rate scrubbing).
+ * Important: this layer is `pointer-events-none` so it can never freeze the UI.
+ * Scrubbing is driven by the parent via `setPointerX`.
  */
 const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
   { className = '' },
@@ -70,16 +75,13 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
 ) {
   const containerRef = useRef<HTMLDivElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
-  const [inView, setInView] = useState(false)
-  const [showPoster, setShowPoster] = useState(true)
-  const [useStaticOnly, setUseStaticOnly] = useState(false)
+  const [playing, setPlaying] = useState(false)
+  const [mediaFailed, setMediaFailed] = useState(false)
 
-  /** Live playbackRate currently applied to the element. */
   const currentRate = useRef(1)
-  /** Pointer-driven target (or leave-ease / whoosh target). */
   const targetRate = useRef(1)
-  const pointerActive = useRef(false)
   const reducedMotion = useRef(false)
+  const interactive = useRef(true)
   const rafId = useRef(0)
   const leaveRaf = useRef(0)
   const whooshRaf = useRef(0)
@@ -91,9 +93,9 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
     const next = clampRate(rate)
     currentRate.current = next
     try {
-      v.playbackRate = next
+      if (Math.abs(v.playbackRate - next) > 0.01) v.playbackRate = next
     } catch {
-      /* some browsers reject extreme rates mid-load */
+      /* ignore */
     }
   }, [])
 
@@ -104,9 +106,8 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
     }
   }, [])
 
-  /** Continuous lerp loop: currentRate → targetRate until close enough. */
   const ensureLerpLoop = useCallback(() => {
-    if (reducedMotion.current || useStaticOnly) return
+    if (!interactive.current || reducedMotion.current) return
     if (rafId.current) return
 
     const tick = () => {
@@ -122,44 +123,21 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
       rafId.current = requestAnimationFrame(tick)
     }
     rafId.current = requestAnimationFrame(tick)
-  }, [applyRate, useStaticOnly])
+  }, [applyRate])
 
-  const setPointerTargetFromClientX = useCallback(
-    (clientX: number) => {
-      if (reducedMotion.current || useStaticOnly) return
-      const el = containerRef.current
-      if (!el) return
-      const rect = el.getBoundingClientRect()
-      if (rect.width <= 0) return
-      const norm = (clientX - rect.left) / rect.width
-      targetRate.current = rateFromNormX(norm)
-      pointerActive.current = true
-      stopRaf(leaveRaf)
-      stopRaf(whooshRaf)
-      whooshToken.current += 1
-      ensureLerpLoop()
-    },
-    [ensureLerpLoop, stopRaf, useStaticOnly],
-  )
-
-  /** Ease targetRate → 1x over ~LEAVE_EASE_MS when pointer leaves. */
   const easeBackToOne = useCallback(() => {
-    if (reducedMotion.current || useStaticOnly) return
-    pointerActive.current = false
+    if (!interactive.current || reducedMotion.current) return
     stopRaf(leaveRaf)
     stopRaf(whooshRaf)
     whooshToken.current += 1
 
-    const start = currentRate.current
-    const from = start
-    const to = 1
+    const from = currentRate.current
     const t0 = performance.now()
 
     const tick = (now: number) => {
       const t = Math.min(1, (now - t0) / LEAVE_EASE_MS)
-      // ease-out cubic
       const eased = 1 - (1 - t) ** 3
-      targetRate.current = from + (to - from) * eased
+      targetRate.current = from + (1 - from) * eased
       applyRate(targetRate.current)
       if (t < 1) {
         leaveRaf.current = requestAnimationFrame(tick)
@@ -170,19 +148,38 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
       }
     }
     leaveRaf.current = requestAnimationFrame(tick)
-  }, [applyRate, stopRaf, useStaticOnly])
+  }, [applyRate, stopRaf])
+
+  const setPointerX = useCallback(
+    (clientX: number | null) => {
+      if (!interactive.current || reducedMotion.current) return
+      if (clientX == null) {
+        easeBackToOne()
+        return
+      }
+      const el = containerRef.current
+      if (!el) return
+      const rect = el.getBoundingClientRect()
+      if (rect.width <= 0) return
+      const norm = (clientX - rect.left) / rect.width
+      targetRate.current = rateFromNormX(norm)
+      stopRaf(leaveRaf)
+      stopRaf(whooshRaf)
+      whooshToken.current += 1
+      ensureLerpLoop()
+    },
+    [easeBackToOne, ensureLerpLoop, stopRaf],
+  )
 
   const whoosh = useCallback(() => {
-    if (reducedMotion.current || useStaticOnly) return
+    if (!interactive.current || reducedMotion.current) return
     const v = videoRef.current
     if (!v || v.paused) return
 
-    // Cancel any in-flight whoosh / leave ease; start a fresh token.
     stopRaf(whooshRaf)
     stopRaf(leaveRaf)
     whooshToken.current += 1
     const token = whooshToken.current
-
     const startRate = currentRate.current
     const t0 = performance.now()
 
@@ -192,14 +189,12 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
       let rate: number
       if (elapsed < WHOOSH_UP_MS) {
         const t = elapsed / WHOOSH_UP_MS
-        const eased = t * t
-        rate = startRate + (WHOOSH_PEAK - startRate) * eased
+        rate = startRate + (WHOOSH_PEAK - startRate) * (t * t)
       } else if (elapsed < WHOOSH_UP_MS + WHOOSH_DOWN_MS) {
         const t = (elapsed - WHOOSH_UP_MS) / WHOOSH_DOWN_MS
         const eased = 1 - (1 - t) ** 3
         rate = WHOOSH_PEAK + (1 - WHOOSH_PEAK) * eased
       } else {
-        rate = 1
         targetRate.current = 1
         applyRate(1)
         whooshRaf.current = 0
@@ -210,152 +205,141 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
       whooshRaf.current = requestAnimationFrame(tick)
     }
     whooshRaf.current = requestAnimationFrame(tick)
-  }, [applyRate, stopRaf, useStaticOnly])
+  }, [applyRate, stopRaf])
 
-  useImperativeHandle(ref, () => ({ whoosh }), [whoosh])
-
-  // Lazy-init: only wire pointer listeners once the hero is in view.
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) setInView(true)
-      },
-      { threshold: 0.05 },
-    )
-    io.observe(el)
-    return () => io.disconnect()
-  }, [])
+  useImperativeHandle(ref, () => ({ whoosh, setPointerX }), [whoosh, setPointerX])
 
   useEffect(() => {
     reducedMotion.current = prefersReducedMotion()
+    interactive.current = !reducedMotion.current
     if (reducedMotion.current) {
-      setUseStaticOnly(true)
+      setMediaFailed(true)
       return
     }
 
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
     const onChange = () => {
       reducedMotion.current = mq.matches
+      interactive.current = !mq.matches
       if (mq.matches) {
-        setUseStaticOnly(true)
         stopRaf(rafId)
         stopRaf(leaveRaf)
         stopRaf(whooshRaf)
         applyRate(1)
+        videoRef.current?.pause()
+        setMediaFailed(true)
       }
     }
     mq.addEventListener('change', onChange)
     return () => mq.removeEventListener('change', onChange)
   }, [applyRate, stopRaf])
 
-  // Attempt autoplay when in view; fall back to poster if blocked / failed.
+  // Try autoplay once enough data is buffered — never permanently kill the
+  // video on a transient play() rejection (AbortError / NotAllowedError race).
   useEffect(() => {
-    if (!inView || useStaticOnly) return
+    if (mediaFailed || reducedMotion.current) return
     const v = videoRef.current
     if (!v) return
 
     let cancelled = false
+    let attempts = 0
+
     const tryPlay = async () => {
+      if (cancelled || !v) return
+      attempts += 1
       try {
+        v.defaultMuted = true
         v.muted = true
+        v.playsInline = true
         await v.play()
-        if (!cancelled) setShowPoster(false)
+        if (!cancelled) setPlaying(true)
       } catch {
-        if (!cancelled) {
-          setUseStaticOnly(true)
-          setShowPoster(true)
+        // Retry a few times as the file buffers; only then keep the poster
+        // visible while the element stays mounted for a later user gesture.
+        if (!cancelled && attempts < 6) {
+          window.setTimeout(() => {
+            void tryPlay()
+          }, 400 * attempts)
         }
       }
     }
+
+    const onCanPlay = () => {
+      void tryPlay()
+    }
+    const onPlaying = () => {
+      if (!cancelled) setPlaying(true)
+    }
+    const onError = () => {
+      if (!cancelled) {
+        setMediaFailed(true)
+        setPlaying(false)
+      }
+    }
+
+    v.addEventListener('canplay', onCanPlay)
+    v.addEventListener('playing', onPlaying)
+    v.addEventListener('error', onError)
+
+    // Kick off load immediately (don't wait for IntersectionObserver — home
+    // hero is always the first paint and IO + overflow parents were flaky).
+    v.load()
     void tryPlay()
 
     return () => {
       cancelled = true
-    }
-  }, [inView, useStaticOnly])
-
-  // Pointer / touch scrubbing — attached only while in viewport and interactive.
-  useEffect(() => {
-    if (!inView || useStaticOnly || reducedMotion.current) return
-    const el = containerRef.current
-    if (!el) return
-
-    const onMove = (e: MouseEvent) => setPointerTargetFromClientX(e.clientX)
-    const onLeave = () => easeBackToOne()
-    const onTouchMove = (e: TouchEvent) => {
-      const t = e.touches[0]
-      if (t) setPointerTargetFromClientX(t.clientX)
-    }
-    const onTouchEnd = () => easeBackToOne()
-
-    el.addEventListener('mousemove', onMove, { passive: true })
-    el.addEventListener('mouseleave', onLeave)
-    el.addEventListener('touchmove', onTouchMove, { passive: true })
-    el.addEventListener('touchend', onTouchEnd)
-    el.addEventListener('touchcancel', onTouchEnd)
-
-    return () => {
-      el.removeEventListener('mousemove', onMove)
-      el.removeEventListener('mouseleave', onLeave)
-      el.removeEventListener('touchmove', onTouchMove)
-      el.removeEventListener('touchend', onTouchEnd)
-      el.removeEventListener('touchcancel', onTouchEnd)
+      v.removeEventListener('canplay', onCanPlay)
+      v.removeEventListener('playing', onPlaying)
+      v.removeEventListener('error', onError)
       stopRaf(rafId)
       stopRaf(leaveRaf)
       stopRaf(whooshRaf)
-      applyRate(1)
+      try {
+        v.pause()
+      } catch {
+        /* ignore */
+      }
     }
-  }, [
-    applyRate,
-    easeBackToOne,
-    inView,
-    setPointerTargetFromClientX,
-    stopRaf,
-    useStaticOnly,
-  ])
+  }, [mediaFailed, stopRaf])
+
+  const showPoster = !playing || mediaFailed
 
   return (
     <div
       ref={containerRef}
-      className={`absolute inset-0 z-0 overflow-hidden ${className}`.trim()}
+      className={`pointer-events-none absolute inset-0 z-0 overflow-hidden ${className}`.trim()}
       aria-hidden
     >
-      {/* Poster always under the video so load / autoplay-fail never flashes empty. */}
       <img
         src={HERO_POSTER_SRC}
         alt=""
-        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
-          showPoster || useStaticOnly ? 'opacity-100' : 'opacity-0'
+        className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+          showPoster ? 'opacity-100' : 'opacity-0'
         }`}
         decoding="async"
+        fetchPriority="high"
       />
 
-      {!useStaticOnly && (
+      {!mediaFailed && (
         <video
           ref={videoRef}
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
-            showPoster ? 'opacity-0' : 'opacity-100'
+          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+            playing ? 'opacity-100' : 'opacity-0'
           }`}
-          src={inView ? HERO_VIDEO_SRC : undefined}
+          src={HERO_VIDEO_SRC}
           poster={HERO_POSTER_SRC}
           autoPlay
           muted
           loop
           playsInline
-          preload="auto"
-          onPlaying={() => setShowPoster(false)}
-          onError={() => {
-            setUseStaticOnly(true)
-            setShowPoster(true)
-          }}
+          // metadata only — full file is ~51MB; preload=auto was saturating the
+          // connection and made the hero look "frozen" on the poster.
+          preload="metadata"
         />
       )}
 
-      {/* Dark gradient so bottom-anchored copy stays legible over bright frames. */}
       <div
-        className="pointer-events-none absolute inset-0 z-[1]"
+        className="absolute inset-0 z-[1]"
         style={{
           background:
             'linear-gradient(180deg, rgba(15,26,29,.35) 0%, rgba(15,26,29,.08) 38%, rgba(15,26,29,.72) 72%, rgba(15,26,29,.92) 100%)',

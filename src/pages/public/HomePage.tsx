@@ -86,7 +86,17 @@ export default function HomePage() {
       : '"We\'re not a tour company — every trip is a photography package first, nature as your studio in the best light."'
 
   return (
-    <section className="home-nexum relative h-screen w-full overflow-hidden bg-[#0a1214] font-[Geist,-apple-system,BlinkMacSystemFont,sans-serif] antialiased">
+    <section
+      className="home-nexum relative h-screen w-full overflow-hidden bg-[#0a1214] font-[Geist,-apple-system,BlinkMacSystemFont,sans-serif] antialiased"
+      onMouseMove={(e) => heroVideoRef.current?.setPointerX(e.clientX)}
+      onMouseLeave={() => heroVideoRef.current?.setPointerX(null)}
+      onTouchMove={(e) => {
+        const t = e.touches[0]
+        if (t) heroVideoRef.current?.setPointerX(t.clientX)
+      }}
+      onTouchEnd={() => heroVideoRef.current?.setPointerX(null)}
+      onTouchCancel={() => heroVideoRef.current?.setPointerX(null)}
+    >
       <HeroVideo ref={heroVideoRef} />
 
       <div className="relative z-10 flex h-full flex-col">
