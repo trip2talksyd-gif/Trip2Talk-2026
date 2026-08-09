@@ -23,7 +23,7 @@ export default function HomePage() {
   const { lang, setLang, tt } = useLang()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
-  const [email, setEmail] = useState('')
+  const [query, setQuery] = useState('')
   const [heroVideoOk, setHeroVideoOk] = useState(true)
   const [destBlurbs, setDestBlurbs] = useState<{ en: string; th: string } | null>(null)
 
@@ -59,8 +59,8 @@ export default function HomePage() {
 
   const onCta = (e?: FormEvent) => {
     e?.preventDefault()
-    const q = email.trim()
-    navigate(q ? `/trips?email=${encodeURIComponent(q)}` : '/trips')
+    const q = query.trim()
+    navigate(q ? `/trips?q=${encodeURIComponent(q)}` : '/trips')
     setMenuOpen(false)
   }
 
@@ -285,12 +285,14 @@ export default function HomePage() {
               className="mt-6 flex w-full flex-col gap-3 sm:mt-8 sm:inline-flex sm:w-auto sm:flex-row sm:items-center sm:rounded-full sm:bg-white sm:p-1.5"
             >
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={lang === 'th' ? 'พิมพ์อีเมลของคุณ' : 'Type your email'}
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={
+                  lang === 'th' ? '...ค้นหามุมงามใน Aus or NZ' : '...find beautiful spots in Aus or NZ'
+                }
                 className="rounded-full bg-white px-5 py-3 text-sm text-gray-900 outline-none placeholder:text-gray-400 sm:w-64 sm:rounded-none sm:bg-transparent sm:px-4 sm:py-2"
-                autoComplete="email"
+                autoComplete="off"
               />
               <button
                 type="submit"
