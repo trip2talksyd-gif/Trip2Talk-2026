@@ -51,12 +51,13 @@ export default function TripsPage() {
   const { tt } = useLang()
   const [searchParams] = useSearchParams()
   const typeParam = searchParams.get('type')
+  const qParam = searchParams.get('q') ?? ''
   const initialFilter: Filter =
     typeParam && VALID_TYPES.includes(typeParam as TripType) ? (typeParam as TripType) : 'all'
 
   const [tours, setTours] = useState<Tour[]>([])
   const [filter, setFilter] = useState<Filter>(initialFilter)
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(qParam)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [openDest, setOpenDest] = useState<string | null>(null)
@@ -81,6 +82,10 @@ export default function TripsPage() {
       setFilter(typeParam as TripType)
     }
   }, [typeParam])
+
+  useEffect(() => {
+    if (qParam) setQuery(qParam)
+  }, [qParam])
 
   const searching = query.trim().length > 0
   const searchBi = tt('trips.search')
