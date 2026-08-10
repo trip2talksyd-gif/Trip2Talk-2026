@@ -162,8 +162,10 @@ export default function PublicLayout() {
       )}
 
       {isHome ? (
-        <div className="flex min-h-0 flex-1 flex-col items-stretch justify-start overflow-hidden">
-          <Outlet />
+        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="app-scroll min-h-0 flex-1" data-app-scroll>
+            <Outlet />
+          </div>
         </div>
       ) : (
         <>

@@ -22,26 +22,16 @@ import {
   staffTabIdleClass,
 } from '../../components/app/staffUi'
 
+import { currentAuTaxYearEnding } from '../../lib/auTaxYear'
+
 const NOW = new Date()
 const CURRENT_CALENDAR_YEAR = NOW.getFullYear()
-
-/**
- * AU tax year label year = calendar year of 30 Jun end.
- * Jul–Dec → ending next Jun (e.g. Aug 2026 → TY ending Jun 2027).
- * Jan–Jun → ending this Jun (e.g. Mar 2026 → TY ending Jun 2026).
- */
-export function currentAuTaxYearEnding(now: Date = new Date()): number {
-  const y = now.getFullYear()
-  const month = now.getMonth() + 1
-  return month >= 7 ? y + 1 : y
-}
 
 const DEFAULT_AU_TY_ENDING = currentAuTaxYearEnding(NOW)
 
 /**
  * Owner-only income from paid installments.
  * Group by calendar month, trip, or AU tax year (1 Jul–30 Jun).
- * Does not merge expenseDb / expenses — P&L combined view is a follow-up.
  */
 export default function InstallmentIncomePage() {
   const { tt } = useLang()
@@ -118,9 +108,9 @@ export default function InstallmentIncomePage() {
         subtitle={
           <>
             <span className="block font-thai text-sm font-medium">{title.th}</span>
-            Paid installments only · AU tax year = 1 Jul–30 Jun · expenses not included
+            Paid installments only · AU tax year = 1 Jul–30 Jun · profit = income − trip-linked expenses
             <span className="mt-0.5 block font-thai">
-              เฉพาะงวดที่จ่ายแล้ว · ปีภาษีออสฯ 1 ก.ค.–30 มิ.ย. · ไม่รวมรายจ่าย
+              เฉพาะงวดที่จ่ายแล้ว · ปีภาษีออสฯ 1 ก.ค.–30 มิ.ย. · กำไร = รายได้ − รายจ่ายที่ผูกทริป
             </span>
           </>
         }

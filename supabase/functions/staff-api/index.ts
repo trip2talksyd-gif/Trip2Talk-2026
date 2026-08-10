@@ -2011,10 +2011,19 @@ Deno.serve(async (req) => {
       }
 
       case 'year_summary': {
-        const { year } = params as { year: number }
+        // Default AU tax year: year = ending 30 Jun → range 1 Jul (year-1) .. 30 Jun year.
+        // mode: 'calendar' keeps Jan–Dec for legacy callers.
+        const { year, mode } = params as { year: number; mode?: 'calendar' | 'tax_year' }
         const y = Number(year) || new Date().getFullYear()
-        const start = `${y}-01-01T00:00:00.000Z`
-        const end = `${y + 1}-01-01T00:00:00.000Z`
+        const useTaxYear = mode !== 'calendar'
+        const start = useTaxYear
+          ? `${y - 1}-07-01T00:00:00.000Z`
+          : `${y}-01-01T00:00:00.000Z`
+        const end = useTaxYear
+          ? `${y}-07-01T00:00:00.000Z`
+          : `${y + 1}-01-01T00:00:00.000Z`
+        const expenseStart = start.slice(0, 10)
+        const expenseEnd = end.slice(0, 10)
 
         const [bookingsRes, expensesRes] = await Promise.all([
           admin
@@ -2025,13 +2034,19 @@ Deno.serve(async (req) => {
           admin
             .from('expenses')
             .select('*')
-            .gte('expense_date', `${y}-01-01`)
-            .lt('expense_date', `${y + 1}-01-01`),
+            .gte('expense_date', expenseStart)
+            .lt('expense_date', expenseEnd),
         ])
         if (bookingsRes.error) throw bookingsRes.error
         if (expensesRes.error) throw expensesRes.error
 
-        return json({ data: { bookings: bookingsRes.data, expenses: expensesRes.data } })
+        return json({
+          data: {
+            bookings: bookingsRes.data,
+            expenses: expensesRes.data,
+            range: { start, end, mode: useTaxYear ? 'tax_year' : 'calendar', year: y },
+          },
+        })
       }
 
       case 'list_draft_content_posts': {

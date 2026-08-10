@@ -1,4 +1,4 @@
--- Split photo delivery into highlight (3-day) and full album (30-day hard deadline).
+-- Split photo delivery into highlight (1–2 weeks) and full album (30-day hard deadline).
 -- Legacy photos_delivered remains: kept in sync when full album is marked (Phase H review cron).
 
 alter table public.tour_bookings
@@ -14,7 +14,7 @@ alter table public.tour_bookings
   add column if not exists full_photos_delivered_at timestamptz null;
 
 comment on column public.tour_bookings.highlight_photos_delivered is
-  'Highlight album delivered (business SLA: within 3 days of trip end).';
+  'Highlight album delivered (business SLA: within 1–2 weeks of trip end).';
 
 comment on column public.tour_bookings.full_photos_delivered is
   'Full album delivered (business SLA: within 14–30 days of trip end; 30 = hard deadline).';

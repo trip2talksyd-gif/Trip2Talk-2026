@@ -19,9 +19,10 @@ import {
   StaffSelect,
   staffShellClass,
 } from '../../components/app/staffUi'
+import { currentAuTaxYearEnding } from '../../lib/auTaxYear'
 
-const CURRENT_YEAR = new Date().getFullYear()
-const YEAR_OPTIONS = [CURRENT_YEAR, CURRENT_YEAR - 1, CURRENT_YEAR - 2]
+const DEFAULT_TY_ENDING = currentAuTaxYearEnding()
+const YEAR_OPTIONS = [DEFAULT_TY_ENDING, DEFAULT_TY_ENDING - 1, DEFAULT_TY_ENDING - 2]
 
 const SOURCE_LABEL: Record<string, string> = {
   facebook: 'Facebook',
@@ -34,7 +35,8 @@ const SOURCE_LABEL: Record<string, string> = {
 
 export default function TaxSummaryPage() {
   const navigate = useNavigate()
-  const [year, setYear] = useState(CURRENT_YEAR)
+  /** AU tax year ending 30 Jun of this calendar year (1 Jul prior → 30 Jun). */
+  const [taxYearEnding, setTaxYearEnding] = useState(DEFAULT_TY_ENDING)
   const [rows, setRows] = useState<TripFinancialRow[]>([])
   const [summary, setSummary] = useState<YearSummary | null>(null)
   const [loading, setLoading] = useState(true)
@@ -43,7 +45,7 @@ export default function TaxSummaryPage() {
   const load = useCallback(() => {
     setLoading(true)
     setError('')
-    fetchYearSummary(year)
+    fetchYearSummary(taxYearEnding, { mode: 'tax_year' })
       .then((summary) => {
         setSummary(summary)
         setRows(summarizeByTrip(summary))
@@ -57,7 +59,7 @@ export default function TaxSummaryPage() {
         setError('Could not load year summary')
       })
       .finally(() => setLoading(false))
-  }, [year, navigate])
+  }, [taxYearEnding, navigate])
 
   useEffect(() => {
     load()
@@ -101,7 +103,7 @@ export default function TaxSummaryPage() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `trip2talk-tax-summary-${year}.csv`
+    a.download = `trip2talk-tax-summary-ty-ending-${taxYearEnding}.csv`
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -112,19 +114,19 @@ export default function TaxSummaryPage() {
         backTo="/app/owner"
         backLabel="← Owner Dashboard"
         title="Tax Summary"
-        subtitle="รายรับ-รายจ่ายรายทริป สำหรับยื่นภาษีปลายปี"
+        subtitle="AU tax year 1 Jul–30 Jun · รายรับ-รายจ่ายรายทริปสำหรับยื่นภาษี"
       />
 
       <StaffMain className="space-y-6">
         <div className="flex items-center gap-2">
           <StaffSelect
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
+            value={taxYearEnding}
+            onChange={(e) => setTaxYearEnding(Number(e.target.value))}
             className="text-sm"
           >
             {YEAR_OPTIONS.map((y) => (
               <option key={y} value={y}>
-                {y}
+                TY ending Jun {y}
               </option>
             ))}
           </StaffSelect>
@@ -145,13 +147,22 @@ export default function TaxSummaryPage() {
             <StaffCard padding={false}>
               <div className="grid grid-cols-3 divide-x divide-white/8">
                 {[
-                  { label: 'Revenue', value: formatAud(totals.revenue) },
-                  { label: 'Expenses', value: formatAud(totals.expense) },
-                  { label: 'Net profit', value: formatAud(totals.profit) },
+                  {
+                    label: 'Total paid income',
+                    hint: 'Sum of amount_paid on bookings in this tax year',
+                    value: formatAud(totals.revenue),
+                  },
+                  { label: 'Expenses', hint: 'Trip-linked + general in period', value: formatAud(totals.expense) },
+                  {
+                    label: 'Net profit',
+                    hint: 'Must equal sum of Profit per trip below',
+                    value: formatAud(totals.profit),
+                  },
                 ].map((card) => (
                   <div key={card.label} className="p-4">
                     <p className="text-xs text-cream-muted">{card.label}</p>
                     <p className="mt-1 font-serif text-lg text-teal-500">{card.value}</p>
+                    <p className="mt-1 text-[10px] leading-snug text-cream-muted/80">{card.hint}</p>
                   </div>
                 ))}
               </div>
@@ -187,28 +198,39 @@ export default function TaxSummaryPage() {
             )}
 
             {rows.length === 0 ? (
-              <p className="text-sm text-cream-muted">ไม่มีข้อมูลปี {year}</p>
+              <p className="text-sm text-cream-muted">
+                ไม่มีข้อมูล TY ending Jun {taxYearEnding}
+              </p>
             ) : (
-              <ul className="space-y-1.5">
-                {rows.map((r) => (
-                  <li key={r.trip_code}>
-                    <StaffCard className="text-sm">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-cream">{r.trip_code}</span>
-                        <span
-                          className={`font-medium ${r.profit_aud >= 0 ? 'text-teal-500' : 'text-coral'}`}
-                        >
-                          {formatAud(r.profit_aud)}
-                        </span>
-                      </div>
-                      <p className="mt-0.5 text-xs text-cream-muted">
-                        {r.bookings_count} bookings · รายรับ {formatAud(r.revenue_aud)} · รายจ่าย{' '}
-                        {formatAud(r.expense_aud)}
-                      </p>
-                    </StaffCard>
-                  </li>
-                ))}
-              </ul>
+              <section>
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-cream-muted">
+                  Profit per trip
+                </h2>
+                <p className="mt-1 text-[10px] text-cream-muted">
+                  Same TY as Total paid income · sum revenue {formatAud(totals.revenue)} · sum
+                  profit {formatAud(totals.profit)}
+                </p>
+                <ul className="mt-2 space-y-1.5">
+                  {rows.map((r) => (
+                    <li key={r.trip_code}>
+                      <StaffCard className="text-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-cream">{r.trip_code}</span>
+                          <span
+                            className={`font-medium ${r.profit_aud >= 0 ? 'text-teal-500' : 'text-coral'}`}
+                          >
+                            {formatAud(r.profit_aud)}
+                          </span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-cream-muted">
+                          {r.bookings_count} bookings · รายรับ {formatAud(r.revenue_aud)} · รายจ่าย{' '}
+                          {formatAud(r.expense_aud)}
+                        </p>
+                      </StaffCard>
+                    </li>
+                  ))}
+                </ul>
+              </section>
             )}
           </>
         )}

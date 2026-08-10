@@ -1065,8 +1065,14 @@ export type YearSummary = {
   expenses: Expense[]
 }
 
-export async function fetchYearSummary(year: number): Promise<YearSummary> {
-  return callStaffApi<YearSummary>('year_summary', { year })
+export async function fetchYearSummary(
+  year: number,
+  opts?: { mode?: 'calendar' | 'tax_year' },
+): Promise<YearSummary> {
+  return callStaffApi<YearSummary>('year_summary', {
+    year,
+    mode: opts?.mode ?? 'tax_year',
+  })
 }
 
 /** Per-trip revenue / cost / profit rollup from a year's bookings + expenses. */

@@ -6,6 +6,7 @@ import { BRAND_BADGE_PNG_SRC, BRAND_BADGE_SRC, BRAND_NAME } from '../../data/bra
 import { fetchConfirmedTours } from '../../lib/toursApi'
 import { heroDestinationBlurbs, uniqueTourDestinations } from '../../lib/tourDisplay'
 import HeroVideo, { type HeroVideoHandle } from '../../components/home/HeroVideo'
+import HomePositioningSection from '../../components/trips/HomePositioningSection'
 
 const CTA_GRADIENT = 'linear-gradient(to bottom, #2B2B2B, #101010)'
 /** Thai display stack — inline so Geist on the hero section cannot steal shaping. */
@@ -90,6 +91,7 @@ export default function HomePage() {
       : '"We\'re not a tour company — every trip is a photography package first, nature as your studio in the best light."'
 
   return (
+    <>
     <section
       className="home-nexum relative grid h-[100dvh] max-h-[100dvh] w-full grid-cols-1 grid-rows-1 overflow-hidden bg-[#0a1214] font-[Geist,-apple-system,BlinkMacSystemFont,sans-serif] antialiased md:max-h-[min(100dvh,900px)] md:h-[min(100dvh,900px)]"
       onMouseMove={(e) => heroVideoRef.current?.setPointerX(e.clientX)}
@@ -391,5 +393,7 @@ export default function HomePage() {
         </div>
       </div>
     </section>
+    <HomePositioningSection />
+    </>
   )
 }
