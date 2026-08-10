@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import SpotRoutePreview from '../../components/spots/SpotRoutePreview'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import { getDiscoverSpots } from '../../data/discoverFeed'
 import { photoThumbSrc } from '../../data/galleryPhotos'
@@ -338,15 +339,40 @@ export default function SpotDetailPage() {
           </section>
         )}
 
-        {spot.access_private_car ? (
+        {spot.access_private_car || (spot.latitude != null && spot.longitude != null) ? (
           <section className="rounded-2xl border border-line bg-white p-4">
             <p className="text-[11px] font-bold uppercase tracking-wide text-teal-darker">Access</p>
-            <p className="mt-2 text-[12px] leading-relaxed text-ink-app/70">{spot.access_private_car}</p>
+            {spot.access_private_car ? (
+              <p className="mt-2 text-[12px] leading-relaxed text-ink-app/70">{spot.access_private_car}</p>
+            ) : null}
             {spot.access_public_transport ? (
               <p className="mt-2 text-[12px] leading-relaxed text-ink-app/70">
                 <b className="text-teal-dark">Transit — </b>
                 {spot.access_public_transport}
               </p>
+            ) : null}
+            {spot.latitude != null && spot.longitude != null ? (
+              <div className="mt-3">
+                <SpotRoutePreview
+                  latitude={spot.latitude}
+                  longitude={spot.longitude}
+                  title={spot.title_en}
+                  locationEn={spot.location_en}
+                  driveTimeFromSydney={spot.drive_time_from_sydney}
+                />
+                {mapsHref ? (
+                  <p className="mt-2 text-[11px] leading-relaxed text-ink-app/45">
+                    Preview only — tap{' '}
+                    <span className="font-bold text-teal-dark">{navigateBi.en}</span> below for
+                    turn-by-turn in Maps.
+                    <span className="mt-0.5 block font-thai">
+                      แผนที่ตัวอย่าง — กด{' '}
+                      <span className="font-bold text-teal-dark">{navigateBi.th}</span>{' '}
+                      ด้านล่างเพื่อนำทางจริง
+                    </span>
+                  </p>
+                ) : null}
+              </div>
             ) : null}
           </section>
         ) : null}
