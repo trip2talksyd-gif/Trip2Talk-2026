@@ -10,6 +10,7 @@ import BrandLogo from '../brand/BrandLogo'
 
 const menuLinks = [
   { to: '/trips', key: 'nav.trips' as const },
+  { to: '/spots', key: 'nav.spots' as const },
   { to: '/favorites', key: 'nav.favorites' as const },
   { to: '/my-trip', key: 'nav.myTrip' as const },
   { to: '/account', key: 'nav.account' as const },
@@ -22,8 +23,8 @@ const menuLinks = [
   { to: '/app', key: 'nav.portal' as const },
 ]
 
-// Desktop top bar — mockup order + Photo Guide hub (Guides), no Account (icon-only).
-const desktopNavOrder = ['/trips', '/gallery', '/photo-guide', '/calendar', '/pricing', '/about']
+// Desktop top bar — mockup order + Photo Spots + Photo Guide hub.
+const desktopNavOrder = ['/trips', '/spots', '/gallery', '/photo-guide', '/calendar', '/pricing', '/about']
 
 export default function PublicLayout() {
   const { t, setLang, lang } = useLang()

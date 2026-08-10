@@ -14,6 +14,7 @@ export type TranslationKey =
   | 'nav.myTrip'
   | 'nav.account'
   | 'nav.photoGuide'
+  | 'nav.spots'
   | 'nav.help'
   | 'btn.bookNow'
   | 'btn.exploreTrips'
@@ -524,6 +525,17 @@ export type TranslationKey =
   | 'spot.droneAllowed'
   | 'spot.droneRestricted'
   | 'spot.droneProhibited'
+  | 'spots.title'
+  | 'spots.subtitle'
+  | 'spots.viewMap'
+  | 'spots.viewList'
+  | 'spots.sortNearest'
+  | 'spots.sortPopular'
+  | 'spots.sortNewest'
+  | 'spots.navigate'
+  | 'spots.tripCta'
+  | 'spots.tips'
+  | 'spots.cameraSettings'
   | 'nav.appTabs'
   | 'experience.badge'
   | 'experience.title'
@@ -546,6 +558,7 @@ const en: Map = {
   'nav.myTrip': 'My Trip',
   'nav.account': 'Account',
   'nav.photoGuide': 'Photo Guide',
+  'nav.spots': 'Photo Spots',
   'nav.help': 'Help',
   'btn.bookNow': 'Book Now',
   'btn.exploreTrips': 'Explore Trips',
@@ -1094,6 +1107,17 @@ const en: Map = {
   'spot.droneAllowed': 'Drone allowed',
   'spot.droneRestricted': 'Drone restricted',
   'spot.droneProhibited': 'Drone prohibited — legal ban',
+  'spots.title': 'Photo Spots',
+  'spots.subtitle': '{n} curated photography locations',
+  'spots.viewMap': 'Map',
+  'spots.viewList': 'List',
+  'spots.sortNearest': 'Nearest (Sydney)',
+  'spots.sortPopular': 'Popular',
+  'spots.sortNewest': 'Newest',
+  'spots.navigate': 'Navigate',
+  'spots.tripCta': 'Go here with Trip2Talk',
+  'spots.tips': 'Tips',
+  'spots.cameraSettings': 'Camera settings',
   'experience.badge': 'Experience',
   'experience.title': 'Stories from the road',
   'experience.body':
@@ -1115,6 +1139,7 @@ const th: Map = {
   'nav.myTrip': 'ทริปของฉัน',
   'nav.account': 'บัญชี',
   'nav.photoGuide': 'คู่มือถ่ายภาพ',
+  'nav.spots': 'พิกัดถ่ายภาพ',
   'nav.help': 'ช่วยเหลือ',
   'btn.bookNow': 'จองเลย',
   'btn.exploreTrips': 'ดูทริปทั้งหมด',
@@ -1661,6 +1686,17 @@ const th: Map = {
   'spot.droneAllowed': 'บินโดรนได้',
   'spot.droneRestricted': 'บินโดรนแบบจำกัด',
   'spot.droneProhibited': 'ห้ามโดรน — ผิดกฎหมาย',
+  'spots.title': 'พิกัดถ่ายภาพ',
+  'spots.subtitle': '{n} จุดถ่ายภาพคัดสรร',
+  'spots.viewMap': 'แผนที่',
+  'spots.viewList': 'รายการ',
+  'spots.sortNearest': 'ใกล้ซิดนีย์',
+  'spots.sortPopular': 'ยอดนิยม',
+  'spots.sortNewest': 'ใหม่ล่าสุด',
+  'spots.navigate': 'นำทาง',
+  'spots.tripCta': 'ไปกับ Trip2Talk',
+  'spots.tips': 'เคล็ดลับ',
+  'spots.cameraSettings': 'ค่ากล้อง',
   'experience.badge': 'ประสบการณ์',
   'experience.title': 'เรื่องราวจากทริปถ่ายภาพ',
   'experience.body': 'เร็วๆ นี้ — รีลทริป ไฮไลท์รายวัน และโมเมนต์จากทริปจริง',

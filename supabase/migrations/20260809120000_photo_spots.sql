@@ -1,5 +1,6 @@
--- Photo Spot Library (Phase 2) — owner-editable spot detail for Discover.
--- Repo migration only until Saen confirms — do NOT apply to production yet.
+-- Photo Spot Library — base table (Phase 2 Discover / Phase 1 Spots).
+-- Prefer applying 20260810120000_photo_spots_phase1.sql which creates + seeds Phase 1 fields.
+-- This file remains for migration history if run in order.
 
 create table if not exists public.photo_spots (
   id uuid primary key default gen_random_uuid(),

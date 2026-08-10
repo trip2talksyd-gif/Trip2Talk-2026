@@ -382,7 +382,7 @@ function NearbyCard({
           </span>
           <CircleBtn
             label={`${openBi.en}: ${spot.titleEn}`}
-            to={`/discover/spot/${librarySlugForGalleryPhotoId(spot.id) ?? spot.id}`}
+            to={`/spots/${librarySlugForGalleryPhotoId(spot.id) ?? spot.id}`}
             className="h-5 w-5 bg-teal-dark text-orange-soft"
           >
             <ChevronRightIcon className="h-2.5 w-2.5" />
