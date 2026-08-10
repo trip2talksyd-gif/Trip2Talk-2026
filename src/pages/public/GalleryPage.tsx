@@ -10,6 +10,7 @@ import {
 } from '../../data/galleryPhotos'
 import { getGalleryAlbums } from '../../data/galleryAlbums'
 import GalleryAlbumCarousel from '../../components/gallery/GalleryAlbumCarousel'
+import GalleryAuthenticityNote from '../../components/gallery/GalleryAuthenticityNote'
 import GalleryLightbox from '../../components/gallery/GalleryLightbox'
 import BiText from '../../components/ui/BiText'
 
@@ -108,6 +109,8 @@ export default function GalleryPage() {
                 </span>
               )}
             </p>
+
+            <GalleryAuthenticityNote className="mb-3" />
 
             {items.length === 0 ? (
               <div className="rounded-xl bg-mint-100 px-4 py-8 text-center text-sm text-ink-soft">

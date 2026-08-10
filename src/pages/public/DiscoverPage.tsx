@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { GALLERY_PHOTOS, photoThumbSrc, type GalleryPhoto } from '../../data/galleryPhotos'
 import { TEAM_MEMBERS } from '../../data/teamMembers'
 import TeamAvatar from '../../components/about/TeamAvatar'
+import GalleryAuthenticityNote from '../../components/gallery/GalleryAuthenticityNote'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import { useLang } from '../../hooks/useLang'
 import type { TranslationKey } from '../../i18n/translations'
@@ -656,6 +657,7 @@ export default function DiscoverPage() {
                     seeAllEn={seeAllBi.en}
                     seeAllTh={seeAllBi.th}
                   />
+                  <GalleryAuthenticityNote className="mb-3" />
                   <LatestWorkGrid photos={latestPhotos} />
                 </section>
               ) : null}

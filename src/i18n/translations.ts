@@ -290,6 +290,7 @@ export type TranslationKey =
   | 'gallery.emptyCategory'
   | 'gallery.exampleAlbum'
   | 'gallery.inspiration'
+  | 'gallery.authenticity'
   | 'photoGuide.back'
   | 'photoGuide.hub.badge'
   | 'photoGuide.hub.title'
@@ -856,6 +857,8 @@ const en: Map = {
   'gallery.emptyCategory': 'No photos in this category',
   'gallery.exampleAlbum': 'Example album from Saen & team',
   'gallery.inspiration': 'Inspiration',
+  'gallery.authenticity':
+    'Every photo here is real — shot by our own photographers on real Trip2Talk trips. No stock images.',
   'photoGuide.back': 'Back to Photo Guide',
   'photoGuide.hub.badge': "Let's Learn and Practice",
   'photoGuide.hub.title': 'Photo Guide',
@@ -1439,6 +1442,8 @@ const th: Map = {
   'gallery.emptyCategory': 'ไม่มีรูปในหมวดนี้',
   'gallery.exampleAlbum': 'อัลบั้มตัวอย่างจากพี่แสนและทีม',
   'gallery.inspiration': 'แรงบันดาลใจ',
+  'gallery.authenticity':
+    'ทุกภาพในหน้านี้คือภาพจริง ถ่ายโดยช่างภาพของ Trip2Talk เองในทริปจริง ไม่ใช่ภาพสต็อก',
   'photoGuide.back': 'กลับไปหน้าคลังเคล็ดลับ',
   'photoGuide.hub.badge': 'มาเรียนรู้และฝึกฝนไปด้วยกัน',
   'photoGuide.hub.title': 'คลังเคล็ดลับถ่ายภาพ',

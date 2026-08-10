@@ -17,7 +17,6 @@ const navLinks: { to: string; key: TranslationKey }[] = [
   { to: '/trips', key: 'nav.trips' },
   { to: '/discover', key: 'nav.discover' },
   { to: '/spots', key: 'nav.spots' },
-  { to: '/gallery', key: 'nav.gallery' },
   { to: '/calendar', key: 'nav.calendar' },
   { to: '/pricing', key: 'nav.pricing' },
   { to: '/about', key: 'nav.about' },

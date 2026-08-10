@@ -16,7 +16,6 @@ const menuLinks = [
   { to: '/my-trip', key: 'nav.myTrip' as const },
   { to: '/account', key: 'nav.account' as const },
   { to: '/photo-guide', key: 'nav.photoGuide' as const },
-  { to: '/gallery', key: 'nav.gallery' as const },
   { to: '/calendar', key: 'nav.calendar' as const },
   { to: '/pricing', key: 'nav.pricing' as const },
   { to: '/help', key: 'nav.help' as const },
@@ -24,12 +23,11 @@ const menuLinks = [
   { to: '/app', key: 'nav.portal' as const },
 ]
 
-// Desktop top bar — Discover feed + Spots + Photo Guide.
+// Desktop top bar — Discover replaces Gallery as the photo feed entry.
 const desktopNavOrder = [
   '/trips',
   '/discover',
   '/spots',
-  '/gallery',
   '/photo-guide',
   '/calendar',
   '/pricing',
