@@ -52,6 +52,8 @@ export type PhotoSpotRow = {
   photo_id: string | null
   hero_image_url: string | null
   thumbnail_url: string | null
+  /** Up to 4 extra public image URLs (hero is separate). */
+  gallery_image_urls: string[]
   rating: number
   sort_order: number
   is_featured: boolean
@@ -60,8 +62,8 @@ export type PhotoSpotRow = {
   updated_at?: string
 }
 
-export const PHOTO_SPOT_CATEGORIES = [
-  'All',
+/** Categories staff can assign (excludes list filter "All"). */
+export const PHOTO_SPOT_EDIT_CATEGORIES = [
   'Landscape',
   'Portrait',
   'Aurora',
@@ -72,6 +74,11 @@ export const PHOTO_SPOT_CATEGORIES = [
   'Milky Way',
   'Nature',
 ] as const
+
+export const PHOTO_SPOT_CATEGORIES = ['All', ...PHOTO_SPOT_EDIT_CATEGORIES] as const
+
+export const PHOTO_SPOT_MAX_GALLERY = 4
+export const PHOTO_SPOT_MAX_IMAGES = 5 // 1 hero + 4 gallery
 
 export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
   {
@@ -130,6 +137,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     photo_id: 'ber-001',
     hero_image_url: null,
     thumbnail_url: null,
+    gallery_image_urls: [],
     rating: 4.9,
     sort_order: 10,
     is_featured: true,
@@ -191,6 +199,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     photo_id: 'syd-015',
     hero_image_url: null,
     thumbnail_url: null,
+    gallery_image_urls: [],
     rating: 4.7,
     sort_order: 20,
     is_featured: true,
@@ -254,6 +263,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     photo_id: 'tas-002',
     hero_image_url: null,
     thumbnail_url: null,
+    gallery_image_urls: [],
     rating: 4.9,
     sort_order: 30,
     is_featured: false,
@@ -311,6 +321,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     photo_id: 'tas-107',
     hero_image_url: null,
     thumbnail_url: null,
+    gallery_image_urls: [],
     rating: 4.8,
     sort_order: 40,
     is_featured: false,
@@ -373,6 +384,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     photo_id: 'nz-001',
     hero_image_url: null,
     thumbnail_url: null,
+    gallery_image_urls: [],
     rating: 4.9,
     sort_order: 50,
     is_featured: true,
@@ -433,6 +445,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     photo_id: 'nz-013',
     hero_image_url: null,
     thumbnail_url: null,
+    gallery_image_urls: [],
     rating: 4.9,
     sort_order: 60,
     is_featured: true,
@@ -493,6 +506,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     photo_id: 'nz-014',
     hero_image_url: null,
     thumbnail_url: null,
+    gallery_image_urls: [],
     rating: 4.8,
     sort_order: 70,
     is_featured: false,
@@ -553,6 +567,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     photo_id: 'nz-015',
     hero_image_url: null,
     thumbnail_url: null,
+    gallery_image_urls: [],
     rating: 4.8,
     sort_order: 80,
     is_featured: true,

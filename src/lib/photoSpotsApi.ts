@@ -1,5 +1,7 @@
 import {
   PHOTO_SPOTS_DRAFT,
+  PHOTO_SPOT_MAX_GALLERY,
+  PHOTO_SPOT_MAX_IMAGES,
   findDraftPhotoSpot,
   tripCtaHref,
   type CameraModeSettings,
@@ -9,6 +11,7 @@ import {
 } from '../data/photoSpotsDraft'
 import { GALLERY_PHOTOS, photoSrc, photoThumbSrc, type GalleryPhoto } from '../data/galleryPhotos'
 import { supabase } from './supabase'
+import { callStaffApi } from './supabaseStaff'
 
 export type { CameraModeSettings, CameraSettings, DroneAllowed, PhotoSpotRow }
 export { tripCtaHref }
@@ -50,6 +53,16 @@ function numOrNull(value: unknown): number | null {
 
 function boolOrFalse(value: unknown): boolean {
   return value === true || value === 'true' || value === 1
+}
+
+function parseUrlList(value: unknown): string[] {
+  if (!Array.isArray(value)) return []
+  const out: string[] = []
+  for (const item of value) {
+    const s = strOrNull(item)
+    if (s) out.push(s)
+  }
+  return out.slice(0, 4)
 }
 
 function parseDroneAllowed(value: unknown): DroneAllowed {
@@ -139,6 +152,7 @@ function parseRow(raw: Record<string, unknown>): PhotoSpotRow | null {
     photo_id: strOrNull(raw.photo_id),
     hero_image_url: strOrNull(raw.hero_image_url),
     thumbnail_url: strOrNull(raw.thumbnail_url),
+    gallery_image_urls: parseUrlList(raw.gallery_image_urls),
     rating: ratingRaw ?? 4.8,
     sort_order: numOrNull(raw.sort_order) ?? 0,
     is_featured: boolOrFalse(raw.is_featured),
@@ -314,4 +328,145 @@ export function badgeForSpot(spot: PhotoSpotDetail): string {
   if (spot.categories.includes('Sunset')) return 'Sunset'
   if (spot.categories.includes('Coastal')) return 'Coastal'
   return spot.categories[0] ?? 'Photo Spot'
+}
+
+// ── Staff admin (via staff-api service role) ───────────────────────────────
+
+export type PhotoSpotAdminPayload = {
+  id?: string
+  slug?: string
+  title_en: string
+  title_th: string
+  location_en: string
+  location_th: string
+  description_en?: string | null
+  description_th?: string | null
+  categories: string[]
+  latitude: number
+  longitude: number
+  best_time?: string | null
+  best_season?: string | null
+  drive_time_from_sydney?: string | null
+  best_time_morning?: string | null
+  best_time_evening?: string | null
+  best_time_night?: string | null
+  access_private_car?: string
+  access_public_transport?: string | null
+  gear_landscape?: string | null
+  gear_portrait?: string | null
+  camera_settings?: CameraSettings
+  tips_en?: string | null
+  tips_th?: string | null
+  warnings_en?: string | null
+  warnings_th?: string | null
+  drone_allowed?: DroneAllowed
+  drone_notes?: string | null
+  related_trip_code?: string | null
+  hero_image_url?: string | null
+  thumbnail_url?: string | null
+  gallery_image_urls?: string[]
+  is_featured?: boolean
+  sort_order?: number
+  review_notes?: string | null
+}
+
+export async function listPhotoSpotsAdmin(): Promise<PhotoSpotRow[]> {
+  const data = await callStaffApi<Record<string, unknown>[]>('list_photo_spots_admin')
+  return (data ?? [])
+    .map((raw) => parseRow(raw))
+    .filter((r): r is PhotoSpotRow => r != null)
+}
+
+export async function upsertPhotoSpot(payload: PhotoSpotAdminPayload): Promise<PhotoSpotRow> {
+  if (!payload.title_en?.trim() || !payload.title_th?.trim()) {
+    throw new Error('Name (EN + TH) is required')
+  }
+  if (!payload.categories?.length) {
+    throw new Error('At least one category is required')
+  }
+  if (
+    payload.latitude == null ||
+    payload.longitude == null ||
+    !Number.isFinite(payload.latitude) ||
+    !Number.isFinite(payload.longitude)
+  ) {
+    throw new Error('Coordinates are required')
+  }
+  const gallery = (payload.gallery_image_urls ?? []).filter(Boolean).slice(0, PHOTO_SPOT_MAX_GALLERY)
+  const hero = payload.hero_image_url?.trim() || null
+  const total = (hero ? 1 : 0) + gallery.length
+  if (total > PHOTO_SPOT_MAX_IMAGES) {
+    throw new Error(`Maximum ${PHOTO_SPOT_MAX_IMAGES} images (1 hero + ${PHOTO_SPOT_MAX_GALLERY} gallery)`)
+  }
+
+  const data = await callStaffApi<Record<string, unknown>>('upsert_photo_spot', {
+    ...payload,
+    gallery_image_urls: gallery,
+    hero_image_url: hero,
+    thumbnail_url: payload.thumbnail_url?.trim() || hero,
+  })
+  const row = parseRow(data)
+  if (!row) throw new Error('Invalid photo spot response')
+  return row
+}
+
+export async function deletePhotoSpot(id: string): Promise<void> {
+  await callStaffApi('delete_photo_spot', { id })
+}
+
+const PHOTO_SPOT_UPLOAD_MAX_BYTES = 5 * 1024 * 1024
+const PHOTO_SPOT_SOURCE_MAX_BYTES = 15 * 1024 * 1024
+
+/** Compress to JPEG ≤ ~1920px wide, quality 0.82. Rejects oversized source files. */
+export async function compressPhotoSpotImage(file: File): Promise<Blob> {
+  if (!file.type.startsWith('image/')) {
+    throw new Error('File must be an image')
+  }
+  if (file.size > PHOTO_SPOT_SOURCE_MAX_BYTES) {
+    throw new Error('Image must be under 15 MB before compression')
+  }
+
+  const bitmap = await createImageBitmap(file)
+  const maxW = 1920
+  const scale = bitmap.width > maxW ? maxW / bitmap.width : 1
+  const w = Math.max(1, Math.round(bitmap.width * scale))
+  const h = Math.max(1, Math.round(bitmap.height * scale))
+  const canvas = document.createElement('canvas')
+  canvas.width = w
+  canvas.height = h
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    bitmap.close()
+    throw new Error('Could not compress image')
+  }
+  ctx.drawImage(bitmap, 0, 0, w, h)
+  bitmap.close()
+
+  const blob: Blob | null = await new Promise((resolve) =>
+    canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.82),
+  )
+  if (!blob) throw new Error('Could not compress image')
+  if (blob.size > PHOTO_SPOT_UPLOAD_MAX_BYTES) {
+    throw new Error('Compressed image still exceeds 5 MB — try a smaller photo')
+  }
+  return blob
+}
+
+/** Upload to public photo-spots/{uuid}/… and return the public URL. */
+export async function uploadPhotoSpotImage(file: File): Promise<string> {
+  const compressed = await compressPhotoSpotImage(file)
+  const uuid = crypto.randomUUID()
+  const path = `${uuid}/${Date.now()}.jpg`
+
+  const { error } = await supabase.storage.from('photo-spots').upload(path, compressed, {
+    upsert: false,
+    contentType: 'image/jpeg',
+  })
+  if (error) {
+    logSupabaseError('uploadPhotoSpotImage', error)
+    throw error
+  }
+
+  const { data } = supabase.storage.from('photo-spots').getPublicUrl(path)
+  return data.publicUrl
 }

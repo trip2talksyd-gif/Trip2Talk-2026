@@ -225,6 +225,20 @@ export default function SpotDetailPage() {
           ) : null}
         </header>
 
+        {spot.gallery_image_urls?.length ? (
+          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+            {spot.gallery_image_urls.map((url) => (
+              <img
+                key={url}
+                src={url}
+                alt=""
+                className="h-24 w-36 shrink-0 rounded-lg object-cover"
+                loading="lazy"
+              />
+            ))}
+          </div>
+        ) : null}
+
         <div className="flex flex-wrap gap-2">
           {spot.best_time ? (
             <span className="rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-semibold text-ink-app/60">

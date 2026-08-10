@@ -347,6 +347,9 @@ const ACTION_ROLES: Record<string, Role[]> = {
   mark_content_post_posted: ['OWNER'],
   insert_content_post: ['OWNER'],
   probe_facebook_page_creds: ['OWNER'],
+  list_photo_spots_admin: ['OWNER', 'MANAGER'],
+  upsert_photo_spot: ['OWNER', 'MANAGER'],
+  delete_photo_spot: ['OWNER', 'MANAGER'],
 }
 
 /**
@@ -2406,6 +2409,198 @@ Deno.serve(async (req) => {
               : null,
           },
         })
+      }
+
+      case 'list_photo_spots_admin': {
+        const { data, error } = await admin
+          .from('photo_spots')
+          .select('*')
+          .order('sort_order', { ascending: true })
+          .order('title_en', { ascending: true })
+        if (error) throw error
+        return json({ data: data ?? [] })
+      }
+
+      case 'upsert_photo_spot': {
+        const spot = params as Record<string, unknown>
+        const titleEn = typeof spot.title_en === 'string' ? spot.title_en.trim() : ''
+        const titleTh = typeof spot.title_th === 'string' ? spot.title_th.trim() : ''
+        const locationEn =
+          typeof spot.location_en === 'string' ? spot.location_en.trim() : ''
+        const locationTh =
+          typeof spot.location_th === 'string' ? spot.location_th.trim() : ''
+        const categories = Array.isArray(spot.categories)
+          ? spot.categories.map((c) => String(c).trim()).filter(Boolean)
+          : []
+        const lat =
+          spot.latitude == null || spot.latitude === ''
+            ? null
+            : Number(spot.latitude)
+        const lng =
+          spot.longitude == null || spot.longitude === ''
+            ? null
+            : Number(spot.longitude)
+
+        if (!titleEn || !titleTh) return json({ error: 'name_required' }, 400)
+        if (!locationEn || !locationTh) return json({ error: 'location_required' }, 400)
+        if (categories.length < 1) return json({ error: 'category_required' }, 400)
+        if (lat == null || lng == null || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+          return json({ error: 'coordinates_required' }, 400)
+        }
+        if (lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+          return json({ error: 'coordinates_invalid' }, 400)
+        }
+
+        const gallery = Array.isArray(spot.gallery_image_urls)
+          ? spot.gallery_image_urls
+              .map((u) => String(u).trim())
+              .filter(Boolean)
+              .slice(0, 4)
+          : []
+        const hero =
+          typeof spot.hero_image_url === 'string' && spot.hero_image_url.trim()
+            ? spot.hero_image_url.trim()
+            : null
+        const thumb =
+          typeof spot.thumbnail_url === 'string' && spot.thumbnail_url.trim()
+            ? spot.thumbnail_url.trim()
+            : hero
+
+        let slug =
+          typeof spot.slug === 'string' && spot.slug.trim()
+            ? spot.slug
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-|-$/g, '')
+            : titleEn
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-|-$/g, '')
+        if (!slug) slug = `spot-${Date.now()}`
+
+        const drone =
+          spot.drone_allowed === 'allowed' ||
+          spot.drone_allowed === 'restricted' ||
+          spot.drone_allowed === 'prohibited'
+            ? spot.drone_allowed
+            : 'restricted'
+
+        const tripCode =
+          typeof spot.related_trip_code === 'string' && spot.related_trip_code.trim()
+            ? spot.related_trip_code.trim()
+            : null
+
+        const row: Record<string, unknown> = {
+          slug,
+          title_en: titleEn,
+          title_th: titleTh,
+          location_en: locationEn,
+          location_th: locationTh,
+          description_en:
+            typeof spot.description_en === 'string' ? spot.description_en.trim() || null : null,
+          description_th:
+            typeof spot.description_th === 'string' ? spot.description_th.trim() || null : null,
+          categories,
+          latitude: lat,
+          longitude: lng,
+          google_maps_url: `https://maps.google.com/?q=${lat},${lng}`,
+          best_time: typeof spot.best_time === 'string' ? spot.best_time.trim() || null : null,
+          best_season:
+            typeof spot.best_season === 'string' ? spot.best_season.trim() || null : null,
+          drive_time_from_sydney:
+            typeof spot.drive_time_from_sydney === 'string'
+              ? spot.drive_time_from_sydney.trim() || null
+              : null,
+          best_time_morning:
+            typeof spot.best_time_morning === 'string'
+              ? spot.best_time_morning.trim() || null
+              : null,
+          best_time_evening:
+            typeof spot.best_time_evening === 'string'
+              ? spot.best_time_evening.trim() || null
+              : null,
+          best_time_night:
+            typeof spot.best_time_night === 'string'
+              ? spot.best_time_night.trim() || null
+              : null,
+          access_private_car:
+            typeof spot.access_private_car === 'string' ? spot.access_private_car : '',
+          access_public_transport:
+            typeof spot.access_public_transport === 'string'
+              ? spot.access_public_transport.trim() || null
+              : null,
+          gear_landscape:
+            typeof spot.gear_landscape === 'string' ? spot.gear_landscape.trim() || null : null,
+          gear_portrait:
+            typeof spot.gear_portrait === 'string' ? spot.gear_portrait.trim() || null : null,
+          camera_settings:
+            spot.camera_settings && typeof spot.camera_settings === 'object'
+              ? spot.camera_settings
+              : {},
+          tips_en: typeof spot.tips_en === 'string' ? spot.tips_en.trim() || null : null,
+          tips_th: typeof spot.tips_th === 'string' ? spot.tips_th.trim() || null : null,
+          warnings_en:
+            typeof spot.warnings_en === 'string' ? spot.warnings_en.trim() || null : null,
+          warnings_th:
+            typeof spot.warnings_th === 'string' ? spot.warnings_th.trim() || null : null,
+          drone_allowed: drone,
+          drone_notes:
+            typeof spot.drone_notes === 'string' ? spot.drone_notes.trim() || null : null,
+          related_trip_code: tripCode,
+          linked_trip_code: tripCode,
+          hero_image_url: hero,
+          thumbnail_url: thumb,
+          gallery_image_urls: gallery,
+          is_featured: spot.is_featured === true,
+          sort_order:
+            spot.sort_order == null || spot.sort_order === ''
+              ? 100
+              : Number(spot.sort_order) || 100,
+          review_notes:
+            typeof spot.review_notes === 'string' ? spot.review_notes.trim() || null : null,
+        }
+
+        const id =
+          typeof spot.id === 'string' && spot.id.trim() ? spot.id.trim() : null
+
+        if (id) {
+          const { data, error } = await admin
+            .from('photo_spots')
+            .update(row)
+            .eq('id', id)
+            .select('*')
+            .maybeSingle()
+          if (error) throw error
+          if (!data) return json({ error: 'not_found' }, 404)
+          return json({ data })
+        }
+
+        // Ensure unique slug for creates
+        const { data: slugHit } = await admin
+          .from('photo_spots')
+          .select('id')
+          .eq('slug', slug)
+          .maybeSingle()
+        if (slugHit) {
+          row.slug = `${slug}-${Date.now().toString(36)}`
+        }
+
+        const { data, error } = await admin
+          .from('photo_spots')
+          .insert(row)
+          .select('*')
+          .single()
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'delete_photo_spot': {
+        const { id } = params as { id?: string }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+        const { error } = await admin.from('photo_spots').delete().eq('id', id)
+        if (error) throw error
+        return json({ ok: true })
       }
 
       default:

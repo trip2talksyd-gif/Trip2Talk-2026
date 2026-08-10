@@ -12,6 +12,7 @@ import {
   History,
   KeyRound,
   LayoutDashboard,
+  MapPin,
   Receipt,
   ShieldAlert,
   TrendingDown,
@@ -54,6 +55,12 @@ const NAV_LINKS: { to: string; label: string; icon: ReactNode; highlighted?: boo
     to: '/app/trips',
     label: 'ลงทริปใหม่',
     icon: <CalendarPlus className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
+    highlighted: true,
+  },
+  {
+    to: '/app/spots',
+    label: 'Photo Spots / จุดถ่ายภาพ',
+    icon: <MapPin className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
     highlighted: true,
   },
   {

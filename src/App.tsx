@@ -49,6 +49,7 @@ import PhotosDeliveryPage from './pages/app/PhotosDeliveryPage'
 import RecentLoginsPage from './pages/app/RecentLoginsPage'
 import StaffPinAdminPage from './pages/app/StaffPinAdminPage'
 import SystemCheckPage from './pages/app/SystemCheckPage'
+import PhotoSpotsAdminPage from './pages/app/PhotoSpotsAdminPage'
 import ConfirmationSummaryPage from './pages/public/ConfirmationSummaryPage'
 import ContentReview from './pages/admin/ContentReview'
 import QuickPost from './pages/admin/QuickPost'
@@ -133,6 +134,22 @@ export default function App() {
           element={
             <RequireStaffRole allow={['OWNER', 'MANAGER']}>
               <TripManagerPage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/spots"
+          element={
+            <RequireStaffRole allow={['OWNER', 'MANAGER']}>
+              <PhotoSpotsAdminPage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
+          path="app/photo-spots"
+          element={
+            <RequireStaffRole allow={['OWNER', 'MANAGER']}>
+              <PhotoSpotsAdminPage />
             </RequireStaffRole>
           }
         />
