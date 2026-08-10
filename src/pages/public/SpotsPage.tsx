@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRight, List, Map as MapIcon, X } from 'lucide-react'
+import { ChevronRight, Heart, List, Map as MapIcon, X } from 'lucide-react'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import SpotMedia from '../../components/spots/SpotMedia'
 import SpotsMap from '../../components/spots/SpotsMap'
 import { useLang } from '../../hooks/useLang'
 import {
+  badgeForSpot,
   fetchPhotoSpots,
   filterSpotsByCategory,
   sortPhotoSpots,
@@ -22,38 +23,130 @@ const CATEGORY_CHIPS = [
   { id: 'Night', en: 'Night', th: 'กลางคืน' },
 ] as const
 
+const FAV_KEY = 't2t_spot_favorites'
+
+function readFavorites(): Set<string> {
+  try {
+    const raw = localStorage.getItem(FAV_KEY)
+    if (!raw) return new Set()
+    const parsed = JSON.parse(raw) as unknown
+    return new Set(Array.isArray(parsed) ? parsed.map(String) : [])
+  } catch {
+    return new Set()
+  }
+}
+
+function writeFavorites(ids: Set<string>) {
+  localStorage.setItem(FAV_KEY, JSON.stringify([...ids]))
+}
+
+function topBadgeLabel(spot: PhotoSpotDetail): string {
+  const best = spot.best_time?.trim()
+  if (best) {
+    const night = /night|dark|aurora|moon|blue\s*hour|after\s*dark/i.test(best)
+    return `${night ? '🌙' : '☀️'} ${best}`
+  }
+  const cat = badgeForSpot(spot)
+  if (/night|aurora/i.test(cat)) return `🌙 ${cat}`
+  return cat
+}
+
 function SpotCard({ spot }: { spot: PhotoSpotDetail }) {
+  const { lang } = useLang()
+  const [fav, setFav] = useState(false)
+  const category = badgeForSpot(spot)
+  const title = lang === 'th' ? spot.title_th : spot.title_en
+  const location = lang === 'th' ? spot.location_th : spot.location_en
+
+  useEffect(() => {
+    setFav(readFavorites().has(spot.id) || readFavorites().has(spot.slug))
+  }, [spot.id, spot.slug])
+
+  const toggleFav = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    const next = !fav
+    setFav(next)
+    const set = readFavorites()
+    if (next) {
+      set.add(spot.id)
+      set.add(spot.slug)
+    } else {
+      set.delete(spot.id)
+      set.delete(spot.slug)
+    }
+    writeFavorites(set)
+  }
+
   return (
-    <Link
-      to={`/spots/${spot.slug}`}
-      className="block overflow-hidden rounded-2xl border border-line bg-white shadow-[0_8px_20px_rgba(18,47,42,0.06)] transition hover:border-teal-dark/20"
-    >
-      <SpotMedia
-        spot={spot}
-        showBadge
-        className="h-[140px] sm:h-[160px]"
-        iconSize="lg"
-      />
-      <div className="px-3.5 py-3">
-        <p className="text-[14px] font-bold text-ink-app">{spot.title_en}</p>
-        <p className="mt-0.5 font-thai text-[12px] text-ink-app/55">
-          {spot.title_th}
-          <span className="text-ink-app/35"> · {spot.location_en}</span>
-        </p>
-        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-ink-app/55">
-          {spot.drive_time_from_sydney ? (
-            <span>
-              🚗 <b className="text-teal-dark">{spot.drive_time_from_sydney}</b>
-            </span>
-          ) : null}
-          {spot.best_time ? (
-            <span>
-              ☀ <b className="text-teal-dark">{spot.best_time}</b>
-            </span>
-          ) : null}
+    <article className="relative h-[158px] overflow-hidden rounded-[20px] bg-teal-darker shadow-[0_10px_24px_rgba(18,47,42,0.1)] sm:h-[180px] lg:h-[200px]">
+      <Link
+        to={`/spots/${spot.slug}`}
+        className="absolute inset-0 block focus:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2"
+        aria-label={`${spot.title_en} / ${spot.title_th}`}
+      >
+        <SpotMedia
+          spot={spot}
+          className="absolute inset-0 h-full w-full"
+          iconSize="lg"
+          alt=""
+        />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(0deg, rgba(12,33,29,0.9), rgba(12,33,29,0.15) 60%, transparent)',
+          }}
+          aria-hidden
+        />
+
+        {/* Top-left light/category badge */}
+        <span className="absolute left-3 top-3 z-[1] max-w-[70%] truncate rounded-full bg-[rgba(255,255,255,0.92)] px-2.5 py-1 text-[9.5px] font-bold text-teal-darker">
+          {topBadgeLabel(spot)}
+        </span>
+
+        {/* Bottom copy + glass pills */}
+        <div className="absolute inset-x-0 bottom-0 z-[1] flex items-end justify-between gap-2 p-3.5">
+          <div className="min-w-0 flex-1 pr-1">
+            <p className="font-display truncate text-[14.5px] font-bold leading-tight text-white">
+              {title}
+            </p>
+            <p className="mt-0.5 truncate text-[11px] font-medium text-white/70">{location}</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {spot.drive_time_from_sydney ? (
+                <span className="rounded-full border border-[rgba(230,147,90,0.55)] bg-[rgba(230,147,90,0.35)] px-2 py-0.5 text-[9.5px] font-semibold text-orange-soft backdrop-blur-[8px]">
+                  {spot.drive_time_from_sydney}
+                </span>
+              ) : null}
+              <span className="rounded-full border border-white/20 bg-white/[0.14] px-2 py-0.5 text-[9.5px] font-semibold text-white/90 backdrop-blur-[8px]">
+                {category}
+              </span>
+            </div>
+          </div>
+
+          <span
+            className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-orange text-teal-darker shadow-[0_6px_14px_rgba(230,147,90,0.45)]"
+            aria-hidden
+          >
+            <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
+          </span>
         </div>
-      </div>
-    </Link>
+      </Link>
+
+      {/* Favorite — outside Link so it doesn't navigate */}
+      <button
+        type="button"
+        onClick={toggleFav}
+        className="absolute right-3 top-3 z-[2] flex h-[26px] w-[26px] items-center justify-center rounded-full border border-white/25 bg-white/25 text-white backdrop-blur-[8px] transition hover:bg-white/40"
+        aria-label={fav ? 'Remove favorite' : 'Save favorite'}
+        aria-pressed={fav}
+      >
+        <Heart
+          className={`h-3.5 w-3.5 ${fav ? 'fill-orange text-orange' : ''}`}
+          strokeWidth={1.9}
+        />
+      </button>
+    </article>
   )
 }
 
@@ -114,7 +207,7 @@ function MapPreviewCard({
 }
 
 export default function SpotsPage() {
-  const { tt } = useLang()
+  const { tt, lang } = useLang()
   const titleBi = tt('spots.title')
   const subBi = tt('spots.subtitle')
   const mapBi = tt('spots.viewMap')
@@ -190,7 +283,7 @@ export default function SpotsPage() {
             }`}
           >
             <MapIcon className="h-3.5 w-3.5" />
-            {mapBi.en}
+            {lang === 'th' ? mapBi.th : mapBi.en}
           </button>
           <button
             type="button"
@@ -200,11 +293,12 @@ export default function SpotsPage() {
             }`}
           >
             <List className="h-3.5 w-3.5" />
-            {listBi.en}
+            {lang === 'th' ? listBi.th : listBi.en}
           </button>
         </div>
       </div>
 
+      {/* Category filter chips */}
       <div className="mt-4 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {CATEGORY_CHIPS.map((chip) => {
           const active = category === chip.id
@@ -213,14 +307,13 @@ export default function SpotsPage() {
               key={chip.id}
               type="button"
               onClick={() => setCategory(chip.id)}
-              className={`shrink-0 rounded-full border px-3.5 py-2 text-[11px] font-semibold ${
+              className={`shrink-0 rounded-full border px-[13px] py-[7px] text-[10px] font-bold transition ${
                 active
-                  ? 'border-teal-dark bg-teal-dark text-cream'
-                  : 'border-line bg-white text-ink-app/55'
+                  ? 'border-orange bg-orange text-ink-app'
+                  : 'border-[rgba(27,29,25,0.1)] bg-white text-ink-app/70'
               }`}
             >
-              {chip.en}
-              <span className="ml-1 font-thai opacity-80">{chip.th}</span>
+              {lang === 'th' ? chip.th : chip.en}
             </button>
           )
         })}
@@ -269,11 +362,11 @@ export default function SpotsPage() {
                         : 'border-line bg-white text-ink-app/55'
                     }`}
                   >
-                    {bi.en}
+                    {lang === 'th' ? bi.th : bi.en}
                   </button>
                 ))}
               </div>
-              <div className="grid gap-3">
+              <div className="grid gap-3 xl:grid-cols-2">
                 {filtered.map((spot) => (
                   <SpotCard key={spot.id} spot={spot} />
                 ))}
@@ -317,12 +410,11 @@ export default function SpotsPage() {
                           : 'border-line bg-white text-ink-app/55'
                       }`}
                     >
-                      {bi.en}
-                      <span className="ml-1 font-thai opacity-80">{bi.th}</span>
+                      {lang === 'th' ? bi.th : bi.en}
                     </button>
                   ))}
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                   {filtered.map((spot) => (
                     <SpotCard key={spot.id} spot={spot} />
                   ))}
