@@ -493,6 +493,9 @@ export type TranslationKey =
   | 'discover.masterpiece'
   | 'discover.nearby'
   | 'discover.seeAll'
+  | 'discover.latest'
+  | 'discover.mapTeaser'
+  | 'discover.mapTeaserSub'
   | 'discover.loadMore'
   | 'discover.cta'
   | 'discover.ctaLead'
@@ -1062,8 +1065,8 @@ const en: Map = {
   'nav.packages': 'Packages',
   'nav.thePro': 'The Pro',
   'nav.appTabs': 'App tabs',
-  'discover.hello': 'Hello, traveler',
-  'discover.helloNamed': 'Hello, {name}',
+  'discover.hello': 'Hi traveler,',
+  'discover.helloNamed': 'Hi {name},',
   'discover.headline': 'Where to shoot next?',
   'discover.search': 'Search a spot or style',
   'discover.filter': 'Filter spots',
@@ -1071,9 +1074,12 @@ const en: Map = {
   'discover.chip.aurora': 'Aurora',
   'discover.chip.portrait': 'Portrait',
   'discover.chip.nature': 'Nature',
-  'discover.masterpiece': 'Masterpiece',
-  'discover.nearby': 'Nearby spots',
+  'discover.masterpiece': "Today's Masterpiece",
+  'discover.nearby': 'Featured spots',
   'discover.seeAll': 'See all',
+  'discover.latest': "Saen's latest work",
+  'discover.mapTeaser': 'Explore spots near you · {n} spots',
+  'discover.mapTeaserSub': '{n} จุด · แผนที่มุมงามทั้งหมด',
   'discover.loadMore': 'Load more spots',
   'discover.cta':
     'Want this shot without driving yourself? Let our photographer take you there.',
@@ -1642,21 +1648,24 @@ const th: Map = {
   'nav.packages': 'แพ็กเกจ',
   'nav.thePro': 'The Pro',
   'nav.appTabs': 'แท็บแอป',
-  'discover.hello': 'สวัสดีนักเดินทาง',
-  'discover.helloNamed': 'สวัสดี {name}',
-  'discover.headline': 'จะไปถ่ายที่ไหนต่อดี?',
-  'discover.search': 'ค้นหามุมถ่ายหรือสไตล์',
+  'discover.hello': 'สวัสดีนักเดินทาง,',
+  'discover.helloNamed': 'สวัสดี {name},',
+  'discover.headline': 'วันนี้อยากเห็นมุมไหน?',
+  'discover.search': 'ค้นหาพิกัด / สไตล์ภาพ',
   'discover.filter': 'กรองมุมถ่าย',
   'discover.chip.all': 'ทั้งหมด',
   'discover.chip.aurora': 'ออโรร่า',
   'discover.chip.portrait': 'พอร์ตเทรต',
   'discover.chip.nature': 'ธรรมชาติ',
-  'discover.masterpiece': 'ผลงานเด่น',
-  'discover.nearby': 'มุมถ่ายใกล้เคียง',
+  'discover.masterpiece': 'Masterpiece วันนี้',
+  'discover.nearby': 'พิกัดแนะนำ',
   'discover.seeAll': 'ดูทั้งหมด',
+  'discover.latest': 'ผลงานล่าสุดจากพี่แสน',
+  'discover.mapTeaser': 'สำรวจพิกัดใกล้คุณ · {n} จุด',
+  'discover.mapTeaserSub': '{n} จุด · แผนที่มุมงามทั้งหมด',
   'discover.loadMore': 'โหลดมุมถ่ายเพิ่ม',
   'discover.cta': 'อยากได้มุมนี้แต่ไม่อยากขับรถเอง? ให้ช่างภาพของเราพาไปสิ',
-  'discover.ctaLead': 'อยากได้มุมนี้แต่ไม่อยากขับรถเอง?',
+  'discover.ctaLead': 'อยากได้รูปมุมนี้แต่เดินทางลำบาก?',
   'discover.ctaBold': 'ให้ช่างภาพของเราพาไปสิ',
   'discover.back': 'กลับ',
   'discover.favorite': 'บันทึกรายการโปรด',

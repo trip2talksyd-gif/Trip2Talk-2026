@@ -1,25 +1,20 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import {
-  DISCOVER_INITIAL_FEED_CAP,
-  DISCOVER_NEARBY_PAGE_SIZE,
-  filterDiscoverSpots,
-  getDiscoverSpots,
-  getMasterpiece,
-  sliceDiscoverSpots,
-  type DiscoverChip,
-  type DiscoverSpot,
-} from '../../data/discoverFeed'
-import { photoThumbSrc } from '../../data/galleryPhotos'
-import { librarySlugForGalleryPhotoId } from '../../lib/photoSpotsApi'
+import { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { GALLERY_PHOTOS, photoThumbSrc, type GalleryPhoto } from '../../data/galleryPhotos'
 import { TEAM_MEMBERS } from '../../data/teamMembers'
 import TeamAvatar from '../../components/about/TeamAvatar'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import { useLang } from '../../hooks/useLang'
 import type { TranslationKey } from '../../i18n/translations'
+import {
+  fetchPhotoSpots,
+  tripCtaHref,
+  type PhotoSpotDetail,
+} from '../../lib/photoSpotsApi'
 import { supabase } from '../../lib/supabase'
 
-/** SVG line icons — paths matched to Trip2Talk-Discover-Tab-v3-Brand-Icons-Mockup.html */
+type DiscoverChip = 'all' | 'aurora' | 'portrait' | 'nature'
+
 const ICON = {
   stroke: 'currentColor',
   strokeWidth: 1.7,
@@ -47,31 +42,6 @@ function FilterIcon({ className }: { className?: string }) {
   )
 }
 
-function HeartIcon({ className, filled }: { className?: string; filled?: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      aria-hidden
-      stroke={filled ? 'none' : 'currentColor'}
-      strokeWidth={1.7}
-      fill={filled ? 'currentColor' : 'none'}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M12 21s-7-4.4-9.5-8.9C.6 8.4 2.4 5 6 5c2 0 3.4 1 4.5 2.3C11.6 6 13 5 15 5c3.6 0 5.4 3.4 3.5 7.1C19 16.6 12 21 12 21z" />
-    </svg>
-  )
-}
-
-function ChevronLeftIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden {...ICON}>
-      <path d="M15 6l-6 6 6 6" />
-    </svg>
-  )
-}
-
 function ChevronRightIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden {...ICON}>
@@ -85,24 +55,6 @@ function SunIcon({ className }: { className?: string }) {
     <svg viewBox="0 0 24 24" className={className} aria-hidden {...ICON}>
       <circle cx="12" cy="12" r="4" />
       <path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1" />
-    </svg>
-  )
-}
-
-function ApertureIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden {...ICON}>
-      <circle cx="12" cy="12" r="8" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  )
-}
-
-function IsoIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden {...ICON}>
-      <rect x="4" y="7" width="16" height="10" rx="2" />
-      <path d="M8 7V5h8v2" />
     </svg>
   )
 }
@@ -157,6 +109,55 @@ function CompassEmptyIcon({ className }: { className?: string }) {
   )
 }
 
+const CHIP_KEYS: { id: DiscoverChip; key: TranslationKey; Icon: typeof ChipAllIcon }[] = [
+  { id: 'all', key: 'discover.chip.all', Icon: ChipAllIcon },
+  { id: 'aurora', key: 'discover.chip.aurora', Icon: ChipAuroraIcon },
+  { id: 'portrait', key: 'discover.chip.portrait', Icon: ChipPortraitIcon },
+  { id: 'nature', key: 'discover.chip.nature', Icon: ChipNatureIcon },
+]
+
+const GALLERY_BADGE: Record<GalleryPhoto['category'], string> = {
+  'new-zealand': 'NZ',
+  tasmania: 'TAS',
+  nsw: 'NSW',
+  sydney: 'Sydney',
+  outback: 'Outback',
+  melbourne: 'MEL',
+  bermagui: 'Coast',
+}
+
+function chipMatchesSpot(spot: PhotoSpotDetail, chip: DiscoverChip): boolean {
+  if (chip === 'all') return true
+  const cats = spot.categories.map((c) => c.toLowerCase())
+  if (chip === 'aurora') {
+    return cats.some((c) => c.includes('aurora') || c.includes('night') || c.includes('milky'))
+  }
+  if (chip === 'portrait') return cats.some((c) => c.includes('portrait'))
+  // nature
+  return cats.some((c) =>
+    ['landscape', 'nature', 'coastal', 'sunrise', 'sunset'].some((k) => c.includes(k)),
+  )
+}
+
+function chipMatchesGallery(photo: GalleryPhoto, chip: DiscoverChip): boolean {
+  if (chip === 'all') return true
+  if (chip === 'aurora') return photo.category === 'tasmania' || photo.category === 'outback'
+  if (chip === 'portrait') {
+    return (
+      photo.category === 'sydney' ||
+      photo.category === 'melbourne' ||
+      /portrait|พอร์ต/i.test(photo.caption_en + photo.caption_th)
+    )
+  }
+  return (
+    photo.category === 'new-zealand' ||
+    photo.category === 'nsw' ||
+    photo.category === 'tasmania' ||
+    photo.category === 'bermagui' ||
+    photo.category === 'outback'
+  )
+}
+
 function nameFromAuthUser(user: {
   email?: string | null
   user_metadata?: Record<string, unknown>
@@ -173,246 +174,257 @@ function nameFromAuthUser(user: {
 
 function useAuthDisplayName(): string | null {
   const [name, setName] = useState<string | null>(null)
-
   useEffect(() => {
     let cancelled = false
-
     void supabase.auth.getSession().then(({ data }) => {
       if (cancelled) return
-      const user = data.session?.user
-      setName(user ? nameFromAuthUser(user) : null)
+      setName(data.session?.user ? nameFromAuthUser(data.session.user) : null)
     })
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      const user = session?.user
-      setName(user ? nameFromAuthUser(user) : null)
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => {
+      setName(session?.user ? nameFromAuthUser(session.user) : null)
     })
-
     return () => {
       cancelled = true
       sub.subscription.unsubscribe()
     }
   }, [])
-
   return name
 }
 
-function CircleBtn({
-  label,
-  onClick,
-  to,
-  children,
-  className = '',
+function SectionLabel({
+  en,
+  th,
+  seeAllTo,
+  seeAllEn,
+  seeAllTh,
 }: {
-  label: string
-  onClick?: () => void
-  to?: string
-  children: ReactNode
-  className?: string
+  en: string
+  th: string
+  seeAllTo?: string
+  seeAllEn?: string
+  seeAllTh?: string
 }) {
-  const cls = `flex h-8 w-8 items-center justify-center rounded-full bg-white/94 transition-opacity hover:opacity-90 motion-reduce:transition-none ${className}`
-  if (to) {
-    return (
-      <Link to={to} aria-label={label} className={cls}>
-        {children}
-      </Link>
-    )
-  }
   return (
-    <button type="button" aria-label={label} onClick={onClick} className={cls}>
-      {children}
-    </button>
+    <div className="mb-3 flex items-baseline justify-between gap-3">
+      <BiDisplayHeading
+        en={en}
+        th={th}
+        as="h2"
+        enClassName="font-display text-[15px] font-semibold tracking-tight text-teal-darker"
+        thClassName="mt-0.5 font-thai text-[11px] font-medium text-ink-app/55"
+      />
+      {seeAllTo && seeAllEn ? (
+        <Link to={seeAllTo} className="shrink-0 text-[10px] font-bold text-orange-deep">
+          {seeAllEn}
+          {seeAllTh ? <span className="ml-1 font-thai font-medium">{seeAllTh}</span> : null}
+        </Link>
+      ) : null}
+    </div>
   )
 }
 
-function MasterpieceCard({
-  spot,
-  liked,
-  onToggleLike,
-}: {
-  spot: DiscoverSpot
-  liked: boolean
-  onToggleLike: () => void
-}) {
-  const navigate = useNavigate()
+function MasterpieceCard({ spot }: { spot: PhotoSpotDetail }) {
   const { tt } = useLang()
-  const backBi = tt('discover.back')
-  const favBi = tt(liked ? 'discover.unfavorite' : 'discover.favorite')
   const ctaLead = tt('discover.ctaLead')
   const ctaBold = tt('discover.ctaBold')
+  const cam = spot.camera_settings.landscape
+  const img = spot.thumbSrc ?? spot.heroSrc
+  const tripHref = tripCtaHref(spot)
 
   return (
-    <article className="overflow-hidden rounded-spot border border-teal-dark/10 bg-white shadow-spot">
-      <div className="relative h-[220px] w-full overflow-hidden bg-teal-soft sm:h-[260px]">
-        <img
-          src={photoThumbSrc(spot.photo, { width: 1200, quality: 70, format: 'webp' })}
-          alt={`${spot.titleEn} / ${spot.titleTh}`}
-          className="h-full w-full object-cover"
-          loading="eager"
-          decoding="async"
-          onError={(e) => {
-            const img = e.currentTarget
-            if (spot.photo.url && img.src !== spot.photo.url) img.src = spot.photo.url
-          }}
-        />
-        <div
-          className="pointer-events-none absolute inset-0 bg-gradient-to-b from-teal-dark/25 to-transparent to-[22%]"
-          aria-hidden
-        />
-        <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3.5">
-          <CircleBtn
-            label={`${backBi.en} / ${backBi.th}`}
-            onClick={() => navigate(-1)}
-            className="text-teal-dark"
-          >
-            <ChevronLeftIcon className="h-4 w-4" />
-          </CircleBtn>
-          <CircleBtn
-            label={`${favBi.en} / ${favBi.th}`}
-            onClick={onToggleLike}
-            className="text-orange-deep"
-          >
-            <HeartIcon className="h-4 w-4" filled={liked} />
-          </CircleBtn>
-        </div>
+    <article className="overflow-hidden rounded-spot bg-white shadow-spot">
+      <div className="relative h-[200px] overflow-hidden bg-teal-soft sm:h-[260px]">
+        {img ? (
+          <img
+            src={img}
+            alt={`${spot.title_en} / ${spot.title_th}`}
+            className="h-full w-full object-cover"
+            loading="eager"
+            decoding="async"
+          />
+        ) : null}
+        <span className="absolute bottom-3 left-3 rounded-full bg-black/55 px-3 py-1.5 text-[10px] font-bold text-white">
+          📍 {spot.location_en}
+        </span>
+        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-bold text-orange-deep shadow-sm">
+          <StarIcon className="h-3 w-3 text-orange" />
+          {spot.rating.toFixed(1)}
+        </span>
       </div>
 
-      <div className="space-y-3 px-[18px] pb-5 pt-[18px]">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h2 className="font-display text-[17px] font-semibold leading-tight tracking-tight text-teal-darker">
-              {spot.titleEn}
-            </h2>
-            <p className="mt-1 font-serif text-[11px] text-ink-app/55">
-              {spot.location} · {spot.titleTh}
-            </p>
-          </div>
-          <p className="flex shrink-0 items-center gap-1 pt-0.5 text-[11px] font-bold text-orange-deep">
-            <StarIcon className="h-3 w-3 text-orange" />
-            {spot.rating.toFixed(1)}
-          </p>
+      <div className="space-y-3.5 px-[18px] pb-5 pt-4">
+        <div>
+          <h3 className="font-display text-[17px] font-semibold tracking-tight text-teal-darker">
+            {spot.title_en}
+          </h3>
+          <p className="mt-0.5 font-thai text-[11px] text-ink-app/55">{spot.title_th}</p>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-bg py-1 pl-1.5 pr-2.5 font-mono text-[9px] text-[#7a5c1c]">
-            <SunIcon className="h-[11px] w-[11px]" />
-            {spot.goldenHourEn}
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-teal-soft py-1 pl-1.5 pr-2.5 font-mono text-[9px] text-teal-mid">
-            <ApertureIcon className="h-[11px] w-[11px]" />
-            {spot.fStop}
-          </span>
-          <span className="inline-flex items-center gap-1 rounded-full bg-teal-soft py-1 pl-1.5 pr-2.5 font-mono text-[9px] text-teal-mid">
-            <IsoIcon className="h-[11px] w-[11px]" />
-            ISO {spot.iso}
-          </span>
+          {spot.best_time ? (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-bg px-2.5 py-1 font-mono text-[9px] text-[#7a5c1c]">
+              <SunIcon className="h-3 w-3" />
+              {spot.best_time}
+            </span>
+          ) : null}
+          {cam?.aperture ? (
+            <span className="rounded-full bg-cream-app px-2.5 py-1 font-mono text-[9px] text-ink-app/55">
+              {cam.aperture}
+            </span>
+          ) : null}
+          {cam?.iso ? (
+            <span className="rounded-full bg-cream-app px-2.5 py-1 font-mono text-[9px] text-ink-app/55">
+              ISO {cam.iso}
+            </span>
+          ) : null}
         </div>
 
-        <Link
-          to={`/trips/${spot.tripCode}`}
-          className="flex items-center justify-between gap-3 rounded-2xl bg-teal-dark px-3.5 py-3 transition-opacity hover:opacity-95 motion-reduce:transition-none"
-          aria-label={`${ctaLead.en} ${ctaBold.en} / ${ctaLead.th} ${ctaBold.th}`}
-        >
-          <span className="min-w-0 max-w-[165px] flex-1 text-[10px] leading-relaxed text-[rgba(245,242,232,0.75)] sm:max-w-none sm:text-[12px]">
-            <span className="block">
-              {ctaLead.en}
-              <span className="mt-0.5 block font-semibold text-white">{ctaBold.en}</span>
-            </span>
-            <span className="mt-1 block font-thai">
+        <div className="flex items-center justify-between gap-3">
+          <p className="max-w-[200px] text-[10.5px] leading-relaxed text-ink-app/55 sm:max-w-none sm:text-[12px]">
+            {ctaLead.en}
+            <span className="mt-0.5 block font-semibold text-ink-app">{ctaBold.en}</span>
+            <span className="mt-1 block font-thai text-[10px] sm:text-[11px]">
               {ctaLead.th}
-              <span className="mt-0.5 block font-semibold text-white">{ctaBold.th}</span>
+              <span className="mt-0.5 block font-semibold text-ink-app/80">{ctaBold.th}</span>
             </span>
-          </span>
-          <span className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full bg-orange text-teal-darker">
+          </p>
+          <Link
+            to={tripHref}
+            aria-label={`${ctaBold.en} / ${ctaBold.th}`}
+            className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-full bg-ink-app text-white shadow-[0_8px_18px_rgba(27,29,25,0.25)] transition-opacity hover:opacity-90"
+          >
             <ChevronRightIcon className="h-4 w-4" />
-          </span>
-        </Link>
+          </Link>
+        </div>
       </div>
     </article>
   )
 }
 
-function NearbyCard({
-  spot,
-  liked,
-  onToggleLike,
+function MapTeaser({
+  spots,
+  countLabel,
 }: {
-  spot: DiscoverSpot
-  liked: boolean
-  onToggleLike: () => void
+  spots: PhotoSpotDetail[]
+  countLabel: { en: string; th: string }
 }) {
-  const { tt } = useLang()
-  const favBi = tt(liked ? 'discover.unfavorite' : 'discover.favorite')
-  const openBi = tt('discover.openSpot')
-  const MetaIcon = spot.chip === 'aurora' ? ChipAuroraIcon : SunIcon
+  const pinSpots = spots.filter((s) => s.latitude != null && s.longitude != null).slice(0, 3)
+  const positions = [
+    { top: '34%', left: '24%' },
+    { top: '48%', left: '52%' },
+    { top: '64%', left: '74%' },
+  ]
 
   return (
-    <article className="w-[46%] shrink-0 overflow-hidden rounded-[18px] border border-teal-dark/10 bg-white shadow-[0_6px_16px_rgba(18,47,42,0.06)] sm:w-44">
-      <div className="relative h-24 overflow-hidden bg-teal-soft">
-        <img
-          src={photoThumbSrc(spot.photo, { width: 640, quality: 68, format: 'webp' })}
-          alt={`${spot.titleEn} / ${spot.titleTh}`}
-          className="h-full w-full object-cover"
-          loading="lazy"
-          decoding="async"
-          onError={(e) => {
-            const img = e.currentTarget
-            if (spot.photo.url && img.src !== spot.photo.url) img.src = spot.photo.url
+    <Link
+      to="/spots"
+      className="relative block h-[120px] overflow-hidden rounded-spot bg-gradient-to-br from-[#dde7dd] via-[#cfdfd8] to-[#e9e3d3] shadow-[0_8px_22px_rgba(18,47,42,0.08)] sm:h-[140px]"
+    >
+      <div
+        className="pointer-events-none absolute inset-0 opacity-70"
+        style={{
+          backgroundImage:
+            'radial-gradient(circle at 30% 25%, rgba(18,47,42,.08) 2px, transparent 2px), radial-gradient(circle at 70% 60%, rgba(18,47,42,.06) 2px, transparent 2px)',
+          backgroundSize: '46px 46px',
+        }}
+        aria-hidden
+      />
+      {pinSpots.map((s, i) => (
+        <span
+          key={s.id}
+          className="absolute flex h-[26px] w-[26px] items-center justify-center rounded-[50%_50%_50%_4px] shadow-[0_4px_10px_rgba(0,0,0,.2)]"
+          style={{
+            top: positions[i]?.top,
+            left: positions[i]?.left,
+            background: i === 0 ? '#e6935a' : '#122f2a',
+            transform: 'rotate(-45deg)',
           }}
-        />
-        <CircleBtn
-          label={`${favBi.en} / ${favBi.th}`}
-          onClick={onToggleLike}
-          className="absolute right-2 top-2 h-[22px] w-[22px] text-orange-deep"
+          title={s.title_en}
         >
-          <HeartIcon className="h-[11px] w-[11px]" filled={liked} />
-        </CircleBtn>
-      </div>
-      <div className="px-2.5 pb-2.5 pt-2">
-        <h3 className="line-clamp-2 text-[10.5px] font-semibold leading-snug text-teal-darker">
-          {spot.titleEn}
-        </h3>
-        <p className="mt-0.5 line-clamp-2 font-serif text-[10px] font-medium text-ink-app/55">
-          {spot.titleTh}
-        </p>
-        <div className="mt-1.5 flex items-center justify-between gap-2">
-          <span className="inline-flex min-w-0 items-center gap-1 truncate text-[8.5px] text-teal-mid">
-            <MetaIcon className="h-2.5 w-2.5 shrink-0" />
-            <span className="truncate">{spot.timeOfDayEn}</span>
+          <span className="text-[10px] leading-none text-white" style={{ transform: 'rotate(45deg)' }}>
+            ◎
           </span>
-          <CircleBtn
-            label={`${openBi.en}: ${spot.titleEn}`}
-            to={`/spots/${librarySlugForGalleryPhotoId(spot.id) ?? spot.id}`}
-            className="h-5 w-5 bg-teal-dark text-orange-soft"
-          >
-            <ChevronRightIcon className="h-2.5 w-2.5" />
-          </CircleBtn>
-        </div>
+        </span>
+      ))}
+      <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-[rgba(18,47,42,0.85)] via-transparent to-transparent px-3.5 py-3">
+        <p className="font-display text-[13px] font-semibold text-white sm:text-[15px]">
+          {countLabel.en}
+        </p>
+        <p className="font-thai text-[10px] text-[rgba(245,242,232,0.75)] sm:text-[11px]">
+          {countLabel.th}
+        </p>
       </div>
-    </article>
+    </Link>
   )
 }
 
-const CHIP_KEYS: {
-  id: DiscoverChip
-  key: TranslationKey
-  Icon: typeof ChipAllIcon
-}[] = [
-  { id: 'all', key: 'discover.chip.all', Icon: ChipAllIcon },
-  { id: 'aurora', key: 'discover.chip.aurora', Icon: ChipAuroraIcon },
-  { id: 'portrait', key: 'discover.chip.portrait', Icon: ChipPortraitIcon },
-  { id: 'nature', key: 'discover.chip.nature', Icon: ChipNatureIcon },
-]
+function LatestWorkGrid({ photos }: { photos: GalleryPhoto[] }) {
+  return (
+    <div className="grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-4">
+      {photos.map((photo) => (
+        <Link
+          key={photo.id}
+          to="/gallery"
+          className="relative block h-[110px] overflow-hidden rounded-[18px] bg-teal-soft shadow-[0_6px_16px_rgba(18,47,42,0.06)] sm:h-[140px]"
+        >
+          <img
+            src={photoThumbSrc(photo, { width: 480, quality: 68, format: 'webp' })}
+            alt={`${photo.caption_en} / ${photo.caption_th}`}
+            className="h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
+          />
+          <span className="absolute left-2 top-2 rounded-full bg-black/50 px-2 py-0.5 text-[8px] font-bold uppercase tracking-wide text-orange-soft">
+            {GALLERY_BADGE[photo.category]}
+          </span>
+        </Link>
+      ))}
+    </div>
+  )
+}
+
+function NearbySpotCard({ spot }: { spot: PhotoSpotDetail }) {
+  const img = spot.thumbSrc ?? spot.heroSrc
+  return (
+    <Link
+      to={`/spots/${spot.slug}`}
+      className="w-[46%] shrink-0 overflow-hidden rounded-[18px] bg-white shadow-[0_6px_18px_rgba(18,47,42,0.06)] sm:w-44"
+    >
+      <div className="relative h-24 bg-teal-soft">
+        {img ? (
+          <img
+            src={img}
+            alt={`${spot.title_en} / ${spot.title_th}`}
+            className="h-full w-full object-cover"
+            loading="lazy"
+          />
+        ) : null}
+      </div>
+      <div className="px-2.5 pb-2.5 pt-2">
+        <p className="line-clamp-2 text-[11px] font-semibold leading-snug text-teal-darker">
+          {spot.title_en}
+        </p>
+        <p className="mt-0.5 line-clamp-1 font-thai text-[10px] text-ink-app/55">{spot.title_th}</p>
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <span className="truncate text-[8.5px] text-ink-app/50">
+            {spot.best_time ?? spot.location_en}
+          </span>
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-dark text-orange-soft">
+            <ChevronRightIcon className="h-2.5 w-2.5" />
+          </span>
+        </div>
+      </div>
+    </Link>
+  )
+}
 
 export default function DiscoverPage() {
   const { tt } = useLang()
   const authName = useAuthDisplayName()
   const [chip, setChip] = useState<DiscoverChip>('all')
   const [query, setQuery] = useState('')
-  const [liked, setLiked] = useState<Record<string, boolean>>({})
-  const [nearbyLimit, setNearbyLimit] = useState(
-    Math.max(1, DISCOVER_INITIAL_FEED_CAP - 1),
-  )
+  const [spots, setSpots] = useState<PhotoSpotDetail[]>([])
+  const [loading, setLoading] = useState(true)
   const saen = TEAM_MEMBERS.find((m) => m.id === 'saen')
 
   const helloGuest = tt('discover.hello')
@@ -422,11 +434,24 @@ export default function DiscoverPage() {
   const filterBi = tt('discover.filter')
   const masterpieceBi = tt('discover.masterpiece')
   const nearbyBi = tt('discover.nearby')
+  const latestBi = tt('discover.latest')
+  const mapTeaserBi = tt('discover.mapTeaser')
   const seeAllBi = tt('discover.seeAll')
-  const loadMoreBi = tt('discover.loadMore')
   const emptyTitle = tt('discover.emptyTitle')
   const emptyBody = tt('discover.emptyBody')
   const clearBi = tt('discover.clearFilters')
+
+  useEffect(() => {
+    let cancelled = false
+    fetchPhotoSpots().then((rows) => {
+      if (cancelled) return
+      setSpots(rows)
+      setLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const helloLine = authName
     ? {
@@ -435,220 +460,225 @@ export default function DiscoverPage() {
       }
     : helloGuest
 
-  const spots = useMemo(() => getDiscoverSpots(), [])
+  const q = query.trim().toLowerCase()
 
-  const filtered = useMemo(() => {
-    const byChip = filterDiscoverSpots(spots, chip)
-    const q = query.trim().toLowerCase()
-    if (!q) return byChip
-    return byChip.filter(
-      (s) =>
-        s.titleEn.toLowerCase().includes(q) ||
-        s.titleTh.includes(q) ||
-        s.location.toLowerCase().includes(q),
-    )
-  }, [spots, chip, query])
+  const filteredSpots = useMemo(() => {
+    return spots.filter((s) => {
+      if (!chipMatchesSpot(s, chip)) return false
+      if (!q) return true
+      return (
+        s.title_en.toLowerCase().includes(q) ||
+        s.title_th.includes(q) ||
+        s.location_en.toLowerCase().includes(q) ||
+        s.categories.some((c) => c.toLowerCase().includes(q)) ||
+        (s.description_en?.toLowerCase().includes(q) ?? false)
+      )
+    })
+  }, [spots, chip, q])
 
-  const isEmpty = filtered.length === 0
+  const filteredGallery = useMemo(() => {
+    return GALLERY_PHOTOS.filter((p) => {
+      if (!chipMatchesGallery(p, chip)) return false
+      if (!q) return true
+      return (
+        p.caption_en.toLowerCase().includes(q) ||
+        p.caption_th.includes(q) ||
+        p.location.toLowerCase().includes(q) ||
+        p.category.includes(q)
+      )
+    })
+  }, [chip, q])
 
-  const masterpiece = useMemo(
-    () => (isEmpty ? null : getMasterpiece(filtered)),
-    [filtered, isEmpty],
-  )
+  const masterpiece = useMemo(() => {
+    if (filteredSpots.length === 0) return null
+    return [...filteredSpots].sort((a, b) => {
+      if (a.is_featured !== b.is_featured) return a.is_featured ? -1 : 1
+      return b.rating - a.rating || a.sort_order - b.sort_order
+    })[0]
+  }, [filteredSpots])
 
-  const nearbyPool = useMemo(() => {
-    if (isEmpty || !masterpiece) return []
-    return filtered.filter((s) => s.id !== masterpiece.id)
-  }, [filtered, isEmpty, masterpiece])
+  const nearbySpots = useMemo(() => {
+    if (!masterpiece) return filteredSpots.slice(0, 8)
+    return filteredSpots.filter((s) => s.id !== masterpiece.id).slice(0, 8)
+  }, [filteredSpots, masterpiece])
 
-  const nearbySlice = useMemo(
-    () => sliceDiscoverSpots(nearbyPool, 0, nearbyLimit),
-    [nearbyPool, nearbyLimit],
-  )
+  const latestPhotos = useMemo(() => filteredGallery.slice(0, 8), [filteredGallery])
 
-  useEffect(() => {
-    setNearbyLimit(Math.max(1, DISCOVER_INITIAL_FEED_CAP - 1))
-  }, [chip, query])
+  const isEmpty = !loading && filteredSpots.length === 0 && latestPhotos.length === 0
 
-  const toggleLike = (id: string) => setLiked((prev) => ({ ...prev, [id]: !prev[id] }))
-
-  const clearFilters = () => {
-    setChip('all')
-    setQuery('')
+  const spotCount = spots.length || filteredSpots.length || 4
+  const mapOverlay = {
+    en: mapTeaserBi.en.replace('{n}', String(spotCount)),
+    th: mapTeaserBi.th.replace('{n}', String(spotCount)),
   }
 
   return (
-    <div className="-mx-4 bg-cream-app pb-8 text-ink-app sm:-mx-6 lg:mx-0">
-      <header className="bg-gradient-to-b from-teal-soft from-0% to-cream-app to-[78%] px-4 pb-3.5 pt-2 sm:px-6">
-        <div className="mb-4 flex items-center justify-between gap-3">
-          <div>
-            <p className="text-[9.5px] font-bold uppercase tracking-[0.06em] text-teal-mid">
-              {helloLine.en}
-              <span className="ml-1.5 font-thai font-medium normal-case tracking-normal">
-                {helloLine.th}
-              </span>
-            </p>
-            <BiDisplayHeading
-              en={headlineBi.en}
-              th={headlineBi.th}
-              as="h1"
-              className="mt-0.5"
-              enClassName="text-[19px] font-semibold leading-tight tracking-tight text-teal-darker"
-              thClassName="mt-0.5 text-sm font-medium text-ink-app/55"
-            />
-          </div>
-          {saen ? (
-            <div className="h-[34px] w-[34px] shrink-0 overflow-hidden rounded-full border-[1.5px] border-orange">
-              <TeamAvatar
-                srcs={saen.photoSrcs}
-                alt={saen.nameEn}
-                initial={saen.initial}
-                className="!h-[34px] !w-[34px] !border-0 !shadow-none sm:!h-[34px] sm:!w-[34px]"
+    <div className="-mx-4 bg-cream-app pb-10 text-ink-app sm:-mx-6 lg:mx-0">
+      <div className="mx-auto max-w-[960px]">
+        <header className="bg-gradient-to-b from-teal-soft/80 from-0% to-cream-app to-[78%] px-4 pb-3.5 pt-3 sm:px-6">
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-semibold tracking-[0.04em] text-ink-app/55">
+                {helloLine.en}
+                <span className="ml-1.5 font-thai font-medium">{helloLine.th}</span>
+              </p>
+              <BiDisplayHeading
+                en={headlineBi.en}
+                th={headlineBi.th}
+                as="h1"
+                className="mt-0.5"
+                enClassName="font-display text-[19px] font-semibold leading-tight tracking-tight text-teal-darker"
+                thClassName="mt-0.5 font-thai text-sm font-medium text-ink-app/55"
               />
             </div>
-          ) : null}
-        </div>
+            {saen ? (
+              <div className="h-[34px] w-[34px] shrink-0 overflow-hidden rounded-full border border-line">
+                <TeamAvatar
+                  srcs={saen.photoSrcs}
+                  alt={saen.nameEn}
+                  initial={saen.initial}
+                  className="!h-[34px] !w-[34px] !border-0 !shadow-none sm:!h-[34px] sm:!w-[34px]"
+                />
+              </div>
+            ) : null}
+          </div>
 
-        <div className="mb-3.5 flex items-center gap-2">
-          <label className="relative flex min-w-0 flex-1 items-center">
-            <span className="pointer-events-none absolute left-4 text-teal-mid">
-              <SearchIcon className="h-4 w-4" />
-            </span>
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder={`${searchBi.en} · ${searchBi.th}`}
-              className="w-full rounded-full border border-teal-dark/10 bg-white py-[11px] pl-11 pr-4 text-[11.5px] text-ink-app outline-none placeholder:text-ink-app/55"
-              aria-label={`${searchBi.en} / ${searchBi.th}`}
-            />
-          </label>
-          <button
-            type="button"
-            aria-label={`${filterBi.en} / ${filterBi.th}`}
-            className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-teal-dark text-orange-soft"
-          >
-            <FilterIcon className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="hide-scrollbar flex gap-[7px] overflow-x-auto pb-0.5">
-          {CHIP_KEYS.map((c) => {
-            const active = chip === c.id
-            const label = tt(c.key)
-            const ChipIcon = c.Icon
-            return (
-              <button
-                key={c.id}
-                type="button"
-                onClick={() => setChip(c.id)}
-                className={`inline-flex shrink-0 items-center gap-[5px] rounded-full px-3.5 py-2 text-[10.5px] font-semibold transition-colors motion-reduce:transition-none ${
-                  active
-                    ? 'border border-teal-dark bg-teal-dark text-white'
-                    : 'border border-teal-dark/10 bg-white text-teal-mid'
-                }`}
-              >
-                <ChipIcon className={`h-3 w-3 ${active ? 'text-orange-soft' : 'text-teal-mid'}`} />
-                {label.en}
-                <span className={`font-thai font-medium ${active ? 'text-white/80' : ''}`}>
-                  {label.th}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      </header>
-
-      <div className="space-y-5 px-[18px] sm:px-6">
-        {isEmpty ? (
-          <section
-            className="flex flex-col items-center rounded-spot border border-teal-dark/10 bg-white px-6 py-12 text-center shadow-spot"
-            aria-live="polite"
-          >
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-teal-soft text-teal-mid">
-              <CompassEmptyIcon className="h-7 w-7" />
-            </span>
-            <BiDisplayHeading
-              en={emptyTitle.en}
-              th={emptyTitle.th}
-              as="h2"
-              className="mt-4"
-              enClassName="text-xl font-semibold text-teal-darker"
-              thClassName="mt-1 text-sm font-medium text-ink-app/55"
-            />
-            <p className="mt-2 max-w-sm text-sm leading-relaxed text-ink-app/70">
-              {emptyBody.en}
-              <span className="mt-1 block font-thai">{emptyBody.th}</span>
-            </p>
+          <div className="mb-3.5 flex items-center gap-2">
+            <label className="relative flex min-w-0 flex-1 items-center">
+              <span className="pointer-events-none absolute left-4 text-teal-mid">
+                <SearchIcon className="h-4 w-4" />
+              </span>
+              <input
+                type="search"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={`${searchBi.en} · ${searchBi.th}`}
+                className="w-full rounded-full border border-line bg-white py-3 pl-11 pr-4 text-[11.5px] text-ink-app outline-none placeholder:text-ink-app/45 shadow-[0_4px_12px_rgba(0,0,0,0.04)]"
+                aria-label={`${searchBi.en} / ${searchBi.th}`}
+              />
+            </label>
             <button
               type="button"
-              onClick={clearFilters}
-              className="mt-6 rounded-full bg-teal-dark px-5 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-95 motion-reduce:transition-none"
+              aria-label={`${filterBi.en} / ${filterBi.th}`}
+              className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full bg-teal-dark text-orange-soft"
             >
-              {clearBi.en}
-              <span className="ml-1.5 font-thai font-medium text-white/80">{clearBi.th}</span>
+              <FilterIcon className="h-4 w-4" />
             </button>
-          </section>
-        ) : (
-          <>
-            <section aria-labelledby="masterpiece-heading">
-              <h2 id="masterpiece-heading" className="sr-only">
-                {masterpieceBi.en} / {masterpieceBi.th}
-              </h2>
+          </div>
+
+          <div className="hide-scrollbar flex gap-[7px] overflow-x-auto pb-0.5">
+            {CHIP_KEYS.map((c) => {
+              const active = chip === c.id
+              const label = tt(c.key)
+              const ChipIcon = c.Icon
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => setChip(c.id)}
+                  className={`inline-flex shrink-0 items-center gap-[5px] rounded-full px-3.5 py-2 text-[10.5px] font-semibold ${
+                    active
+                      ? 'border border-ink-app bg-ink-app text-white'
+                      : 'border border-line bg-white text-ink-app/55'
+                  }`}
+                >
+                  <ChipIcon className={`h-3 w-3 ${active ? 'text-orange-soft' : ''}`} />
+                  {label.en}
+                  <span className={`font-thai font-medium ${active ? 'text-white/80' : ''}`}>
+                    {label.th}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </header>
+
+        <div className="space-y-5 px-4 sm:px-6">
+          {loading ? (
+            <div className="h-[280px] animate-pulse rounded-spot bg-teal-soft/70" />
+          ) : isEmpty ? (
+            <section className="flex flex-col items-center rounded-spot bg-white px-6 py-12 text-center shadow-spot">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-teal-soft text-teal-mid">
+                <CompassEmptyIcon className="h-7 w-7" />
+              </span>
+              <BiDisplayHeading
+                en={emptyTitle.en}
+                th={emptyTitle.th}
+                as="h2"
+                className="mt-4"
+                enClassName="text-xl font-semibold text-teal-darker"
+                thClassName="mt-1 text-sm font-medium text-ink-app/55"
+              />
+              <p className="mt-2 max-w-sm text-sm text-ink-app/70">
+                {emptyBody.en}
+                <span className="mt-1 block font-thai">{emptyBody.th}</span>
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setChip('all')
+                  setQuery('')
+                }}
+                className="mt-6 rounded-full bg-ink-app px-5 py-2.5 text-sm font-semibold text-white"
+              >
+                {clearBi.en}
+                <span className="ml-1.5 font-thai font-medium text-white/80">{clearBi.th}</span>
+              </button>
+            </section>
+          ) : (
+            <>
               {masterpiece ? (
-                <MasterpieceCard
-                  spot={masterpiece}
-                  liked={Boolean(liked[masterpiece.id])}
-                  onToggleLike={() => toggleLike(masterpiece.id)}
-                />
-              ) : (
-                <div className="h-[220px] animate-pulse rounded-spot bg-teal-soft/80 motion-reduce:animate-none" />
-              )}
-            </section>
-
-            <section aria-labelledby="nearby-heading">
-              <div className="mb-3 flex items-baseline justify-between gap-3">
-                <BiDisplayHeading
-                  id="nearby-heading"
-                  en={nearbyBi.en}
-                  th={nearbyBi.th}
-                  as="h2"
-                  className="min-w-0"
-                  enClassName="text-[15px] font-semibold tracking-tight text-teal-darker"
-                  thClassName="mt-0.5 text-[11px] font-medium text-ink-app/55"
-                />
-                <Link to="/gallery" className="text-[10px] font-bold text-orange-deep">
-                  {seeAllBi.en}
-                  <span className="ml-1 font-thai font-medium">{seeAllBi.th}</span>
-                </Link>
-              </div>
-
-              <div className="hide-scrollbar flex gap-2.5 overflow-x-auto pb-1">
-                {nearbySlice.items.map((spot) => (
-                  <NearbyCard
-                    key={spot.id}
-                    spot={spot}
-                    liked={Boolean(liked[spot.id])}
-                    onToggleLike={() => toggleLike(spot.id)}
+                <section>
+                  <SectionLabel
+                    en={masterpieceBi.en}
+                    th={masterpieceBi.th}
+                    seeAllTo="/spots"
+                    seeAllEn={seeAllBi.en}
+                    seeAllTh={seeAllBi.th}
                   />
-                ))}
-              </div>
-
-              {nearbySlice.hasMore ? (
-                <div className="mt-4 flex justify-center">
-                  <button
-                    type="button"
-                    onClick={() => setNearbyLimit((n) => n + DISCOVER_NEARBY_PAGE_SIZE)}
-                    className="rounded-full border border-teal-mid/30 bg-white px-4 py-2 text-sm font-semibold text-teal-mid transition-opacity hover:opacity-90 motion-reduce:transition-none"
-                  >
-                    {loadMoreBi.en}
-                    <span className="ml-1.5 font-thai font-medium">{loadMoreBi.th}</span>
-                  </button>
-                </div>
+                  <MasterpieceCard spot={masterpiece} />
+                </section>
               ) : null}
-            </section>
-          </>
-        )}
+
+              <section>
+                <MapTeaser
+                  spots={filteredSpots.length ? filteredSpots : spots}
+                  countLabel={mapOverlay}
+                />
+              </section>
+
+              {latestPhotos.length > 0 ? (
+                <section>
+                  <SectionLabel
+                    en={latestBi.en}
+                    th={latestBi.th}
+                    seeAllTo="/gallery"
+                    seeAllEn={seeAllBi.en}
+                    seeAllTh={seeAllBi.th}
+                  />
+                  <LatestWorkGrid photos={latestPhotos} />
+                </section>
+              ) : null}
+
+              {nearbySpots.length > 0 ? (
+                <section>
+                  <SectionLabel
+                    en={nearbyBi.en}
+                    th={nearbyBi.th}
+                    seeAllTo="/spots"
+                    seeAllEn={seeAllBi.en}
+                    seeAllTh={seeAllBi.th}
+                  />
+                  <div className="hide-scrollbar flex gap-2.5 overflow-x-auto pb-1">
+                    {nearbySpots.map((spot) => (
+                      <NearbySpotCard key={spot.id} spot={spot} />
+                    ))}
+                  </div>
+                </section>
+              ) : null}
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
