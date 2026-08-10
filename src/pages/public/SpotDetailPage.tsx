@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import SpotHeroCarousel from '../../components/spots/SpotHeroCarousel'
 import SpotRoutePreview from '../../components/spots/SpotRoutePreview'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import { getDiscoverSpots } from '../../data/discoverFeed'
@@ -74,7 +75,6 @@ export default function SpotDetailPage() {
   const showPortraitToggle = Boolean(
     spot?.camera_settings.portrait || spot?.gear_portrait,
   )
-  const hero = spot?.thumbSrc ?? spot?.heroSrc
 
   if (loading) {
     return (
@@ -158,32 +158,11 @@ export default function SpotDetailPage() {
   return (
     <div className="relative min-h-[100dvh] bg-cream pb-[7.5rem] md:pb-16">
       <div className="-mx-4 sm:-mx-6 lg:-mx-10">
-        <div className="relative h-[38vh] min-h-[220px] max-h-[420px] overflow-hidden bg-teal-dark">
-          {hero ? (
-            <img
-              src={hero}
-              alt={`${spot.title_en} / ${spot.title_th}`}
-              className="h-full w-full object-cover"
-              onError={(e) => {
-                const img = e.currentTarget
-                if (spot.heroSrc && img.src !== spot.heroSrc) img.src = spot.heroSrc
-              }}
-            />
-          ) : (
-            <div className="flex h-full items-center justify-center bg-gradient-to-br from-teal-dark to-teal-mid text-cream/70">
-              Photo Spot
-            </div>
-          )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="absolute left-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-cream/95 text-teal-dark shadow"
-            aria-label={`${backBi.en} / ${backBi.th}`}
-          >
-            <ChevronLeftIcon className="h-4 w-4" />
-          </button>
-        </div>
+        <SpotHeroCarousel
+          spot={spot}
+          onBack={() => navigate(-1)}
+          backLabel={`${backBi.en} / ${backBi.th}`}
+        />
 
         {spot.drone_allowed === 'prohibited' ? (
           <div role="alert" className="border-y-4 border-[#5c1408] bg-[#b91c1c] px-4 py-3 text-white">
@@ -224,38 +203,6 @@ export default function SpotDetailPage() {
             </p>
           ) : null}
         </header>
-
-        {spot.gallery_image_urls?.length ? (
-          <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-            {spot.gallery_image_urls.map((url) => (
-              <img
-                key={url}
-                src={url}
-                alt=""
-                className="h-24 w-36 shrink-0 rounded-lg object-cover"
-                loading="lazy"
-              />
-            ))}
-          </div>
-        ) : null}
-
-        <div className="flex flex-wrap gap-2">
-          {spot.best_time ? (
-            <span className="rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-semibold text-ink-app/60">
-              Best time <b className="text-orange-deep">{spot.best_time}</b>
-            </span>
-          ) : null}
-          {spot.best_season ? (
-            <span className="rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-semibold text-ink-app/60">
-              Season <b className="text-orange-deep">{spot.best_season}</b>
-            </span>
-          ) : null}
-          {spot.drive_time_from_sydney ? (
-            <span className="rounded-full border border-line bg-white px-3 py-1.5 text-[11px] font-semibold text-ink-app/60">
-              From Sydney <b className="text-orange-deep">{spot.drive_time_from_sydney}</b>
-            </span>
-          ) : null}
-        </div>
 
         {spot.warnings_en || spot.warnings_th ? (
           <div className="rounded-[10px] border border-[rgba(201,147,46,0.3)] bg-amber-bg px-3.5 py-2.5 text-[12px] font-semibold leading-relaxed text-[#7a5c1c]">
