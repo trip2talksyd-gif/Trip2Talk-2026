@@ -8,10 +8,8 @@ import {
 } from 'react'
 import { useLang } from '../../hooks/useLang'
 
-/** Hero reel — H.264 web encode (Chrome-safe).
- * Original upload at public-media/VDO/Hero_cover01.mp4 was HEVC/H.265 which
- * Chrome often cannot decode (silent poster-only failure). Keep the original
- * in Storage as archive; serve this H.264 cut for playback. */
+/** Hero reel — H.264 on Vercel (`/hero/…`), not Supabase (Cached Egress).
+ * Archive HEVC remains at public-media/VDO/Hero_cover01.mp4 — do not hotlink it. */
 export const HERO_VIDEO_SRC = '/hero/Hero_cover01_web.mp4'
 
 /** Night-sky still while the reel buffers / if media truly fails. */

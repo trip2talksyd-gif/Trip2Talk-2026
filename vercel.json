@@ -5,9 +5,29 @@
       "schedule": "0 22 * * *"
     }
   ],
+  "headers": [
+    {
+      "source": "/hero/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/trip-videos/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
   "rewrites": [
     {
-      "source": "/((?!api/|assets/|icons/|icon-|apple-touch|favicon|manifest|registerSW|sw\\.js|workbox).*)",
+      "source": "/((?!api/|assets/|hero/|trip-videos/|icons/|icon-|apple-touch|favicon|manifest|registerSW|sw\\.js|workbox|brand/).*)",
       "destination": "/index.html"
     }
   ]

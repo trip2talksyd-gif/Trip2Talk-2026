@@ -5,8 +5,7 @@ import { useLang } from '../../hooks/useLang'
 import BiText from '../ui/BiText'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 
-const HERO_MEDIA =
-  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/VDO/Uluru.mp4'
+const HERO_MEDIA = '/trip-videos/Uluru_web.mp4'
 
 const BASE_PRICE = 1390
 const PRIVATE_ADDON = 500

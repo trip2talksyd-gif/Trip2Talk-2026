@@ -247,6 +247,7 @@ export default function TripPrepPage() {
             muted
             loop
             playsInline
+            preload="metadata"
             className="aspect-video w-full rounded-2xl border border-line bg-black object-cover"
           />
         )}

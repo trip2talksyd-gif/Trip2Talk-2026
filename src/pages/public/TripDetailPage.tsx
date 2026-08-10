@@ -212,6 +212,7 @@ export default function TripDetailPage() {
               muted
               loop
               playsInline
+              preload="metadata"
               className="aspect-[6/5] w-full object-cover md:aspect-[21/9]"
             />
           ) : (

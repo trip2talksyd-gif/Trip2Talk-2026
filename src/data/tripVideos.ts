@@ -1,28 +1,28 @@
-/** Per-trip prep-page video, hosted in the `trip-photos` Storage bucket under /VDO.
- * Not every trip has one yet — getTripVideoUrl returns null until a file is uploaded
- * for that destination, and the page simply hides the video block in that case. */
-
-const STORAGE_VIDEO_BASE =
-  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/VDO'
+/**
+ * Per-trip prep / cover videos — hosted on Vercel (`public/trip-videos/`),
+ * NOT Supabase Storage (Cached Egress quota).
+ *
+ * Source masters remain in trip-photos/VDO for archival; the site only
+ * references the compressed H.264 `_web.mp4` copies below.
+ */
 
 const TRIP_VIDEO_FILE: Record<string, string> = {
-  ULU: 'Uluru.mp4',
+  ULU: '/trip-videos/Uluru_web.mp4',
 }
 
 export function getTripVideoUrl(tripCode: string): string | null {
   const prefix = tripCode.split('-')[0]?.toUpperCase() ?? ''
-  const file = TRIP_VIDEO_FILE[prefix]
-  return file ? `${STORAGE_VIDEO_BASE}/${file}` : null
+  return TRIP_VIDEO_FILE[prefix] ?? null
 }
 
-/** Hero/cover video shown at the top of the Trip Detail page instead of the static
- * photo, for destinations that have one. Falls back to the photo hero otherwise. */
+/** Hero/cover video on Trip Detail — falls back to static photo when null. */
 const TRIP_COVER_VIDEO_FILE: Record<string, string> = {
-  NZ: 'NZ/NZ02.mp4',
+  NZ: '/trip-videos/NZ02_web.mp4',
+  TAS: '/trip-videos/Tasmania_cover_web.mp4',
 }
 
 export function getTripCoverVideoUrl(tripCode: string): string | null {
   const prefix = tripCode.split('-')[0]?.toUpperCase() ?? ''
-  const file = TRIP_COVER_VIDEO_FILE[prefix]
-  return file ? `${STORAGE_VIDEO_BASE}/${file}` : null
+  // Tasmania spring codes are TAS-SP / TAS-LH / TAS-3D2N — all start with TAS
+  return TRIP_COVER_VIDEO_FILE[prefix] ?? null
 }
