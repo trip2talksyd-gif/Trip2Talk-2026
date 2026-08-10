@@ -317,6 +317,248 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     review_notes:
       'Aurora claims must stay non-guaranteed. Camera numbers and best-season wording need Saen review.',
   },
+  {
+    id: 'a1111111-1111-4111-8111-111111111201',
+    slug: 'lake-tekapo-good-shepherd',
+    title_en: 'Lake Tekapo — Church of the Good Shepherd',
+    title_th: 'ทะเลสาบเทคาโป — โบสถ์ Church of the Good Shepherd',
+    location_en: 'Lake Tekapo, Mackenzie District, NZ',
+    location_th: 'ทะเลสาบเทคาโป, เขตแมคเคนซี, นิวซีแลนด์',
+    description_en:
+      'Iconic lakeside stone church on Lake Tekapo inside the Aoraki Mackenzie International Dark Sky Reserve — a classic South Island night-sky and daytime landscape stop.',
+    description_th:
+      'โบสถ์หินริมทะเลสาบเทคาโปในเขตมืดนานาชาติ Aoraki Mackenzie — จุดคลาสสิกทั้งกลางวันและท้องฟ้ามืดเกาะใต้',
+    categories: ['Night', 'Milky Way', 'Landscape', 'Portrait'],
+    latitude: -44.00333,
+    longitude: 170.4825,
+    google_maps_url: 'https://maps.google.com/?q=Church+of+the+Good+Shepherd,+Lake+Tekapo',
+    best_time: 'Clear nights (dark sky) / soft daytime lake light',
+    best_season: 'Year-round; clearest winter nights often best for Milky Way (verify cloud)',
+    drive_time_from_sydney: 'Flight SYD→CHC (~3 hrs) + ~3–3.5 hrs drive — not a Sydney day drive',
+    best_time_morning: 'Soft morning light on the church and lake when skies are clear.',
+    best_time_evening: 'Blue hour into dusk — church silhouette against lake and mountains.',
+    best_time_night:
+      'After full dark on clear, moonless nights — Aoraki Mackenzie is an International Dark Sky Reserve. Check cloud + moon phase; do not use bright lights on other visitors.',
+    access_private_car:
+      'Park in the public car parks near Pioneer Drive / church precinct and walk a short distance to the lakeshore viewing areas. Stay off private property and respect church grounds.',
+    access_public_transport: null,
+    gear_landscape: 'Wide lens + tripod for night sky; dress for alpine cold and wind.',
+    gear_portrait: '35–85mm for people with church/lake backdrop — keep paths clear for other visitors.',
+    camera_settings: {
+      landscape: {
+        aperture: 'f/2.8–f/4 (night) / f/8–f/11 (day)',
+        iso: '1600–6400 (night) / 100–200 (day)',
+        shutter: '10–25s (night, track stars carefully) / 1/60–1/125 (day)',
+        filter: null,
+      },
+      portrait: {
+        aperture: 'f/2.8–f/5.6',
+        iso: '200–1600',
+        shutter: '1/160+',
+        filter: null,
+      },
+    },
+    tips_en:
+      'Arrive early for night sessions; keep red/low light only; never block doorways during services. Related Trip2Talk trip: NZ-6D5N (NZ-10D9N also covers Mackenzie).',
+    tips_th:
+      'มาถึงก่อนมืด ใช้ไฟแดง/ไฟอ่อน และอย่าขวางทางเข้าโบสถ์ตอนมีพิธี ทริปที่เกี่ยวข้อง: NZ-6D5N',
+    warnings_en:
+      'Respect church grounds and quiet hours. Cold wind off the lake. Dark-sky etiquette — no bright white lights or lasers. Confirm any local access notices. REVIEW: pin is church location (Wikipedia/Wikidata).',
+    warnings_th:
+      'เคารพพื้นที่โบสถ์ อากาศหนาวลมแรงจากทะเลสาบ ไม่ใช้ไฟขาวแรง/เลเซอร์ [REVIEW พิกัดโบสถ์]',
+    drone_allowed: 'restricted',
+    drone_notes: 'Follow CAA NZ rules; avoid flying over people and near the church precinct.',
+    linked_trip_code: 'NZ-6D5N',
+    related_trip_code: 'NZ-6D5N',
+    photo_id: 'nz-001',
+    hero_image_url: null,
+    thumbnail_url: null,
+    rating: 4.9,
+    sort_order: 50,
+    is_featured: true,
+    review_notes:
+      'Hero photo_id is generic NZ cover — swap to a Tekapo frame when available. Exact night shutter/ISO ranges are starting points for Saen review.',
+  },
+  {
+    id: 'a1111111-1111-4111-8111-111111111202',
+    slug: 'aoraki-hooker-valley',
+    title_en: 'Aoraki / Mount Cook — Hooker Valley',
+    title_th: 'ออรากิ / เมาท์คุก — หุบเขาฮุคเกอร์',
+    location_en: 'Aoraki/Mount Cook National Park, Canterbury, NZ',
+    location_th: 'อุทยานแห่งชาติออรากิ/เมาท์คุก, แคนเทอร์เบอรี, นิวซีแลนด์',
+    description_en:
+      'DOC Hooker Valley Track trailhead area with classic valley views toward Aoraki/Mount Cook — one of New Zealand’s most photographed alpine landscapes.',
+    description_th:
+      'จุดเริ่มเส้นทาง Hooker Valley ของ DOC ที่มองเห็นหุบเขาและยอดออรากิ/เมาท์คุก — วิวอัลไพน์คลาสสิกของนิวซีแลนด์',
+    categories: ['Landscape', 'Nature', 'Sunrise', 'Portrait'],
+    latitude: -43.7187,
+    longitude: 170.09315,
+    google_maps_url: 'https://maps.google.com/?q=Hooker+Valley+Track,+Aoraki+Mount+Cook',
+    best_time: 'Golden hour / clear alpine light on the peaks',
+    best_season: 'Shoulder seasons often clearer; check DOC alerts year-round',
+    drive_time_from_sydney: 'Flight SYD→CHC + drive via Twizel/SH80 — multi-day NZ itinerary',
+    best_time_morning: 'Morning light into the valley when cloud is off the peaks.',
+    best_time_evening: 'Late light on Aoraki/Mount Cook when skies are clear — weather changes fast.',
+    best_time_night: null,
+    access_private_car:
+      'Drive Hooker Valley Road to White Horse Hill car park (DOC). Track starts from the car park area — follow DOC signs.',
+    access_public_transport: null,
+    gear_landscape: 'Wide to standard zoom + poles/layers; alpine weather kit essential.',
+    gear_portrait: 'People-with-mountain frames work mid-tele — stay on marked track.',
+    camera_settings: {
+      landscape: {
+        aperture: 'f/8–f/11',
+        iso: '100–400',
+        shutter: '1/60–1/250 (tripod if wind drops)',
+        filter: 'CPL optional — REVIEW',
+      },
+      portrait: {
+        aperture: 'f/2.8–f/5.6',
+        iso: '100–800',
+        shutter: '1/200+',
+        filter: null,
+      },
+    },
+    tips_en:
+      'Check DOC Hooker Valley Track status before going (closures happen). Related trip: NZ-6D5N / NZ-10D9N South Island legs.',
+    tips_th: 'เช็คสถานะเส้นทาง DOC ก่อนไปเสมอ ทริปที่เกี่ยวข้อง: NZ-6D5N / NZ-10D9N',
+    warnings_en:
+      'Alpine weather, glacial rivers, and sudden cloud/wind. Stay on the marked track and bridges. Recreational drones in national parks typically need DOC authorisation — do not assume you can fly. REVIEW GPS = White Horse Hill / Hooker Valley trailhead.',
+    warnings_th:
+      'อากาศอัลไพน์ แม่น้ำธารน้ำแข็ง เมฆ/ลมเปลี่ยนไว เดินตามทาง DOC โดรนในอุทยานมักต้องขออนุญาต [REVIEW พิกัดจุดจอด]',
+    drone_allowed: 'restricted',
+    drone_notes: 'DOC national park — permits usually required; follow current park rules.',
+    linked_trip_code: 'NZ-6D5N',
+    related_trip_code: 'NZ-6D5N',
+    photo_id: 'nz-013',
+    hero_image_url: null,
+    thumbnail_url: null,
+    rating: 4.9,
+    sort_order: 60,
+    is_featured: true,
+    review_notes:
+      'Track can close — keep warnings current. Hero photo_id is generic NZ — swap when Mount Cook frame is tagged.',
+  },
+  {
+    id: 'a1111111-1111-4111-8111-111111111203',
+    slug: 'lake-pukaki-peters-lookout',
+    title_en: "Lake Pukaki — Peter's Lookout",
+    title_th: 'ทะเลสาบพูคากิ — จุดชมวิว Peter’s Lookout',
+    location_en: 'Mount Cook Road (SH80), near Lake Pukaki, NZ',
+    location_th: 'ถนน Mount Cook (SH80) ใกล้ทะเลสาบพูคากิ, นิวซีแลนด์',
+    description_en:
+      'Signed roadside lookout on SH80 with turquoise Lake Pukaki and mountain backdrop toward Aoraki/Mount Cook — a classic blue-hour / golden-hour pull-over.',
+    description_th:
+      'จุดชมวิวริมถนน SH80 กับน้ำสีฟ้าของทะเลสาบพูคากิและฉากหลังภูเขาไปทางออรากิ — จุดจอดคลาสสิกช่วงฟ้าคราม/golden hour',
+    categories: ['Landscape', 'Sunrise', 'Sunset', 'Nature'],
+    latitude: -44.1901,
+    longitude: 170.1398,
+    google_maps_url: "https://maps.google.com/?q=Peter's+Lookout+Lake+Pukaki",
+    best_time: 'Blue hour / golden hour on clear days',
+    best_season: 'Year-round; clearest views when peaks are free of low cloud',
+    drive_time_from_sydney: 'Flight SYD→CHC + drive on SH80 toward Mount Cook Village',
+    best_time_morning: 'Sunrise/blue hour looking up the lake toward the mountains.',
+    best_time_evening: 'Golden hour when light hits the ranges — watch road traffic.',
+    best_time_night: null,
+    access_private_car:
+      'Pull into the signed Peter’s Lookout / Tapataia Mahaka car park on Mount Cook Road (SH80). Short walk to viewing areas; stay clear of the highway.',
+    access_public_transport: null,
+    gear_landscape: 'Wide to mid zoom; CPL can help manage lake glare — REVIEW preference.',
+    gear_portrait: 'People against lake/mountain — keep clear of the road edge.',
+    camera_settings: {
+      landscape: {
+        aperture: 'f/8–f/11',
+        iso: '100–200',
+        shutter: '1/60–1/125',
+        filter: 'CPL optional — REVIEW',
+      },
+      portrait: {
+        aperture: 'f/2.8–f/4',
+        iso: '100–400',
+        shutter: '1/200+',
+        filter: null,
+      },
+    },
+    tips_en:
+      'SH80 is a busy tourist road — park fully off the lane. Related trip: NZ-6D5N.',
+    tips_th: 'SH80 รถเยอะ — จอดให้พ้นเลน ทริปที่เกี่ยวข้อง: NZ-6D5N',
+    warnings_en:
+      'Highway traffic hazard — do not stop on the road itself. Wind off the lake can be cold. GPS pin is approximate for the lookout precinct — REVIEW exact car-park pin with Saen.',
+    warnings_th:
+      'อันตรายจากรถบนทางหลวง อย่าจอดบนถนน ลมหนาวจากทะเลสาบ [REVIEW พิกัดลานจอด]',
+    drone_allowed: 'restricted',
+    drone_notes: 'CAA NZ rules; avoid flying over roads, cars, and people.',
+    linked_trip_code: 'NZ-6D5N',
+    related_trip_code: 'NZ-6D5N',
+    photo_id: 'nz-014',
+    hero_image_url: null,
+    thumbnail_url: null,
+    rating: 4.8,
+    sort_order: 70,
+    is_featured: false,
+    review_notes:
+      'Confirm exact Peter’s Lookout car-park coordinates before treating pin as surveyed. Hero media generic NZ for now.',
+  },
+  {
+    id: 'a1111111-1111-4111-8111-111111111204',
+    slug: 'that-wanaka-tree',
+    title_en: 'That Wānaka Tree',
+    title_th: 'ต้นไม้ That Wānaka Tree',
+    location_en: 'Lake Wānaka, Otago, NZ',
+    location_th: 'ทะเลสาบวานากา, โอทาโก, นิวซีแลนด์',
+    description_en:
+      'Lone willow standing in the shallows of Lake Wānaka — one of New Zealand’s most photographed trees (sunrise/sunset + portrait favourite).',
+    description_th:
+      'ต้นวิลโลว์เดียวกลางน้ำตื้นของทะเลสาบวานากา — จุดถ่ายภาพยอดนิยมทั้งพระอาทิตย์ขึ้น/ตกและพอร์ตเทรต',
+    categories: ['Landscape', 'Portrait', 'Sunrise', 'Sunset'],
+    latitude: -44.6983,
+    longitude: 169.1175,
+    google_maps_url: 'https://maps.google.com/?q=That+Wanaka+Tree',
+    best_time: 'Sunrise / sunset (calm water helps)',
+    best_season: 'Year-round; calm mornings often cleaner reflections',
+    drive_time_from_sydney: 'Flight SYD→CHC/ZQN + drive to Wānaka — multi-day NZ itinerary',
+    best_time_morning: 'Sunrise when the lake is calm — reflections of the tree and sky.',
+    best_time_evening: 'Sunset / blue hour — expect crowds; be patient and share the shore.',
+    best_time_night: null,
+    access_private_car:
+      'Park near Wanaka Station Park / lakeside walkway access and walk along the public shore path to the tree viewpoint. Do not drive onto the foreshore.',
+    access_public_transport: null,
+    gear_landscape: 'Wide to mid zoom; waterproof footwear for damp shore edges.',
+    gear_portrait: 'Popular for couples/portraits — keep space for other visitors; no climbing the tree.',
+    camera_settings: {
+      landscape: {
+        aperture: 'f/8–f/11',
+        iso: '100–200',
+        shutter: '1/60–1/125 (ND if smoothing water — REVIEW)',
+        filter: 'ND / CPL optional — REVIEW',
+      },
+      portrait: {
+        aperture: 'f/2.8–f/4',
+        iso: '100–400',
+        shutter: '1/200+',
+        filter: null,
+      },
+    },
+    tips_en:
+      'Share the viewpoint; do not climb or damage the tree. Related trip: NZ-6D5N (Wanaka/Queenstown region also on NZ-10D9N).',
+    tips_th: 'แชร์มุมถ่าย อย่าปีน/ทำลายต้นไม้ ทริปที่เกี่ยวข้อง: NZ-6D5N',
+    warnings_en:
+      'Slippery rocks and cold water at the shore. Respect the tree — climbing/damage has been a real issue. Crowds at peak sunrise/sunset. Coords from Wikipedia / NZ Tree Register.',
+    warnings_th:
+      'หินลื่น น้ำเย็น อย่าปีนต้นไม้ คนหนาแน่นตอนพระอาทิตย์ขึ้น/ตก',
+    drone_allowed: 'restricted',
+    drone_notes: 'CAA NZ rules; avoid flying over crowds on the foreshore.',
+    linked_trip_code: 'NZ-6D5N',
+    related_trip_code: 'NZ-6D5N',
+    photo_id: 'nz-015',
+    hero_image_url: null,
+    thumbnail_url: null,
+    rating: 4.8,
+    sort_order: 80,
+    is_featured: true,
+    review_notes:
+      'Hero photo_id is generic NZ — prefer a real Wanaka-tree frame when tagged. Cardrona Valley not seeded separately; Wanaka tree is the verified public pin.',
+  },
 ]
 
 export function findDraftPhotoSpot(key: string): PhotoSpotRow | null {

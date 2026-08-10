@@ -87,7 +87,10 @@ export default function SpotsMap({ spots, selectedId, onSelect, className }: Pro
       map.setView([withCoords[0].latitude, withCoords[0].longitude], 11)
     } else if (withCoords.length > 1) {
       const bounds = L.latLngBounds(withCoords.map((s) => [s.latitude, s.longitude]))
-      map.fitBounds(bounds.pad(0.2), { animate: false, maxZoom: 10 })
+      // AU + NZ spans the Tasman — keep maxZoom low enough that both island groups stay in frame with pins visible.
+      const lngSpan = Math.abs(bounds.getEast() - bounds.getWest())
+      const maxZoom = lngSpan > 25 ? 5 : 10
+      map.fitBounds(bounds.pad(0.18), { animate: false, maxZoom })
     }
   }, [spots, selectedId])
 
