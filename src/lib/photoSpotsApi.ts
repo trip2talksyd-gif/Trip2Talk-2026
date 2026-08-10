@@ -321,7 +321,7 @@ export function filterSpotsByCategory(
   return spots.filter((s) => s.categories.some((x) => x.toLowerCase() === c))
 }
 
-export function badgeForSpot(spot: PhotoSpotDetail): string {
+export function badgeForSpot(spot: Pick<PhotoSpotDetail, 'categories'>): string {
   if (spot.categories.includes('Sunrise')) return 'Sunrise Spot'
   if (spot.categories.includes('Milky Way') || spot.categories.includes('Night')) return 'Night Spot'
   if (spot.categories.includes('Aurora')) return 'Aurora'

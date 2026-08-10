@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { List, Map as MapIcon } from 'lucide-react'
+import { ChevronRight, List, Map as MapIcon, X } from 'lucide-react'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
+import SpotMedia from '../../components/spots/SpotMedia'
 import SpotsMap from '../../components/spots/SpotsMap'
 import { useLang } from '../../hooks/useLang'
 import {
-  badgeForSpot,
   fetchPhotoSpots,
   filterSpotsByCategory,
   sortPhotoSpots,
@@ -23,27 +23,17 @@ const CATEGORY_CHIPS = [
 ] as const
 
 function SpotCard({ spot }: { spot: PhotoSpotDetail }) {
-  const img = spot.thumbSrc ?? spot.heroSrc
-  const badge = badgeForSpot(spot)
   return (
     <Link
       to={`/spots/${spot.slug}`}
       className="block overflow-hidden rounded-2xl border border-line bg-white shadow-[0_8px_20px_rgba(18,47,42,0.06)] transition hover:border-teal-dark/20"
     >
-      <div className="relative h-[140px] bg-teal-soft sm:h-[160px]">
-        {img ? (
-          <img
-            src={img}
-            alt={`${spot.title_en} / ${spot.title_th}`}
-            className="h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : null}
-        <span className="absolute left-2.5 top-2.5 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-orange-soft">
-          {badge}
-        </span>
-      </div>
+      <SpotMedia
+        spot={spot}
+        showBadge
+        className="h-[140px] sm:h-[160px]"
+        iconSize="lg"
+      />
       <div className="px-3.5 py-3">
         <p className="text-[14px] font-bold text-ink-app">{spot.title_en}</p>
         <p className="mt-0.5 font-thai text-[12px] text-ink-app/55">
@@ -67,41 +57,59 @@ function SpotCard({ spot }: { spot: PhotoSpotDetail }) {
   )
 }
 
-function MapPreviewCard({ spot }: { spot: PhotoSpotDetail }) {
-  const img = spot.thumbSrc ?? spot.heroSrc
+function MapPreviewCard({
+  spot,
+  onDismiss,
+}: {
+  spot: PhotoSpotDetail
+  onDismiss: () => void
+}) {
   return (
-    <Link
-      to={`/spots/${spot.slug}`}
-      className="flex gap-3 rounded-2xl bg-white p-3 shadow-[0_14px_34px_rgba(0,0,0,0.16)]"
+    <div
+      className="t2t-map-preview pointer-events-auto overflow-hidden rounded-2xl border border-white/40 bg-white shadow-[0_18px_40px_rgba(18,47,42,0.22)]"
+      role="dialog"
+      aria-label={`${spot.title_en} preview`}
     >
-      <div className="h-[74px] w-[74px] shrink-0 overflow-hidden rounded-xl bg-teal-soft">
-        {img ? (
-          <img
-            src={img}
-            alt=""
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
-        ) : null}
-      </div>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[13px] font-bold text-ink-app">{spot.title_en}</p>
-        <p className="mt-0.5 truncate font-thai text-[11px] text-ink-app/55">
-          {spot.title_th} · {spot.location_en}
-        </p>
-        <div className="mt-1.5 flex flex-wrap gap-1">
-          {spot.categories.slice(0, 3).map((c) => (
-            <span
-              key={c}
-              className="rounded-full border border-line bg-cream px-2 py-0.5 text-[9px] font-semibold text-ink-app/55"
-            >
-              {c}
-            </span>
-          ))}
+      <div className="flex gap-0">
+        <SpotMedia spot={spot} className="h-[96px] w-[96px] shrink-0 sm:h-[108px] sm:w-[108px]" iconSize="md" />
+        <div className="relative min-w-0 flex-1 px-3.5 py-3">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              onDismiss()
+            }}
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-cream text-ink-app/45 transition hover:bg-line hover:text-ink-app"
+            aria-label="Close preview"
+          >
+            <X className="h-3.5 w-3.5" strokeWidth={2.25} />
+          </button>
+          <p className="pr-8 truncate text-[14px] font-bold leading-snug text-ink-app">{spot.title_en}</p>
+          <p className="mt-0.5 truncate font-thai text-[11px] text-ink-app/55">
+            {spot.title_th} · {spot.location_en}
+          </p>
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {spot.categories.slice(0, 3).map((c) => (
+              <span
+                key={c}
+                className="rounded-full border border-line bg-cream px-2 py-0.5 text-[9px] font-semibold text-ink-app/55"
+              >
+                {c}
+              </span>
+            ))}
+          </div>
+          <Link
+            to={`/spots/${spot.slug}`}
+            className="mt-2.5 inline-flex min-h-9 items-center gap-1 rounded-full bg-teal-dark px-3.5 py-1.5 text-[12px] font-bold text-cream transition hover:bg-teal-darker active:scale-[0.98]"
+          >
+            See details
+            <span className="font-thai font-medium opacity-80">/ ดูรายละเอียด</span>
+            <ChevronRight className="h-3.5 w-3.5" strokeWidth={2.5} />
+          </Link>
         </div>
-        <p className="mt-2 text-[11px] font-bold text-orange-deep">ดูรายละเอียด + เส้นทาง →</p>
       </div>
-    </Link>
+    </div>
   )
 }
 
@@ -144,8 +152,19 @@ export default function SpotsPage() {
     if (!filtered.some((s) => s.id === selected.id)) setSelected(null)
   }, [filtered, selected])
 
+  const filterActive = category !== 'All'
+
   return (
     <div className="mx-auto min-h-[70dvh] w-full max-w-[1280px] px-4 py-5 sm:px-6 lg:px-10 lg:py-8">
+      <style>{`
+        @keyframes t2t-preview-in {
+          from { opacity: 0; transform: translateY(14px) scale(0.98); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .t2t-map-preview {
+          animation: t2t-preview-in 0.28s ease-out both;
+        }
+      `}</style>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <BiDisplayHeading
@@ -206,12 +225,17 @@ export default function SpotsPage() {
           )
         })}
       </div>
+      {filterActive ? (
+        <p className="mt-2 text-[11px] font-semibold text-teal-mid">
+          Showing {filtered.length} · แสดง {filtered.length} (map + list)
+        </p>
+      ) : null}
 
       {loading ? (
         <p className="mt-10 text-center text-sm text-teal-mid">…</p>
       ) : (
         <>
-          {/* Desktop: map + list side by side */}
+          {/* Desktop: map + list side by side — both use the same `filtered` set */}
           <div className="mt-5 hidden gap-5 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-start">
             <div className="relative sticky top-4 h-[min(72vh,680px)]">
               <SpotsMap
@@ -222,7 +246,7 @@ export default function SpotsPage() {
               />
               {selected ? (
                 <div className="absolute inset-x-4 bottom-4 z-[500]">
-                  <MapPreviewCard spot={selected} />
+                  <MapPreviewCard spot={selected} onDismiss={() => setSelected(null)} />
                 </div>
               ) : null}
             </div>
@@ -257,7 +281,7 @@ export default function SpotsPage() {
             </div>
           </div>
 
-          {/* Mobile / tablet: toggle views */}
+          {/* Mobile / tablet: toggle views — same `filtered` for map pins and list cards */}
           <div className="mt-5 lg:hidden">
             {view === 'map' ? (
               <div className="relative h-[min(68dvh,560px)]">
@@ -269,7 +293,7 @@ export default function SpotsPage() {
                 />
                 {selected ? (
                   <div className="absolute inset-x-3 bottom-3 z-[500]">
-                    <MapPreviewCard spot={selected} />
+                    <MapPreviewCard spot={selected} onDismiss={() => setSelected(null)} />
                   </div>
                 ) : null}
               </div>
