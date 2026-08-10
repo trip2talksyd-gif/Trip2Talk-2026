@@ -14,7 +14,7 @@ const THAI_DISPLAY_FONT = "'Noto Serif Thai', Sarabun, serif"
 
 const NAV_LINKS = [
   { to: '/trips', en: 'Trips', th: 'ทริป' },
-  { to: '/gallery', en: 'Gallery', th: 'แกลเลอรี' },
+  { to: '/discover', en: 'Discover', th: 'Discover' },
   { to: '/photo-guide', en: 'Guides', th: 'คู่มือ', chevron: true },
   { to: '/pricing', en: 'Pricing', th: 'ราคา' },
 ] as const
