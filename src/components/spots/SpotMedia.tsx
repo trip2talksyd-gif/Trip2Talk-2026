@@ -9,7 +9,10 @@ import {
 } from 'lucide-react'
 import { badgeForSpot } from '../../lib/photoSpotsApi'
 
-type SpotLike = Pick<PhotoSpotDetail, 'categories' | 'title_en' | 'title_th'> & {
+type SpotLike = {
+  categories: string[]
+  title_en: string
+  title_th: string
   heroSrc?: string | null
   thumbSrc?: string | null
 }
