@@ -152,6 +152,8 @@ export type TranslationKey =
   | 'home.positioning.subtitle'
   | 'home.positioning.body'
   | 'home.positioning.note'
+  | 'home.positioning.badge'
+  | 'home.positioning.social'
   | 'home.positioning.pillar1.title'
   | 'home.positioning.pillar1.desc'
   | 'home.positioning.pillar2.title'
@@ -713,6 +715,8 @@ const en: Map = {
     "Every Trip2Talk trip is a photography package first, a trip second. We take you to each location at its most beautiful light — golden hour, blue hour, aurora windows — with one professional photographer who guides and drives you the whole way. Along the way, we'll show you how to get the shot yourself, so you leave with both stunning photos and new skills. This isn't a guided sightseeing tour with photos as an afterthought — it's a photo trip, built around getting you the shot.",
   'home.positioning.note':
     'Note: our trips are especially popular with those who want to feel like the subject of a real photoshoot, not just a tourist with a phone camera.',
+  'home.positioning.badge': 'PHOTO TRIP · TRIP2TALK',
+  'home.positioning.social': 'Real guests · Real photos',
   'home.positioning.pillar1.title': 'Photo package first',
   'home.positioning.pillar1.desc': 'Nature is your studio — travel is built around the shot.',
   'home.positioning.pillar2.title': 'Best light, on purpose',
@@ -1298,6 +1302,8 @@ const th: Map = {
     'ทุกทริปของ Trip2Talk คือแพ็กเกจถ่ายภาพเป็นหลัก การท่องเที่ยวเป็นเรื่องรอง เราพาคุณไปแต่ละโลเคชันในช่วงแสงที่สวยที่สุด ไม่ว่าจะเป็นโกลเด้นอาวร์ บลูอาวร์ หรือช่วงแสงออโรร่า พร้อมช่างภาพมืออาชีพหนึ่งคนที่เป็นทั้ง Trip Leader และคนขับตลอดทริป ระหว่างทางเราจะสอนวิธีถ่ายภาพให้คุณทำเองได้ด้วย กลับบ้านไปพร้อมทั้งภาพสวยๆ และสกิลใหม่ นี่ไม่ใช่ทริปเที่ยวทั่วไปที่แค่แถมถ่ายรูป แต่คือทริปถ่ายภาพที่ออกแบบมาเพื่อภาพของคุณโดยเฉพาะ',
   'home.positioning.note':
     'หมายเหตุ: ทริปของเราเป็นที่นิยมมากสำหรับคนที่อยากรู้สึกเหมือนเป็นนางแบบในเซ็ตถ่ายภาพจริง ไม่ใช่แค่นักท่องเที่ยวถือมือถือถ่ายรูป',
+  'home.positioning.badge': 'ทริปถ่ายภาพ · Trip2Talk',
+  'home.positioning.social': 'ลูกค้าจริง ถ่ายจริง',
   'home.positioning.pillar1.title': 'แพ็กเกจถ่ายภาพเป็นหลัก',
   'home.positioning.pillar1.desc': 'ธรรมชาติคือสตูดิโอ — ทริปออกแบบรอบภาพของคุณ',
   'home.positioning.pillar2.title': 'จงใจเลือกช่วงแสงสวย',
