@@ -537,8 +537,8 @@
 }
 
 .flow-top .back {
-  width: 28px;
-  height: 28px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: var(--mint-100);
   color: var(--teal-700);

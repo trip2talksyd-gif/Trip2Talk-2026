@@ -4,7 +4,7 @@ import { useLang } from '../../hooks/useLang'
 import { fetchFeaturedTours, seatsRemaining } from '../../lib/toursApi'
 import { tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
 import { getPreviewPhotoForTrip, photoSrc } from '../../data/galleryPhotos'
-import TripPhotoHero from './TripPhotoHero'
+import TripCoverImage from './TripCoverImage'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 import type { Tour } from '../../types/tour'
 
@@ -81,20 +81,11 @@ function ShowcaseCard({ tour, lang }: { tour: Tour; lang: 'en' | 'th' }) {
       className="group overflow-hidden rounded-2xl border border-line bg-card shadow-[0_6px_18px_-10px_rgba(10,61,58,0.25)]"
     >
       <div className="relative h-40 w-full overflow-hidden">
-        {imgSrc ? (
-          <img
-            src={imgSrc}
-            alt={tour.name_en}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
-          />
-        ) : (
-          <TripPhotoHero
-            tripCode={tour.trip_code}
-            alt={tour.name_en}
-            className="h-full w-full object-cover"
-          />
-        )}
+        <TripCoverImage
+          src={imgSrc}
+          alt={tour.name_en}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        />
       </div>
       <div className="p-3.5">
         <p className="text-[10px] font-bold uppercase tracking-wider text-teal-600">

@@ -28,6 +28,8 @@ import {
 import type { Tour } from '../../types/tour'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
+import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
+import TripCoverImage from '../../components/trips/TripCoverImage'
 import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
 import { useToast } from '../../components/ui/Toast'
 
@@ -327,18 +329,20 @@ export default function BookingPage() {
         <div className="success-check" aria-hidden>
           <Check className="h-7 w-7" strokeWidth={2.5} />
         </div>
-        <h2>{lang === 'th' ? 'จองสำเร็จแล้ว!' : 'Booking Confirmed!'}</h2>
-        <p className="th-sub">{lang === 'th' ? 'Booking Confirmed!' : 'จองสำเร็จแล้ว!'}</p>
+        <BiDisplayHeading
+          en="Booking Confirmed!"
+          th="จองสำเร็จแล้ว!"
+          as="h2"
+          thAs="p"
+          enClassName=""
+          thClassName="th-sub font-thai"
+        />
         <div className="success-ref">{reference}</div>
 
         {/* .mini-trip — booked trip recap card */}
         {tour && (
           <div className="mini-trip w-full">
-            {tour.cover_image_url ? (
-              <img src={tour.cover_image_url} alt="" />
-            ) : (
-              <div className="mini-trip-fallback">T2T</div>
-            )}
+            <TripCoverImage src={tour.cover_image_url} alt="" className="mini-trip-fallback" compact />
             <div className="min-w-0">
               <b className="truncate">{lang === 'th' ? tour.name_th : tour.name_en}</b>
               <span>
@@ -430,26 +434,24 @@ export default function BookingPage() {
     <form onSubmit={handleSubmit} className="space-y-3.5 pb-4" noValidate>
       {/* .flow-top — focused checkout header: back circle + bilingual title */}
       <div className="flow-top -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
-        <Link to={`/trips/${tripCode}`} className="back" aria-label="Back">
+        <Link to={`/trips/${tripCode}`} className="back" aria-label="Back / กลับ">
           <ArrowLeft className="h-3.5 w-3.5" />
         </Link>
         <div className="min-w-0">
-          <h1 className="m-0 font-serif text-[15.5px] text-ink sm:text-xl">
-            {lang === 'th' ? 'จองทริปของคุณ' : 'Book Your Trip'}
-          </h1>
-          <p className="m-0 font-thai text-[10px] text-ink-soft">
-            {lang === 'th' ? 'Book Your Trip' : 'จองทริปของคุณ'} · {tripCode}
-          </p>
+          <BiDisplayHeading
+            en="Book Your Trip"
+            th={`จองทริปของคุณ · ${tripCode}`}
+            as="h1"
+            thAs="p"
+            enClassName="m-0 text-[15.5px] font-semibold text-ink sm:text-xl"
+            thClassName="m-0 font-thai text-[10px] font-medium text-ink-soft"
+          />
         </div>
       </div>
 
       {/* .mini-trip */}
       <div className="mini-trip">
-        {tour.cover_image_url ? (
-          <img src={tour.cover_image_url} alt="" />
-        ) : (
-          <div className="mini-trip-fallback">T2T</div>
-        )}
+        <TripCoverImage src={tour.cover_image_url} alt="" className="mini-trip-fallback" compact />
         <div className="min-w-0">
           <b className="truncate">{name}</b>
           <span>{tourDurationLabel(tour, lang)}</span>
