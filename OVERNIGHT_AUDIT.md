@@ -168,12 +168,44 @@ Header says owner must apply via Dashboard. **Not applied in this session.**
 
 ---
 
-## Part 2 plan (safe frontend only)
+## Part 2 — what was fixed (on this branch only)
 
-Will fix after this file is written:
+### Covers / trip cards
+- New `TripCoverFallback` + `TripCoverImage` (`onError` → camera + “Photo coming soon” / “รูปกำลังจะมา”).
+- Wired into `TripPhotoHero`, `TripCard`, `HomeTripShowcase`, `TripPickerHero`, booking mini-trip.
+- No invented destination photos.
 
-1. Bilingual “Photo coming soon” cover fallback + `onError` (no fake photos)
-2. Display headings listed above (not Terms/Privacy/Waiver legal bodies)
-3. 44px favourite hit target; bilingual booking Back `aria-label`
+### Public headings
+- Home hero, booking confirm/title, waitlist, my-trip, 404, testimonials, missing photo-spot: EN Fraunces then Thai sibling, not swapped by language toggle.
+- Terms/Privacy section titles and waiver/OSHC copy **left unchanged**.
 
-**Will not touch:** PayID/Square charge logic, waiver/OSHC text, schema, secrets, push/deploy.
+### Accessibility
+- Trip-card favourite control **44×44px**.
+- Booking back circle **44×44px**; `aria-label="Back / กลับ"`.
+
+`npm run build` still passes after these changes.
+
+---
+
+## Needs Saen's decision
+
+1. **Square Edge secrets** — `SQUARE_ACCESS_TOKEN`, `SQUARE_APPLICATION_ID`, `SQUARE_LOCATION_ID`, `SQUARE_ENVIRONMENT`, `SQUARE_WEBHOOK_SIGNATURE_KEY`. Until set, card deposits 503; PayID still works.
+2. **Cover photos to source** — PSP-1DAY / KIA-1DAY (and dated variants) have null `cover_image_url`. Optional: add real Port Stephens / Kiama photos to Storage + `tours.cover_image_url` (and `nsw` gallery pool).
+3. **Trips not in production DB** — BER-3D2N, CAB-3D1N, TAS-SU-4D3N, exact NZ-6D5N. Confirm if they should be created, or if dated NZ/TAS rows are enough.
+4. **PSP-1DAY itinerary copy** — live highlights mention Blue Mountains / Three Sisters on a Port Stephens trip. CMS/content review, not a code fix.
+5. **Apply `20260805150000_phases_g_to_n.sql`?** — no DROP; IF NOT EXISTS only. Staff outbound queue + reminder/photo/referral columns. Review then apply in Dashboard on `bljhnelgmkulxwuhedbi` only.
+6. **Terms/Privacy English-only h2s** — legal; add Thai section titles when you approve wording.
+7. **Bundle size** — main JS ~1.85 MB; code-split later if Lighthouse complains.
+8. **Rotate** the Supabase PAT that has appeared in older chat logs.
+9. **Merge this branch** when you say push/deploy — not done overnight.
+
+---
+
+## Git commits (this branch, in order)
+
+1. `f5c7ee2` — docs: overnight production audit findings  
+2. `8c5acc3` — feat: bilingual photo-coming-soon cover fallback + 44px hit targets  
+3. `0423a1f` — fix: public display headings EN then TH without toggling  
+4. *(this file update)* — Part 2/3 summary
+
+**No push or merge to main was performed. No Supabase migration or Edge Function deploy was run.**
