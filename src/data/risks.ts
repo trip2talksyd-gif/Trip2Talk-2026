@@ -191,6 +191,21 @@ export const WAIVER_CLAUSES = {
       title: 'Photo Delivery Timeline',
       text: 'Highlight photos will be delivered within at least 1–2 weeks of trip completion. The full photo gallery will be delivered within 14–30 days of trip completion.',
     },
+    {
+      id: 'package_duration',
+      title: 'Package Duration is Final Price',
+      text: 'The listed price covers only the stated number of days. Requesting extra days or a different route is treated as a brand-new custom quote, not an extension of the existing package.',
+    },
+    {
+      id: 'extra_day_confirmation',
+      title: 'Extra Day Confirmation Terms',
+      text: 'Our team will provide a written price quote for the difference. Full payment must be received at least 10 days before departure. If not paid by the deadline, the trip proceeds on the originally booked days only — no on-site negotiation.',
+    },
+    {
+      id: 'no_on_trip_extension',
+      title: 'No On-Trip Extensions',
+      text: 'Due to staff commitments to subsequent trips, extending the trip or adding days mid-trip is not possible under any circumstances, regardless of willingness to pay extra.',
+    },
   ],
   th: [
     {
@@ -222,6 +237,21 @@ export const WAIVER_CLAUSES = {
       id: 'photo_delivery',
       title: 'กำหนดส่งภาพถ่าย',
       text: 'ภาพไฮไลท์จะจัดส่งภายในอย่างน้อย 1–2 สัปดาห์หลังจบทริป ส่วนอัลบั้มภาพทั้งหมดจะจัดส่งภายใน 14–30 วันหลังจบทริป',
+    },
+    {
+      id: 'package_duration',
+      title: 'ราคาแพ็กเกจครอบคลุมเฉพาะจำนวนวันที่ระบุ',
+      text: 'ราคาที่ระบุครอบคลุมเฉพาะจำนวนวันที่ระบุในแพ็กเกจเท่านั้น การขอเพิ่มวันหรือเปลี่ยนเส้นทางถือเป็นการขอใบเสนอราคาใหม่แบบกำหนดเอง ไม่ถือเป็นการขยายแพ็กเกจเดิม',
+    },
+    {
+      id: 'extra_day_confirmation',
+      title: 'เงื่อนไขการยืนยันวันเพิ่ม',
+      text: 'ทีมงานจะออกใบเสนอราคาเป็นลายลักษณ์อักษรสำหรับส่วนต่าง ต้องชำระเต็มจำนวนอย่างน้อย 10 วันก่อนวันเดินทาง หากไม่ชำระภายในกำหนด ทริปจะดำเนินตามจำนวนวันเดิมที่จองไว้เท่านั้น — ไม่มีการต่อรองหน้างาน',
+    },
+    {
+      id: 'no_on_trip_extension',
+      title: 'ห้ามขยายทริประหว่างเดินทาง',
+      text: 'เนื่องจากทีมงานมีภาระผูกพันกับทริปถัดไป จึงไม่สามารถขยายทริปหรือเพิ่มวันระหว่างเดินทางได้ในทุกกรณี แม้ยินดีจ่ายเพิ่มก็ตาม',
     },
   ],
 }

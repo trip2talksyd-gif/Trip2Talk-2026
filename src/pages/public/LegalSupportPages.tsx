@@ -81,6 +81,39 @@ export function TermsPage() {
         </p>
       </section>
 
+      <section className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">6. Trip duration & extensions</h2>
+        <p className="font-thai text-ink-soft">6. ระยะเวลาทริปและการขยายทริป</p>
+        <p>
+          <b>Package Duration is Final Price</b> — the listed price covers only the stated number of
+          days. Requesting extra days or a different route is treated as a brand-new custom quote, not
+          an extension of the existing package.
+        </p>
+        <p className="font-thai text-ink-soft">
+          <b>ราคาแพ็กเกจครอบคลุมเฉพาะจำนวนวันที่ระบุ</b> — ราคาที่ระบุครอบคลุมเฉพาะจำนวนวันที่ระบุในแพ็กเกจเท่านั้น
+          การขอเพิ่มวันหรือเปลี่ยนเส้นทางถือเป็นการขอใบเสนอราคาใหม่แบบกำหนดเอง ไม่ถือเป็นการขยายแพ็กเกจเดิม
+        </p>
+        <p>
+          <b>Extra Day Confirmation Terms</b> — our team will provide a written price quote for the
+          difference. Full payment must be received at least 10 days before departure. If not paid by
+          the deadline, the trip proceeds on the originally booked days only — no on-site negotiation.
+        </p>
+        <p className="font-thai text-ink-soft">
+          <b>เงื่อนไขการยืนยันวันเพิ่ม</b> — ทีมงานจะออกใบเสนอราคาเป็นลายลักษณ์อักษรสำหรับส่วนต่าง
+          ต้องชำระเต็มจำนวนอย่างน้อย 10 วันก่อนวันเดินทาง หากไม่ชำระภายในกำหนด ทริปจะดำเนินตามจำนวนวันเดิมที่จองไว้เท่านั้น
+          — ไม่มีการต่อรองหน้างาน
+        </p>
+        <p>
+          <b>No On-Trip Extensions</b> — due to staff commitments to subsequent trips, extending the
+          trip or adding days mid-trip is not possible under any circumstances, regardless of
+          willingness to pay extra.
+        </p>
+        <p className="font-thai text-ink-soft">
+          <b>ห้ามขยายทริประหว่างเดินทาง</b> — เนื่องจากทีมงานมีภาระผูกพันกับทริปถัดไป
+          จึงไม่สามารถขยายทริปหรือเพิ่มวันระหว่างเดินทางได้ในทุกกรณี แม้ยินดีจ่ายเพิ่มก็ตาม
+        </p>
+      </section>
+
       <p className="rounded-xl border border-amber-500/40 bg-amber-50 px-3 py-2 text-[11px] text-ink-soft">
         Draft for business review — not legal advice. Have an Australian legal professional review
         before treating as final.
