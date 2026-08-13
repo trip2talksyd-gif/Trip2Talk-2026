@@ -146,8 +146,13 @@ export default function SpotDetailPage() {
           <ChevronLeftIcon className="h-4 w-4" />
           {backBi.en}
         </button>
-        <h1 className="font-display text-2xl text-teal-darker">{missingBi.en}</h1>
-        <p className="mt-2 font-thai text-ink-app/60">{missingBi.th}</p>
+        <BiDisplayHeading
+          en={missingBi.en}
+          th={missingBi.th}
+          as="h1"
+          enClassName="text-2xl font-semibold text-teal-darker"
+          thClassName="mt-2 font-thai text-ink-app/60"
+        />
         <Link to="/spots" className="mt-6 inline-block text-sm font-bold text-orange-deep">
           Photo Spots
         </Link>

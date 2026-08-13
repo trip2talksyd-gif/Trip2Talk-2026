@@ -8,6 +8,7 @@ import type { Tour } from '../../types/tour'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
+import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 
 export default function WaitlistPage() {
   const { lang, t } = useLang()
@@ -89,9 +90,14 @@ export default function WaitlistPage() {
         >
           <Check className="h-7 w-7" strokeWidth={2.5} />
         </div>
-        <h2 className="m-0 mb-[3px] font-serif text-[18px] text-ink">
-          {lang === 'th' ? 'ลงชื่อ Waitlist แล้ว' : "You're on the waitlist"}
-        </h2>
+        <BiDisplayHeading
+          en="You're on the waitlist"
+          th="ลงชื่อ Waitlist แล้ว"
+          as="h2"
+          className="mb-[3px]"
+          enClassName="m-0 text-[18px] font-semibold text-ink"
+          thClassName="mt-0.5 text-[13px] font-medium text-ink-soft"
+        />
         <p className="mb-4 text-[13px] text-ink-soft">
           {lang === 'th'
             ? 'พอมีที่ว่างหรือเปิดรอบใหม่ ทีมงานจะติดต่อกลับตามลำดับครับ'
@@ -111,9 +117,13 @@ export default function WaitlistPage() {
       </Link>
 
       <div>
-        <h1 className="font-serif text-2xl text-ink">
-          {lang === 'th' ? 'ลงชื่อรอที่ว่าง' : 'Join the waitlist'}
-        </h1>
+        <BiDisplayHeading
+          en="Join the waitlist"
+          th="ลงชื่อรอที่ว่าง"
+          as="h1"
+          enClassName="text-2xl font-semibold text-ink"
+          thClassName="mt-1 text-sm font-medium text-ink-soft"
+        />
         <p className="mt-1 text-sm text-ink-soft">{nameEl}</p>
       </div>
 

@@ -8,6 +8,7 @@ import { lookupMyTrip, type MyTripLookupResult } from '../../lib/toursApi'
 import { isValidEmail } from '../../lib/validation'
 import type { BookingStatus } from '../../types/tour'
 import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
+import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 
 const STATUS_LABEL: Record<string, { en: string; th: string }> = {
   pending_payment: { en: 'Deposit pending', th: 'รอชำระมัดจำ' },
@@ -26,7 +27,7 @@ const STATUS_BADGE: Record<string, string> = {
 }
 
 export default function MyTripPage() {
-  const { lang, t } = useLang()
+  const { lang, t, tt } = useLang()
   const [reference, setReference] = useState('')
   const [contact, setContact] = useState('')
   const [loading, setLoading] = useState(false)
@@ -82,10 +83,24 @@ export default function MyTripPage() {
     ? STATUS_BADGE[booking.booking_status] ?? 'bg-mint-100 text-ink'
     : ''
 
+  const title = tt('nav.myTrip')
+  const subtitle = tt('myTrip.subtitle')
+
   return (
     <div>
-      <h1 className="font-serif text-2xl text-ink">{t('nav.myTrip')}</h1>
-      <p className="mt-1 text-sm leading-relaxed text-ink-soft">{t('myTrip.subtitle')}</p>
+      <BiDisplayHeading
+        en={title.en}
+        th={title.th}
+        as="h1"
+        enClassName="text-2xl font-semibold text-ink"
+        thClassName="mt-1 text-sm font-medium text-ink-soft"
+      />
+      <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+        {subtitle.en}
+        <span lang="th" className="mt-1 block font-serif font-thai text-ink-soft/90">
+          {subtitle.th}
+        </span>
+      </p>
 
       <form
         onSubmit={handleSubmit}
