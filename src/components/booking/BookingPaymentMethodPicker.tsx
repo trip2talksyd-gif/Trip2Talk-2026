@@ -12,7 +12,7 @@ type Props = {
   disabled?: boolean
 }
 
-/** PayID is primary (no fees); Square card/Afterpay is secondary. */
+/** PayID is primary (no fees); Square Web Payments card is secondary. */
 export default function BookingPaymentMethodPicker({
   value,
   onChange,
@@ -33,19 +33,19 @@ export default function BookingPaymentMethodPicker({
   }[] = [
     {
       id: 'payid',
-      titleEn: 'Pay by PayID — no fees, recommended',
-      titleTh: 'โอน PayID — ไม่มีค่าธรรมเนียม (แนะนำ)',
-      subEn: 'Bank transfer to our Australian PayID. Upload slip after transfer.',
-      subTh: 'โอนผ่านแอปธนาคารไปยัง PayID ของเรา แล้วอัปโหลดสลิป',
+      titleEn: 'Bank Transfer (PayID)',
+      titleTh: 'โอนผ่านธนาคาร (PayID)',
+      subEn: 'Australian PayID — no fees. Upload slip after transfer.',
+      subTh: 'โอน PayID ในออสเตรเลีย — ไม่มีค่าธรรมเนียม แล้วอัปโหลดสลิป',
       icon: Landmark,
       recommended: true,
     },
     {
       id: 'square',
-      titleEn: 'Pay by card / Afterpay',
-      titleTh: 'จ่ายด้วยบัตร / Afterpay',
-      subEn: `Secure Square checkout for ${formatAud(depositAud)}. Card processing fees apply.`,
-      subTh: `ชำระผ่าน Square ${formatAud(depositAud)} — บัตรเครดิต/เดบิต หรือ Afterpay (มีค่าธรรมเนียม)`,
+      titleEn: 'Credit/Debit Card (Visa/Mastercard — international OK, via Square)',
+      titleTh: 'บัตรเครดิต/เดบิต (Visa/Mastercard — ใช้บัตรต่างประเทศได้ ผ่าน Square)',
+      subEn: `Pay ${formatAud(depositAud)} on this page. Thai-issued and other non-AU cards welcome. Card fees apply.`,
+      subTh: `ชำระ ${formatAud(depositAud)} บนหน้านี้ รวมบัตรที่ออกในไทย/ต่างประเทศ (มีค่าธรรมเนียมบัตร)`,
       icon: CreditCard,
       showBrandIcons: true,
     },

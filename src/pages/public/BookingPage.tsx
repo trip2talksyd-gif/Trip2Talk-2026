@@ -7,9 +7,9 @@ import BookingPaymentMethodPicker, {
   type CustomerPaymentChoice,
 } from '../../components/booking/BookingPaymentMethodPicker'
 import PayIdDepositPanel from '../../components/booking/PayIdDepositPanel'
+import SquareCardElement from '../../components/booking/SquareCardElement'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import {
-  createSquareCheckout,
   fetchTourByCode,
   formatAud,
   formatDate,
@@ -91,7 +91,8 @@ export default function BookingPage() {
   const [reference, setReference] = useState('')
   const [slipFile, setSlipFile] = useState<File | null>(null)
   const [paymentChoice, setPaymentChoice] = useState<CustomerPaymentChoice>('payid')
-  const [squareRedirecting, setSquareRedirecting] = useState(false)
+  const [squareCardReady, setSquareCardReady] = useState(false)
+  const [squareBookingRef, setSquareBookingRef] = useState('')
   const [installmentPlan, setInstallmentPlan] = useState<1 | 2 | 4>(1)
 
   const [form, setForm] = useState<FormState>(() => {
@@ -269,35 +270,15 @@ export default function BookingPage() {
       })
 
       if (paymentChoice === 'square') {
-        setSquareRedirecting(true)
-        try {
-          const checkout = await createSquareCheckout({
-            booking_reference: bookingRef,
-            buyer_email: form.email.trim(),
-            buyer_phone: normalizeAuMobile(form.phone),
-            redirect_base: window.location.origin,
-          })
-          window.location.assign(checkout.url)
-          return
-        } catch (squareErr) {
-          console.error('[BookingPage] Square checkout failed:', squareErr)
-          const detail = squareErr instanceof Error ? squareErr.message : ''
-          const missingConfig =
-            /square_not_configured|SQUARE_ACCESS_TOKEN|SQUARE_LOCATION_ID/i.test(detail)
-          toast(
-            missingConfig
-              ? lang === 'th'
-                ? 'จองไว้แล้ว แต่ยังไม่ได้ตั้ง Square (ต้องใส่ SQUARE_ACCESS_TOKEN + SQUARE_LOCATION_ID) — ใช้ PayID ไปก่อนได้'
-                : 'Booking saved, but Square is not configured yet (need SQUARE_ACCESS_TOKEN + SQUARE_LOCATION_ID). You can still pay by PayID.'
-              : lang === 'th'
-                ? `จองไว้แล้ว แต่เปิดชำระบัตรไม่สำเร็จ — ใช้ PayID ได้ตามปกติ${detail ? ` (${detail})` : ''}`
-                : `Booking saved, but card checkout failed — you can still pay by PayID${detail ? ` (${detail})` : ''}`,
-            'error',
-          )
-          setSquareRedirecting(false)
-          setReference(bookingRef)
-          return
-        }
+        setSquareBookingRef(bookingRef)
+        setSquareCardReady(true)
+        toast(
+          lang === 'th'
+            ? 'จองที่นั่งแล้ว — กรอกบัตร Square ด้านล่างเพื่อชำระมัดจำ'
+            : 'Seat reserved — enter your card below to pay the deposit via Square.',
+          'success',
+        )
+        return
       }
 
       setReference(bookingRef)
@@ -664,7 +645,7 @@ export default function BookingPage() {
         value={paymentChoice}
         onChange={setPaymentChoice}
         depositAud={depositDue}
-        disabled={submitting || squareRedirecting}
+        disabled={submitting || squareCardReady}
       />
 
       {paymentChoice === 'payid' && (
@@ -684,36 +665,48 @@ export default function BookingPage() {
         </>
       )}
 
-      {paymentChoice === 'square' && (
+      {paymentChoice === 'square' && !squareCardReady && (
         <p className="rounded-xl border border-line bg-white px-3 py-2.5 text-[11px] leading-relaxed text-ink-soft">
           {lang === 'th'
-            ? 'กดปุ่มด้านล่างเพื่อเปิดหน้าชำระเงิน Square (บัตรหรือ Afterpay) — ที่นั่งถูกจองไว้แล้วก่อนไปหน้าชำระ หากชำระไม่สำเร็จ ยังโอน PayID ได้'
-            : 'Tap below to open Square’s secure checkout (card or Afterpay). Your seat is reserved first; if checkout fails you can still pay by PayID.'}
+            ? 'กดปุ่มด้านล่างเพื่อจองที่นั่ง แล้วชำระด้วย Visa/Mastercard บนหน้านี้ผ่าน Square (รวมบัตรที่ออกในไทย) — ระบบ PayID ไม่เปลี่ยน'
+            : 'Tap below to reserve your seat, then pay with Visa/Mastercard on this page via Square (Thai-issued cards OK). PayID is unchanged.'}
         </p>
       )}
 
+      {paymentChoice === 'square' && squareCardReady && tour && (
+        <SquareCardElement
+          amountAud={depositDue}
+          bookingReference={squareBookingRef}
+          email={form.email.trim()}
+          givenName={form.first_name_en.trim()}
+          familyName={form.last_name_en.trim()}
+          onPaid={() => {
+            setReference(squareBookingRef)
+            navigate('/booking/confirmation')
+          }}
+        />
+      )}
+
       {/* Sticky Pay Deposit bar — mockup's white bar with top hairline above the CTA */}
+      {!squareCardReady && (
       <div className="flow-bar sticky bottom-0 -mx-4 !pb-[max(18px,env(safe-area-inset-bottom))] sm:-mx-6 lg:mx-0 lg:rounded-2xl lg:border lg:border-line">
         <button
           type="submit"
-          disabled={submitting || squareRedirecting}
+          disabled={submitting}
           className="book-btn flip-cta cta-shine w-full disabled:opacity-50"
         >
-          {submitting || squareRedirecting
-            ? squareRedirecting
-              ? lang === 'th'
-                ? 'กำลังเปิด Square…'
-                : 'Opening Square…'
-              : t('common.loading')
+          {submitting
+            ? t('common.loading')
             : paymentChoice === 'square'
               ? lang === 'th'
-                ? `ไปชำระบัตร / Afterpay ${formatAud(depositDue)}`
-                : `Pay card / Afterpay — ${formatAud(depositDue)}`
+                ? `จองที่นั่งแล้วชำระบัตร ${formatAud(depositDue)}`
+                : `Reserve & pay card — ${formatAud(depositDue)}`
               : lang === 'th'
                 ? `ชำระมัดจำ ${formatAud(depositDue)}`
                 : `Pay Deposit — ${formatAud(depositDue)}`}
         </button>
       </div>
+      )}
     </form>
   )
 }

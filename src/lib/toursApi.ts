@@ -1354,6 +1354,86 @@ export async function createSquareCheckout(input: {
   return body as SquareCheckoutResult
 }
 
+export type SquareWebPaymentsConfig = {
+  applicationId: string
+  locationId: string
+  environment: 'sandbox' | 'production'
+}
+
+export async function fetchSquarePaymentConfig(): Promise<SquareWebPaymentsConfig> {
+  const res = await fetch(`${supabaseConfig.url}/functions/v1/square-create-payment`, {
+    method: 'GET',
+    headers: {
+      apikey: supabaseConfig.anonKey,
+      Authorization: `Bearer ${supabaseConfig.anonKey}`,
+    },
+  })
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const msg =
+      typeof body?.message === 'string' && body.message.trim()
+        ? body.message
+        : typeof body?.error === 'string'
+          ? body.error
+          : `square-create-payment config failed: ${res.status}`
+    throw new Error(msg)
+  }
+  if (typeof body?.applicationId !== 'string' || typeof body?.locationId !== 'string') {
+    throw new Error('Square Web Payments config missing')
+  }
+  return {
+    applicationId: body.applicationId,
+    locationId: body.locationId,
+    environment: body.environment === 'production' ? 'production' : 'sandbox',
+  }
+}
+
+export type SquareCardChargeResult = {
+  payment_id: string | null
+  status: string
+  amount_aud: number
+  booking_reference: string
+}
+
+/** Charges a Web Payments SDK card token via square-create-payment (server-side). */
+export async function chargeSquareCardToken(input: {
+  booking_reference: string
+  source_id: string
+  buyer_email?: string
+  verification_token?: string
+}): Promise<SquareCardChargeResult> {
+  const res = await fetch(`${supabaseConfig.url}/functions/v1/square-create-payment`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseConfig.anonKey,
+      Authorization: `Bearer ${supabaseConfig.anonKey}`,
+    },
+    body: JSON.stringify({
+      booking_reference: input.booking_reference,
+      source_id: input.source_id,
+      buyer_email: input.buyer_email,
+      verification_token: input.verification_token,
+    }),
+  })
+  const body = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const msg =
+      typeof body?.message === 'string' && body.message.trim()
+        ? body.message
+        : typeof body?.error === 'string'
+          ? body.error
+          : `square-create-payment failed: ${res.status}`
+    throw new Error(msg)
+  }
+  return {
+    payment_id: typeof body?.payment_id === 'string' ? body.payment_id : null,
+    status: typeof body?.status === 'string' ? body.status : '',
+    amount_aud: Number(body?.amount_aud ?? 0),
+    booking_reference: String(body?.booking_reference ?? input.booking_reference),
+  }
+}
+
 export type GenerateCaptionResult = {
   headline_options: string[]
   caption_fb: string
