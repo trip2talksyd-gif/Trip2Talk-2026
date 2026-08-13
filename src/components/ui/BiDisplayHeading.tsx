@@ -35,7 +35,9 @@ export default function BiDisplayHeading({
   return (
     <div id={id} className={className}>
       <EnTag className={`font-display ${enClassName}`.trim()}>{en}</EnTag>
-      <ThTag className={`font-serif ${thClassName}`.trim()}>{th}</ThTag>
+      <ThTag lang="th" className={`font-serif ${thClassName}`.trim()}>
+        {th}
+      </ThTag>
       {children}
     </div>
   )

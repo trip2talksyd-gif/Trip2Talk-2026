@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Aperture, Camera, Sparkles, Star } from 'lucide-react'
 import { GALLERY_PHOTOS, photoThumbSrc } from '../../data/galleryPhotos'
 import { useLang } from '../../hooks/useLang'
+import BiDisplayHeading from '../ui/BiDisplayHeading'
 import BiText from '../ui/BiText'
 
 const PILLARS = [
@@ -60,6 +61,16 @@ export default function HomePositioningSection() {
             บริษัททัวร์
           </p>
         </div>
+
+        <BiDisplayHeading
+          en="Small groups, good light, and photos worth keeping."
+          th="กลุ่มเล็ก แสงสวย และรูปที่อยากเก็บไว้จริงๆ"
+          as="p"
+          thAs="p"
+          className="mt-3 max-w-2xl sm:mt-4"
+          enClassName="text-[18px] font-medium leading-snug text-ink-soft sm:text-[20px] md:text-[22px]"
+          thClassName="mt-1 font-thai text-[15px] font-medium leading-snug text-ink-soft/90 sm:text-[16px]"
+        />
 
         {/* Italic serif subheading — existing subtitle copy */}
         <div className="mt-4 max-w-2xl">

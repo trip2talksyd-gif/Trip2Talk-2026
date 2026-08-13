@@ -717,12 +717,15 @@ const en: Map = {
     'Note: our trips are especially popular with those who want to feel like the subject of a real photoshoot, not just a tourist with a phone camera.',
   'home.positioning.badge': 'PHOTO TRIP · TRIP2TALK',
   'home.positioning.social': 'Real guests · Real photos',
-  'home.positioning.pillar1.title': 'Photo package first',
-  'home.positioning.pillar1.desc': 'Nature is your studio — travel is built around the shot.',
-  'home.positioning.pillar2.title': 'Best light, on purpose',
-  'home.positioning.pillar2.desc': 'Golden hour, blue hour, aurora windows — timed for beauty.',
-  'home.positioning.pillar3.title': 'Learn as you shoot',
-  'home.positioning.pillar3.desc': 'Leave with stunning photos and new skills of your own.',
+  'home.positioning.pillar1.title': 'Small Group, Full Attention',
+  'home.positioning.pillar1.desc':
+    "Just 4–5 people a trip, so nobody's waiting around for their turn with the camera.",
+  'home.positioning.pillar2.title': 'We Chase the Real Light',
+  'home.positioning.pillar2.desc':
+    "We plan around golden hour and blue hour because that's when places actually look their best.",
+  'home.positioning.pillar3.title': "Photos You'll Actually Keep",
+  'home.positioning.pillar3.desc':
+    "Edited, high-quality shots you'll want to look back on — not just another folder of phone pics.",
   'about.notTour.title': "We're not a tour company",
   'about.notTour.body':
     "Trip2Talk is a photography package first — nature as your studio at each location's best light, with one pro photographer who guides and drives. We teach you how to get the shot yourself. This isn't sightseeing with photos as an afterthought.",
@@ -1304,12 +1307,15 @@ const th: Map = {
     'หมายเหตุ: ทริปของเราเป็นที่นิยมมากสำหรับคนที่อยากรู้สึกเหมือนเป็นนางแบบในเซ็ตถ่ายภาพจริง ไม่ใช่แค่นักท่องเที่ยวถือมือถือถ่ายรูป',
   'home.positioning.badge': 'ทริปถ่ายภาพ · Trip2Talk',
   'home.positioning.social': 'ลูกค้าจริง ถ่ายจริง',
-  'home.positioning.pillar1.title': 'แพ็กเกจถ่ายภาพเป็นหลัก',
-  'home.positioning.pillar1.desc': 'ธรรมชาติคือสตูดิโอ — ทริปออกแบบรอบภาพของคุณ',
-  'home.positioning.pillar2.title': 'จงใจเลือกช่วงแสงสวย',
-  'home.positioning.pillar2.desc': 'โกลเด้นอาวร์ บลูอาวร์ ช่วงออโรร่า — ตามแสงที่ดีที่สุด',
-  'home.positioning.pillar3.title': 'เรียนรู้ไปพร้อมถ่าย',
-  'home.positioning.pillar3.desc': 'กลับไปพร้อมภาพสวยและสกิลใหม่ของตัวเอง',
+  'home.positioning.pillar1.title': 'กลุ่มเล็ก ดูแลทั่วถึง',
+  'home.positioning.pillar1.desc':
+    'ทริปละ 4-5 คน ไม่ต้องรอคิวถ่ายรูปนาน ทุกคนได้เวลากับกล้องเต็มที่',
+  'home.positioning.pillar2.title': 'ตามล่าแสงจริง',
+  'home.positioning.pillar2.desc':
+    'เราวางแผนตามโกลเด้นอาวร์และบลูอาวร์ เพราะเป็นช่วงที่ทุกที่สวยที่สุดจริงๆ',
+  'home.positioning.pillar3.title': 'รูปที่เก็บไว้ดูได้จริง',
+  'home.positioning.pillar3.desc':
+    'รูปคุณภาพดี แต่งแล้ว ที่อยากเปิดดูซ้ำ ไม่ใช่แค่โฟลเดอร์รูปมือถือ',
   'about.notTour.title': 'เราไม่ใช่บริษัททัวร์',
   'about.notTour.body':
     'Trip2Talk คือแพ็กเกจถ่ายภาพเป็นหลัก — ธรรมชาติคือสตูดิโอในช่วงแสงที่สวยที่สุดของแต่ละโลเคชัน พร้อมช่างภาพมืออาชีพหนึ่งคนที่เป็นทั้ง Trip Leader และคนขับ และเราจะสอนให้คุณถ่ายเองได้ด้วย นี่ไม่ใช่ทริปเที่ยวที่แค่แถมถ่ายรูป',
