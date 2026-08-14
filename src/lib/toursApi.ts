@@ -1641,13 +1641,32 @@ export async function generateTripPost(tripId: string): Promise<GenerateTripPost
     throw new StaffSessionExpiredError()
   }
 
-  const body = await res.json().catch(() => ({}))
+  const body = (await res.json().catch(() => ({}))) as {
+    data?: ContentPost
+    reused?: boolean
+    message?: string
+    error?: string
+    detail?: string
+    anthropic_status?: number
+    anthropic_type?: string | null
+    anthropic_message?: string | null
+  }
   if (!res.ok) {
     const thai =
-      typeof body?.message === 'string' && body.message.trim()
+      typeof body.message === 'string' && body.message.trim()
         ? body.message
         : 'สร้างโพสต์ไม่สำเร็จ ลองอีกครั้ง'
-    throw new Error(thai)
+    const extra =
+      body.error === 'anthropic_credits' ||
+      body.error === 'anthropic_failed' ||
+      body.error === 'anthropic_unauthorized' ||
+      body.error === 'anthropic_rate_limited' ||
+      body.error === 'anthropic_model_unavailable'
+        ? [body.anthropic_status, body.anthropic_type, body.anthropic_message]
+            .filter(Boolean)
+            .join(' — ')
+        : body.detail
+    throw new Error(extra ? `${thai} (${extra})` : thai)
   }
 
   if (!body?.data?.id) {
