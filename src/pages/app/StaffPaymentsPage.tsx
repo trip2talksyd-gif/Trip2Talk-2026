@@ -33,6 +33,7 @@ import {
   StaffField,
   StaffInput,
 } from '../../components/app/staffUi'
+import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
 
 const CAN_DELETE_INSTALLMENT = new Set(['OWNER', 'MANAGER'])
 
@@ -150,6 +151,7 @@ export default function StaffPaymentsPage() {
     }
     navigate('/app/receipt', {
       state: {
+        bookingId: booking.id,
         bookingReference: booking.booking_reference,
         customerName: `${booking.first_name_en} ${booking.last_name_en}`,
         customerEmail: booking.email,
@@ -193,6 +195,7 @@ export default function StaffPaymentsPage() {
       // Hand off to tax invoice page for this installment
       navigate('/app/receipt', {
         state: {
+          bookingId: booking.id,
           bookingReference: booking.booking_reference,
           customerName: `${booking.first_name_en} ${booking.last_name_en}`,
           customerEmail: booking.email,
@@ -318,6 +321,17 @@ export default function StaffPaymentsPage() {
                         }}
                         onSessionExpired={() => navigate('/app')}
                         toast={toast}
+                      />
+                      <BookingExtensionQuotes
+                        bookingId={booking.id}
+                        travelDate={booking.travel_date}
+                        extraDaysPaid={booking.extra_days_paid}
+                        canIssue={CAN_DELETE_INSTALLMENT.has(staffRole)}
+                        canMarkPaid
+                        onSessionExpired={() => navigate('/app')}
+                        onChanged={() => {
+                          void runSearch()
+                        }}
                       />
                       {booking.referred_by_booking_id && (
                         <p className="text-[10px] text-cream-muted">

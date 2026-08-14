@@ -17,6 +17,7 @@ import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import { useLang } from '../../hooks/useLang'
 import CancelBookingDialog from '../../components/app/CancelBookingDialog'
+import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
 import {
   staffShellClass,
   StaffPageHeader,
@@ -58,6 +59,8 @@ export default function CashierPOS() {
 
   const [cancelling, setCancelling] = useState<TourBooking | null>(null)
   const [cancelSubmitting, setCancelSubmitting] = useState(false)
+  const staffRole = sessionStorage.getItem('staff_role') ?? ''
+  const canIssueQuote = staffRole === 'OWNER' || staffRole === 'MANAGER'
 
   const load = useCallback(() => {
     setLoading(true)
@@ -117,6 +120,7 @@ export default function CashierPOS() {
       if (paidAmount > 0) {
         navigate('/app/receipt', {
           state: {
+            bookingId: booking.id,
             bookingReference: booking.booking_reference,
             customerName: `${firstName.trim()} ${lastName.trim()}`,
             customerEmail: email.trim() || null,
@@ -207,6 +211,7 @@ export default function CashierPOS() {
       load()
       navigate('/app/receipt', {
         state: {
+          bookingId: booking.id,
           bookingReference: booking.booking_reference,
           customerName: `${booking.first_name_en} ${booking.last_name_en}`,
           customerEmail: booking.email || null,
@@ -485,6 +490,22 @@ export default function CashierPOS() {
                           </div>
                         </div>
                       </StaffCard>
+                    )}
+
+                    {cancelled ? null : (
+                      <div className="mt-3 border-t border-white/10 pt-3">
+                        <BookingExtensionQuotes
+                          bookingId={b.id}
+                          travelDate={b.travel_date}
+                          tourDepartureDate={tour?.departure_date}
+                          extraDaysPaid={b.extra_days_paid}
+                          durationDays={tour?.duration_days}
+                          canIssue={canIssueQuote}
+                          canMarkPaid
+                          onSessionExpired={() => navigate('/app')}
+                          onChanged={load}
+                        />
+                      </div>
                     )}
                   </StaffCard>
                 </li>

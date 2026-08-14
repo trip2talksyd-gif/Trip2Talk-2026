@@ -76,9 +76,28 @@ Deno.serve(async (req) => {
   const reviewTargetStart = ymd(addDays(today, -3))
   const reviewTargetEnd = ymd(addDays(today, -2))
 
-  const stats = { reminder_7d: 0, reminder_1d: 0, review: 0, errors: [] as string[] }
+  const stats = {
+    reminder_7d: 0,
+    reminder_1d: 0,
+    review: 0,
+    quotes_expired: 0,
+    errors: [] as string[],
+  }
 
   try {
+    // Extra-day quotes: unpaid past payment_deadline → expired.
+    // Does not modify tour_bookings (original duration stands).
+    const { data: expireResult, error: expireErr } = await admin.rpc(
+      'expire_pending_extension_quotes',
+    )
+    if (expireErr) {
+      stats.errors.push(`quotes_expire: ${expireErr.message}`)
+    } else {
+      stats.quotes_expired = Number(
+        (expireResult as { expired?: number } | null)?.expired ?? 0,
+      )
+    }
+
     // Load published tours with departure dates
     const { data: tours, error: tourErr } = await admin
       .from('tours')
