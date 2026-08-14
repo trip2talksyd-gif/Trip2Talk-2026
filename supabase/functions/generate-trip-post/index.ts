@@ -47,6 +47,66 @@ function str(v: unknown): string | null {
   return typeof v === 'string' && v.trim() ? v.trim() : null
 }
 
+const ANTHROPIC_TIMEOUT_MS = 50_000
+
+/** Map Anthropic HTTP failures to a JSON body staff can actually read (never leak the API key). */
+function anthropicFailure(status: number, errText: string): {
+  status: number
+  body: Record<string, unknown>
+} {
+  let anthropicType: string | undefined
+  let anthropicMessage: string | undefined
+  try {
+    const parsed = JSON.parse(errText) as { error?: { type?: string; message?: string } }
+    anthropicType = parsed?.error?.type
+    anthropicMessage = parsed?.error?.message?.slice(0, 240)
+  } catch {
+    /* ignore non-JSON upstream body */
+  }
+
+  const combined = `${anthropicType ?? ''} ${anthropicMessage ?? ''} ${errText}`.toLowerCase()
+  const isCredits =
+    status === 400 &&
+    (/credit balance is too low/i.test(combined) ||
+      /billing/i.test(combined) ||
+      /purchase credits/i.test(combined))
+  const isAuth = status === 401 || status === 403
+  const isRate = status === 429 || /rate.?limit|overloaded/i.test(combined)
+
+  let message = 'สร้างแคปชันไม่สำเร็จ ลองอีกครั้ง'
+  let error = 'anthropic_failed'
+  let http = 502
+  if (isCredits) {
+    error = 'anthropic_credits'
+    http = 503
+    message =
+      'เครดิต Anthropic หมด — เติมที่ Plans & Billing แล้วกดสร้าง content อีกครั้ง'
+  } else if (isAuth) {
+    error = 'anthropic_unauthorized'
+    http = 502
+    message = 'คีย์ Anthropic ไม่ถูกต้องหรือหมดอายุ — ตรวจ ANTHROPIC_API_KEY ใน Edge Secrets'
+  } else if (isRate) {
+    error = 'anthropic_rate_limited'
+    http = 429
+    message = 'Anthropic จำกัดคำขอชั่วคราว — รอสักครู่แล้วลองใหม่'
+  } else if (status === 404) {
+    error = 'anthropic_model_unavailable'
+    http = 502
+    message = 'โมเดล AI ไม่พร้อมใช้งาน — ติดต่อเจ้าของระบบ'
+  }
+
+  return {
+    status: http,
+    body: {
+      error,
+      message,
+      anthropic_status: status,
+      anthropic_type: anthropicType ?? null,
+      anthropic_message: anthropicMessage ?? null,
+    },
+  }
+}
+
 async function assertOwnerToken(
   admin: ReturnType<typeof createClient>,
   token: string | undefined,
@@ -162,25 +222,44 @@ ${JSON.stringify(tripPayload, null, 2)}
 
 Return JSON with headline_options (3-5 Thai strings), caption_fb, caption_ig, caption_line.`
 
-    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        'x-api-key': ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 1600,
-        system: TRIP_PROMO_BRAND_VOICE,
-        messages: [{ role: 'user', content: userPrompt }],
-      }),
-    })
+    let anthropicRes: Response
+    try {
+      anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+        },
+        body: JSON.stringify({
+          model: MODEL,
+          max_tokens: 1600,
+          system: TRIP_PROMO_BRAND_VOICE,
+          messages: [{ role: 'user', content: userPrompt }],
+        }),
+        signal: AbortSignal.timeout(ANTHROPIC_TIMEOUT_MS),
+      })
+    } catch (err) {
+      const timedOut =
+        (err instanceof DOMException && err.name === 'TimeoutError') ||
+        (err instanceof Error && /timeout|abort/i.test(err.name + err.message))
+      console.error('[generate-trip-post] Anthropic fetch failed', timedOut ? 'timeout' : err)
+      return json(
+        {
+          error: timedOut ? 'anthropic_timeout' : 'anthropic_unreachable',
+          message: timedOut
+            ? 'AI ใช้เวลานานเกินไป — ลองอีกครั้ง'
+            : 'ติดต่อ Anthropic ไม่สำเร็จ — ตรวจเน็ต/สถานะ API แล้วลองใหม่',
+        },
+        timedOut ? 504 : 502,
+      )
+    }
 
     if (!anthropicRes.ok) {
       const errText = await anthropicRes.text()
       console.error('[generate-trip-post] Anthropic error', anthropicRes.status, errText)
-      return json({ error: 'anthropic_failed', message: 'สร้างแคปชันไม่สำเร็จ ลองอีกครั้ง' }, 502)
+      const failure = anthropicFailure(anthropicRes.status, errText)
+      return json(failure.body, failure.status)
     }
 
     const anthropicBody = await anthropicRes.json()
@@ -240,7 +319,11 @@ Return JSON with headline_options (3-5 Thai strings), caption_fb, caption_ig, ca
 
     return json({ data: inserted, reused: false })
   } catch (err) {
-    console.error('[generate-trip-post] failed', err)
-    return json({ error: 'server_error', message: 'เกิดข้อผิดพลาด ลองอีกครั้ง' }, 500)
+    const detail = err instanceof Error ? err.message.slice(0, 200) : String(err).slice(0, 200)
+    console.error('[generate-trip-post] failed', detail)
+    return json(
+      { error: 'server_error', message: 'เกิดข้อผิดพลาด ลองอีกครั้ง', detail },
+      500,
+    )
   }
 })
