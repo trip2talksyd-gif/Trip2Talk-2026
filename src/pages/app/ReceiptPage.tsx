@@ -8,10 +8,12 @@ import {
   StaffButton,
   staffShellClass,
 } from '../../components/app/staffUi'
+import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
 
 /** Data handed off via router state right after a payment is recorded —
  * no extra staff-api round trip, since the caller already has everything. */
 export type ReceiptData = {
+  bookingId?: string | null
   bookingReference: string | null
   customerName: string
   /** Customer's email, if on file — used to prefill the "Email receipt" mailto link. */
@@ -235,6 +237,19 @@ export default function ReceiptPage() {
         <StaffButton variant="secondary" onClick={() => window.print()}>
           🖨️ พิมพ์ใบเสร็จ
         </StaffButton>
+        {data.bookingId ? (
+          <div className="w-full">
+            <BookingExtensionQuotes
+              bookingId={data.bookingId}
+              canIssue={
+                sessionStorage.getItem('staff_role') === 'OWNER' ||
+                sessionStorage.getItem('staff_role') === 'MANAGER'
+              }
+              canMarkPaid
+              onSessionExpired={() => navigate('/app')}
+            />
+          </div>
+        ) : null}
       </div>
 
       <div

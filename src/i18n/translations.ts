@@ -224,7 +224,6 @@ export type TranslationKey =
   | 'pricing.page.subtitle'
   | 'pricing.mostPopular'
   | 'pricing.audPerPerson'
-  | 'pricing.priceHint'
   | 'pricing.tier.day.title'
   | 'pricing.tier.day.desc'
   | 'pricing.tier.day.check.1'
@@ -246,6 +245,9 @@ export type TranslationKey =
   | 'pricing.tier.flagship.check.3'
   | 'pricing.tier.flagship.check.4'
   | 'pricing.tier.flagship.cta'
+  | 'pricing.payid.title'
+  | 'pricing.payid.body'
+  | 'pricing.payid.account'
   | 'pricing.cancel.title'
   | 'pricing.cancel.intro'
   | 'pricing.cancel.col.condition'
@@ -378,6 +380,23 @@ export type TranslationKey =
   | 'about.tips'
   | 'waiver.title'
   | 'waiver.signName'
+  | 'waiver.alreadySubmitted'
+  | 'quote.title'
+  | 'quote.subtitle'
+  | 'quote.extraDays'
+  | 'quote.price'
+  | 'quote.deadline'
+  | 'quote.note'
+  | 'quote.payNow'
+  | 'quote.payFull'
+  | 'quote.noOnSite'
+  | 'quote.expired'
+  | 'quote.cancelled'
+  | 'quote.paid'
+  | 'quote.payidHint'
+  | 'quote.invalid'
+  | 'quote.loading'
+  | 'quote.afterpay'
   | 'safety.title'
   | 'safety.subtitle'
   | 'safety.emergencyName'
@@ -794,7 +813,6 @@ const en: Map = {
   'pricing.page.subtitle': 'Sample figures — live trip pages show exact AUD pricing',
   'pricing.mostPopular': 'Most popular',
   'pricing.audPerPerson': 'AUD / person',
-  'pricing.priceHint': 'Tap or hover the price to see the flip animation',
   'pricing.tier.day.title': 'One-day trips',
   'pricing.tier.day.desc': 'A few hours with one professional photographer — light logistics',
   'pricing.tier.day.check.1': '3-hour photo session',
@@ -816,6 +834,10 @@ const en: Map = {
   'pricing.tier.flagship.check.3': '5+ nights accommodation',
   'pricing.tier.flagship.check.4': 'Lead photographer on every trip',
   'pricing.tier.flagship.cta': 'Book a flagship trip',
+  'pricing.payid.title': 'Paying with PayID',
+  'pricing.payid.body':
+    'PayID is an instant bank-to-bank transfer in Australia — you pay from your banking app, with no extra fee from us. Send the deposit to one of the mobile PayIDs below; the account name must match exactly. Copy-and-paste details are also on the booking form.',
+  'pricing.payid.account': 'Account name',
   'pricing.cancel.title': 'Cancellation & refund policy',
   'pricing.cancel.intro':
     'Trip2Talk takes PayID (AUD) deposits before travel. All amounts are in Australian dollars.',
@@ -966,6 +988,26 @@ const en: Map = {
   'about.tips': 'Insider Tips — Aurora Hunting',
   'waiver.title': 'Waiver & Consent',
   'waiver.signName': 'Type your full name as digital signature',
+  'waiver.alreadySubmitted': 'Waiver already submitted',
+  'quote.title': 'Written quotation — extra trip days',
+  'quote.subtitle': 'Pay the full quoted amount at least 10 days before departure.',
+  'quote.extraDays': 'Extra days',
+  'quote.price': 'Amount due (price difference)',
+  'quote.deadline': 'Payment deadline',
+  'quote.note': 'What the extra days include',
+  'quote.payNow': 'Pay now',
+  'quote.payFull': 'Pay the full quoted amount by the deadline. Partial payment is not accepted.',
+  'quote.noOnSite':
+    'If unpaid by this deadline the extension is cancelled automatically. The trip stays at the originally booked number of days — no on-site negotiation.',
+  'quote.expired':
+    'This quotation expired unpaid. The extra days are cancelled. Your trip stays at the originally booked duration.',
+  'quote.cancelled': 'This quotation was cancelled by Trip2Talk staff.',
+  'quote.paid': 'Payment received. Your trip is extended by the quoted extra days.',
+  'quote.payidHint':
+    'Transfer the FULL quoted amount via PayID. Put your booking reference in the transfer description, then message Trip2Talk with the slip.',
+  'quote.invalid': 'This quotation link is invalid. Ask Trip2Talk staff for a new link.',
+  'quote.loading': 'Loading quotation…',
+  'quote.afterpay': 'Pay with card / Afterpay (Square)',
   'safety.title': 'Safety Info',
   'safety.subtitle': 'For your guide in an emergency — keep it short.',
   'safety.emergencyName': 'Emergency contact name',
@@ -1384,7 +1426,6 @@ const th: Map = {
   'pricing.page.subtitle': 'ตัวเลขเป็นตัวอย่าง — ราคาจริงดูได้ในแต่ละทริป',
   'pricing.mostPopular': 'ยอดนิยม',
   'pricing.audPerPerson': 'AUD / คน',
-  'pricing.priceHint': 'จิ้มหรือโฮเวอร์ตัวเลขดูแอนิเมชัน',
   'pricing.tier.day.title': 'ทริปวันเดียว',
   'pricing.tier.day.desc': 'ไม่กี่ชั่วโมง ช่างภาพมืออาชีพหนึ่งคน โลจิสติกส์น้อย',
   'pricing.tier.day.check.1': 'เซสชันถ่ายภาพ 3 ชม.',
@@ -1406,6 +1447,10 @@ const th: Map = {
   'pricing.tier.flagship.check.3': 'ที่พัก 5+ คืน',
   'pricing.tier.flagship.check.4': 'ช่างภาพมืออาชีพดูแลตลอดทริป',
   'pricing.tier.flagship.cta': 'จองทริปเรือธง',
+  'pricing.payid.title': 'ชำระด้วย PayID',
+  'pricing.payid.body':
+    'PayID คือการโอนเงินระหว่างธนาคารในออสเตรเลียแบบทันที — โอนจากแอปธนาคาร ไม่มีค่าธรรมเนียมจากเรา โอนมัดจำไปที่หมายเลข PayID ด้านล่าง ชื่อบัญชีต้องตรงทุกตัวอักษร รายละเอียดสำหรับคัดลอกอยู่ที่หน้าจองด้วย',
+  'pricing.payid.account': 'ชื่อบัญชี',
   'pricing.cancel.title': 'นโยบายการยกเลิกและคืนเงิน',
   'pricing.cancel.intro':
     'Trip2Talk รับชำระผ่าน PayID (AUD) โดยมัดจำก่อนเดินทาง ราคาทั้งหมดเป็นดอลลาร์ออสเตรเลีย',
@@ -1556,6 +1601,26 @@ const th: Map = {
   'about.tips': 'เคล็ดลับ — ล่าแสงออโรร่า',
   'waiver.title': 'เอกสารยินยอม',
   'waiver.signName': 'พิมพ์ชื่อ-นามสกุลเป็นลายเซ็นดิจิทัล',
+  'waiver.alreadySubmitted': 'ส่งเอกสารยินยอมแล้ว',
+  'quote.title': 'ใบเสนอราคา — วันทริปเพิ่ม',
+  'quote.subtitle': 'ต้องชำระยอดเต็มตามใบเสนอราคาอย่างน้อย 10 วันก่อนวันเดินทาง',
+  'quote.extraDays': 'จำนวนวันเพิ่ม',
+  'quote.price': 'ยอดที่ต้องชำระ (ส่วนต่างราคา)',
+  'quote.deadline': 'กำหนดชำระ',
+  'quote.note': 'รายละเอียดวันที่เพิ่มรวมอะไรบ้าง',
+  'quote.payNow': 'ชำระตอนนี้',
+  'quote.payFull': 'ต้องโอนยอดเต็มตามใบเสนอราคาภายในกำหนด ไม่รับชำระบางส่วน',
+  'quote.noOnSite':
+    'ถ้าไม่ชำระภายในกำหนด ส่วนขยายจะถูกยกเลิกอัตโนมัติ ทริปกลับเป็นจำนวนวันเดิมที่จองไว้ — ไม่มีการต่อรองหน้างาน',
+  'quote.expired':
+    'ใบเสนอราคานี้เลยกำหนดแล้วและยังไม่ชำระ วันเพิ่มถูกยกเลิก ทริปของคุณยังเป็นจำนวนวันเดิมตามที่จอง',
+  'quote.cancelled': 'เจ้าหน้าที่ Trip2Talk ยกเลิกใบเสนอราคานี้แล้ว',
+  'quote.paid': 'ชำระแล้ว ทริปของคุณขยายตามจำนวนวันในใบเสนอราคา',
+  'quote.payidHint':
+    'โอนยอดเต็มตามใบเสนอราคาผ่าน PayID ใส่เลขที่จองในรายละเอียดการโอน แล้วส่งสลิปให้ Trip2Talk',
+  'quote.invalid': 'ลิงก์ใบเสนอราคาไม่ถูกต้อง ขอลิงก์ใหม่จากเจ้าหน้าที่ Trip2Talk',
+  'quote.loading': 'กำลังโหลดใบเสนอราคา…',
+  'quote.afterpay': 'ชำระด้วยบัตร / Afterpay (Square)',
   'safety.title': 'ข้อมูลเพื่อความปลอดภัย',
   'safety.subtitle': 'สำหรับไกด์ใช้ตอนฉุกเฉิน — กรอกสั้นๆ พอ',
   'safety.emergencyName': 'ชื่อผู้ติดต่อฉุกเฉิน',

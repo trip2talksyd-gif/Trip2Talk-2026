@@ -57,7 +57,8 @@ function loadSquareSdk(environment: 'sandbox' | 'production'): Promise<void> {
 
 type Props = {
   amountAud: number
-  bookingReference: string
+  bookingReference?: string
+  quoteToken?: string
   email?: string
   givenName?: string
   familyName?: string
@@ -67,6 +68,7 @@ type Props = {
 export default function SquareCardElement({
   amountAud,
   bookingReference,
+  quoteToken,
   email,
   givenName,
   familyName,
@@ -144,12 +146,29 @@ export default function SquareCardElement({
         return
       }
 
+      if (!quoteToken && !bookingReference) {
+        setError(
+          lang === 'th' ? 'ไม่พบข้อมูลการชำระ' : 'Missing payment reference.',
+        )
+        setBusy(false)
+        return
+      }
+
       const charged = await chargeSquareCardToken({
         booking_reference: bookingReference,
+        quote_token: quoteToken,
         source_id: tokenResult.token,
         buyer_email: email,
       })
       if (charged.status === 'COMPLETED' || charged.status === 'APPROVED') {
+        if (!charged.booking_synced) {
+          setError(
+            lang === 'th'
+              ? 'ชำระกับ Square สำเร็จ แต่ยังไม่บันทึกการจอง — กดชำระอีกครั้งเพื่อซิงค์ (ไม่ตัดบัตรซ้ำ)'
+              : 'Square charged, but the booking is not marked paid yet — tap Pay again to sync (you will not be charged twice).',
+          )
+          return
+        }
         onPaid()
         return
       }
