@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import { fetchFeaturedTours, seatsRemaining } from '../../lib/toursApi'
 import { tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
-import { getPreviewPhotoForTrip, photoSrc } from '../../data/galleryPhotos'
+import { getPreviewPhotoForTrip, photoThumbSrc } from '../../data/galleryPhotos'
 import TripCoverImage from './TripCoverImage'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 import type { Tour } from '../../types/tour'
@@ -73,7 +73,7 @@ export default function HomeTripShowcase() {
 
 function ShowcaseCard({ tour, lang }: { tour: Tour; lang: 'en' | 'th' }) {
   const fallbackPhoto = getPreviewPhotoForTrip(tour.trip_code)
-  const imgSrc = tour.cover_image_url || (fallbackPhoto ? photoSrc(fallbackPhoto) : null)
+  const imgSrc = tour.cover_image_url || (fallbackPhoto ? photoThumbSrc(fallbackPhoto, { width: 720, quality: 70, format: 'webp' }) : null)
 
   return (
     <Link
@@ -84,6 +84,7 @@ function ShowcaseCard({ tour, lang }: { tour: Tour; lang: 'en' | 'th' }) {
         <TripCoverImage
           src={imgSrc}
           alt={tour.name_en}
+          size="card"
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
       </div>

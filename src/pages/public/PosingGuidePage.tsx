@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import { POSING_TIPS, SEASON_CARDS } from '../../data/photoGuideContent'
 import { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
-import { photoSrc } from '../../data/galleryPhotos'
+import { photoThumbSrc } from '../../data/galleryPhotos'
 import BiText from '../../components/ui/BiText'
 
 export default function PosingGuidePage() {
@@ -75,7 +75,7 @@ export default function PosingGuidePage() {
             {album.map((photo) => (
               <img
                 key={photo.id}
-                src={photoSrc(photo)}
+                src={photoThumbSrc(photo, { width: 720, quality: 70, format: 'webp' })}
                 alt={`${photo.caption_en} / ${photo.caption_th}`}
                 loading="lazy"
               />

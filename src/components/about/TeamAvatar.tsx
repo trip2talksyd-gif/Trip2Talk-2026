@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 
 type Props = {
   srcs: string[]
@@ -11,7 +12,8 @@ type Props = {
 export default function TeamAvatar({ srcs, alt, initial, className = '' }: Props) {
   const [index, setIndex] = useState(0)
   const [failed, setFailed] = useState(srcs.length === 0)
-  const src = !failed && index < srcs.length ? srcs[index] : null
+  const raw = !failed && index < srcs.length ? srcs[index] : null
+  const src = raw ? storageImageSrc(raw, STORAGE_IMG.thumb) || raw : null
 
   return (
     <div

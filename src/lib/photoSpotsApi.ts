@@ -9,7 +9,8 @@ import {
   type DroneAllowed,
   type PhotoSpotRow,
 } from '../data/photoSpotsDraft'
-import { GALLERY_PHOTOS, photoSrc, photoThumbSrc, type GalleryPhoto } from '../data/galleryPhotos'
+import { GALLERY_PHOTOS, photoSrc, type GalleryPhoto } from '../data/galleryPhotos'
+import { storageImageSrc, STORAGE_IMG } from './storageImage'
 import { supabase } from './supabase'
 import { callStaffApi } from './supabaseStaff'
 
@@ -190,14 +191,13 @@ export function navigateMapsUrl(
 export function mergePhotoSpot(row: PhotoSpotRow): PhotoSpotDetail {
   const photo = galleryForPhotoId(row.photo_id)
   const galleryHero = photo ? photoSrc(photo) : null
-  const galleryThumb = photo
-    ? photoThumbSrc(photo, { width: 960, quality: 72, format: 'webp' })
-    : null
+  const rawHero = row.hero_image_url || galleryHero
+  const rawThumb = row.thumbnail_url || rawHero
   return {
     ...row,
     photo,
-    heroSrc: row.hero_image_url || galleryHero,
-    thumbSrc: row.thumbnail_url || galleryThumb || row.hero_image_url || galleryHero,
+    heroSrc: storageImageSrc(rawHero, STORAGE_IMG.hero) || null,
+    thumbSrc: storageImageSrc(rawThumb, STORAGE_IMG.card) || null,
     mapsUrl: mapsUrlForSpot(row),
     tripHref: tripCtaHref(row),
   }
@@ -461,6 +461,7 @@ export async function uploadPhotoSpotImage(file: File): Promise<string> {
   const { error } = await supabase.storage.from('photo-spots').upload(path, compressed, {
     upsert: false,
     contentType: 'image/jpeg',
+    cacheControl: '31536000',
   })
   if (error) {
     logSupabaseError('uploadPhotoSpotImage', error)

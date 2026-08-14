@@ -1436,6 +1436,7 @@ export async function uploadContentPhoto(file: File): Promise<string> {
   const { error } = await supabase.storage.from('content-photos').upload(path, file, {
     upsert: false,
     contentType: file.type || `image/${ext}`,
+    cacheControl: '31536000',
   })
   if (error) {
     logSupabaseError('uploadContentPhoto', error)

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Heart } from 'lucide-react'
 import SpotMedia from './SpotMedia'
 import type { PhotoSpotDetail } from '../../lib/photoSpotsApi'
+import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 
 const STORY_MS = 3200
 const FAV_KEY = 't2t_spot_favorites'
@@ -35,7 +36,7 @@ export function spotHeroImages(spot: PhotoSpotDetail): string[] {
   if (out.length === 0) {
     push(spot.heroSrc ?? spot.thumbSrc)
   }
-  return out.slice(0, 5)
+  return out.slice(0, 5).map((u) => storageImageSrc(u, STORAGE_IMG.hero) || u)
 }
 
 function ChevronLeftIcon({ className }: { className?: string }) {

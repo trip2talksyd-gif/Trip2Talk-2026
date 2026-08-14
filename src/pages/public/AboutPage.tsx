@@ -1,6 +1,6 @@
 import { Clock, Mail, MapPin, Phone } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
-import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
+import { GALLERY_PHOTOS, photoThumbSrc } from '../../data/galleryPhotos'
 import { TEAM_MEMBERS } from '../../data/teamMembers'
 import BiText from '../../components/ui/BiText'
 import CountUpStat from '../../components/ui/CountUpStat'
@@ -56,7 +56,7 @@ export default function AboutPage() {
       <div className="grid gap-9 lg:grid-cols-2 lg:items-center">
         {heroPhoto && (
           <img
-            src={photoSrc(heroPhoto)}
+            src={photoThumbSrc(heroPhoto, { width: 1200, quality: 70, format: 'webp' })}
             alt="Trip2Talk team on location"
             className="aspect-[700/520] w-full rounded-[18px] object-cover shadow-mockup"
           />

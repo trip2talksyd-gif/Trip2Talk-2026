@@ -12,7 +12,7 @@ import {
   tourDurationLabel,
 } from '../../lib/tourDisplay'
 import { seatsRemaining } from '../../lib/toursApi'
-import { getPreviewPhotoForTrip, photoSrc } from '../../data/galleryPhotos'
+import { getPreviewPhotoForTrip, photoThumbSrc } from '../../data/galleryPhotos'
 import TripCoverImage from './TripCoverImage'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 import type { TranslationKey } from '../../i18n/translations'
@@ -57,7 +57,7 @@ export default function TripCard({ tour }: Props) {
 
   const previewPhoto = useMemo(() => getPreviewPhotoForTrip(tour.trip_code), [tour.trip_code])
   const previewSrc = useMemo(
-    () => (previewPhoto ? photoSrc(previewPhoto) : ''),
+    () => (previewPhoto ? photoThumbSrc(previewPhoto, { width: 320, quality: 68, format: 'webp' }) : ''),
     [previewPhoto],
   )
 
@@ -72,6 +72,7 @@ export default function TripCard({ tour }: Props) {
         <TripCoverImage
           src={tour.cover_image_url || previewSrc}
           alt={tour.name_en}
+          size="thumb"
           className="h-[78px] w-[78px] rounded-xl object-cover"
         />
         <span
