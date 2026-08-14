@@ -40,6 +40,9 @@ import {
   StaffStatCard,
   staffShellClass,
 } from '../../components/app/staffUi'
+import PaymentReconciliationBanner from '../../components/app/PaymentReconciliationBanner'
+import AiContentGenerationToggle from '../../components/app/AiContentGenerationToggle'
+import { useToast } from '../../components/ui/Toast'
 
 function daysUntil(dateStr: string | null): number {
   if (!dateStr) return 999
@@ -122,6 +125,7 @@ const NAV_LINKS: { to: string; label: string; icon: ReactNode; highlighted?: boo
 
 export default function OwnerDashboard() {
   const navigate = useNavigate()
+  const { toast } = useToast()
   const [bookings, setBookings] = useState<TourBooking[]>([])
   const [expenses, setExpenses] = useState<{ amount_aud: number }[]>([])
   const [items, setItems] = useState<ComplianceItem[]>([])
@@ -225,6 +229,16 @@ export default function OwnerDashboard() {
       />
 
       <StaffMain>
+        <PaymentReconciliationBanner />
+        <StaffCard>
+          <StaffSectionTitle>AI content</StaffSectionTitle>
+          <div className="mt-3">
+            <AiContentGenerationToggle
+              onSessionExpired={() => navigate('/app')}
+              onToast={(msg, tone) => toast(msg, tone ?? 'success')}
+            />
+          </div>
+        </StaffCard>
         {loading && <DashboardCardSkeleton />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
 

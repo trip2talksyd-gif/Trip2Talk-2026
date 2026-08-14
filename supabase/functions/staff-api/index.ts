@@ -379,6 +379,8 @@ const ACTION_ROLES: Record<string, Role[]> = {
   list_photo_spots_admin: ['OWNER', 'MANAGER'],
   upsert_photo_spot: ['OWNER', 'MANAGER'],
   delete_photo_spot: ['OWNER', 'MANAGER'],
+  get_app_settings: ['OWNER', 'MANAGER'],
+  set_ai_content_generation: ['OWNER'],
 }
 
 /**
@@ -2336,6 +2338,46 @@ Deno.serve(async (req) => {
         }
 
         return json({ data })
+      }
+
+      case 'get_app_settings': {
+        const { data, error } = await admin
+          .from('app_settings')
+          .select('ai_content_generation_enabled')
+          .eq('id', 'default')
+          .maybeSingle()
+        if (error) throw error
+        return json({
+          data: {
+            ai_content_generation_enabled: data?.ai_content_generation_enabled !== false,
+          },
+        })
+      }
+
+      case 'set_ai_content_generation': {
+        const { enabled } = params as { enabled?: unknown }
+        if (typeof enabled !== 'boolean') return json({ error: 'invalid_params' }, 400)
+        const staffId =
+          typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+        const { data, error } = await admin
+          .from('app_settings')
+          .upsert(
+            {
+              id: 'default',
+              ai_content_generation_enabled: enabled,
+              updated_at: new Date().toISOString(),
+              updated_by: staffId,
+            },
+            { onConflict: 'id' },
+          )
+          .select('ai_content_generation_enabled')
+          .single()
+        if (error) throw error
+        return json({
+          data: {
+            ai_content_generation_enabled: data.ai_content_generation_enabled !== false,
+          },
+        })
       }
 
       case 'year_summary': {

@@ -8,6 +8,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { TRIP_PROMO_BRAND_VOICE } from './brandVoice.ts'
+import { assertAiContentGenerationEnabled } from '../_shared/aiContentEnabled.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -150,6 +151,11 @@ Deno.serve(async (req) => {
     const ok = await assertOwnerToken(admin, body.token)
     if (!ok) {
       return json({ error: 'unauthorized', message: 'เซสชันหมดอายุ กรุณาใส่ PIN ใหม่' }, 401)
+    }
+
+    const gate = await assertAiContentGenerationEnabled(admin)
+    if (!gate.ok) {
+      return json({ error: gate.error, message: gate.message }, 403)
     }
 
     const { data: tour, error: tourError } = await admin

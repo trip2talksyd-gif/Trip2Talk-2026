@@ -1185,6 +1185,19 @@ export async function updateTourMaxSeats(
   return normalizeTour(row)
 }
 
+export type AppSettings = {
+  ai_content_generation_enabled: boolean
+}
+
+export async function fetchAppSettings(): Promise<AppSettings> {
+  return callStaffApi<AppSettings>('get_app_settings')
+}
+
+/** OWNER-only — persist the AI content kill switch (generate-trip-post + generate-caption). */
+export async function setAiContentGenerationEnabled(enabled: boolean): Promise<AppSettings> {
+  return callStaffApi<AppSettings>('set_ai_content_generation', { enabled })
+}
+
 export type YearSummary = {
   bookings: TourBooking[]
   expenses: Expense[]
@@ -1594,8 +1607,13 @@ export async function generateCaption(
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as {
       error?: string
+      message?: string
       anthropic_status?: number
       anthropic_type?: string | null
+      anthropic_message?: string | null
+    }
+    if (body?.error === 'ai_content_disabled' || body?.error === 'settings_unavailable') {
+      throw new Error(body.message?.trim() || 'ฟีเจอร์นี้ถูกปิดชั่วคราวโดยเจ้าของร้าน')
     }
     if (body?.error === 'anthropic_failed') {
       const detail = [
@@ -1657,6 +1675,7 @@ export async function generateTripPost(tripId: string): Promise<GenerateTripPost
         ? body.message
         : 'สร้างโพสต์ไม่สำเร็จ ลองอีกครั้ง'
     const extra =
+      body.error === 'ai_content_disabled' ||
       body.error === 'anthropic_credits' ||
       body.error === 'anthropic_failed' ||
       body.error === 'anthropic_unauthorized' ||

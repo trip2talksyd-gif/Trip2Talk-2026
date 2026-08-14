@@ -9,6 +9,7 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
 import { BRAND_VOICE } from './brandVoice.ts'
+import { assertAiContentGenerationEnabled } from '../_shared/aiContentEnabled.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -96,6 +97,12 @@ Deno.serve(async (req) => {
 
   const ok = await assertStaffToken(body.token)
   if (!ok) return json({ error: 'unauthorized' }, 401)
+
+  const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
+  const gate = await assertAiContentGenerationEnabled(admin)
+  if (!gate.ok) {
+    return json({ error: gate.error, message: gate.message }, 403)
+  }
 
   try {
     const imgRes = await fetch(imageUrl)
