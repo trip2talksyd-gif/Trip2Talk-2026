@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
-import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
+import { GALLERY_PHOTOS, photoThumbSrc } from '../../data/galleryPhotos'
 import PhotoSlideshow, { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
 import BiText from '../../components/ui/BiText'
 
@@ -111,7 +111,7 @@ export default function PhotoGuideHubPage() {
                 <span className="font-thai text-[9px] font-medium opacity-90">{card.badgeTh}</span>
               </span>
               <img
-                src={photoSrc(photo)}
+                src={photoThumbSrc(photo, { width: 720, quality: 70, format: 'webp' })}
                 alt={`${card.titleEn} / ${card.titleTh}`}
                 className="h-[150px] w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />

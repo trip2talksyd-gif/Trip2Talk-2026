@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type TouchEvent } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import { photoSrc } from '../../data/galleryPhotos'
+import { photoThumbSrc } from '../../data/galleryPhotos'
 import type { GalleryAlbum } from '../../data/galleryAlbums'
 
 type Props = {
@@ -67,7 +67,7 @@ export default function GalleryAlbumCarousel({
 
   if (len === 0 || !current) return null
 
-  const bgUrl = photoSrc(current.hero)
+  const bgUrl = photoThumbSrc(current.hero, { width: 1200, quality: 70, format: 'webp' })
 
   function onTouchStart(e: TouchEvent) {
     touchStartX.current = e.touches[0]?.clientX ?? null
@@ -155,10 +155,11 @@ export default function GalleryAlbumCarousel({
                   className="group relative block h-full w-full overflow-hidden rounded-2xl border border-white/15 text-left shadow-[0_24px_48px_-20px_rgba(0,0,0,0.65)] focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                 >
                   <img
-                    src={photoSrc(album.hero)}
+                    src={photoThumbSrc(album.hero, { width: 960, quality: 72, format: 'webp' })}
                     alt={`${album.nameEn} — ${album.taglineEn}`}
                     className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-[1.03]"
                     loading={i === 0 ? 'eager' : 'lazy'}
+                    decoding="async"
                     draggable={false}
                   />
                   <div

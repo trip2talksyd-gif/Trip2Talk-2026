@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { getHeroPhotoForTrip, photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
+import { getHeroPhotoForTrip, photoThumbSrc, type GalleryPhoto } from '../../data/galleryPhotos'
 import TripCoverFallback from './TripCoverFallback'
 
 type Props = {
@@ -15,7 +15,10 @@ export default function TripPhotoHero({ tripCode, alt, className = '', overrideP
   const [failed, setFailed] = useState(false)
   const defaultPhoto = useMemo(() => getHeroPhotoForTrip(tripCode), [tripCode])
   const photo = overridePhoto ?? defaultPhoto
-  const src = useMemo(() => (photo ? photoSrc(photo) : ''), [photo])
+  const src = useMemo(
+    () => (photo ? photoThumbSrc(photo, { width: 1200, quality: 70, format: 'webp' }) : ''),
+    [photo],
+  )
 
   if (photo && src && !failed) {
     return (
@@ -23,6 +26,7 @@ export default function TripPhotoHero({ tripCode, alt, className = '', overrideP
         src={src}
         alt={alt}
         loading="lazy"
+        decoding="async"
         className={`object-cover ${className}`}
         onError={() => setFailed(true)}
       />

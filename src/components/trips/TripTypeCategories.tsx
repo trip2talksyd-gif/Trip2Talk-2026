@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import type { TripType } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
 import { useInView } from '../../hooks/useInView'
-import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
+import { GALLERY_PHOTOS, photoThumbSrc } from '../../data/galleryPhotos'
 
 const CATEGORIES: { type: TripType; photoId: string; labelKey: 'common.oneday' | 'common.overnight' | 'common.multiday' }[] = [
   { type: 'oneday', photoId: 'syd-015', labelKey: 'common.oneday' },
@@ -22,7 +22,7 @@ function CategoryCard({ category }: { category: (typeof CATEGORIES)[number] }) {
     >
       {photo && (
         <img
-          src={photoSrc(photo)}
+          src={photoThumbSrc(photo, { width: 1200, quality: 70, format: 'webp' })}
           alt={label}
           className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
         />

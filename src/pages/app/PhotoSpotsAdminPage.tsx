@@ -32,6 +32,7 @@ import {
 } from '../../lib/photoSpotsApi'
 import { fetchToursAdmin } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
+import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 
 type FormState = {
   id?: string
@@ -769,7 +770,7 @@ export default function PhotoSpotsAdminPage() {
                   {form.hero_image_url ? (
                     <div className="relative">
                       <img
-                        src={form.hero_image_url}
+                        src={storageImageSrc(form.hero_image_url, STORAGE_IMG.card)}
                         alt="Hero"
                         className="h-28 w-full rounded-lg object-cover"
                       />
@@ -798,7 +799,7 @@ export default function PhotoSpotsAdminPage() {
                   <div className="grid grid-cols-4 gap-2">
                     {form.gallery_image_urls.map((url) => (
                       <div key={url} className="relative">
-                        <img src={url} alt="" className="h-16 w-full rounded object-cover" />
+                        <img src={storageImageSrc(url, STORAGE_IMG.thumb)} alt="" className="h-16 w-full rounded object-cover" />
                         <button
                           type="button"
                           className="absolute right-0.5 top-0.5 rounded-full bg-black/60 p-0.5 text-cream"

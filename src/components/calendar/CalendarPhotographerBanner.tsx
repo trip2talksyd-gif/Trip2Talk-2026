@@ -1,7 +1,7 @@
 import { Camera, Car, Images } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import type { TranslationKey } from '../../i18n/translations'
-import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
+import { GALLERY_PHOTOS, photoThumbSrc } from '../../data/galleryPhotos'
 
 const BANNER_PHOTO = GALLERY_PHOTOS.find((p) => p.id === 'nz-013') ?? GALLERY_PHOTOS[0]
 
@@ -35,7 +35,7 @@ export default function CalendarPhotographerBanner() {
       <div className="absolute inset-0">
         {BANNER_PHOTO && (
           <img
-            src={photoSrc(BANNER_PHOTO)}
+            src={photoThumbSrc(BANNER_PHOTO, { width: 1200, quality: 70, format: 'webp' })}
             alt=""
             className="h-full w-full object-cover"
             loading="lazy"

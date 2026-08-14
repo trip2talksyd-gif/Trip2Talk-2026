@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import { MOBILE_ANGLES } from '../../data/photoGuideContent'
-import { photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
+import { photoThumbSrc, type GalleryPhoto } from '../../data/galleryPhotos'
 import { galleryByIds } from './PhotoSlideshow'
 import BiText from '../ui/BiText'
 import { useInView } from '../../hooks/useInView'
@@ -54,7 +54,7 @@ function AngleMediaCarousel({ photos, alt }: { photos: GalleryPhoto[]; alt: stri
           {photos.map((photo) => (
             <img
               key={photo.id}
-              src={photoSrc(photo)}
+              src={photoThumbSrc(photo, { width: 960, quality: 72, format: 'webp' })}
               alt={alt}
               loading="lazy"
               className="h-full w-full shrink-0 object-cover"
@@ -194,7 +194,7 @@ function TripCrossSellBanner() {
               >
                 {photo ? (
                   <img
-                    src={photoSrc(photo)}
+                    src={photoThumbSrc(photo, { width: 320, quality: 68, format: 'webp' })}
                     alt={`${swatch.labelEn} / ${swatch.labelTh}`}
                     className="h-full w-full object-cover"
                     loading="lazy"

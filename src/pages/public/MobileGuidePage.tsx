@@ -4,7 +4,7 @@ import { enabledSocialProfiles } from '../../data/contactChannels'
 import { MOBILE_LANDSCAPE_TIPS, MOBILE_PORTRAIT_TIPS } from '../../data/photoGuideContent'
 import PhotoSlideshow, { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
 import MobileAnglesSection from '../../components/photoGuide/MobileAnglesSection'
-import { photoSrc } from '../../data/galleryPhotos'
+import { photoThumbSrc } from '../../data/galleryPhotos'
 import BiText from '../../components/ui/BiText'
 
 const DOT_COLORS = ['#20363c', '#e2734a', '#e8935a', '#2e4d53'] as const
@@ -223,7 +223,7 @@ export default function MobileGuidePage() {
             {album.map((photo) => (
               <img
                 key={photo.id}
-                src={photoSrc(photo)}
+                src={photoThumbSrc(photo, { width: 720, quality: 70, format: 'webp' })}
                 alt={`${photo.caption_en} / ${photo.caption_th}`}
                 loading="lazy"
               />
@@ -257,7 +257,7 @@ export default function MobileGuidePage() {
               {portraits.map((photo) => (
                 <img
                   key={photo.id}
-                  src={photoSrc(photo)}
+                  src={photoThumbSrc(photo, { width: 480, quality: 68, format: 'webp' })}
                   alt={`${photo.caption_en} / ${photo.caption_th}`}
                   loading="lazy"
                 />

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { GALLERY_PHOTOS, photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
+import { GALLERY_PHOTOS, photoThumbSrc, type GalleryPhoto } from '../../data/galleryPhotos'
+import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 
 type Slide = {
   photo?: GalleryPhoto
@@ -37,7 +38,9 @@ export default function PhotoSlideshow({ slides, intervalMs = 4000, className = 
       {/* Mockup .shot-slideshow — 21/9 desktop, 16/10 mobile, radius 16 */}
       <div className="shot-slideshow relative aspect-[16/10] overflow-hidden rounded-2xl bg-teal-900 shadow-mockup md:aspect-[21/9]">
         {slides.map((s, i) => {
-          const url = s.photo ? photoSrc(s.photo) : (s.src ?? '')
+          const url = s.photo
+            ? photoThumbSrc(s.photo, { width: 1200, quality: 70, format: 'webp' })
+            : storageImageSrc(s.src, STORAGE_IMG.hero)
           return (
             <img
               key={`${s.sceneEn}-${i}`}

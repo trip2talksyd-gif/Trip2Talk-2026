@@ -1,3 +1,5 @@
+import { storageImageSrc } from '../lib/storageImage'
+
 export type GalleryCategory =
   | 'new-zealand'
   | 'tasmania'
@@ -656,14 +658,9 @@ export function photoThumbSrc(
   photo: GalleryPhoto,
   opts: { width?: number; quality?: number; format?: 'webp' | 'origin' } = {},
 ): string {
-  const src = photoSrc(photo)
-  const width = opts.width ?? 720
-  const quality = opts.quality ?? 70
-  const format = opts.format ?? 'webp'
-  const marker = '/storage/v1/object/public/'
-  const idx = src.indexOf(marker)
-  if (idx === -1) return src
-  const origin = src.slice(0, idx)
-  const path = src.slice(idx + marker.length)
-  return `${origin}/storage/v1/render/image/public/${path}?width=${width}&quality=${quality}&resize=contain&format=${format}`
+  return storageImageSrc(photoSrc(photo), {
+    width: opts.width ?? 720,
+    quality: opts.quality ?? 70,
+    format: opts.format ?? 'webp',
+  })
 }
