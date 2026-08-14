@@ -224,6 +224,7 @@ export type TranslationKey =
   | 'pricing.page.subtitle'
   | 'pricing.mostPopular'
   | 'pricing.audPerPerson'
+  | 'pricing.priceHint'
   | 'pricing.tier.day.title'
   | 'pricing.tier.day.desc'
   | 'pricing.tier.day.check.1'
@@ -813,6 +814,7 @@ const en: Map = {
   'pricing.page.subtitle': 'Sample figures — live trip pages show exact AUD pricing',
   'pricing.mostPopular': 'Most popular',
   'pricing.audPerPerson': 'AUD / person',
+  'pricing.priceHint': 'Tap or hover the price to see the flip animation',
   'pricing.tier.day.title': 'One-day trips',
   'pricing.tier.day.desc': 'A few hours with one professional photographer — light logistics',
   'pricing.tier.day.check.1': '3-hour photo session',
@@ -1426,6 +1428,7 @@ const th: Map = {
   'pricing.page.subtitle': 'ตัวเลขเป็นตัวอย่าง — ราคาจริงดูได้ในแต่ละทริป',
   'pricing.mostPopular': 'ยอดนิยม',
   'pricing.audPerPerson': 'AUD / คน',
+  'pricing.priceHint': 'จิ้มหรือโฮเวอร์ตัวเลขดูแอนิเมชัน',
   'pricing.tier.day.title': 'ทริปวันเดียว',
   'pricing.tier.day.desc': 'ไม่กี่ชั่วโมง ช่างภาพมืออาชีพหนึ่งคน โลจิสติกส์น้อย',
   'pricing.tier.day.check.1': 'เซสชันถ่ายภาพ 3 ชม.',
