@@ -13,7 +13,7 @@ import {
 } from '../../lib/tourDisplay'
 import { seatsRemaining } from '../../lib/toursApi'
 import { getPreviewPhotoForTrip, photoSrc } from '../../data/galleryPhotos'
-import TripPhotoHero from './TripPhotoHero'
+import TripCoverImage from './TripCoverImage'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 import type { TranslationKey } from '../../i18n/translations'
 
@@ -69,20 +69,11 @@ export default function TripCard({ tour }: Props) {
   return (
     <article className="group relative flex gap-2.5 rounded-2xl border border-line bg-card p-2 shadow-[0_6px_18px_-10px_rgba(10,61,58,0.25)]">
       <Link to={`/trips/${tour.trip_code}`} className="relative h-[78px] w-[78px] shrink-0">
-        {previewSrc || tour.cover_image_url ? (
-          <img
-            src={tour.cover_image_url || previewSrc}
-            alt={tour.name_en}
-            className="h-[78px] w-[78px] rounded-xl object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <TripPhotoHero
-            tripCode={tour.trip_code}
-            alt={tour.name_en}
-            className="h-[78px] w-[78px] rounded-xl object-cover"
-          />
-        )}
+        <TripCoverImage
+          src={tour.cover_image_url || previewSrc}
+          alt={tour.name_en}
+          className="h-[78px] w-[78px] rounded-xl object-cover"
+        />
         <span
           className={`absolute left-[5px] top-[5px] rounded-md px-[7px] py-[3px] text-[7px] font-extrabold uppercase tracking-[0.03em] text-cream shadow-[0_2px_6px_-2px_rgba(0,0,0,0.35)] ${category.className}`}
           title={`${catLabel.en} / ${catLabel.th}`}
@@ -132,7 +123,7 @@ export default function TripCard({ tour }: Props) {
         }}
         aria-label={favorited ? `${favRemove.en} / ${favRemove.th}` : `${favAdd.en} / ${favAdd.th}`}
         aria-pressed={favorited}
-        className="absolute right-2 top-2 flex h-[22px] w-[22px] items-center justify-center rounded-full bg-black/35 text-[11px] text-coral"
+        className="absolute right-1 top-1 flex h-11 w-11 items-center justify-center rounded-full text-coral"
       >
         <Heart className={`h-3 w-3 ${favorited ? 'fill-coral' : ''}`} strokeWidth={2} />
       </button>

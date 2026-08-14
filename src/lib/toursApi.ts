@@ -290,6 +290,46 @@ export async function fetchPendingBookings(): Promise<TourBooking[]> {
   return callStaffApi<TourBooking[]>('list_pending_bookings')
 }
 
+export type SignedPaymentSlip = {
+  url: string
+  expires_in: number
+  is_image: boolean
+}
+
+export async function signPaymentSlip(bookingId: string): Promise<SignedPaymentSlip> {
+  return callStaffApi<SignedPaymentSlip>('sign_payment_slip', { bookingId })
+}
+
+export async function flagPendingBooking(bookingId: string, note: string): Promise<void> {
+  await callStaffApi('flag_pending_booking', { bookingId, note })
+}
+
+export type PaymentReconciliationIssue = {
+  id: string
+  created_at: string
+  resolved_at: string | null
+  booking_id: string | null
+  booking_reference: string
+  external_payment_id: string
+  amount_cents: number | null
+  payment_method: string | null
+  reason: string
+  detail: string | null
+  source: string | null
+}
+
+export async function fetchPaymentReconciliationIssues(): Promise<PaymentReconciliationIssue[]> {
+  return callStaffApi<PaymentReconciliationIssue[]>('list_payment_reconciliation_issues')
+}
+
+export async function resolvePaymentReconciliationIssue(id: string, note?: string): Promise<void> {
+  await callStaffApi('resolve_payment_reconciliation_issue', { id, note })
+}
+
+export async function retryPaymentReconciliationIssue(id: string): Promise<void> {
+  await callStaffApi('retry_payment_reconciliation_issue', { id })
+}
+
 export async function updateBookingStatus(
   id: string,
   status: TourBooking['booking_status'],
@@ -365,6 +405,76 @@ export async function createWaiverStaffAssisted(
   input: StaffAssistedWaiverInput,
 ): Promise<WaiverSignature> {
   return callStaffApi<WaiverSignature>('create_waiver_staff_assisted', input)
+}
+
+export type PublicWaiverLookup = {
+  status: 'open' | 'completed'
+  trip_code: string
+  booking_reference: string | null
+  first_name_en: string
+  last_name_en: string
+  signed_name: string | null
+  signed_at: string | null
+  clauses: string[] | Record<string, unknown> | null
+  locale: 'en' | 'th' | null
+  filled_by_staff: boolean
+}
+
+async function callPublicWaiver(body: Record<string, unknown>): Promise<Response> {
+  return fetch(`${supabaseConfig.url}/functions/v1/public-waiver`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseConfig.anonKey,
+      Authorization: `Bearer ${supabaseConfig.anonKey}`,
+    },
+    body: JSON.stringify(body),
+  })
+}
+
+export async function lookupPublicWaiver(token: string): Promise<PublicWaiverLookup> {
+  const res = await callPublicWaiver({ action: 'lookup', token })
+  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>
+  if (res.status === 404) throw new Error('not_found')
+  if (res.status === 410) throw new Error('booking_cancelled')
+  if (!res.ok) throw new Error(typeof body.error === 'string' ? body.error : 'lookup_failed')
+  return body as unknown as PublicWaiverLookup
+}
+
+export async function submitPublicWaiver(input: {
+  token: string
+  signed_name: string
+  clauses: string[]
+  locale: 'en' | 'th'
+  safety: Record<string, unknown>
+  flight: Record<string, unknown>
+}): Promise<{ status: 'completed'; signed_at: string; booking_reference: string | null }> {
+  const res = await callPublicWaiver({ action: 'submit', ...input })
+  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>
+  if (res.status === 409) throw new Error('already_submitted')
+  if (!res.ok) throw new Error(typeof body.error === 'string' ? body.error : 'submit_failed')
+  return body as { status: 'completed'; signed_at: string; booking_reference: string | null }
+}
+
+export async function issueWaiverLink(bookingId: string): Promise<{ token: string; path: string }> {
+  return callStaffApi<{ token: string; path: string }>('issue_waiver_link', { bookingId })
+}
+
+export type WaiverRecordPayload = {
+  booking: {
+    id: string
+    trip_code: string
+    booking_reference: string | null
+    first_name_en: string
+    last_name_en: string
+    waiver_signed: boolean
+    waiver_signed_at: string | null
+  }
+  waiver: WaiverSignature | null
+}
+
+export async function getWaiverRecord(bookingId: string): Promise<WaiverRecordPayload> {
+  return callStaffApi<WaiverRecordPayload>('get_waiver_record', { bookingId })
 }
 
 export async function listWaiversForTour(tripCode: string): Promise<WaiverSignature[]> {
@@ -1060,6 +1170,21 @@ export async function updateTourItinerary(
   return normalizeTours([row])[0]
 }
 
+/** OWNER-only: change tours.max_seats after publish. Requires a short audit reason.
+ * Server refuses new max below current booked_seats. */
+export async function updateTourMaxSeats(
+  id: string,
+  maxSeats: number,
+  reason: string,
+): Promise<Tour> {
+  const row = await callStaffApi<TourRow>('update_tour_max_seats', {
+    id,
+    max_seats: maxSeats,
+    reason,
+  })
+  return normalizeTour(row)
+}
+
 export type YearSummary = {
   bookings: TourBooking[]
   expenses: Expense[]
@@ -1393,6 +1518,7 @@ export type SquareCardChargeResult = {
   status: string
   amount_aud: number
   booking_reference: string
+  booking_synced: boolean
 }
 
 /** Charges a Web Payments SDK card token via square-create-payment (server-side). */
@@ -1431,6 +1557,7 @@ export async function chargeSquareCardToken(input: {
     status: typeof body?.status === 'string' ? body.status : '',
     amount_aud: Number(body?.amount_aud ?? 0),
     booking_reference: String(body?.booking_reference ?? input.booking_reference),
+    booking_synced: body?.booking_synced === true,
   }
 }
 

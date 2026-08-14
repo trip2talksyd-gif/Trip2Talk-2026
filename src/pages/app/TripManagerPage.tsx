@@ -32,6 +32,7 @@ import { DashboardCardSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import TripItineraryEditor from '../../components/app/TripItineraryEditor'
+import TripSeatsEditor from '../../components/app/TripSeatsEditor'
 import ArchiveTourDialog from '../../components/app/ArchiveTourDialog'
 import { Archive, Loader2, RotateCcw, Trash2 } from 'lucide-react'
 
@@ -759,6 +760,16 @@ export default function TripManagerPage() {
                             'สร้าง content ให้ทริปนี้'
                           )}
                         </button>
+                      )}
+                      {isOwner && (
+                        <TripSeatsEditor
+                          tour={t}
+                          onSaved={(updated) =>
+                            setTours((prev) => prev.map((x) => (x.id === updated.id ? updated : x)))
+                          }
+                          onSessionExpired={() => navigate('/app')}
+                          onToast={(msg, tone) => toast(msg, tone ?? 'success')}
+                        />
                       )}
                       <TripItineraryEditor
                         tour={t}

@@ -1,4 +1,5 @@
 import { useLang } from '../../hooks/useLang'
+import BiDisplayHeading from '../ui/BiDisplayHeading'
 import type { Testimonial } from '../../data/testimonials'
 
 type Props = {
@@ -12,9 +13,13 @@ export default function TestimonialSection({ testimonials }: Props) {
 
   return (
     <section>
-      <h2 className="font-serif text-lg text-ink">
-        {lang === 'th' ? 'รีวิวจากลูกทริป' : 'What guests say'}
-      </h2>
+      <BiDisplayHeading
+        en="What guests say"
+        th="รีวิวจากลูกทริป"
+        as="h2"
+        enClassName="text-lg font-semibold text-ink"
+        thClassName="mt-0.5 text-sm font-medium text-ink-soft"
+      />
       <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1">
         {testimonials.map((item) => (
           <figure

@@ -10,6 +10,7 @@ import {
 import { formatAud, seatsRemaining } from '../../lib/toursApi'
 import { getPreviewPhotoForTrip, photoThumbSrc } from '../../data/galleryPhotos'
 import BiDisplayHeading from '../ui/BiDisplayHeading'
+import TripCoverImage from './TripCoverImage'
 
 type Props = {
   tours: Tour[]
@@ -89,17 +90,12 @@ export default function TripPickerHero({ tours }: Props) {
             }`}
             aria-hidden={!on}
           >
-            {src ? (
-              <img
-                src={src}
-                alt=""
-                className="h-full w-full object-cover"
-                loading={i === 0 ? 'eager' : 'lazy'}
-                decoding="async"
-              />
-            ) : (
-              <div className="h-full w-full bg-gradient-to-br from-teal-dark to-teal-darker" />
-            )}
+            <TripCoverImage
+              src={src}
+              alt=""
+              className="h-full w-full object-cover"
+              loading={i === 0 ? 'eager' : 'lazy'}
+            />
           </div>
         )
       })}

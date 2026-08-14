@@ -1,5 +1,6 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { getHeroPhotoForTrip, photoSrc, type GalleryPhoto } from '../../data/galleryPhotos'
+import TripCoverFallback from './TripCoverFallback'
 
 type Props = {
   tripCode: string
@@ -9,29 +10,24 @@ type Props = {
   overridePhoto?: GalleryPhoto | null
 }
 
-/** Hero/thumbnail from gallery base64, or brand gradient fallback */
+/** Hero/thumbnail from gallery, or bilingual “photo coming soon” fallback */
 export default function TripPhotoHero({ tripCode, alt, className = '', overridePhoto }: Props) {
+  const [failed, setFailed] = useState(false)
   const defaultPhoto = useMemo(() => getHeroPhotoForTrip(tripCode), [tripCode])
   const photo = overridePhoto ?? defaultPhoto
   const src = useMemo(() => (photo ? photoSrc(photo) : ''), [photo])
 
-  if (photo) {
+  if (photo && src && !failed) {
     return (
       <img
         src={src}
         alt={alt}
         loading="lazy"
         className={`object-cover ${className}`}
+        onError={() => setFailed(true)}
       />
     )
   }
 
-  return (
-    <div
-      className={`flex items-center justify-center bg-gradient-to-br from-mint-100 to-teal-900/20 ${className}`}
-      aria-hidden
-    >
-      <span className="text-4xl font-bold text-teal-900/30">T2T</span>
-    </div>
-  )
+  return <TripCoverFallback className={className} />
 }

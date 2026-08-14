@@ -75,10 +75,6 @@ export default function HomePage() {
 
   const heroEn = `${tt('home.hero.en.line1').en} ${tt('home.hero.en.line2').en}`
   const heroTh = `${tt('home.hero.th.line1').th} ${tt('home.hero.th.line2').th}`
-  const headline =
-    lang === 'th'
-      ? { primary: heroTh, secondary: heroEn, primaryIsThai: true }
-      : { primary: heroEn, secondary: heroTh, primaryIsThai: false }
 
   const statsBody =
     lang === 'th'
@@ -281,23 +277,15 @@ export default function HomePage() {
         {/* Bottom-anchored content — lives in the constrained hero cell, not below the video */}
         <div className="mt-auto flex min-h-0 flex-col gap-6 overflow-y-auto px-5 pb-8 sm:gap-8 sm:px-8 sm:pb-12 lg:flex-row lg:items-end lg:justify-between lg:px-12 lg:pb-16">
           <div className="max-w-xl">
-            <h1
-              lang={headline.primaryIsThai ? 'th' : 'en'}
-              className={`text-3xl font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl lg:text-[3.5rem] ${
-                headline.primaryIsThai ? 'font-serif' : ''
-              }`}
-              style={headline.primaryIsThai ? { fontFamily: THAI_DISPLAY_FONT } : undefined}
-            >
-              {headline.primary}
+            <h1 className="font-display text-3xl font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl lg:text-[3.5rem]">
+              {heroEn}
             </h1>
             <p
-              lang={headline.primaryIsThai ? 'en' : 'th'}
-              className={`mt-2 text-sm font-medium text-white/75 ${
-                headline.primaryIsThai ? '' : 'font-serif'
-              }`}
-              style={headline.primaryIsThai ? undefined : { fontFamily: THAI_DISPLAY_FONT }}
+              lang="th"
+              className="mt-2 font-serif text-sm font-medium text-white/75"
+              style={{ fontFamily: THAI_DISPLAY_FONT }}
             >
-              {headline.secondary}
+              {heroTh}
             </p>
             <p
               lang={lang === 'th' ? 'th' : 'en'}

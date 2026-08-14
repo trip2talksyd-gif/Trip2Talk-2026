@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import ContentPage from '../../components/layout/ContentPage'
 import PayIdDepositPanel from '../../components/booking/PayIdDepositPanel'
+import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import { FACEBOOK_MESSENGER_URL, FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import { CANCELLATION_POLICY } from '../../data/risks'
 import { useState } from 'react'
@@ -498,13 +499,19 @@ export function NotFoundPage() {
   return (
     <div className="mx-auto max-w-md py-16 text-center">
       <p className="font-serif text-6xl text-teal-500">404</p>
-      <h1 className="mt-3 font-serif text-2xl text-ink">
-        {lang === 'th' ? 'ไม่พบหน้านี้' : 'Page not found'}
-      </h1>
+      <BiDisplayHeading
+        en="Page not found"
+        th="ไม่พบหน้านี้"
+        as="h1"
+        className="mt-3"
+        enClassName="text-2xl font-semibold text-ink"
+        thClassName="mt-1 text-sm font-medium text-ink-soft"
+      />
       <p className="mt-2 text-sm text-ink-soft">
-        {lang === 'th'
-          ? 'ลิงก์อาจหมดอายุ หรือหน้ายังไม่ถูกสร้าง'
-          : 'That link may be outdated, or the page is still on the way.'}
+        That link may be outdated, or the page is still on the way.
+        <span lang="th" className="mt-1 block font-serif font-thai">
+          ลิงก์อาจหมดอายุ หรือหน้ายังไม่ถูกสร้าง
+        </span>
       </p>
       <div className="mt-6 flex flex-wrap justify-center gap-2">
         <Link to="/" className="btn-embossed">

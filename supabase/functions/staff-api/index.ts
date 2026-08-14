@@ -30,6 +30,27 @@ function json(body: unknown, status = 200): Response {
   })
 }
 
+/** Object path inside the private payment-slips bucket (never a public URL). */
+function paymentSlipObjectPath(slipUrl: string | null | undefined): string | null {
+  if (typeof slipUrl !== 'string') return null
+  const trimmed = slipUrl.trim()
+  if (!trimmed) return null
+  const marker = '/payment-slips/'
+  const idx = trimmed.indexOf(marker)
+  const raw = idx >= 0 ? trimmed.slice(idx + marker.length) : trimmed
+  const path = decodeURIComponent(raw.split('?')[0] ?? '').replace(/^\/+/, '')
+  if (!path || path.includes('..') || path.includes('\\') || path.startsWith('http')) return null
+  return path
+}
+
+/** 32-byte base64url — not booking_reference, not sequential. */
+function randomWaiverToken(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(32))
+  let bin = ''
+  for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]!)
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+}
+
 type ContentTargetAccount =
   | 'trip2talk_page'
   | 'chapter99_page'
@@ -321,7 +342,13 @@ const ACTION_ROLES: Record<string, Role[]> = {
   archive_tour: ['OWNER'],
   unarchive_tour: ['OWNER'],
   update_tour_itinerary: ['OWNER', 'MANAGER'],
+  update_tour_max_seats: ['OWNER'],
   record_payment: ['OWNER', 'MANAGER', 'CASHIER'],
+  sign_payment_slip: ['OWNER', 'MANAGER', 'CASHIER'],
+  flag_pending_booking: ['OWNER', 'MANAGER', 'CASHIER'],
+  list_payment_reconciliation_issues: ['OWNER', 'MANAGER', 'CASHIER'],
+  resolve_payment_reconciliation_issue: ['OWNER', 'MANAGER', 'CASHIER'],
+  retry_payment_reconciliation_issue: ['OWNER', 'MANAGER', 'CASHIER'],
   list_payments_for_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   search_customer_payments: ['OWNER', 'MANAGER', 'CASHIER'],
   add_pending_installment: ['OWNER', 'MANAGER', 'CASHIER'],
@@ -332,6 +359,8 @@ const ACTION_ROLES: Record<string, Role[]> = {
   cancel_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   create_waiver_staff_assisted: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   list_waivers_for_tour: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  issue_waiver_link: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  get_waiver_record: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   delete_waiver_signature: ['OWNER'],
   list_outbound_queue: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   complete_outbound: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
@@ -452,6 +481,108 @@ Deno.serve(async (req) => {
           .order('booked_at', { ascending: false })
         if (error) throw error
         return json({ data })
+      }
+
+      case 'sign_payment_slip': {
+        const { bookingId } = params as { bookingId?: string }
+        if (!bookingId) return json({ error: 'invalid_params' }, 400)
+        const { data: booking, error: bookingError } = await admin
+          .from('tour_bookings')
+          .select('id, slip_url')
+          .eq('id', bookingId)
+          .maybeSingle()
+        if (bookingError) throw bookingError
+        if (!booking) return json({ error: 'booking_not_found' }, 404)
+        const objectPath = paymentSlipObjectPath(booking.slip_url)
+        if (!objectPath) return json({ error: 'no_slip' }, 404)
+        const { data: signed, error: signError } = await admin.storage
+          .from('payment-slips')
+          .createSignedUrl(objectPath, 180)
+        if (signError || !signed?.signedUrl) {
+          console.error('[staff-api] sign_payment_slip', signError)
+          return json({ error: 'sign_failed' }, 502)
+        }
+        const lower = objectPath.toLowerCase()
+        const isImage = /\.(jpe?g|png|gif|webp|heic)$/i.test(lower)
+        return json({
+          data: {
+            url: signed.signedUrl,
+            expires_in: 180,
+            is_image: isImage,
+          },
+        })
+      }
+
+      case 'flag_pending_booking': {
+        const { bookingId, note } = params as { bookingId?: string; note?: string }
+        if (!bookingId) return json({ error: 'invalid_params' }, 400)
+        const text = typeof note === 'string' ? note.trim() : ''
+        if (!text) return json({ error: 'invalid_params' }, 400)
+        const { data, error } = await admin
+          .from('tour_bookings')
+          .update({ staff_follow_up_note: text.slice(0, 500) })
+          .eq('id', bookingId)
+          .in('booking_status', ['pending_payment', 'PENDING'])
+          .select('id, staff_follow_up_note, booking_status')
+          .maybeSingle()
+        if (error) throw error
+        if (!data) return json({ error: 'booking_not_found' }, 404)
+        return json({ data })
+      }
+
+      case 'list_payment_reconciliation_issues': {
+        const { data, error } = await admin
+          .from('payment_reconciliation_issues')
+          .select('*')
+          .is('resolved_at', null)
+          .order('created_at', { ascending: false })
+          .limit(50)
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'resolve_payment_reconciliation_issue': {
+        const { id, note } = params as { id?: string; note?: string }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+        const { error } = await admin
+          .from('payment_reconciliation_issues')
+          .update({
+            resolved_at: new Date().toISOString(),
+            resolve_note: typeof note === 'string' && note.trim() ? note.trim() : 'staff_ack',
+          })
+          .eq('id', id)
+          .is('resolved_at', null)
+        if (error) throw error
+        return json({ ok: true })
+      }
+
+      case 'retry_payment_reconciliation_issue': {
+        const { id } = params as { id?: string }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+        const { data: issue, error: issueError } = await admin
+          .from('payment_reconciliation_issues')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle()
+        if (issueError) throw issueError
+        if (!issue) return json({ error: 'not_found' }, 404)
+        if (issue.resolved_at) return json({ error: 'already_resolved' }, 409)
+        const cents = Number(issue.amount_cents ?? 0)
+        if (!(cents > 0) || !issue.external_payment_id || !issue.booking_reference) {
+          return json({ error: 'insufficient_issue_data' }, 400)
+        }
+        const { data: rpcResult, error: rpcError } = await admin.rpc('apply_square_payment', {
+          p_booking_ref: issue.booking_reference,
+          p_amount_cents: Math.round(cents),
+          p_payment_id: issue.external_payment_id,
+          p_payment_method: issue.payment_method || 'square',
+        })
+        if (rpcError) throw rpcError
+        const row = (rpcResult ?? {}) as { ok?: boolean; error?: string }
+        if (!row.ok) {
+          return json({ error: row.error || 'retry_failed', data: rpcResult }, 422)
+        }
+        return json({ data: rpcResult })
       }
 
       case 'update_booking_status': {
@@ -858,6 +989,83 @@ Deno.serve(async (req) => {
         }
 
         return json({ data })
+      }
+
+      case 'issue_waiver_link': {
+        const { bookingId } = params as { bookingId?: string }
+        if (!bookingId) return json({ error: 'invalid_params' }, 400)
+        const { data: booking, error: bookingErr } = await admin
+          .from('tour_bookings')
+          .select('id, waiver_token, cancelled_at')
+          .eq('id', bookingId)
+          .maybeSingle()
+        if (bookingErr) throw bookingErr
+        if (!booking) return json({ error: 'booking_not_found' }, 404)
+        if (booking.cancelled_at) return json({ error: 'booking_cancelled' }, 409)
+
+        let token =
+          typeof booking.waiver_token === 'string' && booking.waiver_token.trim()
+            ? booking.waiver_token.trim()
+            : ''
+        if (!token) {
+          for (let attempt = 0; attempt < 4 && !token; attempt++) {
+            const next = randomWaiverToken()
+            const { data: updated, error: updErr } = await admin
+              .from('tour_bookings')
+              .update({ waiver_token: next })
+              .eq('id', bookingId)
+              .is('waiver_token', null)
+              .select('waiver_token')
+              .maybeSingle()
+            if (updErr) {
+              if (updErr.code !== '23505') throw updErr
+              continue
+            }
+            if (typeof updated?.waiver_token === 'string' && updated.waiver_token) {
+              token = updated.waiver_token
+              break
+            }
+          }
+          if (!token) {
+            const { data: again, error: againErr } = await admin
+              .from('tour_bookings')
+              .select('waiver_token')
+              .eq('id', bookingId)
+              .maybeSingle()
+            if (againErr) throw againErr
+            token = typeof again?.waiver_token === 'string' ? again.waiver_token : ''
+          }
+        }
+        if (!token) return json({ error: 'token_failed' }, 500)
+        return json({ data: { token, path: `/waiver/${token}` } })
+      }
+
+      case 'get_waiver_record': {
+        const { bookingId } = params as { bookingId?: string }
+        if (!bookingId) return json({ error: 'invalid_params' }, 400)
+        const { data: booking, error: bookingErr } = await admin
+          .from('tour_bookings')
+          .select(
+            'id, trip_code, booking_reference, first_name_en, last_name_en, waiver_signed, waiver_signed_at',
+          )
+          .eq('id', bookingId)
+          .maybeSingle()
+        if (bookingErr) throw bookingErr
+        if (!booking) return json({ error: 'booking_not_found' }, 404)
+        const { data: waiver, error: wErr } = await admin
+          .from('waiver_signatures')
+          .select('*')
+          .eq('booking_id', bookingId)
+          .order('signed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        if (wErr) throw wErr
+        return json({
+          data: {
+            booking,
+            waiver: waiver ?? null,
+          },
+        })
       }
 
       case 'list_waivers_for_tour': {
@@ -2010,6 +2218,123 @@ Deno.serve(async (req) => {
           .select()
           .single()
         if (error) throw error
+        return json({ data })
+      }
+
+      case 'update_tour_max_seats': {
+        // OWNER-only capacity override after publish (e.g. one extra seat).
+        // Always writes trip_capacity_changes — refuse the save if the audit insert fails.
+        const { id, max_seats, reason } = params as {
+          id?: string
+          max_seats?: unknown
+          reason?: unknown
+        }
+        if (!id) return json({ error: 'invalid_params' }, 400)
+
+        const note = typeof reason === 'string' ? reason.trim() : ''
+        if (note.length < 8) {
+          return json(
+            {
+              error: 'reason_required',
+              detail:
+                'Reason is required (at least 8 characters) / ต้องระบุเหตุผลอย่างน้อย 8 ตัวอักษร',
+            },
+            400,
+          )
+        }
+        if (note.length > 400) {
+          return json(
+            { error: 'reason_too_long', detail: 'Reason must be 400 characters or fewer' },
+            400,
+          )
+        }
+
+        const next = Number(max_seats)
+        if (!Number.isInteger(next) || next < 1 || next > 99) {
+          return json(
+            {
+              error: 'invalid_max_seats',
+              detail: 'max_seats must be a whole number between 1 and 99 / ที่นั่งต้องเป็นจำนวนเต็ม 1–99',
+            },
+            400,
+          )
+        }
+
+        const { data: existing, error: existingError } = await admin
+          .from('tours')
+          .select('*')
+          .eq('id', id)
+          .maybeSingle()
+        if (existingError) throw existingError
+        if (!existing) return json({ error: 'not_found' }, 404)
+
+        const booked = Number(existing.booked_seats ?? existing.current_pax ?? 0)
+        const oldMax = Number(existing.max_seats ?? existing.max_pax ?? 0)
+        if (next < booked) {
+          return json(
+            {
+              error: 'below_booked_seats',
+              detail: `Cannot set max_seats below booked_seats (${booked}) / ลดที่นั่งต่ำกว่าจำนวนที่จองแล้วไม่ได้ (${booked})`,
+            },
+            409,
+          )
+        }
+
+        if (next === oldMax) {
+          return json({ data: existing })
+        }
+
+        const patch: Record<string, unknown> = { max_seats: next }
+        if ('max_pax' in existing) patch.max_pax = next
+
+        const { data, error } = await admin
+          .from('tours')
+          .update(patch)
+          .eq('id', id)
+          .select()
+          .single()
+        if (error) {
+          const msg = `${error.code ?? ''} ${error.message ?? ''}`
+          if (error.code === '23514' || /booked_seats_within_limit/i.test(msg)) {
+            return json(
+              {
+                error: 'below_booked_seats',
+                detail: `Cannot set max_seats below booked_seats (${booked}) / ลดที่นั่งต่ำกว่าจำนวนที่จองแล้วไม่ได้ (${booked})`,
+              },
+              409,
+            )
+          }
+          throw error
+        }
+
+        const staffId =
+          typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+        const { error: auditErr } = await admin.from('trip_capacity_changes').insert({
+          tour_id: id,
+          old_max_seats: oldMax,
+          new_max_seats: next,
+          reason: note,
+          changed_by: staffId,
+          changed_by_name:
+            typeof session.full_name === 'string' && session.full_name.trim()
+              ? session.full_name.trim()
+              : null,
+          changed_by_role: session.role ?? null,
+        })
+        if (auditErr) {
+          console.error('[update_tour_max_seats] audit insert failed', auditErr)
+          const revert: Record<string, unknown> = { max_seats: oldMax }
+          if ('max_pax' in existing) revert.max_pax = oldMax
+          await admin.from('tours').update(revert).eq('id', id)
+          return json(
+            {
+              error: 'audit_failed',
+              detail: 'Seat change was not saved because the audit log failed',
+            },
+            500,
+          )
+        }
+
         return json({ data })
       }
 
