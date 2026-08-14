@@ -1,7 +1,8 @@
-import { useRef, useState, type ChangeEvent } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Camera, Loader2 } from 'lucide-react'
 import {
+  fetchAppSettings,
   generateCaption,
   insertContentPostDraft,
   uploadContentPhoto,
@@ -29,6 +30,17 @@ export default function QuickPost() {
   const [phase, setPhase] = useState<Phase>('idle')
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [targetAccount, setTargetAccount] = useState<ContentTargetAccount | ''>('')
+  const [aiContentEnabled, setAiContentEnabled] = useState(true)
+
+  useEffect(() => {
+    fetchAppSettings()
+      .then((s) => setAiContentEnabled(s.ai_content_generation_enabled))
+      .catch((err) => {
+        if (err instanceof StaffSessionExpiredError) {
+          navigate('/app')
+        }
+      })
+  }, [navigate])
 
   const busy = phase === 'uploading' || phase === 'generating' || phase === 'saving'
 
@@ -36,6 +48,11 @@ export default function QuickPost() {
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file) return
+
+    if (!aiContentEnabled) {
+      toast('ฟีเจอร์นี้ถูกปิดชั่วคราวโดยเจ้าของร้าน', 'error')
+      return
+    }
 
     if (!targetAccount) {
       toast('เลือกปลายทางโพสต์ก่อนอัปโหลด', 'error')
@@ -144,6 +161,11 @@ export default function QuickPost() {
       />
 
       <StaffMain className="flex max-w-md flex-col gap-6 py-8">
+        {!aiContentEnabled && (
+          <StaffCard className="border-amber/40 bg-amber/10 text-sm text-cream">
+            ฟีเจอร์นี้ถูกปิดชั่วคราวโดยเจ้าของร้าน — เปิดได้ที่ Owner Dashboard หรือ Trip Manager
+          </StaffCard>
+        )}
         {phase === 'done' ? (
           <div className="space-y-6 text-center">
             {previewUrl ? (
@@ -215,14 +237,18 @@ export default function QuickPost() {
               accept="image/*"
               capture="environment"
               className="sr-only"
-              disabled={busy || !targetAccount}
+              disabled={busy || !targetAccount || !aiContentEnabled}
               onChange={(e) => void handleFile(e)}
             />
 
             <StaffButton
               className="min-h-16 gap-3 text-lg"
-              disabled={busy || !targetAccount}
+              disabled={busy || !targetAccount || !aiContentEnabled}
               onClick={() => {
+                if (!aiContentEnabled) {
+                  toast('ฟีเจอร์นี้ถูกปิดชั่วคราวโดยเจ้าของร้าน', 'error')
+                  return
+                }
                 if (!targetAccount) {
                   toast('เลือกปลายทางโพสต์ก่อน', 'error')
                   return
@@ -238,7 +264,11 @@ export default function QuickPost() {
               ) : (
                 <>
                   <Camera className="h-6 w-6" aria-hidden />
-                  {targetAccount ? 'อัปโหลดรูป' : 'เลือกปลายทางก่อน'}
+                  {targetAccount
+                    ? aiContentEnabled
+                      ? 'อัปโหลดรูป'
+                      : 'AI ถูกปิดชั่วคราว'
+                    : 'เลือกปลายทางก่อน'}
                 </>
               )}
             </StaffButton>

@@ -22,6 +22,7 @@ import {
   fetchWaitlist,
   formatDate,
   generateTripPost,
+  fetchAppSettings,
   markWaitlistContacted,
   unarchiveTour,
   updateTourStatus,
@@ -33,6 +34,7 @@ import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import TripItineraryEditor from '../../components/app/TripItineraryEditor'
 import TripSeatsEditor from '../../components/app/TripSeatsEditor'
+import AiContentGenerationToggle from '../../components/app/AiContentGenerationToggle'
 import ArchiveTourDialog from '../../components/app/ArchiveTourDialog'
 import { Archive, Loader2, RotateCcw, Trash2 } from 'lucide-react'
 
@@ -86,15 +88,17 @@ export default function TripManagerPage() {
     mode: 'archive' | 'unarchive' | 'delete'
   } | null>(null)
   const [tourActionSubmitting, setTourActionSubmitting] = useState(false)
+  const [aiContentEnabled, setAiContentEnabled] = useState(true)
   const isOwner = sessionStorage.getItem('staff_role') === 'OWNER'
 
   const load = useCallback(() => {
     setLoading(true)
     setError('')
-    Promise.all([fetchToursAdmin(), fetchWaitlist()])
-      .then(([t, w]) => {
+    Promise.all([fetchToursAdmin(), fetchWaitlist(), fetchAppSettings()])
+      .then(([t, w, settings]) => {
         setTours(t)
         setWaitlist(w)
+        setAiContentEnabled(settings.ai_content_generation_enabled)
       })
       .catch((err) => {
         if (err instanceof StaffSessionExpiredError) {
@@ -500,6 +504,20 @@ export default function TripManagerPage() {
             )}
 
             <section>
+              {isOwner && (
+                <div className="mb-3">
+                  <AiContentGenerationToggle
+                    onSessionExpired={() => navigate('/app')}
+                    onToast={(msg, tone) => toast(msg, tone ?? 'success')}
+                    onChange={setAiContentEnabled}
+                  />
+                </div>
+              )}
+              {!aiContentEnabled && !isOwner && (
+                <p className="mb-2 text-xs text-cream-muted">
+                  สร้าง content ด้วย AI ถูกปิดชั่วคราวโดยเจ้าของร้าน
+                </p>
+              )}
               <StaffButton
                 variant="secondary"
                 className="border-teal-500/40 bg-teal-500/10 text-teal-500 hover:border-teal-500/40 hover:bg-teal-500/15"
@@ -747,9 +765,17 @@ export default function TripManagerPage() {
                       {showContentBtn && (
                         <button
                           type="button"
-                          disabled={generatingTripId !== null}
-                          onClick={() => void handleGenerateTripPost(t)}
-                          className="mt-2 flex min-h-10 w-full items-center justify-center gap-2 rounded-2xl border border-teal-500/40 bg-teal-500/10 px-3 text-xs font-medium text-teal-500 transition-colors hover:bg-teal-500/15 disabled:opacity-50"
+                          disabled={generatingTripId !== null || !aiContentEnabled}
+                          onClick={() => {
+                            if (!aiContentEnabled) return
+                            void handleGenerateTripPost(t)
+                          }}
+                          title={
+                            aiContentEnabled
+                              ? undefined
+                              : 'ฟีเจอร์นี้ถูกปิดชั่วคราวโดยเจ้าของร้าน'
+                          }
+                          className="mt-2 flex min-h-10 w-full items-center justify-center gap-2 rounded-2xl border border-teal-500/40 bg-teal-500/10 px-3 text-xs font-medium text-teal-500 transition-colors hover:bg-teal-500/15 disabled:cursor-not-allowed disabled:opacity-40"
                         >
                           {isGenerating ? (
                             <>
