@@ -18,7 +18,12 @@ import {
 } from '../../lib/toursApi'
 import { SeatsFullError } from '../../types/errors'
 import { tourDurationLabel, isOneDayTrip } from '../../lib/tourDisplay'
-import { isWaiverSigned, getWaiverSession, setConfirmationSummary } from '../../lib/waiverSession'
+import {
+  isWaiverSigned,
+  getWaiverSession,
+  setConfirmationSummary,
+  markConfirmationDepositPaid,
+} from '../../lib/waiverSession'
 import {
   getSupabaseErrorMessage,
   isValidAuMobile,
@@ -271,6 +276,7 @@ export default function BookingPage() {
         depositPaid: false,
         facebookMessagePending: true,
         createdAt: new Date().toISOString(),
+        lookupContact: form.email.trim() || form.phone.trim() || undefined,
       })
 
       if (paymentChoice === 'square') {
@@ -780,8 +786,11 @@ export default function BookingPage() {
           givenName={form.first_name_en.trim()}
           familyName={form.last_name_en.trim()}
           onPaid={() => {
+            markConfirmationDepositPaid(squareBookingRef)
             setReference(squareBookingRef)
-            navigate('/booking/confirmation')
+            navigate(
+              `/booking/confirmation?ref=${encodeURIComponent(squareBookingRef)}&paid=1`,
+            )
           }}
         />
       )}

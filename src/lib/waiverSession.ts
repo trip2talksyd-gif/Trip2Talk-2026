@@ -75,6 +75,8 @@ export type ConfirmationSummaryData = {
   depositPaid: boolean
   facebookMessagePending: boolean
   createdAt: string
+  /** Email or phone used with lookup-my-trip — not shown on the confirmation card. */
+  lookupContact?: string
 }
 
 export function setConfirmationSummary(data: ConfirmationSummaryData): void {
@@ -92,4 +94,19 @@ export function getConfirmationSummary(ref?: string): ConfirmationSummaryData | 
   } catch {
     return null
   }
+}
+
+export function patchConfirmationSummary(
+  ref: string | undefined,
+  patch: Partial<ConfirmationSummaryData>,
+): ConfirmationSummaryData | null {
+  const current = getConfirmationSummary(ref)
+  if (!current) return null
+  const next = { ...current, ...patch, bookingReference: current.bookingReference }
+  setConfirmationSummary(next)
+  return next
+}
+
+export function markConfirmationDepositPaid(ref?: string): ConfirmationSummaryData | null {
+  return patchConfirmationSummary(ref, { depositPaid: true })
 }

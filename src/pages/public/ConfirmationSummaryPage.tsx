@@ -1,13 +1,25 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Check, Circle } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
-import { getConfirmationSummary } from '../../lib/waiverSession'
-import { formatDate } from '../../lib/toursApi'
+import {
+  getConfirmationSummary,
+  markConfirmationDepositPaid,
+  type ConfirmationSummaryData,
+} from '../../lib/waiverSession'
+import { formatDate, lookupMyTrip } from '../../lib/toursApi'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import BiText from '../../components/ui/BiText'
 import { useToast } from '../../components/ui/Toast'
 import BrandLogo from '../../components/brand/BrandLogo'
+
+function statusMeansDepositPaid(status: string | undefined): boolean {
+  return status === 'deposit_paid' || status === 'fully_paid'
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 /**
  * Customer Confirmation Summary — DISTINCT from Tax Invoice.
@@ -19,16 +31,62 @@ export default function ConfirmationSummaryPage() {
   const [params] = useSearchParams()
   const ref = params.get('ref') ?? undefined
   const squareReturn = params.get('square') === '1'
-  const data = useMemo(() => {
+  const paidReturn = params.get('paid') === '1'
+  const optimisticPaid = squareReturn || paidReturn
+  const [data, setData] = useState<ConfirmationSummaryData | null>(() => {
     const summary = getConfirmationSummary(ref)
     if (!summary) return null
-    if (squareReturn && !summary.depositPaid) {
-      return { ...summary, depositPaid: true }
+    if (optimisticPaid && !summary.depositPaid) {
+      return markConfirmationDepositPaid(summary.bookingReference) ?? {
+        ...summary,
+        depositPaid: true,
+      }
     }
     return summary
-  }, [ref, squareReturn])
+  })
+  const [confirmingLive, setConfirmingLive] = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const [downloading, setDownloading] = useState(false)
+
+  useEffect(() => {
+    const summary = getConfirmationSummary(ref)
+    const bookingRef = summary?.bookingReference ?? ref?.trim()
+    const contact = summary?.lookupContact?.trim()
+    if (!bookingRef || !contact) return
+
+    let cancelled = false
+
+    async function refreshFromLive() {
+      const attempts = squareReturn ? 8 : 1
+      if (squareReturn) setConfirmingLive(true)
+      try {
+        for (let i = 0; i < attempts; i++) {
+          if (cancelled) return
+          const result = await lookupMyTrip({
+            tripCodeOrReference: bookingRef,
+            contact,
+          })
+          if (cancelled) return
+          if (statusMeansDepositPaid(result.booking?.booking_status)) {
+            const next = markConfirmationDepositPaid(bookingRef)
+            if (next) setData(next)
+            else setData((prev) => (prev ? { ...prev, depositPaid: true } : prev))
+            return
+          }
+          if (i < attempts - 1) await sleep(2500)
+        }
+      } catch {
+        /* Keep session / optimistic checklist if lookup is unavailable. */
+      } finally {
+        if (!cancelled) setConfirmingLive(false)
+      }
+    }
+
+    void refreshFromLive()
+    return () => {
+      cancelled = true
+    }
+  }, [ref, squareReturn])
 
   const title = tt('confirm.title')
   const subtitle = tt('confirm.subtitle')
@@ -122,11 +180,19 @@ export default function ConfirmationSummaryPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-3 pb-8">
-      {squareReturn && (
+      {(squareReturn || paidReturn) && (
         <div className="rounded-xl border border-teal-600/40 bg-mint-100 px-3 py-2.5 text-[12px] text-ink">
           <BiText
-            en="Thanks — Square reported a successful payment. Your deposit checklist is marked paid (staff ledger updates via webhook within a minute)."
-            th="ขอบคุณ — Square ยืนยันการชำระแล้ว รายการมัดจำถูกทำเครื่องหมายว่าจ่ายแล้ว (ระบบอัปเดตเลเจอร์ภายในประมาณ 1 นาที)"
+            en={
+              confirmingLive
+                ? 'Thanks — Square reported a successful payment. Confirming it on your booking…'
+                : 'Thanks — Square reported a successful payment. Your deposit is marked paid.'
+            }
+            th={
+              confirmingLive
+                ? 'ขอบคุณ — Square ยืนยันการชำระแล้ว กำลังตรวจสถานะการจอง…'
+                : 'ขอบคุณ — Square ยืนยันการชำระแล้ว รายการมัดจำถูกทำเครื่องหมายว่าจ่ายแล้ว'
+            }
             thClassName="mt-0.5 block font-thai text-[11px] text-ink-soft"
           />
         </div>
