@@ -53,6 +53,8 @@ export default function ConfirmationSummaryPage() {
     const bookingRef = summary?.bookingReference ?? ref?.trim()
     const contact = summary?.lookupContact?.trim()
     if (!bookingRef || !contact) return
+    const liveRef = bookingRef
+    const liveContact = contact
 
     let cancelled = false
 
@@ -63,12 +65,12 @@ export default function ConfirmationSummaryPage() {
         for (let i = 0; i < attempts; i++) {
           if (cancelled) return
           const result = await lookupMyTrip({
-            tripCodeOrReference: bookingRef,
-            contact,
+            tripCodeOrReference: liveRef,
+            contact: liveContact,
           })
           if (cancelled) return
           if (statusMeansDepositPaid(result.booking?.booking_status)) {
-            const next = markConfirmationDepositPaid(bookingRef)
+            const next = markConfirmationDepositPaid(liveRef)
             if (next) setData(next)
             else setData((prev) => (prev ? { ...prev, depositPaid: true } : prev))
             return
