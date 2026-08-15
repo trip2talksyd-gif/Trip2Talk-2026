@@ -8,6 +8,7 @@ import {
   StaffButton,
   staffShellClass,
 } from '../../components/app/staffUi'
+import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
 
 /** Data handed off via router state right after a payment is recorded —
@@ -237,6 +238,12 @@ export default function ReceiptPage() {
         <StaffButton variant="secondary" onClick={() => window.print()}>
           🖨️ พิมพ์ใบเสร็จ
         </StaffButton>
+        {data.bookingId ? (
+          <CopyWaiverLinkButton
+            bookingId={data.bookingId}
+            onSessionExpired={() => navigate('/app')}
+          />
+        ) : null}
         {data.bookingId ? (
           <div className="w-full">
             <BookingExtensionQuotes

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { GALLERY_PHOTOS, photoThumbSrc, type GalleryPhoto } from '../../data/galleryPhotos'
-import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
+import { GALLERY_PHOTOS, photoImageAttrs, type GalleryPhoto } from '../../data/galleryPhotos'
+import { storageImageAttrs, STORAGE_SIZES } from '../../lib/storageImage'
 
 type Slide = {
   photo?: GalleryPhoto
@@ -38,13 +38,15 @@ export default function PhotoSlideshow({ slides, intervalMs = 4000, className = 
       {/* Mockup .shot-slideshow — 21/9 desktop, 16/10 mobile, radius 16 */}
       <div className="shot-slideshow relative aspect-[16/10] overflow-hidden rounded-2xl bg-teal-900 shadow-mockup md:aspect-[21/9]">
         {slides.map((s, i) => {
-          const url = s.photo
-            ? photoThumbSrc(s.photo, { width: 1200, quality: 70, format: 'webp' })
-            : storageImageSrc(s.src, STORAGE_IMG.hero)
+          const attrs = s.photo
+            ? photoImageAttrs(s.photo, 'hero', STORAGE_SIZES.hero)
+            : storageImageAttrs(s.src, 'hero', STORAGE_SIZES.hero)
           return (
             <img
               key={`${s.sceneEn}-${i}`}
-              src={url}
+              src={attrs.src}
+              srcSet={attrs.srcSet}
+              sizes={attrs.sizes}
               alt={s.titleEn}
               className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
                 i === index ? 'opacity-100' : 'opacity-0'

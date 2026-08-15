@@ -170,6 +170,19 @@
   }
 }
 
+/*
+ * Unlayered + !important so inherited Geist/Fraunces on marketing heroes cannot
+ * steal shaping. Nesting Thai under Fraunces drops vowels/tone marks (ไ ็ ่ ้).
+ */
+[lang='th'].font-serif,
+[data-bi-heading] > [lang='th'] {
+  font-family: 'Noto Serif Thai', Sarabun, serif !important;
+}
+
+[lang='th'].font-thai {
+  font-family: Sarabun, Prompt, 'Noto Serif Thai', sans-serif !important;
+}
+
 @layer components {
   /* Primary scrollport inside the fixed app shell (public + staff). */
   .app-scroll {

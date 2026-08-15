@@ -87,6 +87,7 @@ function SpotCard({ spot }: { spot: PhotoSpotDetail }) {
       >
         <SpotMedia
           spot={spot}
+          variant="wide"
           className="absolute inset-0 h-full w-full"
           iconSize="lg"
           alt=""
@@ -108,7 +109,12 @@ function SpotCard({ spot }: { spot: PhotoSpotDetail }) {
         {/* Bottom copy + glass pills */}
         <div className="absolute inset-x-0 bottom-0 z-[1] flex items-end justify-between gap-2 p-3.5">
           <div className="min-w-0 flex-1 pr-1">
-            <p className="font-display truncate text-[14.5px] font-bold leading-tight text-white">
+            <p
+              lang={lang === 'th' ? 'th' : 'en'}
+              className={`truncate text-[14.5px] font-bold leading-snug text-white ${
+                lang === 'th' ? 'font-serif' : 'font-display'
+              }`}
+            >
               {title}
             </p>
             <p className="mt-0.5 truncate text-[11px] font-medium text-white/70">{location}</p>
@@ -274,10 +280,11 @@ export default function SpotsPage() {
           </p>
         </div>
 
-        <div className="inline-flex rounded-full border border-line bg-white p-1">
+        <div className="inline-flex rounded-full border border-line bg-white p-1" role="group" aria-label="View mode">
           <button
             type="button"
             onClick={() => setView('map')}
+            aria-pressed={view === 'map'}
             className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-bold ${
               view === 'map' ? 'bg-teal-dark text-cream' : 'text-ink-app/55'
             }`}
@@ -288,6 +295,7 @@ export default function SpotsPage() {
           <button
             type="button"
             onClick={() => setView('list')}
+            aria-pressed={view === 'list'}
             className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-bold ${
               view === 'list' ? 'bg-teal-dark text-cream' : 'text-ink-app/55'
             }`}
@@ -327,10 +335,9 @@ export default function SpotsPage() {
       {loading ? (
         <p className="mt-10 text-center text-sm text-teal-mid">…</p>
       ) : (
-        <>
-          {/* Desktop: map + list side by side — both use the same `filtered` set */}
-          <div className="mt-5 hidden gap-5 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)] lg:items-start">
-            <div className="relative sticky top-4 h-[min(72vh,680px)]">
+        <div className="mt-5">
+          {view === 'map' ? (
+            <div className="relative h-[min(68dvh,560px)] lg:h-[min(72vh,680px)]">
               <SpotsMap
                 spots={filtered}
                 selectedId={selected?.id ?? null}
@@ -338,12 +345,13 @@ export default function SpotsPage() {
                 className="h-full"
               />
               {selected ? (
-                <div className="absolute inset-x-4 bottom-4 z-[500]">
+                <div className="absolute inset-x-3 bottom-3 z-[500] lg:inset-x-4 lg:bottom-4">
                   <MapPreviewCard spot={selected} onDismiss={() => setSelected(null)} />
                 </div>
               ) : null}
             </div>
-            <div>
+          ) : (
+            <>
               <div className="mb-3 flex flex-wrap gap-2">
                 {(
                   [
@@ -366,63 +374,14 @@ export default function SpotsPage() {
                   </button>
                 ))}
               </div>
-              <div className="grid gap-3 xl:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                 {filtered.map((spot) => (
                   <SpotCard key={spot.id} spot={spot} />
                 ))}
               </div>
-            </div>
-          </div>
-
-          {/* Mobile / tablet: toggle views — same `filtered` for map pins and list cards */}
-          <div className="mt-5 lg:hidden">
-            {view === 'map' ? (
-              <div className="relative h-[min(68dvh,560px)]">
-                <SpotsMap
-                  spots={filtered}
-                  selectedId={selected?.id ?? null}
-                  onSelect={setSelected}
-                  className="h-full"
-                />
-                {selected ? (
-                  <div className="absolute inset-x-3 bottom-3 z-[500]">
-                    <MapPreviewCard spot={selected} onDismiss={() => setSelected(null)} />
-                  </div>
-                ) : null}
-              </div>
-            ) : (
-              <>
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {(
-                    [
-                      ['nearest', sortNearestBi],
-                      ['popular', sortPopularBi],
-                      ['newest', sortNewestBi],
-                    ] as const
-                  ).map(([key, bi]) => (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => setSort(key)}
-                      className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold ${
-                        sort === key
-                          ? 'border-orange bg-orange text-ink-app'
-                          : 'border-line bg-white text-ink-app/55'
-                      }`}
-                    >
-                      {lang === 'th' ? bi.th : bi.en}
-                    </button>
-                  ))}
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
-                  {filtered.map((spot) => (
-                    <SpotCard key={spot.id} spot={spot} />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
-        </>
+            </>
+          )}
+        </div>
       )}
     </div>
   )

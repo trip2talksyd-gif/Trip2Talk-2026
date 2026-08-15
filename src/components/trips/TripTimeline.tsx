@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BedDouble, Camera, ChevronDown, Plane, UtensilsCrossed } from 'lucide-react'
+import { BedDouble, Camera, ChevronDown, Plane } from 'lucide-react'
 import {
   getAvailableSeasons,
   getDefaultSeason,
@@ -21,8 +21,10 @@ type Props = {
   nextDate?: string | null
 }
 
+type LegendCategory = Exclude<ItineraryEventCategory, 'meal'>
+
 const CATEGORY_STYLE: Record<
-  ItineraryEventCategory,
+  LegendCategory,
   { icon: typeof Plane; dot: string; labelEn: string; labelTh: string }
 > = {
   flight: {
@@ -43,16 +45,11 @@ const CATEGORY_STYLE: Record<
     labelEn: 'Activity',
     labelTh: 'กิจกรรม',
   },
-  meal: {
-    icon: UtensilsCrossed,
-    dot: 'bg-coral text-cream',
-    labelEn: 'Meal',
-    labelTh: 'มื้ออาหาร',
-  },
 }
 
-function eventCategory(ev: ItineraryEvent): ItineraryEventCategory {
-  return ev.category ?? 'activity'
+function eventCategory(ev: ItineraryEvent): LegendCategory {
+  const cat = ev.category ?? 'activity'
+  return cat === 'meal' ? 'activity' : cat
 }
 
 function DayAccordionPanel({ day, open, onToggle }: {
@@ -206,7 +203,7 @@ export default function TripTimeline({ itinerary, nextDate }: Props) {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {(Object.keys(CATEGORY_STYLE) as ItineraryEventCategory[]).map((key) => {
+        {(Object.keys(CATEGORY_STYLE) as LegendCategory[]).map((key) => {
           const style = CATEGORY_STYLE[key]
           const Icon = style.icon
           return (

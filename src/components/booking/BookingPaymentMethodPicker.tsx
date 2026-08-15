@@ -35,8 +35,10 @@ export default function BookingPaymentMethodPicker({
       id: 'payid',
       titleEn: 'Bank Transfer (PayID)',
       titleTh: 'โอนผ่านธนาคาร (PayID)',
-      subEn: 'Australian PayID — no fees. Upload slip after transfer.',
-      subTh: 'โอน PayID ในออสเตรเลีย — ไม่มีค่าธรรมเนียม แล้วอัปโหลดสลิป',
+      subEn:
+        'Australian PayID — no fees. Use this for agreed discounts / custom amounts. Upload slip after transfer.',
+      subTh:
+        'โอน PayID ในออสเตรเลีย — ไม่มีค่าธรรมเนียม ใช้สำหรับยอดที่ตกลงพิเศษ แล้วอัปโหลดสลิป',
       icon: Landmark,
       recommended: true,
     },
@@ -44,8 +46,8 @@ export default function BookingPaymentMethodPicker({
       id: 'square',
       titleEn: 'Credit/Debit Card (Visa/Mastercard — international OK, via Square)',
       titleTh: 'บัตรเครดิต/เดบิต (Visa/Mastercard — ใช้บัตรต่างประเทศได้ ผ่าน Square)',
-      subEn: `Pay ${formatAud(depositAud)} on this page. Thai-issued and other non-AU cards welcome. Card fees apply.`,
-      subTh: `ชำระ ${formatAud(depositAud)} บนหน้านี้ รวมบัตรที่ออกในไทย/ต่างประเทศ (มีค่าธรรมเนียมบัตร)`,
+      subEn: `Pay deposit (${formatAud(depositAud)}) or pay in full on this page. 2% card surcharge applies.`,
+      subTh: `ชำระมัดจำ (${formatAud(depositAud)}) หรือจ่ายเต็มบนหน้านี้ — มีค่าธรรมเนียมบัตร 2%`,
       icon: CreditCard,
       showBrandIcons: true,
     },

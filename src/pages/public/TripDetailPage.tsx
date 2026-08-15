@@ -653,6 +653,7 @@ export default function TripDetailPage() {
                     <TripPhotoHero
                       tripCode={rec.trip_code}
                       alt={rec.name_en}
+                      size="card"
                       className="aspect-[5/3.6] w-full object-cover"
                     />
                   )}

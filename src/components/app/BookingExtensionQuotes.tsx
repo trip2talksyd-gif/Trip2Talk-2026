@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Copy, FilePlus2, Link2 } from 'lucide-react'
+import { ChevronDown, Copy, FilePlus2, Link2 } from 'lucide-react'
 import {
   cancelExtensionQuote,
   createExtensionQuote,
@@ -31,6 +31,16 @@ function statusLabel(status: ExtensionQuoteStatus): string {
   if (status === 'pending') return 'Pending / รอชำระ'
   if (status === 'expired') return 'Expired / เลยกำหนด'
   return 'Cancelled / ยกเลิก'
+}
+
+/** Empty / invalid → 0 so optional calculator fields never NaN. */
+function parseAud(raw: string): number {
+  const n = Number(raw)
+  return Number.isFinite(n) && n > 0 ? n : 0
+}
+
+function roundAud(n: number): number {
+  return Math.round(n * 100) / 100
 }
 
 type Props = {
@@ -73,6 +83,24 @@ export default function BookingExtensionQuotes({
   const [price, setPrice] = useState('')
   const [note, setNote] = useState('')
   const [deadline, setDeadline] = useState(defaultDeadline)
+  const [calcOpen, setCalcOpen] = useState(false)
+  const [stayPerNight, setStayPerNight] = useState('')
+  const [transportPerDay, setTransportPerDay] = useState('')
+  const [guidePerDay, setGuidePerDay] = useState('')
+  const [otherPerDay, setOtherPerDay] = useState('')
+  const [marginPct, setMarginPct] = useState('25')
+  const [bufferPerDay, setBufferPerDay] = useState('')
+
+  const calcDays = Math.max(1, Math.floor(Number(extraDays)) || 1)
+  const costPerDay =
+    parseAud(stayPerNight) +
+    parseAud(transportPerDay) +
+    parseAud(guidePerDay) +
+    parseAud(otherPerDay)
+  const margin = Math.max(0, parseAud(marginPct))
+  const suggestedPerDay = roundAud(costPerDay * (1 + margin / 100) + parseAud(bufferPerDay))
+  const suggestedTotal = roundAud(suggestedPerDay * calcDays)
+  const canApplySuggested = suggestedTotal > 0
 
   useEffect(() => {
     setDeadline(defaultDeadline)
@@ -135,6 +163,7 @@ export default function BookingExtensionQuotes({
       setExtraDays('1')
       setPrice('')
       setNote('')
+      setCalcOpen(false)
       await copyPath(created)
       onChanged?.()
     } catch (err) {
@@ -302,7 +331,7 @@ export default function BookingExtensionQuotes({
           onClick={() => setOpenForm(false)}
         >
           <div
-            className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-near-black-green p-4 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)]"
+            className="max-h-[min(92vh,40rem)] w-full max-w-md overflow-y-auto rounded-2xl border border-white/10 bg-near-black-green p-4 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)]"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 id="ext-quote-title" className="font-serif text-lg text-cream">
@@ -322,6 +351,125 @@ export default function BookingExtensionQuotes({
                   onChange={(e) => setExtraDays(e.target.value)}
                 />
               </StaffField>
+
+              <div className="rounded-xl border border-white/10 bg-near-black-green/60">
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between gap-2 px-3 py-2 text-left"
+                  aria-expanded={calcOpen}
+                  onClick={() => setCalcOpen((v) => !v)}
+                >
+                  <span className="text-[11px] font-medium text-cream">
+                    คำนวณราคาแนะนำ
+                    <span className="mt-0.5 block text-[10px] font-normal text-cream-muted">
+                      Price calculator — optional helper
+                    </span>
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 shrink-0 text-cream-muted transition-transform ${calcOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+                {calcOpen ? (
+                  <div className="space-y-2 border-t border-white/10 px-3 pb-3 pt-2">
+                    <p className="text-[10px] text-cream-muted">
+                      All costs are per day / ตัวเลขทั้งหมดเป็นต่อวัน — not saved, only pre-fills
+                      the price.
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <StaffField label="ที่พัก/คืน · Stay">
+                        <StaffInput
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          inputMode="decimal"
+                          placeholder="0"
+                          value={stayPerNight}
+                          onChange={(e) => setStayPerNight(e.target.value)}
+                        />
+                      </StaffField>
+                      <StaffField label="รถ/น้ำมัน · Transport">
+                        <StaffInput
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          inputMode="decimal"
+                          placeholder="0"
+                          value={transportPerDay}
+                          onChange={(e) => setTransportPerDay(e.target.value)}
+                        />
+                      </StaffField>
+                      <StaffField label="ไกด์/แรงงาน · Guide">
+                        <StaffInput
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          inputMode="decimal"
+                          placeholder="0"
+                          value={guidePerDay}
+                          onChange={(e) => setGuidePerDay(e.target.value)}
+                        />
+                      </StaffField>
+                      <StaffField label="อื่นๆ · Other">
+                        <StaffInput
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          inputMode="decimal"
+                          placeholder="0"
+                          value={otherPerDay}
+                          onChange={(e) => setOtherPerDay(e.target.value)}
+                        />
+                      </StaffField>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <StaffField label="Margin % (แนะนำ 20–30)">
+                        <StaffInput
+                          type="number"
+                          min={0}
+                          step="1"
+                          inputMode="decimal"
+                          value={marginPct}
+                          onChange={(e) => setMarginPct(e.target.value)}
+                        />
+                      </StaffField>
+                      <StaffField label="Buffer $/วัน · Flat extra">
+                        <StaffInput
+                          type="number"
+                          min={0}
+                          step="0.01"
+                          inputMode="decimal"
+                          placeholder="0"
+                          value={bufferPerDay}
+                          onChange={(e) => setBufferPerDay(e.target.value)}
+                        />
+                      </StaffField>
+                    </div>
+                    <div className="rounded-lg bg-white/[0.04] px-2.5 py-2">
+                      <p className="text-[10px] text-cream-muted">
+                        Cost {formatAud(costPerDay)}/d × (1 + {margin || 0}%)
+                        {parseAud(bufferPerDay) > 0 ? ` + ${formatAud(parseAud(bufferPerDay))}` : ''}{' '}
+                        × {calcDays} day{calcDays === 1 ? '' : 's'}
+                      </p>
+                      <p className="mt-0.5 text-sm font-semibold tabular-nums text-teal-400">
+                        Suggested total {formatAud(suggestedTotal)}
+                        <span className="ml-1 text-[10px] font-normal text-cream-muted">
+                          ({formatAud(suggestedPerDay)}/day)
+                        </span>
+                      </p>
+                      <StaffButton
+                        type="button"
+                        variant="secondary"
+                        className="mt-2 !w-auto px-3 py-1.5 text-[11px]"
+                        disabled={!canApplySuggested}
+                        onClick={() => setPrice(String(suggestedTotal))}
+                      >
+                        ใช้ราคานี้
+                      </StaffButton>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+
               <StaffField label="Price difference AUD / ส่วนต่างราคา">
                 <StaffInput
                   type="number"

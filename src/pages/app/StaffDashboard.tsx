@@ -36,7 +36,10 @@ import CancelBookingDialog from '../../components/app/CancelBookingDialog'
 import ArchiveTourDialog from '../../components/app/ArchiveTourDialog'
 import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
 import TripDaySafetyQuickView from '../../components/app/TripDaySafetyQuickView'
+import PaymentReconciliationBanner from '../../components/app/PaymentReconciliationBanner'
+import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
+import StaffWaiverRecordButton from '../../components/app/StaffWaiverRecordButton'
 import {
   StaffActionChip,
   StaffButton,
@@ -341,6 +344,7 @@ export default function StaffDashboard() {
       </StaffPageHeader>
 
       <StaffMain>
+        <PaymentReconciliationBanner />
         {loading && <ListRowSkeleton count={4} />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
 
@@ -600,7 +604,18 @@ export default function StaffDashboard() {
                         })()}
                       </span>
                       {!cancelled && (
-                        <span className="flex shrink-0 gap-1.5">
+                        <span className="flex shrink-0 flex-wrap justify-end gap-1.5">
+                          <CopyWaiverLinkButton
+                            bookingId={b.id}
+                            onSessionExpired={() => navigate('/app')}
+                          />
+                          {(b.waiver_signed || waivers.some((w) => w.booking_id === b.id)) && (
+                            <StaffWaiverRecordButton
+                              bookingId={b.id}
+                              tripName={selected?.name_en}
+                              onSessionExpired={() => navigate('/app')}
+                            />
+                          )}
                           <StaffButton type="button" variant="ghost" onClick={() => openEdit(b)} title="แก้ไขชื่อ/เบอร์/อีเมล">
                             ✏️ แก้ไข
                           </StaffButton>

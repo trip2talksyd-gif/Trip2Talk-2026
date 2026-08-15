@@ -4,7 +4,8 @@ import SpotHeroCarousel from '../../components/spots/SpotHeroCarousel'
 import SpotRoutePreview from '../../components/spots/SpotRoutePreview'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import { getDiscoverSpots } from '../../data/discoverFeed'
-import { photoThumbSrc } from '../../data/galleryPhotos'
+import { photoImageAttrs } from '../../data/galleryPhotos'
+import { STORAGE_SIZES } from '../../lib/storageImage'
 import { useLang } from '../../hooks/useLang'
 import {
   fetchPhotoSpotByKey,
@@ -84,16 +85,12 @@ export default function SpotDetailPage() {
 
   if (!spot) {
     if (galleryFallback) {
-      const fbHero = photoThumbSrc(galleryFallback.photo, {
-        width: 960,
-        quality: 72,
-        format: 'webp',
-      })
+      const fbHero = photoImageAttrs(galleryFallback.photo, 'hero', STORAGE_SIZES.fullBleed)
       return (
         <div className="relative min-h-[100dvh] bg-cream pb-16">
           <div className="relative h-[42vh] min-h-[220px] overflow-hidden bg-teal-dark">
             <img
-              src={fbHero}
+              {...fbHero}
               alt={`${galleryFallback.titleEn} / ${galleryFallback.titleTh}`}
               className="h-full w-full object-cover"
             />

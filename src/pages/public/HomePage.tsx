@@ -7,10 +7,9 @@ import { fetchConfirmedTours } from '../../lib/toursApi'
 import { heroDestinationBlurbs, uniqueTourDestinations } from '../../lib/tourDisplay'
 import HeroVideo, { type HeroVideoHandle } from '../../components/home/HeroVideo'
 import HomePositioningSection from '../../components/trips/HomePositioningSection'
+import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 
 const CTA_GRADIENT = 'linear-gradient(to bottom, #2B2B2B, #101010)'
-/** Thai display stack — inline so Geist on the hero section cannot steal shaping. */
-const THAI_DISPLAY_FONT = "'Noto Serif Thai', Sarabun, serif"
 
 const NAV_LINKS = [
   { to: '/trips', en: 'Trips', th: 'ทริป' },
@@ -277,16 +276,14 @@ export default function HomePage() {
         {/* Bottom-anchored content — lives in the constrained hero cell, not below the video */}
         <div className="mt-auto flex min-h-0 flex-col gap-6 overflow-y-auto px-5 pb-8 sm:gap-8 sm:px-8 sm:pb-12 lg:flex-row lg:items-end lg:justify-between lg:px-12 lg:pb-16">
           <div className="max-w-xl">
-            <h1 className="font-display text-3xl font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl lg:text-[3.5rem]">
-              {heroEn}
-            </h1>
-            <p
-              lang="th"
-              className="mt-2 font-serif text-sm font-medium text-white/75"
-              style={{ fontFamily: THAI_DISPLAY_FONT }}
-            >
-              {heroTh}
-            </p>
+            <BiDisplayHeading
+              en={heroEn}
+              th={heroTh}
+              as="h1"
+              thAs="p"
+              enClassName="text-3xl font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl lg:text-[3.5rem]"
+              thClassName="mt-2 text-sm font-medium text-white/75"
+            />
             <p
               lang={lang === 'th' ? 'th' : 'en'}
               className={`mt-3 max-w-md text-sm leading-relaxed text-white/75 ${

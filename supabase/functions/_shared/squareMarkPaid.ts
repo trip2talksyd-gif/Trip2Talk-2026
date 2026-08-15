@@ -3,84 +3,155 @@ import { createClient } from 'npm:@supabase/supabase-js@2'
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
-/** Idempotent: records a Square payment and updates booking status. Service-role only. */
+export type MarkSquarePaidResult = {
+  ok: boolean
+  skipped?: boolean
+  repaired?: boolean
+  error?: string
+  booking_status?: string
+  amount_paid_aud?: number
+}
+
+type ApplyRow = {
+  ok?: boolean
+  skipped?: boolean
+  repaired?: boolean
+  error?: string
+  booking_status?: string
+  amount_paid_aud?: number
+}
+
+function adminClient() {
+  return createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
+}
+
+function logReconciliation(opts: {
+  bookingRef: string
+  paymentId: string
+  error: string
+  source: string
+}): void {
+  console.error(
+    `[square-mark-paid] RECONCILIATION_NEEDED booking_ref=${opts.bookingRef} payment_id=${opts.paymentId} source=${opts.source} error=${opts.error}`,
+  )
+}
+
+async function recordReconciliationIssue(
+  admin: ReturnType<typeof adminClient>,
+  opts: {
+    bookingRef: string
+    paymentId: string
+    amountCents: number
+    paymentMethod: string
+    reason: string
+    detail: string
+    source: string
+    bookingId?: string | null
+  },
+): Promise<void> {
+  logReconciliation({
+    bookingRef: opts.bookingRef,
+    paymentId: opts.paymentId,
+    error: opts.reason,
+    source: opts.source,
+  })
+  const { error } = await admin.from('payment_reconciliation_issues').insert({
+    booking_id: opts.bookingId ?? null,
+    booking_reference: opts.bookingRef,
+    external_payment_id: opts.paymentId,
+    amount_cents: opts.amountCents,
+    payment_method: opts.paymentMethod,
+    reason: opts.reason,
+    detail: opts.detail.slice(0, 2000),
+    source: opts.source,
+  })
+  if (error && String(error.code) !== '23505') {
+    console.error('[square-mark-paid] failed to insert payment_reconciliation_issues', error)
+  }
+}
+
+/** Idempotent: records a Square payment and updates booking status in one DB transaction. */
 export async function markSquarePaid(opts: {
   bookingRef: string
   amountCents: number
   paymentId: string
   paymentMethod?: string
-}): Promise<{ ok: boolean; skipped?: boolean; error?: string }> {
-  const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
+  source?: string
+}): Promise<MarkSquarePaidResult> {
+  const admin = adminClient()
   const paymentMethod = opts.paymentMethod || 'square'
+  const source = opts.source || 'square-mark-paid'
+  const bookingRef = opts.bookingRef.trim().toUpperCase()
 
-  const { data: existingExt } = await admin
-    .from('booking_payments')
-    .select('id')
-    .eq('external_payment_id', opts.paymentId)
-    .maybeSingle()
-  if (existingExt?.id) return { ok: true, skipped: true }
-
-  const { data: booking, error: bookingError } = await admin
-    .from('tour_bookings')
-    .select('id, booking_reference, amount_paid_aud, booking_status, payment_plan_installments, tour_id')
-    .ilike('booking_reference', opts.bookingRef)
-    .maybeSingle()
-  if (bookingError) throw bookingError
-  if (!booking) return { ok: false, error: 'booking_not_found' }
-
-  const { data: tour } = await admin
-    .from('tours')
-    .select('price_aud')
-    .eq('id', booking.tour_id)
-    .maybeSingle()
-  const priceAud = tour ? Number(tour.price_aud ?? 0) : 0
-
-  const amountAud = Math.round(opts.amountCents) / 100
-  if (!(amountAud > 0)) return { ok: false, error: 'invalid_amount' }
-
-  const { count } = await admin
-    .from('booking_payments')
-    .select('id', { count: 'exact', head: true })
-    .eq('booking_id', booking.id)
-  const installmentNo = (count ?? 0) + 1
-  const paidAt = new Date().toISOString()
-  const invoiceNo = `T2T-INV-${booking.booking_reference ?? booking.id.slice(0, 8)}-${installmentNo}`
-  const label =
-    installmentNo === 1
-      ? 'Deposit'
-      : `Installment ${installmentNo}${
-          booking.payment_plan_installments ? `/${booking.payment_plan_installments}` : ''
-        }`
-
-  const { error: insertError } = await admin.from('booking_payments').insert({
-    booking_id: booking.id,
-    amount_aud: amountAud,
-    payment_method: paymentMethod,
-    installment_no: installmentNo,
-    label,
-    status: 'paid',
-    paid_at: paidAt,
-    receipt_invoice_number: invoiceNo,
-    external_payment_id: opts.paymentId,
-    recorded_by_staff_id: null,
-  })
-  if (insertError) {
-    if (String(insertError.code) === '23505') return { ok: true, skipped: true }
-    throw insertError
-  }
-
-  const newTotal = Number(booking.amount_paid_aud ?? 0) + amountAud
-  const newStatus = priceAud > 0 && newTotal >= priceAud ? 'fully_paid' : 'deposit_paid'
-
-  const { error: updateError } = await admin
-    .from('tour_bookings')
-    .update({
-      amount_paid_aud: newTotal,
-      booking_status: newStatus,
-      payment_method: paymentMethod,
+  try {
+    const { data, error } = await admin.rpc('apply_square_payment', {
+      p_booking_ref: bookingRef,
+      p_amount_cents: Math.round(opts.amountCents),
+      p_payment_id: opts.paymentId,
+      p_payment_method: paymentMethod,
     })
-    .eq('id', booking.id)
-  if (updateError) throw updateError
+    if (error) {
+      await recordReconciliationIssue(admin, {
+        bookingRef,
+        paymentId: opts.paymentId,
+        amountCents: opts.amountCents,
+        paymentMethod,
+        reason: 'mark_paid_failed',
+        detail: error.message || String(error.code || 'rpc_error'),
+        source,
+      })
+      return { ok: false, error: error.message || 'apply_square_payment_failed' }
+    }
 
-  return { ok: true }
+    const row = (data ?? {}) as ApplyRow
+    if (!row.ok) {
+      const err = row.error || 'apply_square_payment_failed'
+      let bookingId: string | null = null
+      if (err !== 'booking_not_found') {
+        const { data: booking } = await admin
+          .from('tour_bookings')
+          .select('id')
+          .ilike('booking_reference', bookingRef)
+          .maybeSingle()
+        bookingId = booking?.id ?? null
+      }
+      await recordReconciliationIssue(admin, {
+        bookingRef,
+        paymentId: opts.paymentId,
+        amountCents: opts.amountCents,
+        paymentMethod,
+        reason: err === 'booking_not_found' ? 'booking_not_found' : 'mark_paid_failed',
+        detail: err,
+        source,
+        bookingId,
+      })
+      return { ok: false, error: err }
+    }
+
+    if (row.repaired) {
+      console.warn(
+        `[square-mark-paid] RECONCILIATION_REPAIRED booking_ref=${bookingRef} payment_id=${opts.paymentId} source=${source} status=${row.booking_status ?? ''}`,
+      )
+    }
+
+    return {
+      ok: true,
+      skipped: Boolean(row.skipped),
+      repaired: Boolean(row.repaired),
+      booking_status: row.booking_status,
+      amount_paid_aud: row.amount_paid_aud,
+    }
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err)
+    await recordReconciliationIssue(admin, {
+      bookingRef,
+      paymentId: opts.paymentId,
+      amountCents: opts.amountCents,
+      paymentMethod,
+      reason: 'mark_paid_failed',
+      detail,
+      source,
+    })
+    return { ok: false, error: detail }
+  }
 }

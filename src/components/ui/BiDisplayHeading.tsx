@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useLang } from '../../hooks/useLang'
 
 type HeadingTag = 'h1' | 'h2' | 'h3' | 'p' | 'div'
 
@@ -16,10 +17,28 @@ type Props = {
   children?: ReactNode
 }
 
+const FONT_CLASS = /\bfont-(display|serif|thai)\b/g
+/** Tight Latin tracking/leading clips Thai vowels and tone marks (่ ้ ี ็ ไ). */
+const THAI_UNSAFE =
+  /\b(tracking-(tighter|tight)|tracking-\[[^\]]+\]|leading-(none|tight)|leading-\[[^\]]+\])\b/g
+
+/** Size/weight/color/spacing only — fonts stay language-specific. */
+function visualClasses(className: string, forThai = false) {
+  let next = className.replace(FONT_CLASS, '')
+  if (forThai) {
+    next = next.replace(THAI_UNSAFE, '')
+    if (!/\bleading-/.test(next)) next = `${next} leading-snug`
+  }
+  return next.replace(/\s+/g, ' ').trim()
+}
+
 /**
  * Bilingual display heading: English on Fraunces (`font-display`), Thai on
  * Noto Serif Thai (`font-serif`) as a sibling — never the same font-family tree.
  * Nesting Thai under Fraunces breaks Thai vowel/tone shaping.
+ *
+ * Primary line follows `lang` (same order/emphasis as BiText). Both languages
+ * stay visible — this only swaps visual order and emphasis.
  */
 export default function BiDisplayHeading({
   en,
@@ -32,12 +51,34 @@ export default function BiDisplayHeading({
   thClassName = '',
   children,
 }: Props) {
+  const { lang } = useLang()
+  const thaiPrimary = lang === 'th'
+  const enPrimaryVisual = visualClasses(enClassName)
+  const thPrimaryVisual = visualClasses(enClassName, true)
+  const enSecondaryVisual = visualClasses(thClassName)
+  const thSecondaryVisual = visualClasses(thClassName, true)
+
+  const enNode = (
+    <EnTag
+      lang="en"
+      className={`font-display ${thaiPrimary ? enSecondaryVisual : enPrimaryVisual}`.trim()}
+    >
+      {en}
+    </EnTag>
+  )
+  const thNode = (
+    <ThTag
+      lang="th"
+      className={`font-serif ${thaiPrimary ? thPrimaryVisual : thSecondaryVisual}`.trim()}
+    >
+      {th}
+    </ThTag>
+  )
+
   return (
-    <div id={id} className={className}>
-      <EnTag className={`font-display ${enClassName}`.trim()}>{en}</EnTag>
-      <ThTag lang="th" className={`font-serif ${thClassName}`.trim()}>
-        {th}
-      </ThTag>
+    <div id={id} data-bi-heading="" className={className}>
+      {thaiPrimary ? thNode : enNode}
+      {thaiPrimary ? enNode : thNode}
       {children}
     </div>
   )

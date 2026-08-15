@@ -1,7 +1,9 @@
 // Trip2Talk — charge a Square Web Payments SDK card token (AUD deposit).
 //
 // GET  → public Web Payments config { applicationId, locationId, environment }
-// POST → { booking_reference, source_id, buyer_email?, verification_token? }
+// POST → { booking_reference, source_id, buyer_email?, verification_token?, amount_kind? }
+// Booking card charges: amount_kind is 'deposit' | 'full'. Server computes base from
+// the tour, adds a 2% card surcharge, and records amount_paid_aud from Square's response.
 //
 // Secrets (Supabase Edge):
 //   SQUARE_ACCESS_TOKEN
@@ -49,6 +51,23 @@ function audToCents(aud: number): number {
   return Math.round(Number(aud) * 100)
 }
 
+/** 2% Square card surcharge — computed server-side. Never taken from the client total. */
+const CARD_SURCHARGE_RATE = 0.02
+
+function withCardSurchargeCents(baseCents: number): number {
+  return Math.round(baseCents * (1 + CARD_SURCHARGE_RATE))
+}
+
+/** Confirmed charge amount from Square's payment object — never from the client body. */
+function squareConfirmedCents(payment: Record<string, unknown> | undefined): number | null {
+  const money = payment?.amount_money
+  if (!money || typeof money !== 'object') return null
+  const amount = (money as { amount?: unknown }).amount
+  if (typeof amount !== 'number' || !Number.isFinite(amount)) return null
+  const cents = Math.round(amount)
+  return cents >= 1 ? cents : null
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS_HEADERS })
 
@@ -87,6 +106,7 @@ Deno.serve(async (req) => {
     source_id?: string
     buyer_email?: string
     verification_token?: string
+    amount_kind?: string
   }
   try {
     body = await req.json()
@@ -191,12 +211,18 @@ Deno.serve(async (req) => {
       const payment = squareJson?.payment as Record<string, unknown> | undefined
       const paymentId = typeof payment?.id === 'string' ? payment.id : ''
       const status = typeof payment?.status === 'string' ? payment.status : ''
+      const confirmedCents = squareConfirmedCents(payment)
 
       let bookingSynced = false
       if (status === 'COMPLETED' && paymentId) {
+        if (!confirmedCents) {
+          console.error(
+            `[square-create-payment] RECONCILIATION_NEEDED quote_id=${quote.id} payment_id=${paymentId} error=missing_square_amount`,
+          )
+        }
         const marked = await applyExtensionQuotePayment({
           quoteId: quote.id,
-          amountCents,
+          amountCents: confirmedCents ?? amountCents,
           paymentId,
           paymentMethod: 'square',
           source: 'square-create-payment',
@@ -235,17 +261,13 @@ Deno.serve(async (req) => {
     if (bookingError) throw bookingError
     if (!booking) return json({ error: 'booking_not_found' }, 404)
 
-    if (
-      booking.booking_status === 'deposit_paid' ||
-      booking.booking_status === 'fully_paid' ||
-      booking.booking_status === 'cancelled'
-    ) {
+    if (booking.booking_status === 'fully_paid' || booking.booking_status === 'cancelled') {
       return json({ error: 'booking_not_payable', status: booking.booking_status }, 409)
     }
 
     const { data: tour, error: tourError } = await admin
       .from('tours')
-      .select('id, trip_code, name_en, deposit_aud')
+      .select('id, trip_code, name_en, deposit_aud, price_aud')
       .eq('id', booking.tour_id)
       .maybeSingle()
     if (tourError) throw tourError
@@ -253,7 +275,17 @@ Deno.serve(async (req) => {
 
     const depositAud = Number(tour.deposit_aud ?? 0)
     if (!(depositAud > 0)) return json({ error: 'invalid_deposit' }, 400)
-    const amountCents = audToCents(depositAud)
+    const depositCents = audToCents(depositAud)
+    const priceAud = Number(tour.price_aud ?? 0)
+    const alreadyPaidAud = Number(booking.amount_paid_aud ?? 0)
+    const remainingCents = Math.max(0, audToCents(priceAud) - audToCents(alreadyPaidAud))
+
+    const amountKind = body.amount_kind === 'full' ? 'full' : 'deposit'
+    const baseCents = amountKind === 'full' ? remainingCents : depositCents
+    if (!(baseCents >= 1)) {
+      return json({ error: amountKind === 'full' ? 'nothing_owing' : 'invalid_deposit' }, 400)
+    }
+    const amountCents = withCardSurchargeCents(baseCents)
 
     const email =
       (typeof body.buyer_email === 'string' && body.buyer_email.trim()) ||
@@ -267,7 +299,7 @@ Deno.serve(async (req) => {
 
     const squareBody: Record<string, unknown> = {
       source_id: sourceId,
-      idempotency_key: `t2t-deposit-${bookingRef}`,
+      idempotency_key: `t2t-card-${bookingRef}-${amountCents}`,
       amount_money: {
         amount: amountCents,
         currency: 'AUD',
@@ -302,30 +334,37 @@ Deno.serve(async (req) => {
     const payment = squareJson?.payment as Record<string, unknown> | undefined
     const paymentId = typeof payment?.id === 'string' ? payment.id : ''
     const status = typeof payment?.status === 'string' ? payment.status : ''
+    const confirmedCents = squareConfirmedCents(payment)
 
     await admin.from('tour_bookings').update({ payment_method: 'square' }).eq('id', booking.id)
 
     let bookingSynced = false
     if (status === 'COMPLETED' && paymentId) {
-      const marked = await markSquarePaid({
-        bookingRef,
-        amountCents,
-        paymentId,
-        paymentMethod: 'square',
-        source: 'square-create-payment',
-      })
-      bookingSynced = Boolean(marked.ok)
-      if (!marked.ok) {
+      if (!confirmedCents) {
         console.error(
-          `[square-create-payment] RECONCILIATION_NEEDED booking_ref=${bookingRef} payment_id=${paymentId} error=${marked.error ?? 'mark_paid_failed'}`,
+          `[square-create-payment] RECONCILIATION_NEEDED booking_ref=${bookingRef} payment_id=${paymentId} error=missing_square_amount`,
         )
+      } else {
+        const marked = await markSquarePaid({
+          bookingRef,
+          amountCents: confirmedCents,
+          paymentId,
+          paymentMethod: 'square',
+          source: 'square-create-payment',
+        })
+        bookingSynced = Boolean(marked.ok)
+        if (!marked.ok) {
+          console.error(
+            `[square-create-payment] RECONCILIATION_NEEDED booking_ref=${bookingRef} payment_id=${paymentId} error=${marked.error ?? 'mark_paid_failed'}`,
+          )
+        }
       }
     }
 
     return json({
       payment_id: paymentId || null,
       status,
-      amount_aud: depositAud,
+      amount_aud: confirmedCents != null ? confirmedCents / 100 : null,
       booking_reference: bookingRef,
       booking_synced: bookingSynced,
       environment: SQUARE_ENV === 'production' ? 'production' : 'sandbox',

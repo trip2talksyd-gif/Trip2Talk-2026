@@ -1528,13 +1528,14 @@ export type SquareCheckoutResult = {
   booking_reference: string
 }
 
-/** Creates a Square hosted Payment Link for a booking deposit (card / Afterpay). */
+/** Creates a Square hosted Payment Link (Afterpay/Clearpay — no card surcharge). */
 export async function createSquareCheckout(input: {
   booking_reference?: string
   quote_token?: string
   buyer_email?: string
   buyer_phone?: string
   redirect_base?: string
+  amount_kind?: 'deposit' | 'full'
 }): Promise<SquareCheckoutResult> {
   const res = await fetch(`${supabaseConfig.url}/functions/v1/square-create-checkout`, {
     method: 'POST',
@@ -1549,6 +1550,7 @@ export async function createSquareCheckout(input: {
       buyer_email: input.buyer_email,
       buyer_phone: input.buyer_phone,
       redirect_base: input.redirect_base ?? window.location.origin,
+      amount_kind: input.amount_kind,
     }),
   })
 
@@ -1617,6 +1619,7 @@ export async function chargeSquareCardToken(input: {
   source_id: string
   buyer_email?: string
   verification_token?: string
+  amount_kind?: 'deposit' | 'full'
 }): Promise<SquareCardChargeResult> {
   const res = await fetch(`${supabaseConfig.url}/functions/v1/square-create-payment`, {
     method: 'POST',
@@ -1631,6 +1634,7 @@ export async function chargeSquareCardToken(input: {
       source_id: input.source_id,
       buyer_email: input.buyer_email,
       verification_token: input.verification_token,
+      amount_kind: input.amount_kind,
     }),
   })
   const body = await res.json().catch(() => ({}))

@@ -3,7 +3,8 @@ import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import { MOBILE_ANGLES } from '../../data/photoGuideContent'
-import { photoThumbSrc, type GalleryPhoto } from '../../data/galleryPhotos'
+import { photoImageAttrs, photoThumbSrc, type GalleryPhoto } from '../../data/galleryPhotos'
+import { STORAGE_SIZES } from '../../lib/storageImage'
 import { galleryByIds } from './PhotoSlideshow'
 import BiText from '../ui/BiText'
 import { useInView } from '../../hooks/useInView'
@@ -54,7 +55,7 @@ function AngleMediaCarousel({ photos, alt }: { photos: GalleryPhoto[]; alt: stri
           {photos.map((photo) => (
             <img
               key={photo.id}
-              src={photoThumbSrc(photo, { width: 960, quality: 72, format: 'webp' })}
+              {...photoImageAttrs(photo, 'hero', STORAGE_SIZES.hero)}
               alt={alt}
               loading="lazy"
               className="h-full w-full shrink-0 object-cover"

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
+import { storageImageSrc, storageImageAttrs, STORAGE_IMG, STORAGE_SIZES } from '../../lib/storageImage'
 import TripCoverFallback from './TripCoverFallback'
 
 type CoverSize = 'thumb' | 'card' | 'hero'
@@ -12,6 +12,7 @@ type Props = {
   compact?: boolean
   /** Display size — maps to a Storage transform. compact defaults to thumb. */
   size?: CoverSize
+  sizes?: string
 }
 
 const SIZE_OPTS = {
@@ -28,16 +29,22 @@ export default function TripCoverImage({
   loading = 'lazy',
   compact = false,
   size,
+  sizes,
 }: Props) {
   const [failed, setFailed] = useState(false)
   const variant: CoverSize = size ?? (compact ? 'thumb' : 'card')
-  const url = storageImageSrc(src, SIZE_OPTS[variant])
-  if (!url || failed) {
+  const attrs =
+    variant === 'hero'
+      ? storageImageAttrs(src, 'hero', sizes ?? STORAGE_SIZES.fullBleed)
+      : { src: storageImageSrc(src, SIZE_OPTS[variant]), srcSet: undefined, sizes: undefined }
+  if (!attrs.src || failed) {
     return <TripCoverFallback className={className} compact={compact} />
   }
   return (
     <img
-      src={url}
+      src={attrs.src}
+      srcSet={attrs.srcSet}
+      sizes={attrs.sizes}
       alt={alt}
       className={className}
       loading={loading}

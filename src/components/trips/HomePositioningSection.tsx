@@ -55,7 +55,10 @@ export default function HomePositioningSection() {
             <AccentBadge />
             Tour Company
           </h2>
-          <p className="mt-2 font-serif text-[22px] font-bold leading-[1.2] tracking-[-0.01em] text-teal-darker sm:text-[26px] md:text-[30px]">
+          <p
+            lang="th"
+            className="mt-2 font-serif text-[22px] font-bold leading-[1.2] text-teal-darker sm:text-[26px] md:text-[30px]"
+          >
             เราไม่ใช่
             <AccentBadge />
             บริษัททัวร์
@@ -77,7 +80,10 @@ export default function HomePositioningSection() {
           <p className="font-display text-[18px] font-medium italic leading-snug text-ink-soft sm:text-[20px] md:text-[22px]">
             {subtitle.en}
           </p>
-          <p className="mt-1 font-serif text-[15px] font-medium italic leading-snug text-ink-soft/90 sm:text-[16px]">
+          <p
+            lang="th"
+            className="mt-1 font-serif text-[15px] font-medium italic leading-snug text-ink-soft/90 sm:text-[16px]"
+          >
             {subtitle.th}
           </p>
         </div>

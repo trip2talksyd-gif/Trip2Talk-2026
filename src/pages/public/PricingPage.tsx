@@ -2,8 +2,10 @@ import { Link } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import type { TranslationKey } from '../../i18n/translations'
+import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import BiText from '../../components/ui/BiText'
 import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
+import { BUSINESS_ENTITY, PAYID_OPTIONS } from '../../data/paymentDetails'
 
 const TIERS = [
   {
@@ -37,7 +39,6 @@ export default function PricingPage() {
   const subtitle = tt('pricing.page.subtitle')
   const mostPopular = tt('pricing.mostPopular')
   const audPerPerson = tt('pricing.audPerPerson')
-  const priceHint = tt('pricing.priceHint')
   const cancelTitle = tt('pricing.cancel.title')
   const cancelIntro = tt('pricing.cancel.intro')
   const colCondition = tt('pricing.cancel.col.condition')
@@ -111,13 +112,6 @@ export default function PricingPage() {
               </div>
               <BiText
                 as="p"
-                en={priceHint.en}
-                th={priceHint.th}
-                className="mt-1 text-[10px] text-ink-soft"
-                thClassName="mt-px block font-thai text-[9px] text-ink-soft/85"
-              />
-              <BiText
-                as="p"
                 en={desc.en}
                 th={desc.th}
                 className="mb-3.5 mt-0.5 text-[11.5px] text-ink-soft"
@@ -150,6 +144,52 @@ export default function PricingPage() {
           )
         })}
       </div>
+
+      <section
+        id="payid"
+        className="scroll-mt-24 rounded-xl border border-line bg-card p-5 shadow-mockup sm:p-6"
+      >
+        <BiDisplayHeading
+          en={tt('pricing.payid.title').en}
+          th={tt('pricing.payid.title').th}
+          as="h2"
+          thAs="p"
+          enClassName="text-lg font-semibold text-ink"
+          thClassName="mt-0.5 text-[14px] font-medium text-ink-soft"
+        />
+        <BiText
+          as="p"
+          en={tt('pricing.payid.body').en}
+          th={tt('pricing.payid.body').th}
+          className="mt-3 text-sm leading-relaxed text-ink-soft"
+          thClassName="mt-1 block font-thai text-[13px] leading-relaxed text-ink-soft/90"
+        />
+        <ul className="mt-4 space-y-2">
+          {PAYID_OPTIONS.map((opt) => (
+            <li
+              key={opt.id}
+              className="flex flex-wrap items-baseline justify-between gap-2 rounded-editorial border border-line bg-mint-100/60 px-3 py-2.5"
+            >
+              <span className="text-[12px] font-semibold text-ink">
+                {opt.bankEn}
+                <span className="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft">
+                  {opt.bankTh}
+                </span>
+              </span>
+              <span className="font-mono text-[13px] font-bold tracking-wide text-teal-800">
+                {opt.payIdDisplay}
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 text-[12px] text-ink-soft">
+          {tt('pricing.payid.account').en}:{' '}
+          <span className="font-semibold text-ink">{BUSINESS_ENTITY.accountName}</span>
+          <span className="mt-0.5 block font-thai text-[11px] text-ink-soft/90">
+            {tt('pricing.payid.account').th}: {BUSINESS_ENTITY.accountName}
+          </span>
+        </p>
+      </section>
 
       <section>
         <BiText

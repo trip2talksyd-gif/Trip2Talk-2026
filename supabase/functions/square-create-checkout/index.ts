@@ -1,7 +1,9 @@
 // Trip2Talk — create Square hosted Payment Link (card + Afterpay).
 //
 // POST JSON:
-//   { booking_reference, buyer_email?, buyer_phone?, redirect_base? }
+//   { booking_reference, buyer_email?, buyer_phone?, redirect_base?, amount_kind? }
+// amount_kind: 'deposit' | 'full' — Afterpay/Clearpay only, NO 2% card surcharge.
+// Card Web Payments SDK charges (with surcharge) go through square-create-payment.
 //
 // Looks up the booking + tour deposit with service role, creates a Quick Pay /
 // order payment link, returns { url, order_id, payment_link_id }.
@@ -74,6 +76,7 @@ Deno.serve(async (req) => {
     buyer_email?: string
     buyer_phone?: string
     redirect_base?: string
+    amount_kind?: string
   }
   try {
     body = await req.json()
@@ -230,11 +233,7 @@ Deno.serve(async (req) => {
     if (bookingError) throw bookingError
     if (!booking) return json({ error: 'booking_not_found' }, 404)
 
-    if (
-      booking.booking_status === 'deposit_paid' ||
-      booking.booking_status === 'fully_paid' ||
-      booking.booking_status === 'cancelled'
-    ) {
+    if (booking.booking_status === 'fully_paid' || booking.booking_status === 'cancelled') {
       return json({ error: 'booking_not_payable', status: booking.booking_status }, 409)
     }
 
@@ -248,7 +247,16 @@ Deno.serve(async (req) => {
 
     const depositAud = Number(tour.deposit_aud ?? 0)
     if (!(depositAud > 0)) return json({ error: 'invalid_deposit' }, 400)
-    const amountCents = audToCents(depositAud)
+    const depositCents = audToCents(depositAud)
+    const priceAud = Number(tour.price_aud ?? 0)
+    const alreadyPaidAud = Number(booking.amount_paid_aud ?? 0)
+    const remainingCents = Math.max(0, audToCents(priceAud) - audToCents(alreadyPaidAud))
+    const amountKind = body.amount_kind === 'full' ? 'full' : 'deposit'
+    const amountCents = amountKind === 'full' ? remainingCents : depositCents
+    if (!(amountCents >= 1)) {
+      return json({ error: amountKind === 'full' ? 'nothing_owing' : 'invalid_deposit' }, 400)
+    }
+    const amountAud = amountCents / 100
 
     const email =
       (typeof body.buyer_email === 'string' && body.buyer_email.trim()) ||
@@ -264,11 +272,14 @@ Deno.serve(async (req) => {
       `${redirectBase}/booking/confirmation?ref=${encodeURIComponent(bookingRef)}&square=1`
 
     const idempotencyKey = crypto.randomUUID()
-    const lineName = `Trip2Talk deposit — ${tour.trip_code}`
+    const lineName =
+      amountKind === 'full'
+        ? `Trip2Talk balance — ${tour.trip_code}`
+        : `Trip2Talk deposit — ${tour.trip_code}`
 
     const squareBody = {
       idempotency_key: idempotencyKey,
-      description: `Deposit for ${bookingRef}`,
+      description: amountKind === 'full' ? `Balance for ${bookingRef}` : `Deposit for ${bookingRef}`,
       payment_note: bookingRef,
       order: {
         location_id: SQUARE_LOCATION_ID,
@@ -290,8 +301,8 @@ Deno.serve(async (req) => {
         redirect_url: redirectUrl,
         merchant_support_email: 'trip2talksyd@gmail.com',
         accepted_payment_methods: {
-          apple_pay: true,
-          google_pay: true,
+          apple_pay: false,
+          google_pay: false,
           cash_app_pay: false,
           afterpay_clearpay: true,
         },
@@ -331,14 +342,14 @@ Deno.serve(async (req) => {
     // Soft-tag booking so staff can see Square was requested.
     await admin
       .from('tour_bookings')
-      .update({ payment_method: 'square' })
+      .update({ payment_method: 'afterpay' })
       .eq('id', booking.id)
 
     return json({
       url,
       payment_link_id: link?.id ?? null,
       order_id: link?.order_id ?? squareJson?.related_resources?.orders?.[0]?.id ?? null,
-      amount_aud: depositAud,
+      amount_aud: amountAud,
       booking_reference: bookingRef,
       environment: SQUARE_ENV,
     })

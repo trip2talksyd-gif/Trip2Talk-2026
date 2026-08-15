@@ -1,4 +1,4 @@
-import { storageImageSrc } from '../lib/storageImage'
+import { storageImageSrc, storageImageAttrs } from '../lib/storageImage'
 
 export type GalleryCategory =
   | 'new-zealand'
@@ -663,4 +663,13 @@ export function photoThumbSrc(
     quality: opts.quality ?? 70,
     format: opts.format ?? 'webp',
   })
+}
+
+/** Responsive WebP srcset for large gallery photos (heroes, banners, lightbox). */
+export function photoImageAttrs(
+  photo: GalleryPhoto,
+  kind: 'hero' | 'album' | 'lightbox',
+  sizes?: string,
+) {
+  return storageImageAttrs(photoSrc(photo), kind, sizes)
 }

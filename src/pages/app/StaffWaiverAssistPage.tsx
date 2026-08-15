@@ -18,6 +18,7 @@ import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
 import StaffWaiverConfirmActions from '../../components/app/StaffWaiverConfirmActions'
+import WaiverRecordActions from '../../components/app/WaiverRecordActions'
 import {
   staffShellClass,
   StaffPageHeader,
@@ -492,6 +493,22 @@ export default function StaffWaiverAssistPage() {
                         departureDate={selectedTour?.departure_date}
                         customerEmail={email}
                       />
+                      <div className="mt-3 border-t border-white/10 pt-3">
+                        <p className="mb-2 text-[10px] font-medium uppercase tracking-wide text-cream-muted">
+                          Download waiver record / ดาวน์โหลดหลักฐาน waiver
+                        </p>
+                        <WaiverRecordActions
+                          bookingReference={linked?.booking_reference ?? null}
+                          customerName={selected.signed_name}
+                          tripCode={selected.trip_code}
+                          tripName={selectedTour?.name_en}
+                          signedAt={selected.signed_at}
+                          clauses={selected.clauses}
+                          filledByStaff={Boolean(selected.filled_by_staff)}
+                          staffName={selected.staff_fill_staff_name}
+                          authorizationNote={selected.staff_fill_authorization_note}
+                        />
+                      </div>
                     </StaffCard>
                   </div>
                 )

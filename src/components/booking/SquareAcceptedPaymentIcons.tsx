@@ -1,19 +1,28 @@
 import type { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 import { Landmark } from 'lucide-react'
 
 /** Shared compact payment brand marks (booking + footer). */
 
 type Tone = 'light' | 'dark'
 
+const AFTERPAY_HOW_IT_WORKS = 'https://www.afterpay.com/en-AU/how-it-works'
+
+type BrandLink =
+  | { kind: 'internal'; to: string; label: string }
+  | { kind: 'external'; href: string; label: string }
+
 function BrandShell({
   className = '',
   title,
   tone = 'light',
+  labelled = true,
   children,
 }: {
   className?: string
   title: string
   tone?: Tone
+  labelled?: boolean
   children: ReactNode
 }) {
   const shell =
@@ -23,17 +32,18 @@ function BrandShell({
   return (
     <span
       className={`inline-flex h-5 min-w-[2rem] items-center justify-center overflow-hidden rounded-[3px] border px-1 sm:h-6 sm:min-w-[2.35rem] sm:rounded-[4px] sm:px-1.5 ${shell} ${className}`.trim()}
-      title={title}
-      aria-label={title}
+      title={labelled ? title : undefined}
+      aria-label={labelled ? title : undefined}
+      aria-hidden={labelled ? undefined : true}
     >
       {children}
     </span>
   )
 }
 
-function PayIdIcon({ tone = 'light' }: { tone?: Tone }) {
+function PayIdIcon({ tone = 'light', labelled = true }: { tone?: Tone; labelled?: boolean }) {
   return (
-    <BrandShell title="PayID" tone={tone} className="gap-0.5 !px-1">
+    <BrandShell title="PayID" tone={tone} labelled={labelled} className="gap-0.5 !px-1">
       <Landmark className="h-3 w-3 text-teal-800" aria-hidden strokeWidth={2.25} />
       <svg viewBox="0 0 36 16" className="h-3 w-[1.85rem]" aria-hidden>
         <text
@@ -53,9 +63,9 @@ function PayIdIcon({ tone = 'light' }: { tone?: Tone }) {
   )
 }
 
-function VisaIcon({ tone = 'light' }: { tone?: Tone }) {
+function VisaIcon({ tone = 'light', labelled = true }: { tone?: Tone; labelled?: boolean }) {
   return (
-    <BrandShell title="Visa" tone={tone}>
+    <BrandShell title="Visa" tone={tone} labelled={labelled}>
       <svg viewBox="0 0 42 16" className="h-3 w-[2.1rem] sm:h-3.5 sm:w-[2.35rem]" aria-hidden>
         <text
           x="21"
@@ -75,9 +85,9 @@ function VisaIcon({ tone = 'light' }: { tone?: Tone }) {
   )
 }
 
-function MastercardIcon({ tone = 'light' }: { tone?: Tone }) {
+function MastercardIcon({ tone = 'light', labelled = true }: { tone?: Tone; labelled?: boolean }) {
   return (
-    <BrandShell title="Mastercard" tone={tone}>
+    <BrandShell title="Mastercard" tone={tone} labelled={labelled}>
       <svg viewBox="0 0 38 24" className="h-3.5 w-6 sm:h-4 sm:w-[1.85rem]" aria-hidden>
         <circle cx="14.5" cy="12" r="7.2" fill="#EB001B" />
         <circle cx="23.5" cy="12" r="7.2" fill="#F79E1B" />
@@ -90,30 +100,9 @@ function MastercardIcon({ tone = 'light' }: { tone?: Tone }) {
   )
 }
 
-function AmexIcon({ tone = 'light' }: { tone?: Tone }) {
+function AfterpayIcon({ tone = 'light', labelled = true }: { tone?: Tone; labelled?: boolean }) {
   return (
-    <BrandShell className="!border-[#2E77BC] !bg-[#2E77BC]" title="American Express" tone={tone}>
-      <svg viewBox="0 0 48 16" className="h-2.5 w-8 sm:h-3 sm:w-10" aria-hidden>
-        <text
-          x="24"
-          y="11.2"
-          textAnchor="middle"
-          fill="#fff"
-          fontFamily="Inter, Arial, Helvetica, sans-serif"
-          fontSize="7.5"
-          fontWeight="800"
-          letterSpacing="0.6"
-        >
-          AMEX
-        </text>
-      </svg>
-    </BrandShell>
-  )
-}
-
-function AfterpayIcon({ tone = 'light' }: { tone?: Tone }) {
-  return (
-    <BrandShell className="!border-[#b2fce4] !bg-[#b2fce4]" title="Afterpay" tone={tone}>
+    <BrandShell className="!border-[#b2fce4] !bg-[#b2fce4]" title="Afterpay" tone={tone} labelled={labelled}>
       <svg viewBox="0 0 72 16" className="h-2.5 w-[3rem] sm:h-3 sm:w-[3.6rem]" aria-hidden>
         <text
           x="36"
@@ -132,24 +121,57 @@ function AfterpayIcon({ tone = 'light' }: { tone?: Tone }) {
   )
 }
 
-export type PaymentBrandId = 'payid' | 'visa' | 'mastercard' | 'amex' | 'afterpay'
+export type PaymentBrandId = 'payid' | 'visa' | 'mastercard' | 'afterpay'
 
-const DEFAULT_SQUARE: PaymentBrandId[] = ['visa', 'mastercard', 'amex', 'afterpay']
+const DEFAULT_SQUARE: PaymentBrandId[] = ['visa', 'mastercard', 'afterpay']
 const DEFAULT_FOOTER: PaymentBrandId[] = ['payid', 'visa', 'mastercard', 'afterpay']
 
-function renderBrand(id: PaymentBrandId, tone: Tone) {
-  switch (id) {
-    case 'payid':
-      return <PayIdIcon key={id} tone={tone} />
-    case 'visa':
-      return <VisaIcon key={id} tone={tone} />
-    case 'mastercard':
-      return <MastercardIcon key={id} tone={tone} />
-    case 'amex':
-      return <AmexIcon key={id} tone={tone} />
-    case 'afterpay':
-      return <AfterpayIcon key={id} tone={tone} />
+function renderBrand(id: PaymentBrandId, tone: Tone, link?: BrandLink) {
+  // Marks are decorative; the row aria-label (and link aria-label when present) speak.
+  const icon = (() => {
+    switch (id) {
+      case 'payid':
+        return <PayIdIcon tone={tone} labelled={false} />
+      case 'visa':
+        return <VisaIcon tone={tone} labelled={false} />
+      case 'mastercard':
+        return <MastercardIcon tone={tone} labelled={false} />
+      case 'afterpay':
+        return <AfterpayIcon tone={tone} labelled={false} />
+    }
+  })()
+
+  if (!link) {
+    return (
+      <span key={id} className="pointer-events-none cursor-default select-none">
+        {icon}
+      </span>
+    )
   }
+
+  const className =
+    'inline-flex cursor-pointer rounded-[3px] outline-none transition-opacity hover:opacity-85 focus-visible:ring-2 focus-visible:ring-white/60'
+
+  if (link.kind === 'external') {
+    return (
+      <a
+        key={id}
+        href={link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={className}
+        aria-label={link.label}
+      >
+        {icon}
+      </a>
+    )
+  }
+
+  return (
+    <Link key={id} to={link.to} className={className} aria-label={link.label}>
+      {icon}
+    </Link>
+  )
 }
 
 type Props = {
@@ -157,6 +179,7 @@ type Props = {
   tone?: Tone
   className?: string
   label?: string
+  brandLinks?: Partial<Record<PaymentBrandId, BrandLink>>
 }
 
 /** Booking Square option — cards + Afterpay. */
@@ -172,7 +195,7 @@ export default function SquareAcceptedPaymentIcons({
       brands={DEFAULT_SQUARE}
       tone={tone}
       className={`mt-1.5 ${className}`.trim()}
-      label="Accepted: Visa, Mastercard, American Express, Afterpay"
+      label="Accepted: Visa, Mastercard, Afterpay"
     />
   )
 }
@@ -184,7 +207,19 @@ export function FooterPaymentIcons({ className = '' }: { className?: string }) {
       brands={DEFAULT_FOOTER}
       tone="dark"
       className={className}
-      label="Accepted payments: PayID, Visa, Mastercard, Afterpay"
+      label="We accept PayID, Visa, Mastercard, Afterpay"
+      brandLinks={{
+        payid: {
+          kind: 'internal',
+          to: '/pricing#payid',
+          label: 'PayID — how to pay / วิธีชำระ PayID',
+        },
+        afterpay: {
+          kind: 'external',
+          href: AFTERPAY_HOW_IT_WORKS,
+          label: 'Afterpay — how it works (opens in a new tab)',
+        },
+      }}
     />
   )
 }
@@ -194,13 +229,14 @@ export function AcceptedPaymentIcons({
   tone = 'light',
   className = '',
   label,
+  brandLinks,
 }: Props) {
   return (
     <span
       className={`flex flex-wrap items-center gap-1 sm:gap-1.5 ${className}`.trim()}
       aria-label={label ?? `Accepted: ${brands.join(', ')}`}
     >
-      {brands.map((id) => renderBrand(id, tone))}
+      {brands.map((id) => renderBrand(id, tone, brandLinks?.[id]))}
     </span>
   )
 }

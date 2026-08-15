@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 import type { GalleryPhoto } from '../../data/galleryPhotos'
-import { photoThumbSrc } from '../../data/galleryPhotos'
+import { photoImageAttrs } from '../../data/galleryPhotos'
 
 type Props = {
   photos: GalleryPhoto[]
@@ -84,7 +84,7 @@ export default function GalleryLightbox({ photos, initialIndex, onClose }: Props
         </button>
 
         <img
-          src={photoThumbSrc(photo, { width: 1600, quality: 72, format: 'webp' })}
+          {...photoImageAttrs(photo, 'lightbox')}
           alt={caption}
           className="max-h-[70vh] max-w-full object-contain"
         />
