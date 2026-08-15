@@ -19,6 +19,7 @@ import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import { TripCardSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import type { TranslationKey } from '../../i18n/translations'
+import { preferSquareCardCheckout } from '../../lib/preferredPayment'
 
 type Filter = 'all' | TripType
 
@@ -76,6 +77,10 @@ export default function TripsPage() {
   useEffect(() => {
     if (qParam) setQuery(qParam)
   }, [qParam])
+
+  useEffect(() => {
+    if (searchParams.get('pay') === 'square') preferSquareCardCheckout()
+  }, [searchParams])
 
   const searching = query.trim().length > 0
   const searchBi = tt('trips.search')

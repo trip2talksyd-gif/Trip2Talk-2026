@@ -498,15 +498,7 @@ export default function StaffDashboard() {
               </div>
             </div>
             <div className="mt-4 rounded-2xl border border-amber/30 bg-amber/5 p-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-amber">
-                Trip-day safety
-                <span className="mt-0.5 block font-thai text-[10px] font-medium normal-case tracking-normal text-amber/80">
-                  ข้อมูลฉุกเฉินวันทริป
-                </span>
-              </h3>
-              <div className="mt-2.5">
-                <TripDaySafetyQuickView bookings={manifest.filter((b) => !isBookingCancelled(b))} />
-              </div>
+              <TripDaySafetyQuickView bookings={manifest.filter((b) => !isBookingCancelled(b))} />
             </div>
             {filteredManifest.length === 0 ? (
               <p className="mt-3 text-sm text-cream-muted">

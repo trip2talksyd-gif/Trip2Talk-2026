@@ -24,6 +24,7 @@ import {
   setConfirmationSummary,
   markConfirmationDepositPaid,
 } from '../../lib/waiverSession'
+import { readPreferredCustomerPayment } from '../../lib/preferredPayment'
 import {
   getSupabaseErrorMessage,
   isValidAuMobile,
@@ -97,7 +98,9 @@ export default function BookingPage() {
   const [touched, setTouched] = useState(false)
   const [reference, setReference] = useState('')
   const [slipFile, setSlipFile] = useState<File | null>(null)
-  const [paymentChoice, setPaymentChoice] = useState<CustomerPaymentChoice>('payid')
+  const [paymentChoice, setPaymentChoice] = useState<CustomerPaymentChoice>(() =>
+    readPreferredCustomerPayment(params.get('pay')),
+  )
   const [squareCardReady, setSquareCardReady] = useState(false)
   const [squareBookingRef, setSquareBookingRef] = useState('')
   const [installmentPlan, setInstallmentPlan] = useState<1 | 2 | 4>(1)

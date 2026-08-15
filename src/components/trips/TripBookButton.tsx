@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import type { Tour } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
 import { getUnbookableReason, isTourBookable } from '../../lib/toursApi'
+import { squarePayQuerySuffix } from '../../lib/preferredPayment'
 import { FACEBOOK_MESSENGER_URL } from '../../data/contactChannels'
 import FlipText from '../ui/FlipText'
 
@@ -68,7 +69,9 @@ export default function TripBookButton({
     )
   }
 
-  const to = detailOnly ? `/trips/${tour.trip_code}` : `/waiver?trip=${tour.trip_code}`
+  const to = detailOnly
+    ? `/trips/${tour.trip_code}`
+    : `/waiver?trip=${tour.trip_code}${squarePayQuerySuffix()}`
   const labelEn = detailOnly ? t('btn.viewTrip') : t('btn.bookNow')
   const labelTh = detailOnly ? 'ดูทริป' : 'จองเลย'
 

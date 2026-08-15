@@ -10,8 +10,9 @@ import BrandLogo from '../../components/brand/BrandLogo'
 const MAX_ATTEMPTS = 3
 const LOCKOUT_MS = 30_000
 
-/** Full-bleed PIN gate background (night sky / Milky Way). */
-const PIN_GATE_BG_SRC = '/brand/pin-gate-bg.webp'
+/** Full-bleed PIN gate background (The Neck, Tasmania). */
+const PIN_GATE_BG_SRC =
+  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Tasmania/Hobat/the%20neckweb.jpg'
 
 function redirectForRole(role: StaffRole): string {
   switch (role) {

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import type { Tour } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
 import { formatDate, isTourBookable } from '../../lib/toursApi'
+import { squarePayQuerySuffix } from '../../lib/preferredPayment'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 
 type Props = {
@@ -12,7 +13,7 @@ type Props = {
 export default function TripStickyBookBar({ tour }: Props) {
   const { tt } = useLang()
   const bookable = isTourBookable(tour)
-  const to = bookable ? `/waiver?trip=${tour.trip_code}` : undefined
+  const to = bookable ? `/waiver?trip=${tour.trip_code}${squarePayQuerySuffix()}` : undefined
   const book = tt('btn.bookNow')
   const soon = tt('btn.comingSoon')
   const from = tt('detail.fromPrice')
