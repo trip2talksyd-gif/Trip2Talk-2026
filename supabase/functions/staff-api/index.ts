@@ -381,6 +381,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   resolve_payment_reconciliation_issue: ['OWNER', 'MANAGER', 'CASHIER'],
   retry_payment_reconciliation_issue: ['OWNER', 'MANAGER', 'CASHIER'],
   list_payments_for_booking: ['OWNER', 'MANAGER', 'CASHIER'],
+  get_receipt_by_reference: ['OWNER', 'MANAGER', 'CASHIER'],
   search_customer_payments: ['OWNER', 'MANAGER', 'CASHIER'],
   add_pending_installment: ['OWNER', 'MANAGER', 'CASHIER'],
   update_installment: ['OWNER', 'MANAGER', 'CASHIER'],
@@ -510,14 +511,34 @@ Deno.serve(async (req) => {
   try {
     switch (action) {
       case 'list_pending_bookings': {
-        // Public + cashier flows use lowercase statuses (pending_payment), not PENDING.
-        const { data, error } = await admin
+        // Pending PayID/cash rows, plus Square/Afterpay deposits that would
+        // otherwise vanish from Cashier after mark-paid (read-only union).
+        const { data: pending, error: pendingError } = await admin
           .from('tour_bookings')
           .select('*')
           .in('booking_status', ['pending_payment', 'PENDING'])
           .order('booked_at', { ascending: false })
-        if (error) throw error
-        return json({ data })
+        if (pendingError) throw pendingError
+
+        const { data: cardPaid, error: cardError } = await admin
+          .from('tour_bookings')
+          .select('*')
+          .in('payment_method', ['square', 'afterpay'])
+          .in('booking_status', ['deposit_paid', 'fully_paid', 'paid'])
+          .is('cancelled_at', null)
+          .order('booked_at', { ascending: false })
+          .limit(50)
+        if (cardError) throw cardError
+
+        const seen = new Set<string>()
+        const merged: Record<string, unknown>[] = []
+        for (const row of [...(pending ?? []), ...(cardPaid ?? [])]) {
+          const id = String((row as { id?: string }).id ?? '')
+          if (!id || seen.has(id)) continue
+          seen.add(id)
+          merged.push(row as Record<string, unknown>)
+        }
+        return json({ data: merged })
       }
 
       case 'sign_payment_slip': {
@@ -2128,6 +2149,46 @@ Deno.serve(async (req) => {
           .order('installment_no', { ascending: true })
         if (error) throw error
         return json({ data })
+      }
+
+      case 'get_receipt_by_reference': {
+        const { bookingReference } = params as { bookingReference?: string }
+        const ref = typeof bookingReference === 'string' ? bookingReference.trim().toUpperCase() : ''
+        if (!ref.startsWith('T2T-')) return json({ error: 'invalid_params' }, 400)
+
+        const { data: booking, error: bookingError } = await admin
+          .from('tour_bookings')
+          .select('*')
+          .ilike('booking_reference', ref)
+          .maybeSingle()
+        if (bookingError) throw bookingError
+        if (!booking) return json({ error: 'booking_not_found' }, 404)
+
+        const { data: payments, error: payError } = await admin
+          .from('booking_payments')
+          .select('*')
+          .eq('booking_id', booking.id)
+          .order('installment_no', { ascending: true })
+        if (payError) throw payError
+
+        let tour: Record<string, unknown> | null = null
+        if (booking.tour_id) {
+          const { data: tourRow, error: tourError } = await admin
+            .from('tours')
+            .select('id, trip_code, name_en, departure_date, price_aud, deposit_aud')
+            .eq('id', booking.tour_id)
+            .maybeSingle()
+          if (tourError) throw tourError
+          tour = tourRow
+        }
+
+        return json({
+          data: {
+            booking,
+            payments: payments ?? [],
+            tour,
+          },
+        })
       }
 
       case 'delete_tour': {

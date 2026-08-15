@@ -5,13 +5,16 @@ import { useLang } from '../../hooks/useLang'
 import {
   getConfirmationSummary,
   markConfirmationDepositPaid,
+  patchConfirmationSummary,
   type ConfirmationSummaryData,
 } from '../../lib/waiverSession'
-import { formatDate, lookupMyTrip } from '../../lib/toursApi'
+import { formatAud, formatDate, lookupMyTrip } from '../../lib/toursApi'
+import { isSquareGatewayMethod, remainingTripBalanceAud } from '../../lib/paymentCredit'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import BiText from '../../components/ui/BiText'
 import { useToast } from '../../components/ui/Toast'
 import BrandLogo from '../../components/brand/BrandLogo'
+import type { TranslationKey } from '../../i18n/translations'
 
 function statusMeansDepositPaid(status: string | undefined): boolean {
   return status === 'deposit_paid' || status === 'fully_paid'
@@ -59,8 +62,8 @@ export default function ConfirmationSummaryPage() {
     let cancelled = false
 
     async function refreshFromLive() {
-      const attempts = squareReturn ? 8 : 1
-      if (squareReturn) setConfirmingLive(true)
+      const attempts = squareReturn || paidReturn ? 8 : 1
+      if (squareReturn || paidReturn) setConfirmingLive(true)
       try {
         for (let i = 0; i < attempts; i++) {
           if (cancelled) return
@@ -69,10 +72,35 @@ export default function ConfirmationSummaryPage() {
             contact: liveContact,
           })
           if (cancelled) return
+          const method = result.booking?.payment_method ?? null
+          const livePatch: Partial<ConfirmationSummaryData> = {}
+          if (method) livePatch.paymentMethod = method
+          if (result.booking) {
+            livePatch.priceAud = result.booking.price_aud
+            livePatch.depositAud = result.booking.deposit_aud
+            livePatch.amountPaidAud = result.booking.amount_paid_aud
+            livePatch.bookingStatus = result.booking.booking_status
+          }
+          if (Object.keys(livePatch).length > 0) {
+            const patched = patchConfirmationSummary(liveRef, livePatch)
+            if (patched) setData(patched)
+            else setData((prev) => (prev ? { ...prev, ...livePatch } : prev))
+          }
           if (statusMeansDepositPaid(result.booking?.booking_status)) {
             const next = markConfirmationDepositPaid(liveRef)
-            if (next) setData(next)
-            else setData((prev) => (prev ? { ...prev, depositPaid: true } : prev))
+            if (next) {
+              setData({ ...next, ...livePatch })
+            } else {
+              setData((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      depositPaid: true,
+                      ...livePatch,
+                    }
+                  : prev,
+              )
+            }
             return
           }
           if (i < attempts - 1) await sleep(2500)
@@ -88,7 +116,7 @@ export default function ConfirmationSummaryPage() {
     return () => {
       cancelled = true
     }
-  }, [ref, squareReturn])
+  }, [ref, squareReturn, paidReturn])
 
   const title = tt('confirm.title')
   const subtitle = tt('confirm.subtitle')
@@ -155,6 +183,33 @@ export default function ConfirmationSummaryPage() {
       </div>
     )
   }
+
+  const cardDepositReceived =
+    optimisticPaid ||
+    (data.depositPaid && isSquareGatewayMethod(data.paymentMethod))
+
+  const remainingBalance = cardDepositReceived
+    ? remainingTripBalanceAud({
+        priceAud: data.priceAud,
+        depositAud: data.depositAud,
+        amountPaidAud: data.amountPaidAud,
+        paymentMethod: data.paymentMethod === 'afterpay' ? 'afterpay' : 'square',
+        bookingStatus:
+          data.bookingStatus ?? (data.depositPaid ? 'deposit_paid' : 'pending_payment'),
+      })
+    : null
+
+  const remainingCopy =
+    remainingBalance == null
+      ? null
+      : {
+          en: tt('confirm.next.card.remaining').en.replace('{amount}', formatAud(remainingBalance)),
+          th: tt('confirm.next.card.remaining').th.replace('{amount}', formatAud(remainingBalance)),
+        }
+
+  const nextStepKeys: TranslationKey[] = cardDepositReceived
+    ? ['confirm.next.card.1', 'confirm.next.2', 'confirm.next.3']
+    : ['confirm.next.1', 'confirm.next.2', 'confirm.next.3']
 
   const checks: { done: boolean; en: string; th: string; pendingLabel?: boolean }[] = [
     {
@@ -307,12 +362,23 @@ export default function ConfirmationSummaryPage() {
             thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
           />
           <ol className="mt-2 list-decimal space-y-2 pl-4 text-[12px] text-ink">
-            {[tt('confirm.next.1'), tt('confirm.next.2'), tt('confirm.next.3')].map((bi, i) => (
-              <li key={i}>
-                {bi.en}
-                <span className="mt-0.5 block font-thai text-[10px] text-ink-soft">{bi.th}</span>
+            {nextStepKeys.map((key) => {
+              const bi = tt(key)
+              return (
+                <li key={key}>
+                  {bi.en}
+                  <span className="mt-0.5 block font-thai text-[10px] text-ink-soft">{bi.th}</span>
+                </li>
+              )
+            })}
+            {remainingCopy ? (
+              <li>
+                {remainingCopy.en}
+                <span className="mt-0.5 block font-thai text-[10px] text-ink-soft">
+                  {remainingCopy.th}
+                </span>
               </li>
-            ))}
+            ) : null}
           </ol>
         </div>
 

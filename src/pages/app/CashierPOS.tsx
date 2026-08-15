@@ -12,6 +12,7 @@ import {
   flagPendingBooking,
 } from '../../lib/toursApi'
 import { isSelectableBookableTour } from '../../lib/tourSelectability'
+import { isSquareGatewayMethod, remainingTripBalanceAud } from '../../lib/paymentCredit'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { Tour, TourBooking } from '../../types/tour'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
@@ -33,6 +34,20 @@ import {
   StaffInput,
   StaffSelect,
 } from '../../components/app/staffUi'
+
+const PAY_METHOD_OPTIONS: { value: string; label: string }[] = [
+  { value: 'cash', label: 'เงินสด / Cash' },
+  { value: 'payid', label: 'PayID' },
+  { value: 'bank_transfer', label: 'โอนธนาคาร / Bank' },
+  { value: 'square', label: 'Card via Square' },
+  { value: 'afterpay', label: 'Afterpay via Square' },
+  { value: 'manual', label: 'อื่นๆ / Other' },
+]
+
+function cashierMethodLabel(method: string | null | undefined): string {
+  const value = (method ?? '').trim().toLowerCase()
+  return PAY_METHOD_OPTIONS.find((o) => o.value === value)?.label ?? (method || '—')
+}
 
 export default function CashierPOS() {
   const { t } = useLang()
@@ -177,7 +192,15 @@ export default function CashierPOS() {
 
   function openPaymentRow(booking: TourBooking) {
     const tour = tours.find((tr) => tr.trip_code === booking.trip_code)
-    const remaining = tour ? Math.max(0, tour.price_aud - booking.amount_paid_aud) : 0
+    const remaining = tour
+      ? remainingTripBalanceAud({
+          priceAud: tour.price_aud,
+          depositAud: tour.deposit_aud,
+          amountPaidAud: booking.amount_paid_aud,
+          paymentMethod: booking.payment_method,
+          bookingStatus: booking.booking_status,
+        }) ?? 0
+      : 0
     const plan = booking.payment_plan_installments ?? 1
     const perInstallment = tour && plan > 1 ? Math.min(remaining, tour.price_aud / plan) : remaining
     setPayingId(booking.id)
@@ -448,10 +471,11 @@ export default function CashierPOS() {
                     value={paymentMethod}
                     onChange={(e) => setPaymentMethod(e.target.value)}
                   >
-                    <option value="cash">เงินสด</option>
-                    <option value="payid">PayID</option>
-                    <option value="bank_transfer">โอนธนาคาร</option>
-                    <option value="manual">อื่นๆ</option>
+                    {PAY_METHOD_OPTIONS.map((o) => (
+                      <option key={o.value} value={o.value}>
+                        {o.label}
+                      </option>
+                    ))}
                   </StaffSelect>
                 </StaffField>
               </div>
@@ -486,7 +510,16 @@ export default function CashierPOS() {
             {bookings.map((b) => {
               const tour = tours.find((tr) => tr.trip_code === b.trip_code)
               const plan = b.payment_plan_installments ?? 1
-              const remaining = tour ? Math.max(0, tour.price_aud - b.amount_paid_aud) : null
+              const remaining = tour
+                ? remainingTripBalanceAud({
+                    priceAud: tour.price_aud,
+                    depositAud: tour.deposit_aud,
+                    amountPaidAud: b.amount_paid_aud,
+                    paymentMethod: b.payment_method,
+                    bookingStatus: b.booking_status,
+                  })
+                : null
+              const cardPaid = isSquareGatewayMethod(b.payment_method)
               const isPaying = payingId === b.id
               const cancelled = isBookingCancelled(b)
 
@@ -513,10 +546,17 @@ export default function CashierPOS() {
                       {remaining !== null && remaining > 0 ? ` · เหลือ ${remaining.toLocaleString()} AUD` : ''}
                     </p>
                     <p className="mt-1.5 text-[11px] text-cream-muted">
-                      {bookingHasSlip(b) ? (
-                        <span>PayID slip on file</span>
+                      <span>ช่องทาง {cashierMethodLabel(b.payment_method)}</span>
+                      {cardPaid ? (
+                        <span className="mt-0.5 block text-teal-500/90">
+                          {b.payment_method === 'afterpay'
+                            ? 'Afterpay via Square — no PayID slip'
+                            : 'Card via Square — no PayID slip'}
+                        </span>
+                      ) : bookingHasSlip(b) ? (
+                        <span className="mt-0.5 block">PayID slip on file</span>
                       ) : (
-                        <span className="text-amber-200/90">No slip uploaded</span>
+                        <span className="mt-0.5 block text-amber-200/90">No slip uploaded</span>
                       )}
                       {b.staff_follow_up_note ? (
                         <span className="mt-0.5 block text-amber-200/90">
@@ -538,6 +578,20 @@ export default function CashierPOS() {
                             onSessionExpired={() => navigate('/app')}
                           />
                         ) : null}
+                        {cardPaid && b.booking_reference ? (
+                          <StaffButton
+                            type="button"
+                            variant="secondary"
+                            onClick={() =>
+                              navigate(
+                                `/app/receipt?ref=${encodeURIComponent(b.booking_reference ?? '')}`,
+                              )
+                            }
+                            className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
+                          >
+                            Receipt
+                          </StaffButton>
+                        ) : null}
                         {bookingHasSlip(b) ? (
                           <StaffButton
                             type="button"
@@ -549,14 +603,16 @@ export default function CashierPOS() {
                             {slipBusyId === b.id ? 'Opening…' : 'View slip'}
                           </StaffButton>
                         ) : null}
-                        <StaffButton
-                          type="button"
-                          disabled={verifyId === b.id}
-                          onClick={() => void verifyPayId(b)}
-                          className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
-                        >
-                          {verifyId === b.id ? 'Verifying…' : 'Verify PayID'}
-                        </StaffButton>
+                        {!cardPaid ? (
+                          <StaffButton
+                            type="button"
+                            disabled={verifyId === b.id}
+                            onClick={() => void verifyPayId(b)}
+                            className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
+                          >
+                            {verifyId === b.id ? 'Verifying…' : 'Verify PayID'}
+                          </StaffButton>
+                        ) : null}
                         <StaffButton
                           type="button"
                           variant="secondary"
@@ -600,10 +656,11 @@ export default function CashierPOS() {
                                 value={payMethod}
                                 onChange={(e) => setPayMethod(e.target.value)}
                               >
-                                <option value="cash">เงินสด</option>
-                                <option value="payid">PayID</option>
-                                <option value="bank_transfer">โอนธนาคาร</option>
-                                <option value="manual">อื่นๆ</option>
+                                {PAY_METHOD_OPTIONS.map((o) => (
+                                  <option key={o.value} value={o.value}>
+                                    {o.label}
+                                  </option>
+                                ))}
                               </StaffSelect>
                             </StaffField>
                           </div>

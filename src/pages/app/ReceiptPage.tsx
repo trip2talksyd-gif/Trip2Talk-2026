@@ -1,15 +1,23 @@
-import { useRef, useState } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useToast } from '../../components/ui/Toast'
 import { PAYID_OPTIONS } from '../../data/paymentDetails'
 import { BRAND_BADGE_PNG_SRC } from '../../data/brand'
-import { formatTravelDateLabel } from '../../lib/toursApi'
+import {
+  fetchReceiptByReference,
+  formatTravelDateLabel,
+  resolveBookingTravelDate,
+  type BookingReceiptLookup,
+} from '../../lib/toursApi'
+import { remainingTripBalanceAud } from '../../lib/paymentCredit'
+import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import {
   StaffButton,
   staffShellClass,
 } from '../../components/app/staffUi'
 import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
+import type { BookingPayment } from '../../types/tour'
 
 /** Data handed off via router state right after a payment is recorded —
  * no extra staff-api round trip, since the caller already has everything. */
@@ -43,7 +51,7 @@ const PAYMENT_METHOD_LABEL: Record<string, string> = {
   payid: 'PayID',
   bank_transfer: 'Bank Transfer',
   manual: 'Other',
-  square: 'Card/Afterpay via Square',
+  square: 'Card via Square',
   afterpay: 'Afterpay via Square',
 }
 
@@ -93,14 +101,102 @@ function formatAudCents(amount: number): string {
   }).format(amount)
 }
 
+function pickReceiptPayment(
+  payments: BookingPayment[],
+  installmentNo?: number | null,
+): BookingPayment | null {
+  const paid = payments.filter((p) => p.status === 'paid' || (!p.status && p.paid_at))
+  if (installmentNo != null && Number.isFinite(installmentNo)) {
+    const match =
+      paid.find((p) => p.installment_no === installmentNo) ??
+      payments.find((p) => p.installment_no === installmentNo)
+    if (match) return match
+  }
+  if (paid.length > 0) return paid[paid.length - 1]
+  return payments[0] ?? null
+}
+
+function receiptFromLookup(
+  lookup: BookingReceiptLookup,
+  installmentNo?: number | null,
+): ReceiptData {
+  const { booking, payments, tour } = lookup
+  const payment = pickReceiptPayment(payments, installmentNo)
+  const method = payment?.payment_method ?? booking.payment_method ?? null
+  const amountPaid = Number(payment?.amount_aud ?? booking.amount_paid_aud ?? 0)
+  const priceAud = tour?.price_aud ?? null
+  const remaining =
+    priceAud != null
+      ? remainingTripBalanceAud({
+          priceAud,
+          depositAud: tour?.deposit_aud,
+          amountPaidAud: Number(booking.amount_paid_aud ?? 0),
+          paymentMethod: method,
+          bookingStatus: booking.booking_status,
+        })
+      : null
+  return {
+    bookingId: booking.id,
+    bookingReference: booking.booking_reference,
+    customerName: `${booking.first_name_en} ${booking.last_name_en}`.trim(),
+    customerEmail: booking.email || null,
+    tripName: tour?.name_en ?? booking.trip_code,
+    tripCode: booking.trip_code,
+    departureDate: resolveBookingTravelDate(booking, tour?.departure_date ?? null),
+    amountPaid,
+    paymentMethod: method,
+    bookingStatus: booking.booking_status,
+    source: booking.source ?? null,
+    installmentNo: payment?.installment_no ?? 1,
+    installmentPlan: booking.payment_plan_installments,
+    priceAud,
+    balanceRemaining: remaining,
+  }
+}
+
 export default function ReceiptPage() {
   const location = useLocation()
+  const [params] = useSearchParams()
   const navigate = useNavigate()
   const { toast } = useToast()
-  const data = location.state as ReceiptData | null
+  const refParam = params.get('ref')?.trim() || null
+  const installmentParam = params.get('installment')
+  const installmentNo = installmentParam ? Number(installmentParam) : null
+  const stateData = location.state as ReceiptData | null
+  const [data, setData] = useState<ReceiptData | null>(
+    refParam ? null : stateData,
+  )
+  const [loadError, setLoadError] = useState('')
   const issuedAt = new Date()
   const cardRef = useRef<HTMLDivElement>(null)
   const [downloading, setDownloading] = useState(false)
+
+  useEffect(() => {
+    if (!refParam) {
+      setData(stateData)
+      setLoadError('')
+      return
+    }
+    let cancelled = false
+    setLoadError('')
+    fetchReceiptByReference(refParam)
+      .then((lookup) => {
+        if (cancelled) return
+        setData(receiptFromLookup(lookup, installmentNo))
+      })
+      .catch((err) => {
+        if (cancelled) return
+        if (err instanceof StaffSessionExpiredError) {
+          navigate('/app')
+          return
+        }
+        setLoadError('Could not load receipt from booking reference')
+        setData(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [refParam, installmentNo, navigate, stateData])
 
   async function handleDownloadImage() {
     if (!cardRef.current) return
@@ -194,7 +290,11 @@ export default function ReceiptPage() {
           </Link>
         </header>
         <main className="app-scroll mx-auto w-full max-w-md px-4 py-6" data-app-scroll>
-          <p className="text-sm text-cream-muted">ไม่พบข้อมูลใบเสร็จ</p>
+          <p className="text-sm text-cream-muted">
+            {refParam && !loadError
+              ? 'Loading receipt…'
+              : loadError || 'ไม่พบข้อมูลใบเสร็จ'}
+          </p>
         </main>
       </div>
     )

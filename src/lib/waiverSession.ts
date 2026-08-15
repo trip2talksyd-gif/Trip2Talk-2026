@@ -73,6 +73,12 @@ export type ConfirmationSummaryData = {
   waiverSigned: boolean
   safetyInfoOnFile: boolean
   depositPaid: boolean
+  /** How the guest chose / paid the deposit — used on confirmation next-steps. */
+  paymentMethod?: string | null
+  priceAud?: number | null
+  depositAud?: number | null
+  amountPaidAud?: number | null
+  bookingStatus?: string | null
   facebookMessagePending: boolean
   createdAt: string
   /** Email or phone used with lookup-my-trip — not shown on the confirmation card. */

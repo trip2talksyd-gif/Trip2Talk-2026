@@ -592,6 +592,7 @@ export type MyTripBookingSummary = {
   reference: string | null
   trip_code: string
   booking_status: string
+  payment_method: string | null
   amount_paid_aud: number
   booked_at: string
   first_name_en: string
@@ -951,6 +952,25 @@ export async function recordPayment(
 
 export async function fetchPaymentsForBooking(bookingId: string): Promise<BookingPayment[]> {
   return callStaffApi<BookingPayment[]>('list_payments_for_booking', { bookingId })
+}
+
+export type BookingReceiptLookup = {
+  booking: TourBooking
+  payments: BookingPayment[]
+  tour: {
+    id: string
+    trip_code: string
+    name_en: string
+    departure_date: string | null
+    price_aud: number
+    deposit_aud: number
+  } | null
+}
+
+export async function fetchReceiptByReference(
+  bookingReference: string,
+): Promise<BookingReceiptLookup> {
+  return callStaffApi<BookingReceiptLookup>('get_receipt_by_reference', { bookingReference })
 }
 
 export type CustomerPaymentSearchRow = {

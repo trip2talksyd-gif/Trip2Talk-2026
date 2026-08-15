@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     const { data: byReference, error: refError } = await admin
       .from('tour_bookings')
       .select(
-        'booking_reference, trip_code, booking_status, amount_paid_aud, booked_at, first_name_en, last_name_en, email, phone, tour_id',
+        'booking_reference, trip_code, booking_status, payment_method, amount_paid_aud, booked_at, first_name_en, last_name_en, email, phone, tour_id',
       )
       .ilike('booking_reference', refNorm)
       .limit(5)
@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
       const { data: byCode, error: codeError } = await admin
         .from('tour_bookings')
         .select(
-          'booking_reference, trip_code, booking_status, amount_paid_aud, booked_at, first_name_en, last_name_en, email, phone, tour_id',
+          'booking_reference, trip_code, booking_status, payment_method, amount_paid_aud, booked_at, first_name_en, last_name_en, email, phone, tour_id',
         )
         .ilike('trip_code', refNorm)
         .order('booked_at', { ascending: false })
@@ -134,6 +134,7 @@ Deno.serve(async (req) => {
         reference: booking.booking_reference ?? null,
         trip_code: booking.trip_code,
         booking_status: booking.booking_status,
+        payment_method: booking.payment_method ?? null,
         amount_paid_aud: Number(booking.amount_paid_aud) || 0,
         booked_at: booking.booked_at,
         first_name_en: booking.first_name_en,

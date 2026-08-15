@@ -440,6 +440,8 @@ export type TranslationKey =
   | 'confirm.noInvoice'
   | 'confirm.nextTitle'
   | 'confirm.next.1'
+  | 'confirm.next.card.1'
+  | 'confirm.next.card.remaining'
   | 'confirm.next.2'
   | 'confirm.next.3'
   | 'confirm.check.deposit'
@@ -1064,6 +1066,10 @@ const en: Map = {
     'No tax invoice included here — sent separately per payment.',
   'confirm.nextTitle': 'What happens next',
   'confirm.next.1': 'Transfer your deposit via PayID and send the slip on Facebook.',
+  'confirm.next.card.1':
+    'Your card deposit was received via Square (card or Afterpay). No PayID slip is needed.',
+  'confirm.next.card.remaining':
+    'Remaining trip balance: {amount} (deposit credited; the 2% card surcharge is not trip credit).',
   'confirm.next.2': 'We confirm your seat and add you to the trip group chat.',
   'confirm.next.3': 'Before departure, check Trip Prep for packing and meeting point.',
   'confirm.check.deposit': 'Deposit paid',
@@ -1688,6 +1694,10 @@ const th: Map = {
     'ไม่มีใบกำกับภาษีในหน้านี้ — ส่งแยกตามแต่ละครั้งที่ชำระ',
   'confirm.nextTitle': 'ขั้นตอนถัดไป',
   'confirm.next.1': 'โอนมัดจำผ่าน PayID แล้วส่งสลิปทาง Facebook',
+  'confirm.next.card.1':
+    'เราได้รับมัดจำผ่าน Square แล้ว (บัตรหรือ Afterpay) ไม่ต้องส่งสลิป PayID',
+  'confirm.next.card.remaining':
+    'ยอดคงเหลือของทริป: {amount} (นับมัดจำแล้ว ไม่รวมค่าธรรมเนียมบัตร 2%)',
   'confirm.next.2': 'เรายืนยันที่นั่งและเชิญเข้ากลุ่มแชททริป',
   'confirm.next.3': 'ก่อนเดินทาง ดู Trip Prep สำหรับของที่ต้องเตรียมและจุดนัดพบ',
   'confirm.check.deposit': 'ชำระมัดจำแล้ว',
