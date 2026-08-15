@@ -377,6 +377,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   record_payment: ['OWNER', 'MANAGER', 'CASHIER'],
   sign_payment_slip: ['OWNER', 'MANAGER', 'CASHIER'],
   flag_pending_booking: ['OWNER', 'MANAGER', 'CASHIER'],
+  set_marketing_photo_opt_out: ['OWNER', 'MANAGER', 'CASHIER'],
   list_payment_reconciliation_issues: ['OWNER', 'MANAGER', 'CASHIER'],
   resolve_payment_reconciliation_issue: ['OWNER', 'MANAGER', 'CASHIER'],
   retry_payment_reconciliation_issue: ['OWNER', 'MANAGER', 'CASHIER'],
@@ -582,6 +583,43 @@ Deno.serve(async (req) => {
           .eq('id', bookingId)
           .in('booking_status', ['pending_payment', 'PENDING'])
           .select('id, staff_follow_up_note, booking_status')
+          .maybeSingle()
+        if (error) throw error
+        if (!data) return json({ error: 'booking_not_found' }, 404)
+        return json({ data })
+      }
+
+      case 'set_marketing_photo_opt_out': {
+        const { bookingId, optedOut, note } = params as {
+          bookingId?: string
+          optedOut?: boolean
+          note?: string
+        }
+        if (!bookingId || typeof optedOut !== 'boolean') {
+          return json({ error: 'invalid_params' }, 400)
+        }
+        const staffName =
+          typeof session.full_name === 'string' && session.full_name.trim()
+            ? session.full_name.trim()
+            : 'staff'
+        const trimmed = typeof note === 'string' ? note.trim().slice(0, 500) : ''
+        const payload: Record<string, unknown> = {
+          marketing_photo_opt_out: optedOut,
+        }
+        if (optedOut) {
+          payload.marketing_photo_opt_out_at = new Date().toISOString()
+          payload.marketing_photo_opt_out_note =
+            trimmed || `Opt-out recorded by ${staffName}`
+        } else {
+          payload.marketing_photo_opt_out_at = null
+          if (trimmed) payload.marketing_photo_opt_out_note = trimmed
+        }
+
+        const { data, error } = await admin
+          .from('tour_bookings')
+          .update(payload)
+          .eq('id', bookingId)
+          .select()
           .maybeSingle()
         if (error) throw error
         if (!data) return json({ error: 'booking_not_found' }, 404)

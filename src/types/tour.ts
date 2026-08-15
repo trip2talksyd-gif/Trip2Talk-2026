@@ -102,6 +102,10 @@ export interface TourBooking {
   slip_url: string | null
   /** Cashier flag on unpaid bookings (missing/bad PayID slip). Not a payment status. */
   staff_follow_up_note?: string | null
+  /** Guest emailed to opt out of marketing use of trip photos/video. */
+  marketing_photo_opt_out?: boolean | null
+  marketing_photo_opt_out_at?: string | null
+  marketing_photo_opt_out_note?: string | null
   booking_reference: string | null
   booked_at: string
   /**

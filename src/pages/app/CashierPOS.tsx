@@ -24,6 +24,7 @@ import PaymentReconciliationBanner from '../../components/app/PaymentReconciliat
 import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import StaffWaiverRecordButton from '../../components/app/StaffWaiverRecordButton'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
+import MarketingPhotoOptOutCard from '../../components/app/MarketingPhotoOptOutCard'
 import {
   staffShellClass,
   StaffPageHeader,
@@ -751,6 +752,19 @@ export default function CashierPOS() {
                         </div>
                       </div>
                     ) : null}
+
+                    <div className="mt-3 border-t border-white/10 pt-3">
+                      <MarketingPhotoOptOutCard
+                        booking={b}
+                        onUpdated={(next) =>
+                          setBookings((prev) =>
+                            prev.map((row) => (row.id === next.id ? { ...row, ...next } : row)),
+                          )
+                        }
+                        onSessionExpired={() => navigate('/app')}
+                        toast={toast}
+                      />
+                    </div>
                   </StaffCard>
                 </li>
               )

@@ -305,6 +305,14 @@ export async function flagPendingBooking(bookingId: string, note: string): Promi
   await callStaffApi('flag_pending_booking', { bookingId, note })
 }
 
+export async function setMarketingPhotoOptOut(params: {
+  bookingId: string
+  optedOut: boolean
+  note?: string
+}): Promise<TourBooking> {
+  return callStaffApi<TourBooking>('set_marketing_photo_opt_out', params)
+}
+
 export type PaymentReconciliationIssue = {
   id: string
   created_at: string

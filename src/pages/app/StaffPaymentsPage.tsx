@@ -34,6 +34,7 @@ import {
   StaffInput,
 } from '../../components/app/staffUi'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
+import MarketingPhotoOptOutCard from '../../components/app/MarketingPhotoOptOutCard'
 
 const CAN_DELETE_INSTALLMENT = new Set(['OWNER', 'MANAGER'])
 
@@ -308,6 +309,18 @@ export default function StaffPaymentsPage() {
                   {open && (
                     <div className="mt-3 space-y-2 border-t border-white/10 pt-3">
                       <LoyaltyBlock booking={booking} />
+                      <MarketingPhotoOptOutCard
+                        booking={booking}
+                        onUpdated={(next) => {
+                          setRows((prev) =>
+                            prev.map((r) =>
+                              r.booking.id === booking.id ? { ...r, booking: next } : r,
+                            ),
+                          )
+                        }}
+                        onSessionExpired={() => navigate('/app')}
+                        toast={toast}
+                      />
                       <TravelDateEditor
                         booking={booking}
                         busy={busyId === booking.id}
