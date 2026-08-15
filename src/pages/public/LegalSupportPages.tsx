@@ -3,6 +3,7 @@ import { useLang } from '../../hooks/useLang'
 import ContentPage from '../../components/layout/ContentPage'
 import PayIdDepositPanel from '../../components/booking/PayIdDepositPanel'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
+import BiText from '../../components/ui/BiText'
 import { FACEBOOK_MESSENGER_URL, FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import { CANCELLATION_POLICY } from '../../data/risks'
 import { useState } from 'react'
@@ -126,6 +127,19 @@ export function TermsPage() {
   )
 }
 
+function PolicyHeading({ en, th }: { en: string; th: string }) {
+  return (
+    <BiDisplayHeading
+      as="h2"
+      en={en}
+      th={th}
+      className="mb-2"
+      enClassName="text-lg font-semibold text-ink"
+      thClassName="mt-0.5 text-[13px] font-medium text-ink-soft"
+    />
+  )
+}
+
 export function PrivacyPage() {
   const { lang } = useLang()
   return (
@@ -133,101 +147,170 @@ export function PrivacyPage() {
       title={lang === 'th' ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy'}
       subtitle={
         lang === 'th'
-          ? 'ข้อมูลที่เราเก็บ เก็บอย่างไร และใช้ทำอะไร'
-          : 'What we collect, where it is stored, and how we use it.'
+          ? 'ข้อมูลที่เราเก็บ เก็บอย่างไร และใช้ทำอะไร — ฉบับร่างรอตรวจ'
+          : 'What we collect, where it is stored, and how we use it — draft pending review.'
       }
     >
-      <section className="space-y-3">
-        <h2 className="font-serif text-lg text-ink">1. Who we are</h2>
-        <p>
-          Trip2Talk (Chapter99 / Saard Saenmuang, ABN 81 951 461 769) operates trip2talk.com.au from
-          Sydney, Australia. Contact:{' '}
-          <a href="mailto:trip2talksyd@gmail.com" className="text-teal-700 underline">
-            trip2talksyd@gmail.com
-          </a>
-          .
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-serif text-lg text-ink">2. What we collect</h2>
-        <ul className="list-disc space-y-1 pl-5 text-ink">
-          <li>Booking details: name, email, phone, trip selection, dates of birth when provided</li>
-          <li>
-            Safety info: emergency contact, allergies, medical notes, insurance type/membership
-            (optional free text)
-          </li>
-          <li>
-            Flight-assist fields when you opt in (legal name, DOB, passport number, nationality) —
-            treated as sensitive
-          </li>
-          <li>Payment records: amounts, method (PayID or Square card/Afterpay), slips, tax invoice metadata</li>
-          <li>Waiver signatures and staff-assisted authorization notes when applicable</li>
-          <li>Waitlist name/phone/email if a trip is full</li>
-        </ul>
-        <p className="font-thai text-ink-soft">
-          เราเก็บข้อมูลการจอง ข้อมูลความปลอดภัย (ถ้ากรอก) ข้อมูลช่วยจองตั๋วบินเมื่อคุณเปิดใช้ ประวัติการชำระ และลายเซ็น waiver
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-serif text-lg text-ink">3. How we use data</h2>
-        <p>
-          To process bookings and deposits, coordinate trips (usually via our Facebook Page inbox),
-          keep guides informed of emergency/allergy notes on trip day, issue tax invoices, and
-          improve operations. We do not sell your personal data.
-        </p>
-        <p className="font-thai text-ink-soft">
-          ใช้เพื่อจองทริป ประสานงาน (มักผ่าน Facebook) ให้ไกด์ดูข้อมูลฉุกเฉินวันทริป และออกใบกำกับภาษี — เราไม่ขายข้อมูล
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-serif text-lg text-ink">4. Storage & security</h2>
-        <p>
-          Data is stored in Supabase (PostgreSQL) with row-level security; staff tools access
-          bookings via authenticated Edge Functions. Hosting for the website is on Vercel. The live
-          Supabase project is in Sydney (ap-southeast-2). Sensitive fields (passport, medical,
-          emergency contact) follow the same restricted staff-access pattern as other compliance
-          documents in this app. Trip photo galleries are delivered via Pic-Time, a third-party
-          gallery service.
-        </p>
-        <p className="font-thai text-ink-soft">
-          เก็บใน Supabase ที่ซิดนีย์ (ap-southeast-2) พร้อม RLS; พนักงานเข้าถึงผ่าน Edge Function
-          เว็บโฮสต์บน Vercel ข้อมูลอ่อนไหวจำกัดเฉพาะพนักงานที่ล็อกอิน ส่งอัลบั้มรูปทริปผ่าน Pic-Time
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-serif text-lg text-ink">5. Cookies & analytics</h2>
-        <p>
-          This site does not currently load third-party analytics or advertising cookies. We may use
-          essential browser storage for language preference, waiver session state, and staff session
-          tokens. If analytics are added later, a consent banner will be introduced.
-        </p>
-        <p className="font-thai text-ink-soft">
-          ขณะนี้ไม่มีคุกกี้วิเคราะห์จากบุคคลที่สาม — ใช้ที่เก็บในเบราว์เซอร์เท่าที่จำเป็นต่อการใช้งาน
-        </p>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="font-serif text-lg text-ink">6. Your rights</h2>
-        <p>
-          You may ask us to update or delete personal data that is no longer required for legal,
-          tax, or safety records. Accounting records may need to be retained for Australian tax
-          obligations.
-        </p>
-      </section>
-
       <p className="rounded-xl border border-amber-500/40 bg-amber-50 px-3 py-2 text-[11px] text-ink-soft">
-        <strong>Owner / legal review required.</strong> This is a draft privacy notice for Trip2Talk
-        operations. Accuracy has compliance implications under the Australian Privacy Principles —
-        have the business owner (and ideally a legal professional) review before treating as final.
+        <strong>Draft — not a final published policy.</strong> Owner and (if you choose) an Australian
+        privacy lawyer should review before this is treated as live.
         <span className="mt-1 block font-thai">
-          <strong>ต้องให้เจ้าของธุรกิจ (และ ideally ที่ปรึกษากฎหมาย) ตรวจก่อนใช้จริง</strong> —
-          นโยบายความเป็นส่วนตัวมีผลด้านกฎหมายในออสเตรเลีย
+          <strong>ฉบับร่าง — ยังไม่ใช่นโยบายที่ประกาศใช้จริง</strong> ควรให้เจ้าของธุรกิจ
+          และที่ปรึกษากฎหมายตรวจก่อนถือว่าเป็นฉบับสมบูรณ์
         </span>
       </p>
+
+      <section>
+        <PolicyHeading en="1. Who we are" th="1. เราคือใคร" />
+        <BiText
+          as="p"
+          en="Trip2Talk is operated by Chapter99 trading as Trip2Talk (Saard Saenmuang), ABN 81 951 461 769, based in Sydney, Australia. Website: trip2talk.com.au. Email: trip2talksyd@gmail.com."
+          th="Trip2Talk ดำเนินการโดย Chapter99 ในนาม Trip2Talk (Saard Saenmuang) ABN 81 951 461 769 สำนักงานซิดนีย์ ออสเตรเลีย เว็บไซต์ trip2talk.com.au อีเมล trip2talksyd@gmail.com"
+        />
+      </section>
+
+      <section>
+        <PolicyHeading en="2. What we collect" th="2. ข้อมูลที่เราเก็บ" />
+        <BiText
+          as="p"
+          en="When you book a trip we collect the details you enter on the booking and waiver forms. In the current product that includes:"
+          th="เมื่อจองทริป เราเก็บข้อมูลที่คุณกรอกในแบบฟอร์มจองและ waiver ตามระบบปัจจุบัน ได้แก่:"
+        />
+        <ul className="mt-2 list-disc space-y-2 pl-5">
+          <li>
+            <BiText
+              en="Identity and contact: first and last name, email, phone, date of birth, and passport number if you provide it (the form may store “PENDING” if left blank)."
+              th="ชื่อ-นามสกุล อีเมล เบอร์โทร วันเกิด และเลขหนังสือเดินทางหากกรอก (ถ้าว่าง ระบบอาจบันทึกเป็น PENDING)"
+            />
+          </li>
+          <li>
+            <BiText
+              en="Trip booking: trip code, travel date, number of seats, booking reference, and how you found us."
+              th="ข้อมูลทริป รหัสทริป วันเดินทาง จำนวนที่นั่ง เลขที่การจอง และช่องทางที่รู้จักเรา"
+            />
+          </li>
+          <li>
+            <BiText
+              en="Safety information: emergency contact name and phone (required), medical conditions, allergies, dietary notes, and insurance / OSHC details you enter."
+              th="ข้อมูลความปลอดภัย: ชื่อและเบอร์ผู้ติดต่อฉุกเฉิน (จำเป็น) โรคประจำตัว ภูมิแพ้ ข้อจำกัดอาหาร และข้อมูลประกัน / OSHC ที่คุณกรอก"
+            />
+          </li>
+          <li>
+            <BiText
+              en="Optional flight-assist fields if you ask us to help book flights: legal name, date of birth, passport number, nationality, and frequent-flyer number."
+              th="ข้อมูลช่วยจองตั๋วบิน (เมื่อคุณเปิดใช้): ชื่อตามพาสปอร์ต วันเกิด เลขหนังสือเดินทาง สัญชาติ และเลขสมาชิกสายการบิน"
+            />
+          </li>
+          <li>
+            <BiText
+              en="Waiver records stored against the booking: typed digital signature, timestamp, accepted clause IDs, and (if staff assist) an authorization note."
+              th="บันทึก waiver ผูกกับการจอง: ลายเซ็นดิจิทัล เวลาที่ลงนาม ข้อที่ยินยอม และบันทึกการลงนามแทนโดยพนักงาน (ถ้ามี)"
+            />
+          </li>
+          <li>
+            <BiText
+              en="Payment records: amount, method (PayID, Square card, Afterpay, cash, or bank transfer), dates, invoice numbers, Square payment IDs, and PayID slip images if you upload them. We do not store full card numbers, CVV, or card PINs — Square processes the card or Afterpay charge."
+              th="ประวัติการชำระ: ยอด ช่องทาง (PayID, บัตร Square, Afterpay, เงินสด หรือโอนธนาคาร) วันที่ เลขใบเสร็จ รหัสชำระ Square และสลิป PayID หากอัปโหลด เราไม่เก็บเลขบัตรเต็ม CVV หรือ PIN ของบัตร — Square เป็นผู้ประมวลผลบัตร/Afterpay"
+            />
+          </li>
+          <li>
+            <BiText
+              en="Waitlist name, phone, and email if a trip is full and you join the waitlist."
+              th="ชื่อ เบอร์ และอีเมลใน waitlist หากทริปเต็ม"
+            />
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <PolicyHeading en="3. How we use it" th="3. เราใช้ข้อมูลอย่างไร" />
+        <BiText
+          as="p"
+          en="We use this information to hold your seat, take deposits and remaining payments, issue tax invoices, coordinate the trip (usually through our Facebook Page inbox and group chat), share trip-day safety notes with authenticated guides/staff, deliver photo galleries, and run the business. We do not sell your personal information."
+          th="ใช้เพื่อล็อคที่นั่ง รับมัดจำและยอดที่เหลือ ออกใบกำกับภาษี ประสานทริป (มักผ่านเพจ Facebook และแชทกลุ่ม) ให้ไกด์/พนักงานที่ล็อกอินดูข้อมูลความปลอดภัยวันทริป ส่งอัลบั้มรูป และดำเนินธุรกิจ เราไม่ขายข้อมูลส่วนบุคคล"
+        />
+      </section>
+
+      <section>
+        <PolicyHeading en="4. Payments" th="4. การชำระเงิน" />
+        <BiText
+          as="p"
+          en="PayID: you transfer to our published PayID and may upload a payment slip. The slip is stored in our private payment-slips storage and opened only by logged-in staff."
+          th="PayID: คุณโอนเข้า PayID ที่ประกาศ และอาจอัปโหลดสลิป สลิปเก็บในที่เก็บแบบไม่เปิดสาธารณะ พนักงานที่ล็อกอินเท่านั้นที่เปิดดูได้"
+        />
+        <BiText
+          as="p"
+          className="mt-2"
+          en="Card and Afterpay: charges run through Square (same merchant account as in-person Square). Square receives the card or Afterpay details. We store the booking method (square or afterpay), amount charged, and Square’s payment reference — not the full PAN."
+          th="บัตรและ Afterpay: ชำระผ่าน Square (บัญชีเดียวกับเครื่องรูดหน้าร้าน) Square เป็นผู้รับข้อมูลบัตร/Afterpay เราเก็บช่องทาง (square หรือ afterpay) ยอดที่ตัด และรหัสอ้างอิงของ Square — ไม่เก็บเลขบัตรเต็ม"
+        />
+      </section>
+
+      <section>
+        <PolicyHeading en="5. Staff access" th="5. การเข้าถึงของพนักงาน" />
+        <BiText
+          as="p"
+          en="Public visitors cannot list other people’s bookings. Staff tools at /app require a PIN login that creates a time-limited staff session. Booking, medical, emergency, passport, payment, and waiver records are then loaded through our staff API (not open database access in the browser). Access is limited to staff roles we assign (for example cashier, guide, manager, owner)."
+          th="ผู้เข้าชมทั่วไปไม่สามารถดูรายการจองของผู้อื่นได้ เครื่องมือพนักงานที่ /app ต้องล็อกอินด้วย PIN เพื่อสร้างเซสชัน มีกำหนดหมดอายุ ข้อมูลการจอง การแพทย์ ผู้ติดต่อฉุกเฉิน พาสปอร์ต การชำระ และ waiver ถูกโหลดผ่าน staff API ไม่ได้เปิดฐานข้อมูลในเบราว์เซอร์ สิทธิ์จำกัดตามบทบาทที่เรากำหนด เช่น แคชเชียร์ ไกด์ ผู้จัดการ เจ้าของ"
+        />
+      </section>
+
+      <section>
+        <PolicyHeading en="6. Photos and marketing" th="6. รูปภาพและการตลาด" />
+        <BiText
+          as="p"
+          en="Trip photos and video may include guests. Before booking, the digital waiver includes a Photo & Video Consent clause: you consent to Trip2Talk using photos/videos from the trip for marketing unless you opt out in writing before departure. To opt out, email trip2talksyd@gmail.com with your booking reference before the trip starts. Guest galleries are typically sent via Pic-Time. Marketing images may also appear on this website, our Facebook Page, and related Trip2Talk / Chapter99 channels."
+          th="รูปและวิดีโอทริปอาจมีภาพผู้ร่วมเดินทาง ก่อนจอง เอกสาร waiver มีข้อยินยอมใช้ภาพ/วิดีโอ: คุณยินยอมให้ Trip2Talk ใช้เพื่อการตลาด เว้นแต่แจ้ง opt-out เป็นลายลักษณ์อักษรก่อนเดินทาง หากไม่ต้องการให้ใช้ภาพ ส่งอีเมลไปที่ trip2talksyd@gmail.com พร้อมเลขที่การจองก่อนวันออกเดินทาง อัลบั้มลูกค้าส่งผ่าน Pic-Time เป็นหลัก ภาพการตลาดอาจปรากฏบนเว็บไซต์นี้ เพจ Facebook และช่องทาง Trip2Talk / Chapter99 ที่เกี่ยวข้อง"
+        />
+        <p className="mt-2">
+          <Link to="/waiver" className="text-teal-700 underline">
+            {lang === 'th' ? 'อ่าน waiver →' : 'Read the waiver →'}
+          </Link>
+        </p>
+      </section>
+
+      <section>
+        <PolicyHeading en="7. Storage, hosting, and processors" th="7. ที่เก็บข้อมูล ผู้ให้บริการ" />
+        <BiText
+          as="p"
+          en="Booking data is stored in Supabase (PostgreSQL) in the Sydney region (ap-southeast-2), with row-level security. The public site is hosted on Vercel. We also use Square (payments), Pic-Time (guest galleries), Meta/Facebook (inbox and Page coordination), and Google Fonts (website typefaces). Square, Pic-Time, Meta, Vercel, and Google Fonts may process data outside Australia. Those providers handle data under their own terms."
+          th="ข้อมูลการจองเก็บใน Supabase (PostgreSQL) โซนซิดนีย์ (ap-southeast-2) พร้อม RLS เว็บโฮสต์บน Vercel นอกจากนี้ใช้ Square (ชำระเงิน) Pic-Time (อัลบั้มลูกค้า) Meta/Facebook (อินบ็อกซ์และเพจ) และ Google Fonts (ฟอนต์เว็บ) Square, Pic-Time, Meta, Vercel และ Google Fonts อาจประมวลผลข้อมูลนอกออสเตรเลีย ผู้ให้บริการเหล่านี้ดำเนินการตามข้อกำหนดของตนเอง"
+        />
+      </section>
+
+      <section>
+        <PolicyHeading en="8. Cookies and analytics" th="8. คุกกี้และการวิเคราะห์" />
+        <BiText
+          as="p"
+          en="This site does not load Google Analytics, Meta Pixel, or other advertising/analytics scripts. We use essential browser storage only: language preference, waiver/confirmation session state, optional notification toggles on this device, a one-time PWA cache-clear flag, and staff session tokens after PIN login. Google Fonts may set cookies according to Google’s policies. If we add analytics later, we will add a consent banner first."
+          th="เว็บนี้ไม่ได้โหลด Google Analytics, Meta Pixel หรือสคริปต์โฆษณา/วิเคราะห์อื่น ใช้ที่เก็บในเบราว์เซอร์เท่าที่จำเป็น: ภาษา เซสชัน waiver/ยืนยันการจอง สวิตช์แจ้งเตือนบนเครื่องนี้ ธงล้างแคช PWA ครั้งเดียว และโทเคนพนักงานหลังล็อกอิน PIN Google Fonts อาจตั้งคุกกี้ตามนโยบายของ Google หากเพิ่มระบบวิเคราะห์ในภายหลัง จะมีแบนเนอร์ขอความยินยอมก่อน"
+        />
+      </section>
+
+      <section>
+        <PolicyHeading en="9. How long we keep data" th="9. เก็บข้อมูลนานเท่าใด" />
+        <BiText
+          as="p"
+          en="Financial and core booking records (invoices, payment ledger, booking identity and trip details) are kept for 5 years to meet Australian tax record-keeping. Sensitive safety fields — medical conditions, allergies, and emergency contact name and phone — are cleared 60 days after the trip end date. That automated clearing is not live in the booking system yet, so this page stays a draft until it is. Passport and flight-assist fields are not part of that 60-day wipe; ask us if you want those removed after the trip."
+          th="ข้อมูลการเงินและการจองหลัก (ใบเสร็จ สมุดชำระ ตัวตนและรายละเอียดทริป) เก็บ 5 ปีตามหน้าที่ด้านภาษีของออสเตรเลีย ข้อมูลความปลอดภัยที่อ่อนไหว — โรคประจำตัว ภูมิแพ้ ชื่อและเบอร์ผู้ติดต่อฉุกเฉิน — จะล้างภายใน 60 วันหลังวันสิ้นสุดทริป ระบบล้างอัตโนมัติยังไม่เปิดใช้ ดังนั้นหน้านี้ยังเป็นฉบับร่าง เลขพาสปอร์ตและข้อมูลช่วยจองตั๋วไม่อยู่ในชุดล้าง 60 วันนี้ หากต้องการให้ลบหลังทริป แจ้งเราได้"
+        />
+      </section>
+
+      <section>
+        <PolicyHeading en="10. Your rights" th="10. สิทธิของคุณ" />
+        <BiText
+          as="p"
+          en="You may ask us to access, correct, or delete personal information that is no longer required for the trip, tax, or safety. Use the My Trip lookup with your booking reference and email/phone, or email trip2talksyd@gmail.com. Australian Privacy Principles may apply to this small business — this notice is practical disclosure, not legal advice."
+          th="คุณขอเข้าถึง แก้ไข หรือลบข้อมูลส่วนบุคคลที่ไม่จำเป็นต่อทริป ภาษี หรือความปลอดภัยได้แล้ว ใช้หน้า My Trip ด้วยเลขที่การจองและอีเมล/เบอร์ หรืออีเมล trip2talksyd@gmail.com หลักการความเป็นส่วนตัวของออสเตรเลียอาจใช้กับธุรกิจขนาดเล็กนี้ — หน้านี้อธิบายการปฏิบัติจริง ไม่ใช่คำแนะนำทางกฎหมาย"
+        />
+      </section>
+
+      <BiText
+        as="p"
+        className="text-[11px] text-ink-soft"
+        en="Last updated: 15 August 2026 (draft)."
+        th="อัปเดตล่าสุด: 15 สิงหาคม 2026 (ฉบับร่าง)"
+      />
     </ContentPage>
   )
 }
