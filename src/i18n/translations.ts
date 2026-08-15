@@ -248,6 +248,9 @@ export type TranslationKey =
   | 'pricing.payid.title'
   | 'pricing.payid.body'
   | 'pricing.payid.account'
+  | 'pricing.card.intro'
+  | 'pricing.card.cta'
+  | 'pricing.card.fee'
   | 'pricing.cancel.title'
   | 'pricing.cancel.intro'
   | 'pricing.cancel.col.condition'
@@ -838,6 +841,10 @@ const en: Map = {
   'pricing.payid.body':
     'PayID is an instant bank-to-bank transfer in Australia — you pay from your banking app, with no extra fee from us. Send the deposit to one of the mobile PayIDs below; the account name must match exactly. Copy-and-paste details are also on the booking form.',
   'pricing.payid.account': 'Account name',
+  'pricing.card.intro': 'Prefer to pay by card? You can also pay by Visa/Mastercard.',
+  'pricing.card.cta': 'Pay by Card',
+  'pricing.card.fee':
+    'Opens the same Square card checkout as booking after you choose a trip. A 2% card fee applies — PayID has no fee.',
   'pricing.cancel.title': 'Cancellation & refund policy',
   'pricing.cancel.intro':
     'Trip2Talk takes PayID (AUD) deposits before travel. All amounts are in Australian dollars.',
@@ -1451,6 +1458,10 @@ const th: Map = {
   'pricing.payid.body':
     'PayID คือการโอนเงินระหว่างธนาคารในออสเตรเลียแบบทันที — โอนจากแอปธนาคาร ไม่มีค่าธรรมเนียมจากเรา โอนมัดจำไปที่หมายเลข PayID ด้านล่าง ชื่อบัญชีต้องตรงทุกตัวอักษร รายละเอียดสำหรับคัดลอกอยู่ที่หน้าจองด้วย',
   'pricing.payid.account': 'ชื่อบัญชี',
+  'pricing.card.intro': 'สะดวกจ่ายด้วยบัตร? จ่ายผ่าน Visa/Mastercard ได้เช่นกัน',
+  'pricing.card.cta': 'จ่ายด้วยบัตร',
+  'pricing.card.fee':
+    'เปิดฟอร์มบัตร Square เดียวกับหน้าจอง หลังจากเลือกทริป — มีค่าธรรมเนียมบัตร 2% โอน PayID ไม่มีค่าธรรมเนียม',
   'pricing.cancel.title': 'นโยบายการยกเลิกและคืนเงิน',
   'pricing.cancel.intro':
     'Trip2Talk รับชำระผ่าน PayID (AUD) โดยมัดจำก่อนเดินทาง ราคาทั้งหมดเป็นดอลลาร์ออสเตรเลีย',

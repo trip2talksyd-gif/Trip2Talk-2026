@@ -1,6 +1,7 @@
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import { setWaiverSigned } from '../../lib/waiverSession'
+import { squarePayQuerySuffix } from '../../lib/preferredPayment'
 import { insertWaiverSignature } from '../../lib/toursApi'
 import { useToast } from '../../components/ui/Toast'
 import BiText from '../../components/ui/BiText'
@@ -55,7 +56,7 @@ export default function WaiverPage() {
           console.error('[WaiverPage] failed to persist waiver signature:', err)
         }
         toast(successBi.en, 'success')
-        navigate(`/booking?trip=${tripCode}`)
+        navigate(`/booking?trip=${tripCode}${squarePayQuerySuffix()}`)
       }}
     />
   )

@@ -1,11 +1,13 @@
 import { Link } from 'react-router-dom'
-import { Check } from 'lucide-react'
+import { Check, CreditCard } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import type { TranslationKey } from '../../i18n/translations'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import BiText from '../../components/ui/BiText'
 import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
+import { AcceptedPaymentIcons } from '../../components/booking/SquareAcceptedPaymentIcons'
 import { BUSINESS_ENTITY, PAYID_OPTIONS } from '../../data/paymentDetails'
+import { preferSquareCardCheckout } from '../../lib/preferredPayment'
 
 const TIERS = [
   {
@@ -189,6 +191,41 @@ export default function PricingPage() {
             {tt('pricing.payid.account').th}: {BUSINESS_ENTITY.accountName}
           </span>
         </p>
+
+        <div className="mt-5 border-t border-dashed border-line pt-4">
+          <BiText
+            as="p"
+            en={tt('pricing.card.intro').en}
+            th={tt('pricing.card.intro').th}
+            className="text-[13px] leading-relaxed text-ink"
+            thClassName="mt-1 block font-thai text-[12px] leading-relaxed text-ink-soft"
+          />
+          <AcceptedPaymentIcons
+            brands={['visa', 'mastercard']}
+            className="mt-2"
+            label="Visa, Mastercard"
+          />
+          <Link
+            to="/trips?pay=square"
+            onClick={preferSquareCardCheckout}
+            className="mt-3 inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-line bg-white px-4 py-2.5 text-sm font-semibold text-ink shadow-sm transition-colors hover:border-teal-600/40"
+          >
+            <CreditCard className="h-4 w-4 text-teal-800" aria-hidden />
+            <span>
+              {tt('pricing.card.cta').en}
+              <span className="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft">
+                {tt('pricing.card.cta').th}
+              </span>
+            </span>
+          </Link>
+          <BiText
+            as="p"
+            en={tt('pricing.card.fee').en}
+            th={tt('pricing.card.fee').th}
+            className="mt-2 text-[11px] leading-relaxed text-ink-soft"
+            thClassName="mt-0.5 block font-thai text-[10.5px] leading-relaxed text-ink-soft/90"
+          />
+        </div>
       </section>
 
       <section>

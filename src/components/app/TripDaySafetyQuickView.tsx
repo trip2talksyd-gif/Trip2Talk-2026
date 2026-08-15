@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { Phone } from 'lucide-react'
 import type { TourBooking } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
-import BiText from '../ui/BiText'
 
 type Props = {
   bookings: TourBooking[]
@@ -66,13 +65,14 @@ export default function TripDaySafetyQuickView({
   return (
     <div className="space-y-2.5">
       <div className="flex flex-wrap items-end justify-between gap-2">
-        <BiText
-          as="h3"
-          en={title.en}
-          th={title.th}
-          className="text-xs font-semibold uppercase tracking-wider text-gold"
-          thClassName="mt-0.5 block font-thai text-[10px] font-medium text-cream-muted normal-case tracking-normal"
-        />
+        <div>
+          <h3 className="font-display text-xs font-semibold uppercase tracking-wider text-gold">
+            {title.en}
+          </h3>
+          <p lang="th" className="mt-0.5 font-serif text-[10px] font-medium text-cream-muted">
+            {title.th}
+          </p>
+        </div>
         {options.length > 0 && (
           <select
             value={filter}
