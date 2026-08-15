@@ -5,6 +5,8 @@ import {
   CalendarDays,
   CalendarPlus,
   Camera,
+  ChevronLeft,
+  ChevronRight,
   ClipboardList,
   CreditCard,
   FileCheck,
@@ -123,19 +125,47 @@ const NAV_LINKS: { to: string; label: string; icon: ReactNode; highlighted?: boo
   },
 ]
 
+function currentYearMonth() {
+  const now = new Date()
+  return { year: now.getFullYear(), month: now.getMonth() + 1 }
+}
+
+function shiftMonth(year: number, month: number, delta: number) {
+  const d = new Date(year, month - 1 + delta, 1)
+  return { year: d.getFullYear(), month: d.getMonth() + 1 }
+}
+
+function monthHeading(year: number, month: number, isCurrent: boolean) {
+  if (isCurrent) return 'This month'
+  return new Date(year, month - 1, 1).toLocaleDateString('en-AU', {
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
 export default function OwnerDashboard() {
   const navigate = useNavigate()
   const { toast } = useToast()
+  const today = currentYearMonth()
+  const [cursor, setCursor] = useState(today)
   const [bookings, setBookings] = useState<TourBooking[]>([])
   const [expenses, setExpenses] = useState<{ amount_aud: number }[]>([])
   const [items, setItems] = useState<ComplianceItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  const isCurrentMonth = cursor.year === today.year && cursor.month === today.month
+  const canNextMonth = !isCurrentMonth
+  const statsHeading = monthHeading(cursor.year, cursor.month, isCurrentMonth)
+
   const load = useCallback(() => {
     setLoading(true)
     setError('')
-    Promise.all([fetchBookingsThisMonth(), fetchExpensesThisMonth(), fetchComplianceItems()])
+    Promise.all([
+      fetchBookingsThisMonth(cursor),
+      fetchExpensesThisMonth(cursor),
+      fetchComplianceItems(),
+    ])
       .then(([b, e, c]) => {
         setBookings(b)
         setExpenses(e)
@@ -150,7 +180,7 @@ export default function OwnerDashboard() {
         setError('Could not load dashboard data')
       })
       .finally(() => setLoading(false))
-  }, [navigate])
+  }, [cursor, navigate])
 
   useEffect(() => {
     load()
@@ -225,7 +255,7 @@ export default function OwnerDashboard() {
         backTo="/app"
         backLabel="← PIN"
         title="Owner Dashboard"
-        subtitle="Ops overview · this month"
+        subtitle={`Ops overview · ${statsHeading.toLowerCase()}`}
       />
 
       <StaffMain>
@@ -279,7 +309,26 @@ export default function OwnerDashboard() {
             )}
 
             <section>
-              <StaffSectionTitle>This month</StaffSectionTitle>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  aria-label="Previous month"
+                  onClick={() => setCursor((c) => shiftMonth(c.year, c.month, -1))}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-cream-muted transition-colors hover:bg-white/10 hover:text-cream"
+                >
+                  <ChevronLeft className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+                </button>
+                <StaffSectionTitle>{statsHeading}</StaffSectionTitle>
+                <button
+                  type="button"
+                  aria-label="Next month"
+                  disabled={!canNextMonth}
+                  onClick={() => setCursor((c) => shiftMonth(c.year, c.month, 1))}
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-cream-muted transition-colors hover:bg-white/10 hover:text-cream disabled:cursor-not-allowed disabled:text-cream/20 disabled:hover:bg-transparent"
+                >
+                  <ChevronRight className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+                </button>
+              </div>
               <div className="mt-3.5 grid grid-cols-2 gap-3 sm:gap-3.5">
                 {stats.map((card) => (
                   <StaffStatCard

@@ -293,6 +293,13 @@ export type TranslationKey =
   | 'calendar.banner.sub'
   | 'calendar.empty'
   | 'calendar.moreDestinations'
+  | 'calendar.weekday.mon'
+  | 'calendar.weekday.tue'
+  | 'calendar.weekday.wed'
+  | 'calendar.weekday.thu'
+  | 'calendar.weekday.fri'
+  | 'calendar.weekday.sat'
+  | 'calendar.weekday.sun'
   | 'gallery.empty'
   | 'gallery.emptyCategory'
   | 'gallery.exampleAlbum'
@@ -889,6 +896,13 @@ const en: Map = {
   'calendar.banner.sub': 'One pro photographer guides and drives the whole way',
   'calendar.empty': 'No trips in this month',
   'calendar.moreDestinations': 'More destinations',
+  'calendar.weekday.mon': 'Mon',
+  'calendar.weekday.tue': 'Tue',
+  'calendar.weekday.wed': 'Wed',
+  'calendar.weekday.thu': 'Thu',
+  'calendar.weekday.fri': 'Fri',
+  'calendar.weekday.sat': 'Sat',
+  'calendar.weekday.sun': 'Sun',
   'gallery.empty': 'No gallery photos yet',
   'gallery.emptyCategory': 'No photos in this category',
   'gallery.exampleAlbum': 'Example album from Saen & team',
@@ -1506,6 +1520,13 @@ const th: Map = {
   'calendar.banner.sub': 'ช่างภาพหนึ่งคนเป็นทั้ง Trip Leader และคนขับตลอดทริป',
   'calendar.empty': 'ไม่มีทริปในเดือนนี้',
   'calendar.moreDestinations': 'ทริปอื่นๆ ที่น่าสนใจ',
+  'calendar.weekday.mon': 'จ.',
+  'calendar.weekday.tue': 'อ.',
+  'calendar.weekday.wed': 'พ.',
+  'calendar.weekday.thu': 'พฤ.',
+  'calendar.weekday.fri': 'ศ.',
+  'calendar.weekday.sat': 'ส.',
+  'calendar.weekday.sun': 'อา.',
   'gallery.empty': 'ยังไม่มีรูปในแกลเลอรี',
   'gallery.emptyCategory': 'ไม่มีรูปในหมวดนี้',
   'gallery.exampleAlbum': 'อัลบั้มตัวอย่างจากพี่แสนและทีม',

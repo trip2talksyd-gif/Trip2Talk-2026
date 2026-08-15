@@ -756,12 +756,33 @@ export async function verifyStaffPin(pin: string): Promise<StaffAuthResult | nul
   }
 }
 
-export async function fetchExpensesThisMonth(): Promise<Expense[]> {
-  return callStaffApi<Expense[]>('expenses_this_month')
+function localMonthBounds(year: number, month1: number) {
+  return {
+    from: new Date(year, month1 - 1, 1).toISOString(),
+    to: new Date(year, month1, 1).toISOString(),
+    year,
+    month: month1,
+  }
 }
 
-export async function fetchBookingsThisMonth(): Promise<TourBooking[]> {
-  return callStaffApi<TourBooking[]>('bookings_this_month')
+export async function fetchExpensesThisMonth(opts?: {
+  year: number
+  month: number
+}): Promise<Expense[]> {
+  const now = new Date()
+  const year = opts?.year ?? now.getFullYear()
+  const month = opts?.month ?? now.getMonth() + 1
+  return callStaffApi<Expense[]>('expenses_this_month', localMonthBounds(year, month))
+}
+
+export async function fetchBookingsThisMonth(opts?: {
+  year: number
+  month: number
+}): Promise<TourBooking[]> {
+  const now = new Date()
+  const year = opts?.year ?? now.getFullYear()
+  const month = opts?.month ?? now.getMonth() + 1
+  return callStaffApi<TourBooking[]>('bookings_this_month', localMonthBounds(year, month))
 }
 
 export async function fetchComplianceItems(): Promise<ComplianceItem[]> {

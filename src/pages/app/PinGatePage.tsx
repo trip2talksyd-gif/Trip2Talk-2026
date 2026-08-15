@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { verifyStaffPin } from '../../lib/toursApi'
 import type { StaffRole } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
@@ -132,7 +132,13 @@ export default function PinGatePage() {
       >
       <div className="liquid-glass relative w-full max-w-xs rounded-2xl p-8">
         <div className="flex flex-col items-center">
-          <BrandLogo size="xl" tone="dark" />
+          <Link
+            to="/"
+            aria-label="Home"
+            className="rounded-full transition-opacity hover:opacity-80 active:opacity-70"
+          >
+            <BrandLogo size="xl" tone="dark" decorative />
+          </Link>
           <h1 className="mt-5 font-serif text-xl text-cream">{t('pin.welcome')}</h1>
           <p className="mt-1 text-sm text-cream-muted">Enter 4-digit PIN</p>
 

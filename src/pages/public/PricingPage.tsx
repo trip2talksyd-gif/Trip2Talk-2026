@@ -5,7 +5,7 @@ import type { TranslationKey } from '../../i18n/translations'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import BiText from '../../components/ui/BiText'
 import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
-import { AcceptedPaymentIcons } from '../../components/booking/SquareAcceptedPaymentIcons'
+import SquareAcceptedPaymentIcons from '../../components/booking/SquareAcceptedPaymentIcons'
 import { BUSINESS_ENTITY, PAYID_OPTIONS } from '../../data/paymentDetails'
 import { preferSquareCardCheckout } from '../../lib/preferredPayment'
 
@@ -200,11 +200,7 @@ export default function PricingPage() {
             className="text-[13px] leading-relaxed text-ink"
             thClassName="mt-1 block font-thai text-[12px] leading-relaxed text-ink-soft"
           />
-          <AcceptedPaymentIcons
-            brands={['visa', 'mastercard']}
-            className="mt-2"
-            label="Visa, Mastercard"
-          />
+          <SquareAcceptedPaymentIcons className="mt-2" />
           <Link
             to="/trips?pay=square"
             onClick={preferSquareCardCheckout}

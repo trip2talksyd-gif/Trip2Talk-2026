@@ -1,4 +1,6 @@
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useLocation, useNavigate, useNavigationType } from 'react-router-dom'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
@@ -42,6 +44,48 @@ export const staffTabActiveClass =
 export const staffTabIdleClass =
   'rounded-full bg-white/10 px-2.5 py-1 text-[11px] font-medium text-cream-muted transition-colors hover:bg-white/15'
 
+function StaffHistoryNav() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const navType = useNavigationType()
+  const idx = typeof window !== 'undefined' ? Number(window.history.state?.idx ?? 0) : 0
+  const [maxIdx, setMaxIdx] = useState(idx)
+
+  useEffect(() => {
+    if (navType === 'PUSH' || navType === 'REPLACE') {
+      setMaxIdx(idx)
+    } else {
+      setMaxIdx((prev) => Math.max(prev, idx))
+    }
+  }, [idx, location.key, navType])
+
+  const canBack = idx > 0
+  const canForward = idx < maxIdx
+
+  return (
+    <div className="flex items-center gap-0.5" role="group" aria-label="Page history">
+      <button
+        type="button"
+        disabled={!canBack}
+        onClick={() => navigate(-1)}
+        aria-label="Back"
+        className="flex h-8 w-8 items-center justify-center rounded-full text-cream transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:text-cream/25 disabled:hover:bg-transparent"
+      >
+        <ChevronLeft className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+      </button>
+      <button
+        type="button"
+        disabled={!canForward}
+        onClick={() => navigate(1)}
+        aria-label="Forward"
+        className="flex h-8 w-8 items-center justify-center rounded-full text-cream transition-colors hover:bg-white/10 disabled:cursor-not-allowed disabled:text-cream/25 disabled:hover:bg-transparent"
+      >
+        <ChevronRight className="h-4 w-4" strokeWidth={2.25} aria-hidden />
+      </button>
+    </div>
+  )
+}
+
 export function StaffPageHeader({
   backTo,
   backLabel,
@@ -67,12 +111,15 @@ export function StaffPageHeader({
           <Link to="/app" className="min-w-0" aria-label="Trip2Talk staff home">
             <BrandLogo size="sm" tone="dark" withWordmark decorative wordmarkClassName="text-cream" />
           </Link>
-          <Link
-            to={backTo}
-            className="shrink-0 text-sm font-medium text-teal-500 transition-colors hover:text-teal-400"
-          >
-            {backLabel}
-          </Link>
+          <div className="flex shrink-0 items-center gap-1.5">
+            <StaffHistoryNav />
+            <Link
+              to={backTo}
+              className="text-sm font-medium text-teal-500 transition-colors hover:text-teal-400"
+            >
+              {backLabel}
+            </Link>
+          </div>
         </div>
         <h1 className="mt-0.5 font-serif text-2xl font-semibold tracking-tight text-cream sm:text-[1.65rem]">
           {title}

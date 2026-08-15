@@ -62,6 +62,26 @@ function addCalendarDays(ymd: string, days: number): string {
   return dt.toISOString().slice(0, 10)
 }
 
+function isIsoInstant(s: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s) && !Number.isNaN(Date.parse(s))
+}
+
+/** Closed month window. Prefers client `from`/`to` (local calendar); else UTC current month. */
+function monthRangeFromParams(params: Record<string, unknown>): { from: string; to: string } {
+  const from = typeof params.from === 'string' ? params.from : ''
+  const to = typeof params.to === 'string' ? params.to : ''
+  if (isIsoInstant(from) && isIsoInstant(to) && from < to) {
+    return { from, to }
+  }
+  const now = new Date()
+  const y = now.getUTCFullYear()
+  const m = now.getUTCMonth()
+  return {
+    from: new Date(Date.UTC(y, m, 1)).toISOString(),
+    to: new Date(Date.UTC(y, m + 1, 1)).toISOString(),
+  }
+}
+
 type ContentTargetAccount =
   | 'trip2talk_page'
   | 'chapter99_page'
@@ -629,25 +649,23 @@ Deno.serve(async (req) => {
       }
 
       case 'bookings_this_month': {
-        const start = new Date()
-        start.setDate(1)
-        start.setHours(0, 0, 0, 0)
+        const { from, to } = monthRangeFromParams(params as Record<string, unknown>)
         const { data, error } = await admin
           .from('tour_bookings')
           .select('*')
-          .gte('booked_at', start.toISOString())
+          .gte('booked_at', from)
+          .lt('booked_at', to)
         if (error) throw error
         return json({ data })
       }
 
       case 'expenses_this_month': {
-        const start = new Date()
-        start.setDate(1)
-        start.setHours(0, 0, 0, 0)
+        const { from, to } = monthRangeFromParams(params as Record<string, unknown>)
         const { data, error } = await admin
           .from('expenses')
           .select('*')
-          .gte('created_at', start.toISOString())
+          .gte('created_at', from)
+          .lt('created_at', to)
         if (error) throw error
         return json({ data })
       }

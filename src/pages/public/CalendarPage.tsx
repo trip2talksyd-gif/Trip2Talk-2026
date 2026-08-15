@@ -1,20 +1,18 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
 import { Camera } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
-import { fetchConfirmedTours, formatDate, seatsRemaining } from '../../lib/toursApi'
-import { tourDestinationLabel, tourDurationLabel } from '../../lib/tourDisplay'
+import { fetchConfirmedTours } from '../../lib/toursApi'
 import type { Tour } from '../../types/tour'
 import { PageError } from '../../components/ui/PageError'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import TripFilmstrip from '../../components/trips/TripFilmstrip'
-import BiText from '../../components/ui/BiText'
+import CalendarHero from '../../components/calendar/CalendarHero'
+import CalendarMonthGrid, { departureIso } from '../../components/calendar/CalendarMonthGrid'
+import CalendarMonthTripList from '../../components/calendar/CalendarMonthTripList'
 
 function monthKey(iso: string | null | undefined): string | null {
-  if (!iso) return null
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return null
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  const day = departureIso(iso)
+  return day ? day.slice(0, 7) : null
 }
 
 function monthLabel(key: string): string {
@@ -24,16 +22,6 @@ function monthLabel(key: string): string {
     month: 'short',
     year: 'numeric',
   })
-}
-
-function dayParts(iso: string | null | undefined) {
-  if (!iso) return { day: '—', mon: '' }
-  const d = new Date(iso)
-  if (Number.isNaN(d.getTime())) return { day: '—', mon: '' }
-  return {
-    day: String(d.getDate()).padStart(2, '0'),
-    mon: d.toLocaleDateString('en-AU', { month: 'short' }),
-  }
 }
 
 export default function CalendarPage() {
@@ -96,35 +84,26 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4 pb-4">
-      {/* .cal-top — title + month chips share the white bar */}
-      <header className="-mx-4 border-b border-line bg-card px-4 pb-3 pt-2 sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border lg:px-5">
-        <BiText
-          as="h1"
-          en={title.en}
-          th={title.th}
-          serif
-          className="text-[17px] text-ink sm:text-2xl"
-          thClassName="mt-px block font-thai text-[11px] font-medium text-ink-soft sm:text-[13px]"
-        />
-        {months.length > 0 && (
-          <div className="hide-scrollbar mt-3 flex gap-2 overflow-x-auto">
-            {months.map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => setActiveMonth(m)}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-[10.5px] font-bold transition-colors ${
-                  activeMonth === m
-                    ? 'bg-gradient-to-b from-teal-500 to-teal-800 text-cream'
-                    : 'bg-mint-100 text-teal-700'
-                }`}
-              >
-                {monthLabel(m)}
-              </button>
-            ))}
-          </div>
-        )}
-      </header>
+      <CalendarHero titleEn={title.en} titleTh={title.th} />
+
+      {months.length > 0 && (
+        <div className="hide-scrollbar flex gap-2 overflow-x-auto">
+          {months.map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setActiveMonth(m)}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-[10.5px] font-bold transition-colors ${
+                activeMonth === m
+                  ? 'bg-gradient-to-b from-teal-500 to-teal-800 text-cream'
+                  : 'bg-mint-100 text-teal-700'
+              }`}
+            >
+              {monthLabel(m)}
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-br from-teal-900 to-teal-700 px-3.5 py-[13px] text-cream">
         <Camera className="h-5 w-5 shrink-0 text-teal-400" strokeWidth={2} />
@@ -148,57 +127,18 @@ export default function CalendarPage() {
 
       {!loading && !error && (
         <>
-          <ul className="space-y-2.5">
-            {filtered.map((tour) => {
-              const seats = seatsRemaining(tour)
-              const parts = dayParts(tour.departure_date)
-              const destEn = tourDestinationLabel(tour.trip_code, 'en')
-              const destTh = tourDestinationLabel(tour.trip_code, 'th')
-              return (
-                <li key={tour.id}>
-                  <Link
-                    to={`/trips/${tour.trip_code}`}
-                    className="flex items-center gap-2.5 rounded-[14px] border border-line bg-card p-[9px] transition-colors hover:border-teal-500/40"
-                  >
-                    <div className="flex h-11 w-11 shrink-0 flex-col items-center justify-center rounded-[10px] bg-mint-100 text-teal-800">
-                      <span className="text-sm font-bold leading-none">{parts.day}</span>
-                      <span className="text-[7.5px] font-bold uppercase">{parts.mon}</span>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-xs font-semibold text-ink">
-                        {tour.name_en}
-                        <span className="ml-1 font-thai text-[10px] font-medium text-ink-soft">
-                          {tour.name_th}
-                        </span>
-                      </p>
-                      <p className="truncate text-[9.5px] text-ink-soft">
-                        {tourDurationLabel(tour, 'en')} · {destEn}
-                        {tour.departure_date ? ` · ${formatDate(tour.departure_date, 'en')}` : ''}
-                      </p>
-                      <p className="truncate font-thai text-[8.5px] text-ink-soft/80">
-                        {tourDurationLabel(tour, 'th')} · {destTh}
-                        {tour.departure_date ? ` · ${formatDate(tour.departure_date, 'th')}` : ''}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-right text-[9px] font-bold text-coral">
-                      {seats === 0 ? seatsFullBi.en : `${seats} ${seatsLeftBi.en}`}
-                      <span className="mt-0.5 block font-thai text-[8px] font-medium opacity-85">
-                        {seats === 0 ? seatsFullBi.th : `${seatsLeftBi.th} ${seats}`}
-                      </span>
-                    </span>
-                  </Link>
-                </li>
-              )
-            })}
-            {filtered.length === 0 && (
-              <p className="py-6 text-center text-sm text-ink-soft">
-                {emptyBi.en}
-                <span className="mt-0.5 block font-thai text-xs text-ink-soft/85">
-                  {emptyBi.th}
-                </span>
-              </p>
-            )}
-          </ul>
+          {activeMonth !== 'all' && (
+            <CalendarMonthGrid monthKey={activeMonth} tours={upcomingTours} />
+          )}
+          <CalendarMonthTripList
+            tours={filtered}
+            emptyEn={emptyBi.en}
+            emptyTh={emptyBi.th}
+            seatsLeftEn={seatsLeftBi.en}
+            seatsLeftTh={seatsLeftBi.th}
+            seatsFullEn={seatsFullBi.en}
+            seatsFullTh={seatsFullBi.th}
+          />
 
           <TripFilmstrip
             tours={upcomingTours}
