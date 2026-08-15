@@ -19,6 +19,9 @@ dist-ssr
 # Staff PIN seed (placeholder or real PINs) — run manually in SQL Editor only
 supabase/seed/staff_profiles_seed.sql
 
+# One-off local ops (lockout PIN reset, etc.) — never commit
+scripts/one-off/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -29,6 +32,12 @@ supabase/seed/staff_profiles_seed.sql
 *.njsproj
 *.sln
 *.sw?
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
 
 .vercel
 .cursor/

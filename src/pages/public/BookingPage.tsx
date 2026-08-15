@@ -96,6 +96,8 @@ export default function BookingPage() {
   const [squareCardReady, setSquareCardReady] = useState(false)
   const [squareBookingRef, setSquareBookingRef] = useState('')
   const [installmentPlan, setInstallmentPlan] = useState<1 | 2 | 4>(1)
+  const [payIdAmountKind, setPayIdAmountKind] = useState<'deposit' | 'custom'>('deposit')
+  const [payIdCustomRaw, setPayIdCustomRaw] = useState('')
 
   const [form, setForm] = useState<FormState>(() => {
     const session = tripCode ? getWaiverSession(tripCode) : null
@@ -429,6 +431,23 @@ export default function BookingPage() {
   ]
 
   const depositDue = tour.deposit_aud
+  const payIdCustomParsed = (() => {
+    const trimmed = payIdCustomRaw.trim()
+    if (!trimmed) return null
+    if (!/^-?\d+(\.\d{1,2})?$/.test(trimmed)) return null
+    const n = Number(trimmed)
+    if (!Number.isFinite(n)) return null
+    return Math.round(n * 100) / 100
+  })()
+  const payIdTransferAud =
+    payIdAmountKind === 'custom'
+      ? payIdCustomParsed != null && payIdCustomParsed > 0
+        ? payIdCustomParsed
+        : undefined
+      : depositDue
+  const payIdCustomWarning =
+    payIdAmountKind === 'custom' &&
+    (payIdCustomParsed == null || payIdCustomParsed <= 0)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3.5 pb-4" noValidate>
@@ -652,7 +671,80 @@ export default function BookingPage() {
 
       {paymentChoice === 'payid' && (
         <>
-          <PayIdDepositPanel variant="booking" />
+          <fieldset className="space-y-2 rounded-xl border border-line bg-white p-3">
+            <legend className="px-1 text-[11px] font-bold text-ink">
+              {lang === 'th' ? 'ยอดโอน PayID' : 'PayID amount'}
+            </legend>
+            <label
+              className={`flex cursor-pointer items-start gap-2 rounded-[10px] border px-3 py-2 ${
+                payIdAmountKind === 'deposit' ? 'border-teal-600 bg-mint-100' : 'border-line'
+              }`}
+            >
+              <input
+                type="radio"
+                name="t2t-payid-amount"
+                checked={payIdAmountKind === 'deposit'}
+                onChange={() => setPayIdAmountKind('deposit')}
+                className="mt-0.5 accent-teal-700"
+              />
+              <span className="text-[11px] font-semibold text-ink">
+                {lang === 'th'
+                  ? `มัดจำมาตรฐาน — ${formatAud(depositDue)} AUD`
+                  : `Standard Deposit — ${formatAud(depositDue)} AUD`}
+              </span>
+            </label>
+            <label
+              className={`flex cursor-pointer items-start gap-2 rounded-[10px] border px-3 py-2 ${
+                payIdAmountKind === 'custom' ? 'border-teal-600 bg-mint-100' : 'border-line'
+              }`}
+            >
+              <input
+                type="radio"
+                name="t2t-payid-amount"
+                checked={payIdAmountKind === 'custom'}
+                onChange={() => setPayIdAmountKind('custom')}
+                className="mt-0.5 accent-teal-700"
+              />
+              <span className="min-w-0 flex-1">
+                <span className="block text-[11px] font-semibold text-ink">
+                  {lang === 'th' ? 'ยอดกำหนดเอง' : 'Custom Amount'}
+                </span>
+                <span className="mt-0.5 block text-[10px] leading-snug text-ink-soft">
+                  {lang === 'th'
+                    ? 'กรอกยอดที่ตกลงกับผู้จัดทริป — โอน PayID ไม่มีค่าธรรมเนียมบัตร'
+                    : 'Enter the amount agreed with your trip organizer'}
+                </span>
+                {payIdAmountKind === 'custom' && (
+                  <span className="mt-2 flex items-center gap-2">
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      step="0.01"
+                      value={payIdCustomRaw}
+                      onChange={(e) => setPayIdCustomRaw(e.target.value)}
+                      className="w-full rounded-lg border border-line px-2 py-1.5 text-[12px] text-ink"
+                      placeholder="0.00"
+                      aria-label={
+                        lang === 'th'
+                          ? 'ยอดที่ตกลงกับผู้จัดทริป'
+                          : 'Amount agreed with your trip organizer'
+                      }
+                    />
+                    <span className="shrink-0 text-[11px] font-semibold text-ink-soft">AUD</span>
+                  </span>
+                )}
+              </span>
+            </label>
+            {payIdCustomWarning && (
+              <p className="text-[10.5px] leading-relaxed text-[#7a5b16]" role="status">
+                {lang === 'th'
+                  ? 'ยอดนี้เป็น 0 หรือติดลบ — ตรวจกับผู้จัดทริปก่อนโอน (ยังจองที่นั่งได้)'
+                  : 'This amount is $0 or negative. Confirm with your trip organizer before transferring (you can still submit the booking).'}
+              </p>
+            )}
+          </fieldset>
+
+          <PayIdDepositPanel variant="booking" amountAud={payIdTransferAud} />
 
           <label className="mt-1 block cursor-pointer rounded-[12px] border-[1.5px] border-dashed border-line bg-white p-4 text-center text-[11.5px] text-ink-soft">
             {t('booking.uploadSlip')}
@@ -678,8 +770,13 @@ export default function BookingPage() {
       {paymentChoice === 'square' && squareCardReady && tour && (
         <SquareCardElement
           amountAud={depositDue}
+          depositAud={tour.deposit_aud}
+          listedPriceAud={tour.price_aud}
+          alreadyPaidAud={0}
+          showAmountOptions
           bookingReference={squareBookingRef}
           email={form.email.trim()}
+          phone={form.phone.trim()}
           givenName={form.first_name_en.trim()}
           familyName={form.last_name_en.trim()}
           onPaid={() => {
@@ -701,11 +798,11 @@ export default function BookingPage() {
             ? t('common.loading')
             : paymentChoice === 'square'
               ? lang === 'th'
-                ? `จองที่นั่งแล้วชำระบัตร ${formatAud(depositDue)}`
-                : `Reserve & pay card — ${formatAud(depositDue)}`
+                ? `จองที่นั่งแล้วชำระบัตร`
+                : `Reserve & pay card`
               : lang === 'th'
-                ? `ชำระมัดจำ ${formatAud(depositDue)}`
-                : `Pay Deposit — ${formatAud(depositDue)}`}
+                ? `ชำระ ${formatAud(payIdTransferAud ?? depositDue)}`
+                : `Pay ${formatAud(payIdTransferAud ?? depositDue)}`}
         </button>
       </div>
       )}

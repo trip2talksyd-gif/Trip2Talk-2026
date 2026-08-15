@@ -1,5 +1,6 @@
 import { useLang } from '../../hooks/useLang'
-import { GALLERY_PHOTOS, photoSrc } from '../../data/galleryPhotos'
+import { GALLERY_PHOTOS, photoImageAttrs } from '../../data/galleryPhotos'
+import { STORAGE_SIZES } from '../../lib/storageImage'
 import type { TranslationKey } from '../../i18n/translations'
 
 /** Chamfered/angular card — top-left & bottom-right cuts (founders stat card spec). */
@@ -53,7 +54,7 @@ function StatCard({
     >
       {photo && (
         <img
-          src={photoSrc(photo)}
+          {...photoImageAttrs(photo, 'hero', STORAGE_SIZES.third)}
           alt=""
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"

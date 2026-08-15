@@ -161,7 +161,7 @@ export function PrivacyPage() {
             Flight-assist fields when you opt in (legal name, DOB, passport number, nationality) —
             treated as sensitive
           </li>
-          <li>Payment records: amounts, method, slips, tax invoice metadata</li>
+          <li>Payment records: amounts, method (PayID or Square card/Afterpay), slips, tax invoice metadata</li>
           <li>Waiver signatures and staff-assisted authorization notes when applicable</li>
           <li>Waitlist name/phone/email if a trip is full</li>
         </ul>
@@ -186,14 +186,15 @@ export function PrivacyPage() {
         <h2 className="font-serif text-lg text-ink">4. Storage & security</h2>
         <p>
           Data is stored in Supabase (PostgreSQL) with row-level security; staff tools access
-          bookings via authenticated Edge Functions. Hosting for the website is on Vercel. We aim to
-          keep project infrastructure in regions suitable for Australian operations; confirm the live
-          Supabase project region in the dashboard. Sensitive fields (passport, medical, emergency
-          contact) follow the same restricted staff-access pattern as other compliance documents in
-          this app.
+          bookings via authenticated Edge Functions. Hosting for the website is on Vercel. The live
+          Supabase project is in Sydney (ap-southeast-2). Sensitive fields (passport, medical,
+          emergency contact) follow the same restricted staff-access pattern as other compliance
+          documents in this app. Trip photo galleries are delivered via Pic-Time, a third-party
+          gallery service.
         </p>
         <p className="font-thai text-ink-soft">
-          เก็บใน Supabase พร้อม RLS; พนักงานเข้าถึงผ่าน Edge Function เว็บโฮสต์บน Vercel ข้อมูลอ่อนไหวจำกัดเฉพาะพนักงานที่ล็อกอิน
+          เก็บใน Supabase ที่ซิดนีย์ (ap-southeast-2) พร้อม RLS; พนักงานเข้าถึงผ่าน Edge Function
+          เว็บโฮสต์บน Vercel ข้อมูลอ่อนไหวจำกัดเฉพาะพนักงานที่ล็อกอิน ส่งอัลบั้มรูปทริปผ่าน Pic-Time
         </p>
       </section>
 

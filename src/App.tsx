@@ -14,6 +14,8 @@ import SpotDetailPage from './pages/public/SpotDetailPage'
 import SpotsPage from './pages/public/SpotsPage'
 import ExperiencePage from './pages/public/ExperiencePage'
 import WaiverPage from './pages/public/WaiverPage'
+import CustomerWaiverPage from './pages/public/CustomerWaiverPage'
+import CustomerExtensionQuotePage from './pages/public/CustomerExtensionQuotePage'
 import BookingPage from './pages/public/BookingPage'
 import WaitlistPage from './pages/public/WaitlistPage'
 import FavoritesPage from './pages/public/FavoritesPage'
@@ -75,7 +77,9 @@ export default function App() {
           <Route path="gallery" element={<GalleryPage />} />
           <Route path="pricing" element={<PricingPage />} />
           <Route path="about" element={<AboutPage />} />
+          <Route path="waiver/:token" element={<CustomerWaiverPage />} />
           <Route path="waiver" element={<WaiverPage />} />
+          <Route path="quote/:token" element={<CustomerExtensionQuotePage />} />
           <Route path="booking" element={<BookingPage />} />
           <Route path="booking/confirmation" element={<ConfirmationSummaryPage />} />
           <Route path="waitlist" element={<WaitlistPage />} />

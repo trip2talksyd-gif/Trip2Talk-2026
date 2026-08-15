@@ -8,6 +8,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { badgeForSpot } from '../../lib/photoSpotsApi'
+import { storageImageAttrs, STORAGE_SIZES } from '../../lib/storageImage'
 
 type SpotLike = {
   categories: string[]
@@ -74,23 +75,33 @@ export default function SpotMedia({
   iconSize = 'md',
   showBadge = false,
   alt,
+  variant = 'thumb',
 }: {
   spot: SpotLike
   className?: string
   iconSize?: 'sm' | 'md' | 'lg'
   showBadge?: boolean
   alt?: string
+  /** `wide` = full-bleed cards/heroes with srcset; `thumb` = small tiles. */
+  variant?: 'thumb' | 'wide'
 }) {
-  const src = spot.thumbSrc ?? spot.heroSrc
+  const raw = variant === 'wide' ? (spot.heroSrc ?? spot.thumbSrc) : (spot.thumbSrc ?? spot.heroSrc)
+  const attrs = raw
+    ? variant === 'wide'
+      ? storageImageAttrs(raw, 'hero', STORAGE_SIZES.hero)
+      : { src: raw, srcSet: undefined, sizes: undefined }
+    : null
   const { Icon, gradient, iconClass } = visualForSpot(spot)
   const iconCls =
     iconSize === 'sm' ? 'h-6 w-6' : iconSize === 'lg' ? 'h-10 w-10' : 'h-8 w-8'
 
   return (
     <div className={`relative overflow-hidden bg-teal-soft ${className}`}>
-      {src ? (
+      {attrs?.src ? (
         <img
-          src={src}
+          src={attrs.src}
+          srcSet={attrs.srcSet}
+          sizes={attrs.sizes}
           alt={alt ?? `${spot.title_en} / ${spot.title_th}`}
           className="h-full w-full object-cover"
           loading="lazy"

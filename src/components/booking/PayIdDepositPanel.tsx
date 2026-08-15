@@ -11,9 +11,18 @@ import { useLang } from '../../hooks/useLang'
 type Props = {
   /** Compact for booking form; full for Payment Methods page */
   variant?: 'booking' | 'page'
+  /** When set, copy/headings refer to this amount (extension quotes). */
+  amountAud?: number
+  paymentReference?: string | null
+  purpose?: 'deposit' | 'extension'
 }
 
-export default function PayIdDepositPanel({ variant = 'booking' }: Props) {
+export default function PayIdDepositPanel({
+  variant = 'booking',
+  amountAud,
+  paymentReference,
+  purpose = 'deposit',
+}: Props) {
   const { lang } = useLang()
   const [selected, setSelected] = useState<PayIdOption>(DEFAULT_PAYID)
   const [copied, setCopied] = useState(false)
@@ -36,21 +45,46 @@ export default function PayIdDepositPanel({ variant = 'booking' }: Props) {
 
   return (
     <section
+      id={isPage ? 'payid' : undefined}
       className={
         isPage
-          ? 'space-y-4'
+          ? 'scroll-mt-24 space-y-4'
           : 'rounded-xl border border-line bg-white p-4'
       }
     >
       <div className={isPage ? '' : ''}>
         <h2 className={`font-semibold text-ink ${isPage ? 'font-serif text-lg' : 'text-sm'}`}>
-          {lang === 'th' ? 'โอนมัดจำผ่าน PayID' : 'Pay deposit via PayID'}
+          {purpose === 'extension'
+            ? lang === 'th'
+              ? 'โอนตามใบเสนอราคาผ่าน PayID'
+              : 'Pay quotation via PayID'
+            : lang === 'th'
+              ? 'โอนมัดจำผ่าน PayID'
+              : 'Pay deposit via PayID'}
         </h2>
         <p className="mt-1 text-[11px] leading-relaxed text-ink-soft">
-          {lang === 'th'
-            ? 'เลือก PayID ด้านล่าง → โอนในแอปธนาคาร → อัปโหลดสลิปเพื่อยืนยันที่นั่ง'
-            : 'Pick a PayID below → transfer in your banking app → upload the slip to secure your seat.'}
+          {purpose === 'extension'
+            ? lang === 'th'
+              ? 'เลือก PayID ด้านล่าง → โอนยอดเต็มตามใบเสนอราคาในแอปธนาคาร → ส่งสลิปให้ Trip2Talk'
+              : 'Pick a PayID below → transfer the FULL quoted amount in your banking app → send the slip to Trip2Talk.'
+            : lang === 'th'
+              ? 'เลือก PayID ด้านล่าง → โอนในแอปธนาคาร → อัปโหลดสลิปเพื่อยืนยันที่นั่ง'
+              : 'Pick a PayID below → transfer in your banking app → upload the slip to secure your seat.'}
         </p>
+        {(amountAud != null && amountAud > 0) || paymentReference ? (
+          <p className="mt-2 rounded-lg bg-mint-100 px-3 py-2 text-[12px] font-semibold text-teal-900">
+            {amountAud != null && amountAud > 0
+              ? lang === 'th'
+                ? `ยอดที่ต้องโอน: A$${amountAud.toFixed(2)}`
+                : `Amount to transfer: A$${amountAud.toFixed(2)}`
+              : null}
+            {paymentReference ? (
+              <span className="mt-0.5 block font-mono text-[11px] font-medium">
+                {lang === 'th' ? 'อ้างอิง' : 'Reference'}: {paymentReference}
+              </span>
+            ) : null}
+          </p>
+        ) : null}
       </div>
 
       <div className="mt-3 space-y-2">

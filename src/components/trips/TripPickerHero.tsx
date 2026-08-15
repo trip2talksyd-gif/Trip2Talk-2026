@@ -9,6 +9,7 @@ import {
 } from '../../lib/tourDisplay'
 import { formatAud, seatsRemaining } from '../../lib/toursApi'
 import { getPreviewPhotoForTrip, photoThumbSrc } from '../../data/galleryPhotos'
+import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 import BiDisplayHeading from '../ui/BiDisplayHeading'
 import TripCoverImage from './TripCoverImage'
 
@@ -23,7 +24,7 @@ function tripBgSrc(tour: Tour): string {
   if (preview) {
     return photoThumbSrc(preview, { width: 1200, quality: 70, format: 'webp' })
   }
-  return tour.cover_image_url || ''
+  return storageImageSrc(tour.cover_image_url, STORAGE_IMG.hero)
 }
 
 function tripThumbSrc(tour: Tour): string {
@@ -31,7 +32,7 @@ function tripThumbSrc(tour: Tour): string {
   if (preview) {
     return photoThumbSrc(preview, { width: 160, quality: 68, format: 'webp' })
   }
-  return tour.cover_image_url || ''
+  return storageImageSrc(tour.cover_image_url, STORAGE_IMG.thumb)
 }
 
 /**
@@ -93,6 +94,7 @@ export default function TripPickerHero({ tours }: Props) {
             <TripCoverImage
               src={src}
               alt=""
+              size="hero"
               className="h-full w-full object-cover"
               loading={i === 0 ? 'eager' : 'lazy'}
             />

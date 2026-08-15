@@ -13,6 +13,7 @@ import type {
   Tour,
   TourBooking,
   TourStatus,
+  TripExtensionQuote,
   WaiverSignature,
   WaitlistEntry,
 } from '../types/tour'
@@ -458,6 +459,78 @@ export async function submitPublicWaiver(input: {
 
 export async function issueWaiverLink(bookingId: string): Promise<{ token: string; path: string }> {
   return callStaffApi<{ token: string; path: string }>('issue_waiver_link', { bookingId })
+}
+
+export type PublicExtensionQuoteLookup = {
+  status: 'pending' | 'paid' | 'expired' | 'cancelled'
+  extra_days: number
+  price_difference_aud: number
+  quote_note: string
+  payment_deadline: string
+  paid_at: string | null
+  payment_method: string | null
+  payable: boolean
+  trip_code: string
+  trip_name_en: string | null
+  trip_name_th: string | null
+  duration_days: number | null
+  extra_days_paid: number
+  booking_reference: string | null
+  first_name_en: string
+  last_name_en: string
+}
+
+async function callPublicExtensionQuote(body: Record<string, unknown>): Promise<Response> {
+  return fetch(`${supabaseConfig.url}/functions/v1/public-extension-quote`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseConfig.anonKey,
+      Authorization: `Bearer ${supabaseConfig.anonKey}`,
+    },
+    body: JSON.stringify(body),
+  })
+}
+
+export async function lookupPublicExtensionQuote(token: string): Promise<PublicExtensionQuoteLookup> {
+  const res = await callPublicExtensionQuote({ action: 'lookup', token })
+  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>
+  if (res.status === 404) throw new Error('not_found')
+  if (res.status === 410) throw new Error('booking_cancelled')
+  if (!res.ok) throw new Error(typeof body.error === 'string' ? body.error : 'lookup_failed')
+  return body as unknown as PublicExtensionQuoteLookup
+}
+
+export async function listExtensionQuotes(params: {
+  bookingId?: string
+  tourId?: string
+  bookingIds?: string[]
+}): Promise<TripExtensionQuote[]> {
+  return callStaffApi<TripExtensionQuote[]>('list_extension_quotes', params)
+}
+
+export async function createExtensionQuote(input: {
+  bookingId: string
+  extraDays: number
+  priceDifferenceAud: number
+  quoteNote: string
+  paymentDeadline?: string | null
+}): Promise<TripExtensionQuote & { token: string; path: string }> {
+  return callStaffApi<TripExtensionQuote & { token: string; path: string }>(
+    'create_extension_quote',
+    input,
+  )
+}
+
+export async function cancelExtensionQuote(quoteId: string): Promise<{ id: string; status: string }> {
+  return callStaffApi<{ id: string; status: string }>('cancel_extension_quote', { quoteId })
+}
+
+export async function markExtensionQuotePaid(
+  quoteId: string,
+  paymentMethod = 'payid',
+): Promise<unknown> {
+  return callStaffApi('mark_extension_quote_paid', { quoteId, paymentMethod })
 }
 
 export type WaiverRecordPayload = {
@@ -1436,6 +1509,7 @@ export async function uploadContentPhoto(file: File): Promise<string> {
   const { error } = await supabase.storage.from('content-photos').upload(path, file, {
     upsert: false,
     contentType: file.type || `image/${ext}`,
+    cacheControl: '31536000',
   })
   if (error) {
     logSupabaseError('uploadContentPhoto', error)
@@ -1454,12 +1528,14 @@ export type SquareCheckoutResult = {
   booking_reference: string
 }
 
-/** Creates a Square hosted Payment Link for a booking deposit (card / Afterpay). */
+/** Creates a Square hosted Payment Link (Afterpay/Clearpay — no card surcharge). */
 export async function createSquareCheckout(input: {
-  booking_reference: string
+  booking_reference?: string
+  quote_token?: string
   buyer_email?: string
   buyer_phone?: string
   redirect_base?: string
+  amount_kind?: 'deposit' | 'full'
 }): Promise<SquareCheckoutResult> {
   const res = await fetch(`${supabaseConfig.url}/functions/v1/square-create-checkout`, {
     method: 'POST',
@@ -1470,9 +1546,11 @@ export async function createSquareCheckout(input: {
     },
     body: JSON.stringify({
       booking_reference: input.booking_reference,
+      quote_token: input.quote_token,
       buyer_email: input.buyer_email,
       buyer_phone: input.buyer_phone,
       redirect_base: input.redirect_base ?? window.location.origin,
+      amount_kind: input.amount_kind,
     }),
   })
 
@@ -1536,10 +1614,12 @@ export type SquareCardChargeResult = {
 
 /** Charges a Web Payments SDK card token via square-create-payment (server-side). */
 export async function chargeSquareCardToken(input: {
-  booking_reference: string
+  booking_reference?: string
+  quote_token?: string
   source_id: string
   buyer_email?: string
   verification_token?: string
+  amount_kind?: 'deposit' | 'full'
 }): Promise<SquareCardChargeResult> {
   const res = await fetch(`${supabaseConfig.url}/functions/v1/square-create-payment`, {
     method: 'POST',
@@ -1550,9 +1630,11 @@ export async function chargeSquareCardToken(input: {
     },
     body: JSON.stringify({
       booking_reference: input.booking_reference,
+      quote_token: input.quote_token,
       source_id: input.source_id,
       buyer_email: input.buyer_email,
       verification_token: input.verification_token,
+      amount_kind: input.amount_kind,
     }),
   })
   const body = await res.json().catch(() => ({}))

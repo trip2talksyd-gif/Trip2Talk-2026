@@ -36,6 +36,10 @@ import CancelBookingDialog from '../../components/app/CancelBookingDialog'
 import ArchiveTourDialog from '../../components/app/ArchiveTourDialog'
 import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
 import TripDaySafetyQuickView from '../../components/app/TripDaySafetyQuickView'
+import PaymentReconciliationBanner from '../../components/app/PaymentReconciliationBanner'
+import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
+import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
+import StaffWaiverRecordButton from '../../components/app/StaffWaiverRecordButton'
 import {
   StaffActionChip,
   StaffButton,
@@ -51,6 +55,7 @@ type TourListTab = 'upcoming' | 'archived'
 
 const CAN_CANCEL_ROLES = new Set(['OWNER', 'MANAGER', 'CASHIER'])
 const CAN_ADMIN_LIST_ROLES = new Set(['OWNER', 'MANAGER'])
+const CAN_ISSUE_QUOTE_ROLES = new Set(['OWNER', 'MANAGER'])
 
 /** Destination-themed accent for tour cards (dark staff shell). */
 function tripTheme(tripCode: string): { bar: string; iconBg: string; Icon: typeof Camera } {
@@ -116,6 +121,7 @@ export default function StaffDashboard() {
   const canCancel = staffRole ? CAN_CANCEL_ROLES.has(staffRole) : false
   const isOwner = staffRole === 'OWNER'
   const canAdminList = staffRole ? CAN_ADMIN_LIST_ROLES.has(staffRole) : false
+  const canIssueQuote = staffRole ? CAN_ISSUE_QUOTE_ROLES.has(staffRole) : false
 
   // Inline "แก้ไข" flow for fixing a typo'd name/phone/email on a booking —
   // does not touch payment status, so it's safe to edit anytime, then
@@ -338,6 +344,7 @@ export default function StaffDashboard() {
       </StaffPageHeader>
 
       <StaffMain>
+        <PaymentReconciliationBanner />
         {loading && <ListRowSkeleton count={4} />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
 
@@ -567,12 +574,13 @@ export default function StaffDashboard() {
                   return (
                     <li
                       key={b.id}
-                      className={`flex items-center justify-between gap-2 rounded-2xl px-3 py-2.5 text-sm ${
+                      className={`rounded-2xl px-3 py-2.5 text-sm ${
                         cancelled
                           ? 'border border-white/5 bg-surface-card/40 text-cream-muted opacity-60'
                           : 'border border-white/8 bg-surface-card text-cream'
                       }`}
                     >
+                      <div className="flex items-center justify-between gap-2">
                       <span className="min-w-0 truncate">
                         {b.first_name_en} {b.last_name_en}
                         {cancelled ? (
@@ -596,7 +604,18 @@ export default function StaffDashboard() {
                         })()}
                       </span>
                       {!cancelled && (
-                        <span className="flex shrink-0 gap-1.5">
+                        <span className="flex shrink-0 flex-wrap justify-end gap-1.5">
+                          <CopyWaiverLinkButton
+                            bookingId={b.id}
+                            onSessionExpired={() => navigate('/app')}
+                          />
+                          {(b.waiver_signed || waivers.some((w) => w.booking_id === b.id)) && (
+                            <StaffWaiverRecordButton
+                              bookingId={b.id}
+                              tripName={selected?.name_en}
+                              onSessionExpired={() => navigate('/app')}
+                            />
+                          )}
                           <StaffButton type="button" variant="ghost" onClick={() => openEdit(b)} title="แก้ไขชื่อ/เบอร์/อีเมล">
                             ✏️ แก้ไข
                           </StaffButton>
@@ -627,6 +646,25 @@ export default function StaffDashboard() {
                           </button>
                         </span>
                       )}
+                      </div>
+                      {!cancelled ? (
+                        <div className="mt-2 border-t border-white/8 pt-2">
+                          <BookingExtensionQuotes
+                            bookingId={b.id}
+                            travelDate={b.travel_date}
+                            tourDepartureDate={selected?.departure_date}
+                            extraDaysPaid={b.extra_days_paid}
+                            durationDays={selected?.duration_days}
+                            canIssue={canIssueQuote}
+                            canMarkPaid={canCancel}
+                            onSessionExpired={() => navigate('/app')}
+                            onChanged={() => {
+                              if (!selected) return
+                              void fetchBookingsForTour(selected.id).then(setManifest).catch(() => {})
+                            }}
+                          />
+                        </div>
+                      ) : null}
                     </li>
                   )
                 })}

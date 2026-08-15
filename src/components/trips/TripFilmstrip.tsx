@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { tourDestinationLabel, tourDurationLabel } from '../../lib/tourDisplay'
-import { getPreviewPhotoForTrip, photoSrc } from '../../data/galleryPhotos'
+import { getPreviewPhotoForTrip, photoThumbSrc } from '../../data/galleryPhotos'
+import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 import type { Tour } from '../../types/tour'
 
 type Props = {
@@ -30,7 +31,9 @@ export default function TripFilmstrip({ tours, labelEn, labelTh, className = '' 
         <div className="cal-filmstrip-track">
           {slides.map((tour, i) => {
             const fallbackPhoto = getPreviewPhotoForTrip(tour.trip_code)
-            const imgSrc = tour.cover_image_url || (fallbackPhoto ? photoSrc(fallbackPhoto) : null)
+            const imgSrc =
+              storageImageSrc(tour.cover_image_url, STORAGE_IMG.thumb) ||
+              (fallbackPhoto ? photoThumbSrc(fallbackPhoto, STORAGE_IMG.thumb) : null)
             const destEn = tourDestinationLabel(tour.trip_code, 'en')
             const destTh = tourDestinationLabel(tour.trip_code, 'th')
             return (
@@ -45,6 +48,7 @@ export default function TripFilmstrip({ tours, labelEn, labelTh, className = '' 
                     alt={`${tour.name_en} / ${tour.name_th}`}
                     className="h-full w-full object-cover"
                     loading="lazy"
+                    decoding="async"
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center bg-teal-800 text-cream/40">

@@ -19,6 +19,7 @@ import {
   targetAccountOpenUrl,
 } from '../../data/facebookDestinations'
 import { getGalleryPhotosForTrip, photoSrc } from '../../data/galleryPhotos'
+import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { useToast } from '../../components/ui/Toast'
 import {
@@ -186,7 +187,7 @@ function ManualGroupCard({
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {photos.map((url) => (
             <li key={url} className="overflow-hidden rounded-editorial border border-white/8">
-              <img src={url} alt="" className="aspect-square w-full object-cover" loading="lazy" />
+              <img src={storageImageSrc(url, STORAGE_IMG.card)} alt="" className="aspect-square w-full object-cover" loading="lazy" />
             </li>
           ))}
         </ul>
@@ -559,7 +560,7 @@ function ReviewCard({
                     }`}
                   >
                     <img
-                      src={url}
+                      src={storageImageSrc(url, STORAGE_IMG.card)}
                       alt=""
                       loading="lazy"
                       className="aspect-[3/2] w-full bg-near-black-green object-cover"

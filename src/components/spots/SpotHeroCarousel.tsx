@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Heart } from 'lucide-react'
 import SpotMedia from './SpotMedia'
 import type { PhotoSpotDetail } from '../../lib/photoSpotsApi'
+import { storageImageAttrs, STORAGE_SIZES } from '../../lib/storageImage'
 
 const STORY_MS = 3200
 const FAV_KEY = 't2t_spot_favorites'
@@ -174,19 +175,24 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
         style={{ transform: `translateX(-${index * 100}%)` }}
       >
         {images.length > 0 ? (
-          images.map((src, i) => (
+          images.map((src, i) => {
+            const attrs = storageImageAttrs(src, 'hero', STORAGE_SIZES.fullBleed)
+            return (
             <div key={src} className="relative h-full min-w-full shrink-0">
               <img
-                src={src}
+                src={attrs.src}
+                srcSet={attrs.srcSet}
+                sizes={attrs.sizes}
                 alt={`${spot.title_en} ${i + 1}/${images.length}`}
                 className="h-full w-full object-cover"
                 draggable={false}
               />
             </div>
-          ))
+            )
+          })
         ) : (
           <div className="h-full min-w-full shrink-0">
-            <SpotMedia spot={spot} className="h-full w-full" iconSize="lg" />
+            <SpotMedia spot={spot} variant="wide" className="h-full w-full" iconSize="lg" />
           </div>
         )}
       </div>

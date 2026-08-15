@@ -13,16 +13,22 @@
 
 import { createHmac } from 'node:crypto'
 import { markSquarePaid } from '../_shared/squareMarkPaid.ts'
+import {
+  applyExtensionQuotePayment,
+  extractExtensionQuoteId,
+} from '../_shared/applyExtensionQuote.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SQUARE_ACCESS_TOKEN = Deno.env.get('SQUARE_ACCESS_TOKEN')
-const SQUARE_ENV = (Deno.env.get('SQUARE_ENVIRONMENT') || 'production').toLowerCase()
+const _squareEnvRaw = (Deno.env.get('SQUARE_ENVIRONMENT') || 'sandbox').toLowerCase()
+const SQUARE_ENV = _squareEnvRaw === 'production' ? 'production' : 'sandbox'
+console.log(`[square-webhook] SQUARE_ENVIRONMENT=${SQUARE_ENV}`)
 const SQUARE_WEBHOOK_SIGNATURE_KEY = Deno.env.get('SQUARE_WEBHOOK_SIGNATURE_KEY')
 
 const SQUARE_API_BASE =
-  SQUARE_ENV === 'sandbox'
-    ? 'https://connect.squareupsandbox.com'
-    : 'https://connect.squareup.com'
+  SQUARE_ENV === 'production'
+    ? 'https://connect.squareup.com'
+    : 'https://connect.squareupsandbox.com'
 
 const NOTIFICATION_URL =
   Deno.env.get('SQUARE_WEBHOOK_NOTIFICATION_URL') ||
@@ -146,6 +152,32 @@ Deno.serve(async (req) => {
 
     const orderId = typeof payment.order_id === 'string' ? payment.order_id : ''
     const order = orderId ? await retrieveOrder(orderId) : null
+    const paymentRef =
+      typeof payment.reference_id === 'string' ? payment.reference_id : ''
+    const orderRef =
+      order && typeof order.reference_id === 'string' ? order.reference_id : ''
+    const note = typeof payment.note === 'string' ? payment.note : ''
+    const quoteId = extractExtensionQuoteId({
+      note,
+      referenceId: paymentRef || orderRef,
+    })
+    if (quoteId) {
+      const result = await applyExtensionQuotePayment({
+        quoteId,
+        amountCents,
+        paymentId: String(payment.id),
+        paymentMethod: methodFromPayment(payment),
+        source: 'square-webhook',
+      })
+      if (!result.ok) {
+        console.error(
+          `[square-webhook] RECONCILIATION_NEEDED quote_id=${quoteId} payment_id=${payment.id} error=${result.error ?? 'mark_paid_failed'}`,
+        )
+        return json({ ok: false, ...result, quote_id: quoteId }, 500)
+      }
+      return json({ ok: result.ok, ...result, quote_id: quoteId })
+    }
+
     const bookingRef = extractBookingRef(payment, order)
     if (!bookingRef.startsWith('T2T-')) {
       console.error('[square-webhook] missing booking ref', { paymentId, orderId })
@@ -157,7 +189,14 @@ Deno.serve(async (req) => {
       amountCents,
       paymentId: String(payment.id),
       paymentMethod: methodFromPayment(payment),
+      source: 'square-webhook',
     })
+    if (!result.ok) {
+      console.error(
+        `[square-webhook] RECONCILIATION_NEEDED booking_ref=${bookingRef} payment_id=${payment.id} error=${result.error ?? 'mark_paid_failed'}`,
+      )
+      return json({ ok: false, ...result, booking_reference: bookingRef }, 500)
+    }
 
     return json({ ok: result.ok, ...result, booking_reference: bookingRef })
   } catch (err) {

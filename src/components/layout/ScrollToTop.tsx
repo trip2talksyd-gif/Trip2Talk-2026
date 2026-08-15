@@ -11,18 +11,30 @@ import { useLocation } from 'react-router-dom'
  * Scroll lives in `[data-app-scroll]` (fixed app shell), not the window.
  */
 export default function ScrollToTop() {
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
 
   useEffect(() => {
-    const ports = document.querySelectorAll<HTMLElement>('[data-app-scroll]')
-    if (ports.length > 0) {
-      ports.forEach((el) => {
-        el.scrollTop = 0
-      })
-      return
+    const id = hash.startsWith('#') ? hash.slice(1) : ''
+
+    const run = () => {
+      const target = id ? document.getElementById(id) : null
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        return
+      }
+      const ports = document.querySelectorAll<HTMLElement>('[data-app-scroll]')
+      if (ports.length > 0) {
+        ports.forEach((el) => {
+          el.scrollTop = 0
+        })
+        return
+      }
+      window.scrollTo(0, 0)
     }
-    window.scrollTo(0, 0)
-  }, [pathname])
+
+    const raf = window.requestAnimationFrame(run)
+    return () => window.cancelAnimationFrame(raf)
+  }, [pathname, hash])
 
   return null
 }

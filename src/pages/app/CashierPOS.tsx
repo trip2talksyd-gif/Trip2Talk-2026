@@ -8,6 +8,8 @@ import {
   cancelBooking,
   isBookingCancelled,
   resolveBookingTravelDate,
+  signPaymentSlip,
+  flagPendingBooking,
 } from '../../lib/toursApi'
 import { isSelectableBookableTour } from '../../lib/tourSelectability'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
@@ -17,6 +19,10 @@ import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import { useLang } from '../../hooks/useLang'
 import CancelBookingDialog from '../../components/app/CancelBookingDialog'
+import PaymentReconciliationBanner from '../../components/app/PaymentReconciliationBanner'
+import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
+import StaffWaiverRecordButton from '../../components/app/StaffWaiverRecordButton'
+import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
 import {
   staffShellClass,
   StaffPageHeader,
@@ -58,6 +64,15 @@ export default function CashierPOS() {
 
   const [cancelling, setCancelling] = useState<TourBooking | null>(null)
   const [cancelSubmitting, setCancelSubmitting] = useState(false)
+
+  const [slipBusyId, setSlipBusyId] = useState<string | null>(null)
+  const [slipViewer, setSlipViewer] = useState<{ url: string; title: string } | null>(null)
+  const [flaggingId, setFlaggingId] = useState<string | null>(null)
+  const [flagNote, setFlagNote] = useState('Follow up — PayID slip')
+  const [flagSubmitting, setFlagSubmitting] = useState(false)
+  const [verifyId, setVerifyId] = useState<string | null>(null)
+  const staffRole = sessionStorage.getItem('staff_role') ?? ''
+  const canIssueQuote = staffRole === 'OWNER' || staffRole === 'MANAGER'
 
   const load = useCallback(() => {
     setLoading(true)
@@ -117,6 +132,7 @@ export default function CashierPOS() {
       if (paidAmount > 0) {
         navigate('/app/receipt', {
           state: {
+            bookingId: booking.id,
             bookingReference: booking.booking_reference,
             customerName: `${firstName.trim()} ${lastName.trim()}`,
             customerEmail: email.trim() || null,
@@ -195,6 +211,97 @@ export default function CashierPOS() {
     }
   }
 
+  function bookingHasSlip(booking: TourBooking): boolean {
+    return Boolean(booking.slip_url?.trim())
+  }
+
+  async function viewSlip(booking: TourBooking) {
+    if (!bookingHasSlip(booking)) return
+    setSlipBusyId(booking.id)
+    try {
+      const signed = await signPaymentSlip(booking.id)
+      if (signed.is_image) {
+        setSlipViewer({
+          url: signed.url,
+          title: `${booking.first_name_en} ${booking.last_name_en}`.trim(),
+        })
+      } else {
+        window.open(signed.url, '_blank', 'noopener,noreferrer')
+      }
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast('Could not open slip', 'error')
+    } finally {
+      setSlipBusyId(null)
+    }
+  }
+
+  async function verifyPayId(booking: TourBooking) {
+    const tour = tours.find((tr) => tr.trip_code === booking.trip_code)
+    const deposit = Number(tour?.deposit_aud ?? 0)
+    if (!(deposit > 0)) {
+      openPaymentRow(booking)
+      setPayMethod('payid')
+      return
+    }
+    setVerifyId(booking.id)
+    try {
+      const result = await recordPayment(booking.id, deposit, 'payid')
+      toast(t('toast.paymentUpdated'), 'success')
+      load()
+      navigate('/app/receipt', {
+        state: {
+          bookingId: booking.id,
+          bookingReference: booking.booking_reference,
+          customerName: `${booking.first_name_en} ${booking.last_name_en}`,
+          customerEmail: booking.email || null,
+          tripName: tour?.name_en ?? booking.trip_code,
+          tripCode: booking.trip_code,
+          departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
+          amountPaid: deposit,
+          paymentMethod: 'payid',
+          bookingStatus: result.booking_status,
+          source: booking.source ?? null,
+          installmentNo: result.installment_no,
+          installmentPlan: result.installment_plan,
+          priceAud: result.price_aud,
+          balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
+        },
+      })
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast(t('toast.paymentFailed'), 'error')
+    } finally {
+      setVerifyId(null)
+    }
+  }
+
+  async function submitFlag(booking: TourBooking) {
+    const note = flagNote.trim()
+    if (!note) return
+    setFlagSubmitting(true)
+    try {
+      await flagPendingBooking(booking.id, note)
+      toast('Flagged for follow-up', 'success')
+      setFlaggingId(null)
+      load()
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast('Could not save flag — apply staff_follow_up_note migration if missing', 'error')
+    } finally {
+      setFlagSubmitting(false)
+    }
+  }
+
   async function submitPayment(booking: TourBooking) {
     const amount = Number(payAmount)
     if (!amount || amount <= 0) return
@@ -207,6 +314,7 @@ export default function CashierPOS() {
       load()
       navigate('/app/receipt', {
         state: {
+          bookingId: booking.id,
           bookingReference: booking.booking_reference,
           customerName: `${booking.first_name_en} ${booking.last_name_en}`,
           customerEmail: booking.email || null,
@@ -252,6 +360,7 @@ export default function CashierPOS() {
       </StaffPageHeader>
 
       <StaffMain>
+        <PaymentReconciliationBanner />
         <StaffButton
           variant="secondary"
           onClick={() => setFormOpen((v) => !v)}
@@ -403,9 +512,62 @@ export default function CashierPOS() {
                       {plan > 1 ? ` · แบ่งจ่าย ${plan} งวด` : ''}
                       {remaining !== null && remaining > 0 ? ` · เหลือ ${remaining.toLocaleString()} AUD` : ''}
                     </p>
+                    <p className="mt-1.5 text-[11px] text-cream-muted">
+                      {bookingHasSlip(b) ? (
+                        <span>PayID slip on file</span>
+                      ) : (
+                        <span className="text-amber-200/90">No slip uploaded</span>
+                      )}
+                      {b.staff_follow_up_note ? (
+                        <span className="mt-0.5 block text-amber-200/90">
+                          Flagged: {b.staff_follow_up_note}
+                        </span>
+                      ) : null}
+                    </p>
 
                     {cancelled ? null : !isPaying ? (
                       <div className="mt-3 flex flex-wrap gap-2">
+                        <CopyWaiverLinkButton
+                          bookingId={b.id}
+                          onSessionExpired={() => navigate('/app')}
+                        />
+                        {b.waiver_signed ? (
+                          <StaffWaiverRecordButton
+                            bookingId={b.id}
+                            tripName={tour?.name_en}
+                            onSessionExpired={() => navigate('/app')}
+                          />
+                        ) : null}
+                        {bookingHasSlip(b) ? (
+                          <StaffButton
+                            type="button"
+                            variant="secondary"
+                            disabled={slipBusyId === b.id}
+                            onClick={() => void viewSlip(b)}
+                            className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
+                          >
+                            {slipBusyId === b.id ? 'Opening…' : 'View slip'}
+                          </StaffButton>
+                        ) : null}
+                        <StaffButton
+                          type="button"
+                          disabled={verifyId === b.id}
+                          onClick={() => void verifyPayId(b)}
+                          className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
+                        >
+                          {verifyId === b.id ? 'Verifying…' : 'Verify PayID'}
+                        </StaffButton>
+                        <StaffButton
+                          type="button"
+                          variant="secondary"
+                          onClick={() => {
+                            setFlaggingId(b.id)
+                            setFlagNote(b.staff_follow_up_note?.trim() || 'Follow up — PayID slip')
+                          }}
+                          className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
+                        >
+                          Flag
+                        </StaffButton>
                         <StaffButton
                           onClick={() => openPaymentRow(b)}
                           className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
@@ -486,6 +648,52 @@ export default function CashierPOS() {
                         </div>
                       </StaffCard>
                     )}
+
+                    {cancelled ? null : (
+                      <div className="mt-3 border-t border-white/10 pt-3">
+                        <BookingExtensionQuotes
+                          bookingId={b.id}
+                          travelDate={b.travel_date}
+                          tourDepartureDate={tour?.departure_date}
+                          extraDaysPaid={b.extra_days_paid}
+                          durationDays={tour?.duration_days}
+                          canIssue={canIssueQuote}
+                          canMarkPaid
+                          onSessionExpired={() => navigate('/app')}
+                          onChanged={load}
+                        />
+                      </div>
+                    )}
+
+                    {flaggingId === b.id && !cancelled ? (
+                      <div className="mt-3 space-y-2 rounded-xl border border-amber-200/25 bg-near-black-green p-3">
+                        <StaffField label="Follow-up note (booking stays pending)">
+                          <StaffInput
+                            value={flagNote}
+                            onChange={(e) => setFlagNote(e.target.value)}
+                            maxLength={500}
+                          />
+                        </StaffField>
+                        <div className="flex gap-2">
+                          <StaffButton
+                            type="button"
+                            disabled={!flagNote.trim() || flagSubmitting}
+                            onClick={() => void submitFlag(b)}
+                            className="flex-1 text-xs uppercase tracking-wider"
+                          >
+                            {flagSubmitting ? 'Saving…' : 'Save flag'}
+                          </StaffButton>
+                          <StaffButton
+                            type="button"
+                            variant="secondary"
+                            onClick={() => setFlaggingId(null)}
+                            className="text-xs"
+                          >
+                            Cancel
+                          </StaffButton>
+                        </div>
+                      </div>
+                    ) : null}
                   </StaffCard>
                 </li>
               )
@@ -501,6 +709,35 @@ export default function CashierPOS() {
           onConfirm={confirmCancel}
           onClose={() => !cancelSubmitting && setCancelling(null)}
         />
+      )}
+      {slipViewer && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Payment slip"
+          onClick={() => setSlipViewer(null)}
+        >
+          <div
+            className="max-h-[90vh] max-w-lg overflow-auto rounded-2xl border border-white/15 bg-near-black-green p-3"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="mb-2 text-sm font-medium text-cream">{slipViewer.title}</p>
+            <img
+              src={slipViewer.url}
+              alt="PayID payment slip"
+              className="max-h-[70vh] w-full rounded-lg object-contain"
+            />
+            <StaffButton
+              type="button"
+              variant="secondary"
+              className="mt-3 w-full text-xs"
+              onClick={() => setSlipViewer(null)}
+            >
+              Close
+            </StaffButton>
+          </div>
+        </div>
       )}
     </div>
   )

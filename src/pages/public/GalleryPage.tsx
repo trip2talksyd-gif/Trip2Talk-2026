@@ -4,7 +4,7 @@ import { useLang } from '../../hooks/useLang'
 import {
   filterGalleryPhotos,
   GALLERY_PHOTOS,
-  photoSrc,
+  photoThumbSrc,
   type GalleryFilter,
   type GalleryPhoto,
 } from '../../data/galleryPhotos'
@@ -132,9 +132,10 @@ export default function GalleryPage() {
                       className="group relative aspect-square overflow-hidden rounded-xl bg-teal-900/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-600"
                     >
                       <img
-                        src={photoSrc(photo)}
+                        src={photoThumbSrc(photo, { width: 720, quality: 70, format: 'webp' })}
                         alt={caption}
                         loading="lazy"
+                        decoding="async"
                         className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.04]"
                       />
                       <span

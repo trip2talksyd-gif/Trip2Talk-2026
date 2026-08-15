@@ -23,11 +23,29 @@
           "value": "public, max-age=31536000, immutable"
         }
       ]
+    },
+    {
+      "source": "/brand/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/team/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     }
   ],
   "rewrites": [
     {
-      "source": "/((?!api/|assets/|hero/|trip-videos/|icons/|icon-|apple-touch|favicon|manifest|registerSW|sw\\.js|workbox|brand/).*)",
+      "source": "/((?!api/|assets/|hero/|trip-videos/|icons/|icon-|apple-touch|favicon|manifest|registerSW|sw\\.js|workbox|brand/|team/).*)",
       "destination": "/index.html"
     }
   ]

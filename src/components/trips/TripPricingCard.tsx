@@ -76,11 +76,6 @@ export default function TripPricingCard({ tour, includes }: Props) {
           {lang === 'th' ? 'AUD / คน' : 'AUD / person'}
         </span>
       </div>
-      <p className="mt-1 text-[10.5px] text-ink-soft">
-        {lang === 'th'
-          ? 'จิ้มหรือโฮเวอร์ตัวเลขดูแอนิเมชัน'
-          : 'Tap or hover the price for the split-flap flip'}
-      </p>
 
       <div className="mt-4 grid grid-cols-3 gap-2">
         {icons.map(({ icon: Icon, en, th }) => (

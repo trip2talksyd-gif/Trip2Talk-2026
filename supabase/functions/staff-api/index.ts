@@ -51,6 +51,17 @@ function randomWaiverToken(): string {
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 }
 
+function isYmd(s: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(s)
+}
+
+/** Calendar-day arithmetic on YYYY-MM-DD (UTC date parts — not local TZ). */
+function addCalendarDays(ymd: string, days: number): string {
+  const [y, m, d] = ymd.split('-').map(Number)
+  const dt = new Date(Date.UTC(y, (m ?? 1) - 1, (d ?? 1) + days))
+  return dt.toISOString().slice(0, 10)
+}
+
 type ContentTargetAccount =
   | 'trip2talk_page'
   | 'chapter99_page'
@@ -381,6 +392,10 @@ const ACTION_ROLES: Record<string, Role[]> = {
   delete_photo_spot: ['OWNER', 'MANAGER'],
   get_app_settings: ['OWNER', 'MANAGER'],
   set_ai_content_generation: ['OWNER'],
+  create_extension_quote: ['OWNER', 'MANAGER'],
+  list_extension_quotes: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  cancel_extension_quote: ['OWNER', 'MANAGER'],
+  mark_extension_quote_paid: ['OWNER', 'MANAGER', 'CASHIER'],
 }
 
 /**
@@ -2968,6 +2983,188 @@ Deno.serve(async (req) => {
         const { error } = await admin.from('photo_spots').delete().eq('id', id)
         if (error) throw error
         return json({ ok: true })
+      }
+
+      case 'list_extension_quotes': {
+        const { bookingId, tourId, bookingIds } = params as {
+          bookingId?: string
+          tourId?: string
+          bookingIds?: string[]
+        }
+        let query = admin
+          .from('trip_extension_quotes')
+          .select(
+            'id, booking_id, extra_days, price_difference_aud, quote_note, status, payment_deadline, quote_token, created_by, created_at, paid_at, payment_method',
+          )
+          .order('created_at', { ascending: false })
+
+        if (typeof bookingId === 'string' && bookingId) {
+          query = query.eq('booking_id', bookingId)
+        } else if (typeof tourId === 'string' && tourId) {
+          const { data: bookings, error: bErr } = await admin
+            .from('tour_bookings')
+            .select('id')
+            .eq('tour_id', tourId)
+          if (bErr) throw bErr
+          const ids = (bookings ?? []).map((b) => b.id)
+          if (ids.length === 0) return json({ data: [] })
+          query = query.in('booking_id', ids)
+        } else if (Array.isArray(bookingIds) && bookingIds.length > 0) {
+          query = query.in('booking_id', bookingIds.filter((id) => typeof id === 'string'))
+        } else {
+          return json({ error: 'invalid_params' }, 400)
+        }
+
+        const { data, error } = await query
+        if (error) throw error
+        const rows = (data ?? []).map((q) => ({
+          ...q,
+          path: `/quote/${q.quote_token}`,
+        }))
+        return json({ data: rows })
+      }
+
+      case 'create_extension_quote': {
+        const {
+          bookingId,
+          extraDays,
+          priceDifferenceAud,
+          quoteNote,
+          paymentDeadline,
+        } = params as {
+          bookingId?: string
+          extraDays?: number
+          priceDifferenceAud?: number
+          quoteNote?: string
+          paymentDeadline?: string | null
+        }
+        const days = Math.floor(Number(extraDays))
+        const price = Number(priceDifferenceAud)
+        const note = typeof quoteNote === 'string' ? quoteNote.trim() : ''
+        if (!bookingId || !Number.isFinite(days) || days < 1 || !Number.isFinite(price) || price <= 0 || !note) {
+          return json({ error: 'invalid_params' }, 400)
+        }
+
+        const { data: booking, error: bookingErr } = await admin
+          .from('tour_bookings')
+          .select('id, tour_id, travel_date, cancelled_at, trip_code')
+          .eq('id', bookingId)
+          .maybeSingle()
+        if (bookingErr) throw bookingErr
+        if (!booking) return json({ error: 'booking_not_found' }, 404)
+        if (booking.cancelled_at) return json({ error: 'booking_cancelled' }, 409)
+
+        const { data: tour } = await admin
+          .from('tours')
+          .select('id, departure_date, next_date')
+          .eq('id', booking.tour_id)
+          .maybeSingle()
+
+        const departure =
+          (typeof booking.travel_date === 'string' && booking.travel_date.slice(0, 10)) ||
+          (typeof tour?.departure_date === 'string' && tour.departure_date.slice(0, 10)) ||
+          (typeof tour?.next_date === 'string' && tour.next_date.slice(0, 10)) ||
+          ''
+
+        let deadline =
+          typeof paymentDeadline === 'string' && isYmd(paymentDeadline.trim().slice(0, 10))
+            ? paymentDeadline.trim().slice(0, 10)
+            : ''
+        if (!deadline) {
+          if (!isYmd(departure)) return json({ error: 'need_departure_date' }, 400)
+          deadline = addCalendarDays(departure, -10)
+        }
+
+        await admin
+          .from('trip_extension_quotes')
+          .update({ status: 'cancelled' })
+          .eq('booking_id', bookingId)
+          .eq('status', 'pending')
+
+        const staffId =
+          typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+
+        let inserted: Record<string, unknown> | null = null
+        for (let attempt = 0; attempt < 4 && !inserted; attempt++) {
+          const token = randomWaiverToken()
+          const { data: row, error: insErr } = await admin
+            .from('trip_extension_quotes')
+            .insert({
+              booking_id: bookingId,
+              extra_days: days,
+              price_difference_aud: price,
+              quote_note: note,
+              status: 'pending',
+              payment_deadline: deadline,
+              quote_token: token,
+              created_by: staffId,
+            })
+            .select(
+              'id, booking_id, extra_days, price_difference_aud, quote_note, status, payment_deadline, quote_token, created_by, created_at, paid_at, payment_method',
+            )
+            .maybeSingle()
+          if (insErr) {
+            if (insErr.code === '23505') continue
+            throw insErr
+          }
+          inserted = row
+        }
+        if (!inserted) return json({ error: 'token_failed' }, 500)
+        const token = String(inserted.quote_token ?? '')
+        return json({
+          data: {
+            ...inserted,
+            token,
+            path: `/quote/${token}`,
+          },
+        })
+      }
+
+      case 'cancel_extension_quote': {
+        const { quoteId } = params as { quoteId?: string }
+        if (!quoteId) return json({ error: 'invalid_params' }, 400)
+        const { data, error } = await admin
+          .from('trip_extension_quotes')
+          .update({ status: 'cancelled' })
+          .eq('id', quoteId)
+          .eq('status', 'pending')
+          .select('id, status')
+          .maybeSingle()
+        if (error) throw error
+        if (!data) return json({ error: 'not_cancellable' }, 409)
+        return json({ data })
+      }
+
+      case 'mark_extension_quote_paid': {
+        const { quoteId, paymentMethod } = params as {
+          quoteId?: string
+          paymentMethod?: string
+        }
+        if (!quoteId) return json({ error: 'invalid_params' }, 400)
+        const method =
+          typeof paymentMethod === 'string' && paymentMethod.trim()
+            ? paymentMethod.trim().slice(0, 40)
+            : 'payid'
+        const { data: quote, error: qErr } = await admin
+          .from('trip_extension_quotes')
+          .select('id, price_difference_aud, status')
+          .eq('id', quoteId)
+          .maybeSingle()
+        if (qErr) throw qErr
+        if (!quote) return json({ error: 'quote_not_found' }, 404)
+        const amountCents = Math.round(Number(quote.price_difference_aud) * 100)
+        const { data, error } = await admin.rpc('apply_extension_quote_payment', {
+          p_quote_id: quoteId,
+          p_amount_cents: amountCents,
+          p_payment_id: `staff-${quoteId}`,
+          p_payment_method: method,
+        })
+        if (error) throw error
+        const row = (data ?? {}) as { ok?: boolean; error?: string }
+        if (!row.ok) {
+          return json({ error: row.error || 'mark_paid_failed' }, 409)
+        }
+        return json({ data })
       }
 
       default:

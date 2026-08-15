@@ -100,6 +100,8 @@ export interface TourBooking {
   amount_paid_aud: number
   payment_method: string | null
   slip_url: string | null
+  /** Cashier flag on unpaid bookings (missing/bad PayID slip). Not a payment status. */
+  staff_follow_up_note?: string | null
   booking_reference: string | null
   booked_at: string
   /**
@@ -107,6 +109,13 @@ export interface TourBooking {
    * this instead of tours.departure_date or trip-code derivation.
    */
   travel_date?: string | null
+  /**
+   * Paid extra days from trip_extension_quotes. Tour duration_days is unchanged;
+   * display duration = (tours.duration_days ?? 1) + extra_days_paid.
+   */
+  extra_days_paid?: number | null
+  /** Opaque self-serve waiver URL token (staff-only; never shown to guests as the booking ref). */
+  waiver_token?: string | null
   /** Soft-cancel timestamp — row is kept for tax/audit; null = active. */
   cancelled_at?: string | null
   /** Staff name or id who cancelled. */
@@ -145,6 +154,26 @@ export interface BookingPayment {
   receipt_invoice_number?: string | null
   recorded_by_staff_id?: string | null
   created_at: string
+  extension_quote_id?: string | null
+}
+
+export type ExtensionQuoteStatus = 'pending' | 'paid' | 'expired' | 'cancelled'
+
+/** Staff-issued written quote for extra trip days. Customer pays via /quote/:quote_token. */
+export interface TripExtensionQuote {
+  id: string
+  booking_id: string
+  extra_days: number
+  price_difference_aud: number
+  quote_note: string
+  status: ExtensionQuoteStatus
+  payment_deadline: string
+  quote_token?: string | null
+  path?: string
+  created_by: string | null
+  created_at: string
+  paid_at: string | null
+  payment_method: string | null
 }
 
 export interface StaffProfile {

@@ -34,9 +34,10 @@ import { getTripMap, googleMapsEmbedUrl } from '../../data/tripMaps'
 import {
   getGalleryPhotosForTrip,
   getPreviewPhotoForTrip,
-  photoSrc,
+  photoThumbSrc,
   type GalleryPhoto,
 } from '../../data/galleryPhotos'
+import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 import { getTripCoverVideoUrl } from '../../data/tripVideos'
 import { getTestimonialsForTrip } from '../../data/testimonials'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
@@ -361,10 +362,11 @@ export default function TripDetailPage() {
                 }`}
               >
                 <img
-                  src={photoSrc(photo)}
+                  src={photoThumbSrc(photo, { width: 480, quality: 68, format: 'webp' })}
                   alt={tour.name_en}
                   className="h-full w-full object-cover"
                   loading="lazy"
+                  decoding="async"
                 />
               </button>
             ))}
@@ -631,7 +633,9 @@ export default function TripDetailPage() {
           <div className="mt-4 grid gap-3 sm:grid-cols-3">
             {moreTrips.map((rec) => {
               const preview = getPreviewPhotoForTrip(rec.trip_code)
-              const img = rec.cover_image_url || (preview ? photoSrc(preview) : '')
+              const img =
+                storageImageSrc(rec.cover_image_url, STORAGE_IMG.card) ||
+                (preview ? photoThumbSrc(preview, STORAGE_IMG.card) : '')
               return (
                 <Link
                   key={rec.id}
@@ -649,6 +653,7 @@ export default function TripDetailPage() {
                     <TripPhotoHero
                       tripCode={rec.trip_code}
                       alt={rec.name_en}
+                      size="card"
                       className="aspect-[5/3.6] w-full object-cover"
                     />
                   )}

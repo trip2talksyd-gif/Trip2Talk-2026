@@ -13,6 +13,14 @@ Dashboard SQL, CLI deploy outside a merged PR), you must **in the same session**
 
 Never leave production ahead of the repo. See root `CLAUDE.md`.
 
+## E2E — bilingual headings
+
+`npm run test:e2e` runs Chromium Playwright checks in `e2e/` against the Vite
+dev server. They guard the BiDisplayHeading / BiText split: English on Fraunces,
+Thai on Noto Serif Thai (`lang="th"` sibling — never nested under Fraunces),
+both languages always visible, EN/TH pill only reorders emphasis. See the
+comment at the top of `e2e/bilingual-headings.spec.ts`. UI mode: `npm run test:e2e:ui`.
+
 ## React + TypeScript + Vite template notes
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
