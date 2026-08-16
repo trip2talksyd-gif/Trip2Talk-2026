@@ -1101,6 +1101,37 @@ export type PhotosPendingRow = TourBooking & {
 
 export type PhotoDeliveryStage = 'highlight' | 'full'
 
+export type HealthRetentionDryRunRow = {
+  booking_reference: string | null
+  trip_code: string
+  trip_end_date: string
+  days_since_end: number
+  populated_fields: string[]
+}
+
+export type HealthRetentionDryRunReport = {
+  ok: boolean
+  dry_run: true
+  destructive: false
+  as_of: string
+  trip_end_formula: string
+  retention_days: number
+  target_fields: string[]
+  summary: {
+    ended_trip_codes: number
+    bookings_on_ended_trips: number
+    eligible: number
+    eligible_also_marketing_opt_out: number
+    eligible_cancelled: number
+  }
+  rows: HealthRetentionDryRunRow[]
+}
+
+/** OWNER-only. SELECT-only — does not wipe health fields. */
+export async function healthRetentionDryRun(): Promise<HealthRetentionDryRunReport> {
+  return callStaffApi<HealthRetentionDryRunReport>('health_retention_dry_run')
+}
+
 export async function fetchPhotosPending(): Promise<PhotosPendingRow[]> {
   return callStaffApi<PhotosPendingRow[]>('list_photos_pending')
 }

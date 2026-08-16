@@ -62,6 +62,126 @@ function addCalendarDays(ymd: string, days: number): string {
   return dt.toISOString().slice(0, 10)
 }
 
+/** Confirmed live tour_bookings columns — health/emergency wipe candidates only. */
+const HEALTH_RETENTION_FIELDS = [
+  'medical_conditions',
+  'allergies',
+  'emergency_contact_name',
+  'emergency_contact_phone',
+  'emergency_contact_relationship',
+  'medications',
+  'dietary_requirements',
+  'oshc_provider',
+  'oshc_expiry',
+  'oshc_membership_number',
+  'travel_insurance_provider',
+  'travel_insurance_policy_number',
+] as const
+
+type HealthRetentionField = (typeof HEALTH_RETENTION_FIELDS)[number]
+
+function isPopulatedHealthValue(value: unknown): boolean {
+  if (value == null) return false
+  if (typeof value === 'string') return value.trim() !== ''
+  return true
+}
+
+/**
+ * SELECT-only dry-run. Keep in sync with cron-daily `health_retention_dry_run`.
+ * Trip end = departure_date + max(1, duration_days) - 1 (UTC).
+ */
+async function runHealthRetentionDryRun(admin: ReturnType<typeof createClient>) {
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const { data: tours, error: tourErr } = await admin
+    .from('tours')
+    .select('trip_code, departure_date, duration_days')
+  if (tourErr) throw tourErr
+
+  const cutoff = addCalendarDays(todayStr, -60)
+  const ended = new Map<string, { trip_end_date: string; days_since_end: number }>()
+  for (const t of tours ?? []) {
+    const dep = String(t.departure_date || '').slice(0, 10)
+    if (!dep) continue
+    const days = Math.max(1, Number(t.duration_days ?? 1))
+    const tripEnd = addCalendarDays(dep, days - 1)
+    if (tripEnd > cutoff) continue
+    const daysSince = Math.round(
+      (new Date(todayStr + 'T00:00:00Z').getTime() -
+        new Date(tripEnd + 'T00:00:00Z').getTime()) /
+        86_400_000,
+    )
+    ended.set(String(t.trip_code), { trip_end_date: tripEnd, days_since_end: daysSince })
+  }
+
+  const codes = [...ended.keys()]
+  const rows: {
+    booking_reference: string | null
+    trip_code: string
+    trip_end_date: string
+    days_since_end: number
+    populated_fields: HealthRetentionField[]
+  }[] = []
+  let bookingsScanned = 0
+  let eligibleAlsoOptedOut = 0
+  let eligibleCancelled = 0
+
+  const selectCols = [
+    'booking_reference',
+    'trip_code',
+    'cancelled_at',
+    'marketing_photo_opt_out',
+    ...HEALTH_RETENTION_FIELDS,
+  ].join(', ')
+
+  for (let i = 0; i < codes.length; i += 80) {
+    const chunk = codes.slice(i, i + 80)
+    const { data: bookings, error } = await admin
+      .from('tour_bookings')
+      .select(selectCols)
+      .in('trip_code', chunk)
+    if (error) throw error
+
+    for (const b of bookings ?? []) {
+      bookingsScanned++
+      const meta = ended.get(String(b.trip_code))
+      if (!meta) continue
+      const populated_fields = HEALTH_RETENTION_FIELDS.filter((field) =>
+        isPopulatedHealthValue((b as Record<string, unknown>)[field]),
+      )
+      if (populated_fields.length === 0) continue
+      if (b.marketing_photo_opt_out === true) eligibleAlsoOptedOut++
+      if (b.cancelled_at) eligibleCancelled++
+      rows.push({
+        booking_reference: (b.booking_reference as string | null) ?? null,
+        trip_code: String(b.trip_code),
+        trip_end_date: meta.trip_end_date,
+        days_since_end: meta.days_since_end,
+        populated_fields,
+      })
+    }
+  }
+
+  rows.sort((a, b) => b.days_since_end - a.days_since_end || a.trip_code.localeCompare(b.trip_code))
+
+  return {
+    ok: true,
+    dry_run: true,
+    destructive: false,
+    as_of: todayStr,
+    trip_end_formula: 'departure_date + max(1, duration_days) - 1 (UTC calendar days)',
+    retention_days: 60,
+    target_fields: [...HEALTH_RETENTION_FIELDS],
+    summary: {
+      ended_trip_codes: codes.length,
+      bookings_on_ended_trips: bookingsScanned,
+      eligible: rows.length,
+      eligible_also_marketing_opt_out: eligibleAlsoOptedOut,
+      eligible_cancelled: eligibleCancelled,
+    },
+    rows,
+  }
+}
+
 function isIsoInstant(s: string): boolean {
   return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s) && !Number.isNaN(Date.parse(s))
 }
@@ -419,6 +539,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   list_extension_quotes: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   cancel_extension_quote: ['OWNER', 'MANAGER'],
   mark_extension_quote_paid: ['OWNER', 'MANAGER', 'CASHIER'],
+  health_retention_dry_run: ['OWNER'],
 }
 
 /**
@@ -1272,6 +1393,10 @@ Deno.serve(async (req) => {
           .single()
         if (error) throw error
         return json({ data })
+      }
+
+      case 'health_retention_dry_run': {
+        return json({ data: await runHealthRetentionDryRun(admin) })
       }
 
       case 'list_photos_pending': {

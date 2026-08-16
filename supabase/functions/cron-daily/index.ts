@@ -61,12 +61,270 @@ function authorized(req: Request): boolean {
   return bearer === CRON_SECRET || q === CRON_SECRET
 }
 
+/** Confirmed live tour_bookings columns — health/emergency wipe candidates only. */
+const HEALTH_RETENTION_FIELDS = [
+  'medical_conditions',
+  'allergies',
+  'emergency_contact_name',
+  'emergency_contact_phone',
+  'emergency_contact_relationship',
+  'medications',
+  'dietary_requirements',
+  'oshc_provider',
+  'oshc_expiry',
+  'oshc_membership_number',
+  'travel_insurance_provider',
+  'travel_insurance_policy_number',
+] as const
+
+type HealthRetentionField = (typeof HEALTH_RETENTION_FIELDS)[number]
+
+function isPopulatedHealthValue(value: unknown): boolean {
+  if (value == null) return false
+  if (typeof value === 'string') return value.trim() !== ''
+  return true
+}
+
+type EligibleHealthRow = {
+  booking_id: string
+  booking_reference: string | null
+  trip_code: string
+  trip_end_date: string
+  days_since_end: number
+  populated_fields: HealthRetentionField[]
+}
+
+/**
+ * Shared eligibility for dry-run and live wipe.
+ * Trip end = departure_date + max(1, duration_days) - 1 (UTC).
+ * Eligible when trip_end_date <= today - 60 AND at least one target field is set.
+ * Keep in sync with staff-api `health_retention_dry_run`.
+ */
+async function findEligibleHealthRetentionRows(
+  admin: ReturnType<typeof createClient>,
+  todayStr: string,
+) {
+  const { data: tours, error: tourErr } = await admin
+    .from('tours')
+    .select('trip_code, departure_date, duration_days')
+  if (tourErr) throw tourErr
+
+  const cutoff = ymd(addDays(new Date(todayStr + 'T00:00:00Z'), -60))
+  const ended = new Map<string, { trip_end_date: string; days_since_end: number }>()
+  for (const t of tours ?? []) {
+    const dep = String(t.departure_date || '').slice(0, 10)
+    if (!dep) continue
+    const days = Math.max(1, Number(t.duration_days ?? 1))
+    const tripEnd = ymd(addDays(new Date(dep + 'T00:00:00Z'), days - 1))
+    if (tripEnd > cutoff) continue
+    const daysSince = Math.round(
+      (new Date(todayStr + 'T00:00:00Z').getTime() -
+        new Date(tripEnd + 'T00:00:00Z').getTime()) /
+        86_400_000,
+    )
+    ended.set(String(t.trip_code), { trip_end_date: tripEnd, days_since_end: daysSince })
+  }
+
+  const codes = [...ended.keys()]
+  const rows: EligibleHealthRow[] = []
+  let bookingsScanned = 0
+  let eligibleAlsoOptedOut = 0
+  let eligibleCancelled = 0
+
+  const selectCols = [
+    'id',
+    'booking_reference',
+    'trip_code',
+    'cancelled_at',
+    'marketing_photo_opt_out',
+    ...HEALTH_RETENTION_FIELDS,
+  ].join(', ')
+
+  for (let i = 0; i < codes.length; i += 80) {
+    const chunk = codes.slice(i, i + 80)
+    const { data: bookings, error } = await admin
+      .from('tour_bookings')
+      .select(selectCols)
+      .in('trip_code', chunk)
+    if (error) throw error
+
+    for (const b of bookings ?? []) {
+      bookingsScanned++
+      const meta = ended.get(String(b.trip_code))
+      if (!meta) continue
+      const populated_fields = HEALTH_RETENTION_FIELDS.filter((field) =>
+        isPopulatedHealthValue((b as Record<string, unknown>)[field]),
+      )
+      if (populated_fields.length === 0) continue
+      if (b.marketing_photo_opt_out === true) eligibleAlsoOptedOut++
+      if (b.cancelled_at) eligibleCancelled++
+      rows.push({
+        booking_id: String(b.id),
+        booking_reference: (b.booking_reference as string | null) ?? null,
+        trip_code: String(b.trip_code),
+        trip_end_date: meta.trip_end_date,
+        days_since_end: meta.days_since_end,
+        populated_fields,
+      })
+    }
+  }
+
+  rows.sort((a, b) => b.days_since_end - a.days_since_end || a.trip_code.localeCompare(b.trip_code))
+
+  return {
+    rows,
+    endedTripCodes: codes.length,
+    bookingsScanned,
+    eligibleAlsoOptedOut,
+    eligibleCancelled,
+  }
+}
+
+async function runHealthRetentionDryRun(
+  admin: ReturnType<typeof createClient>,
+  todayStr: string,
+) {
+  const found = await findEligibleHealthRetentionRows(admin, todayStr)
+  return {
+    ok: true,
+    dry_run: true,
+    destructive: false,
+    as_of: todayStr,
+    trip_end_formula: 'departure_date + max(1, duration_days) - 1 (UTC calendar days)',
+    retention_days: 60,
+    target_fields: [...HEALTH_RETENTION_FIELDS],
+    excluded_from_this_policy: [
+      'passport_number',
+      'flight_*',
+      'bookings / payments / invoices',
+      'marketing_photo_opt_out*',
+    ],
+    flagged_not_in_wipe_list: [
+      'insurance_type',
+      'insurance_provider',
+      'insurance_policy_number',
+      'oshc_risk_acknowledged',
+      'other_notes',
+      'date_of_birth',
+      'safety_info_updated_at',
+    ],
+    summary: {
+      ended_trip_codes: found.endedTripCodes,
+      bookings_on_ended_trips: found.bookingsScanned,
+      eligible: found.rows.length,
+      eligible_also_marketing_opt_out: found.eligibleAlsoOptedOut,
+      eligible_cancelled: found.eligibleCancelled,
+    },
+    rows: found.rows.map(({ booking_id: _id, ...row }) => row),
+  }
+}
+
+/**
+ * Destructive. Calls apply_health_data_wipe only for rows from
+ * findEligibleHealthRetentionRows (same as dry-run). One RPC = one transaction.
+ */
+async function runHealthRetentionLiveWipe(
+  admin: ReturnType<typeof createClient>,
+  todayStr: string,
+) {
+  const found = await findEligibleHealthRetentionRows(admin, todayStr)
+  const wiped: { booking_reference: string | null; trip_code: string; fields_wiped: string[] }[] = []
+  const skipped: string[] = []
+  const failures: { booking_reference: string | null; trip_code: string; error: string }[] = []
+
+  for (const row of found.rows) {
+    try {
+      const { data, error } = await admin.rpc('apply_health_data_wipe', {
+        p_booking_id: row.booking_id,
+        p_trip_end_date: row.trip_end_date,
+      })
+      if (error) {
+        failures.push({
+          booking_reference: row.booking_reference,
+          trip_code: row.trip_code,
+          error: error.message,
+        })
+        continue
+      }
+      const result = data as { ok?: boolean; skipped?: boolean; fields_wiped?: string[]; error?: string } | null
+      if (!result?.ok) {
+        failures.push({
+          booking_reference: row.booking_reference,
+          trip_code: row.trip_code,
+          error: result?.error ?? 'wipe_failed',
+        })
+        continue
+      }
+      if (result.skipped) {
+        skipped.push(row.booking_reference ?? row.booking_id)
+        continue
+      }
+      wiped.push({
+        booking_reference: row.booking_reference,
+        trip_code: row.trip_code,
+        fields_wiped: Array.isArray(result.fields_wiped) ? result.fields_wiped : row.populated_fields,
+      })
+    } catch (err) {
+      failures.push({
+        booking_reference: row.booking_reference,
+        trip_code: row.trip_code,
+        error: String(err),
+      })
+    }
+  }
+
+  return {
+    ok: failures.length === 0,
+    dry_run: false,
+    destructive: true,
+    as_of: todayStr,
+    eligible: found.rows.length,
+    wiped: wiped.length,
+    skipped: skipped.length,
+    failed: failures.length,
+    rows_wiped: wiped,
+    failures,
+  }
+}
+
+async function resolveManualTask(req: Request): Promise<string> {
+  const fromQuery = new URL(req.url).searchParams.get('task') ?? ''
+  if (fromQuery) return fromQuery
+  const ct = req.headers.get('content-type') ?? ''
+  if (!ct.includes('application/json')) return ''
+  try {
+    const body = (await req.json()) as { task?: unknown }
+    return typeof body.task === 'string' ? body.task : ''
+  } catch {
+    return ''
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS })
   if (req.method !== 'POST' && req.method !== 'GET') return json({ error: 'method_not_allowed' }, 405)
   if (!authorized(req)) return json({ error: 'unauthorized' }, 401)
 
   const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
+  const task = await resolveManualTask(req)
+  if (task === 'health_retention_dry_run') {
+    try {
+      return json(await runHealthRetentionDryRun(admin, ymd(new Date())))
+    } catch (err) {
+      console.error('[cron-daily] health_retention_dry_run', err)
+      return json({ error: 'server_error', detail: String(err) }, 500)
+    }
+  }
+  if (task === 'health_retention_live_wipe') {
+    try {
+      return json(await runHealthRetentionLiveWipe(admin, ymd(new Date())))
+    } catch (err) {
+      console.error('[cron-daily] health_retention_live_wipe', err)
+      return json({ error: 'server_error', detail: String(err) }, 500)
+    }
+  }
+  if (task) return json({ error: 'unknown_task' }, 400)
+
   const today = new Date()
   const todayStr = ymd(today)
   const in7 = ymd(addDays(today, 7))
@@ -81,6 +339,7 @@ Deno.serve(async (req) => {
     reminder_1d: 0,
     review: 0,
     quotes_expired: 0,
+    health_retention_wipe: null as Awaited<ReturnType<typeof runHealthRetentionLiveWipe>> | null,
     errors: [] as string[],
   }
 
@@ -265,6 +524,17 @@ Deno.serve(async (req) => {
         await admin.from('tour_bookings').update({ review_requested_at: now }).eq('id', b.id)
         stats.review++
       }
+    }
+
+    try {
+      stats.health_retention_wipe = await runHealthRetentionLiveWipe(admin, todayStr)
+      if (stats.health_retention_wipe.failed > 0) {
+        stats.errors.push(
+          `health_retention_wipe: ${stats.health_retention_wipe.failed} booking(s) failed`,
+        )
+      }
+    } catch (wipeErr) {
+      stats.errors.push(`health_retention_wipe: ${String(wipeErr)}`)
     }
 
     return json({
