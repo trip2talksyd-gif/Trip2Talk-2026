@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import SpotHeroCarousel from '../../components/spots/SpotHeroCarousel'
+import LetterboxPhoto from '../../components/spots/LetterboxPhoto'
 import SpotRoutePreview from '../../components/spots/SpotRoutePreview'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import { getDiscoverSpots } from '../../data/discoverFeed'
@@ -90,10 +91,12 @@ export default function SpotDetailPage() {
       return (
         <div className="relative min-h-[100dvh] bg-cream pb-16">
           <div className="relative h-[42vh] min-h-[220px] overflow-hidden bg-teal-dark">
-            <img
-              {...fbHero}
+            <LetterboxPhoto
+              src={fbHero.src}
+              srcSet={fbHero.srcSet}
+              sizes={fbHero.sizes}
               alt={`${galleryFallback.titleEn} / ${galleryFallback.titleTh}`}
-              className="h-full w-full object-cover"
+              loading="eager"
             />
             <button
               type="button"
