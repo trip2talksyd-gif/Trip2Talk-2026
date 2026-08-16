@@ -44,14 +44,26 @@ function ignoreUnlessExpired(err: unknown, onExpired: () => void): void {
 
 function BookingStatusDonut({ counts }: { counts: BookingStatusCounts }) {
   const total = STATUS_SEGMENTS.reduce((sum, seg) => sum + counts[seg.key], 0)
-  const r = 34
+  const r = 36
+  const stroke = 13
   const c = 2 * Math.PI * r
   let offset = 0
 
   return (
-    <div className="flex items-center gap-3">
-      <svg viewBox="0 0 100 100" className="h-[5.5rem] w-[5.5rem] shrink-0" aria-hidden>
-        <circle cx="50" cy="50" r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="12" />
+    <div className="flex flex-col items-center">
+      <svg
+        viewBox="0 0 100 100"
+        className="h-[11.5rem] w-[11.5rem] sm:h-[13.5rem] sm:w-[13.5rem]"
+        aria-hidden
+      >
+        <circle
+          cx="50"
+          cy="50"
+          r={r}
+          fill="none"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth={stroke}
+        />
         {total > 0
           ? STATUS_SEGMENTS.map((seg) => {
               const value = counts[seg.key]
@@ -67,7 +79,7 @@ function BookingStatusDonut({ counts }: { counts: BookingStatusCounts }) {
                   r={r}
                   fill="none"
                   stroke={seg.color}
-                  strokeWidth="12"
+                  strokeWidth={stroke}
                   strokeLinecap="butt"
                   strokeDasharray={`${len} ${c - len}`}
                   strokeDashoffset={-dashOffset}
@@ -82,22 +94,22 @@ function BookingStatusDonut({ counts }: { counts: BookingStatusCounts }) {
           textAnchor="middle"
           dominantBaseline="middle"
           className="fill-cream"
-          fontSize="16"
+          fontSize="18"
           fontWeight="600"
         >
           {total}
         </text>
       </svg>
-      <ul className="min-w-0 flex-1 space-y-1">
+      <ul className="mt-4 w-full space-y-1.5">
         {STATUS_SEGMENTS.map((seg) => (
-          <li key={seg.key} className="flex items-center justify-between gap-2 text-[11px]">
-            <span className="flex min-w-0 items-center gap-1.5 text-cream-muted">
-              <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: seg.color }} />
+          <li key={seg.key} className="flex items-center justify-between gap-2 text-xs">
+            <span className="flex min-w-0 items-center gap-2 text-cream-muted">
+              <span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: seg.color }} />
               <span className="truncate">
                 {seg.labelEn} / {seg.labelTh}
               </span>
             </span>
-            <span className="tabular-nums text-cream">{counts[seg.key]}</span>
+            <span className="tabular-nums font-medium text-cream">{counts[seg.key]}</span>
           </li>
         ))}
       </ul>
@@ -232,11 +244,11 @@ export default function StaffOpsSummary({
       <StaffSectionTitle>Ops snapshot / สรุปงานวันนี้</StaffSectionTitle>
       <div className="mt-3.5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
         {counts ? (
-          <StaffCard>
-            <p className="text-[11px] font-medium uppercase tracking-[0.08em] text-cream-muted/90">
+          <StaffCard className="h-full">
+            <p className="text-center text-[11px] font-medium uppercase tracking-[0.08em] text-cream-muted/90">
               Bookings / สถานะการจอง
             </p>
-            <div className="mt-3">
+            <div className="mt-4">
               <BookingStatusDonut counts={counts} />
             </div>
           </StaffCard>
