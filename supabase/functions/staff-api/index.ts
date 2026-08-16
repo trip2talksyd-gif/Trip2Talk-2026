@@ -479,6 +479,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   expenses_this_month: ['OWNER', 'MANAGER'],
   insert_expense: ['OWNER', 'MANAGER'],
   insurance_alerts: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  booking_status_counts: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   compliance_items: ['OWNER', 'MANAGER'],
   list_tours_admin: ['OWNER', 'MANAGER'],
   create_tour: ['OWNER', 'MANAGER'],
@@ -866,6 +867,29 @@ Deno.serve(async (req) => {
           .order('expiry_date', { ascending: true })
         if (error) throw error
         return json({ data })
+      }
+
+      case 'booking_status_counts': {
+        const { data, error } = await admin.from('tour_bookings').select('booking_status')
+        if (error) throw error
+        const counts = {
+          pending_payment: 0,
+          deposit_paid: 0,
+          fully_paid: 0,
+          cancelled: 0,
+          no_show: 0,
+        }
+        for (const row of data ?? []) {
+          const raw = String((row as { booking_status?: string }).booking_status ?? '')
+            .trim()
+            .toLowerCase()
+          if (raw === 'pending_payment' || raw === 'pending') counts.pending_payment += 1
+          else if (raw === 'deposit_paid') counts.deposit_paid += 1
+          else if (raw === 'fully_paid' || raw === 'paid') counts.fully_paid += 1
+          else if (raw === 'cancelled') counts.cancelled += 1
+          else if (raw === 'no_show') counts.no_show += 1
+        }
+        return json({ data: counts })
       }
 
       case 'compliance_items': {
@@ -3265,6 +3289,8 @@ Deno.serve(async (req) => {
           hero_image_url: hero,
           thumbnail_url: thumb,
           gallery_image_urls: gallery,
+          video_url:
+            typeof spot.video_url === 'string' ? spot.video_url.trim() || null : null,
           is_featured: spot.is_featured === true,
           sort_order:
             spot.sort_order == null || spot.sort_order === ''

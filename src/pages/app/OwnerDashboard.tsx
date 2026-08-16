@@ -4,7 +4,6 @@ import {
   Banknote,
   CalendarDays,
   CalendarPlus,
-  Camera,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -43,6 +42,7 @@ import {
   staffShellClass,
 } from '../../components/app/staffUi'
 import PaymentReconciliationBanner from '../../components/app/PaymentReconciliationBanner'
+import StaffOpsSummary from '../../components/app/StaffOpsSummary'
 import AiContentGenerationToggle from '../../components/app/AiContentGenerationToggle'
 import { useToast } from '../../components/ui/Toast'
 
@@ -117,11 +117,6 @@ const NAV_LINKS: { to: string; label: string; icon: ReactNode; highlighted?: boo
     to: '/app/content-review',
     label: 'Content Review (Facebook drafts)',
     icon: <FilePen className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
-  },
-  {
-    to: '/app/quick-post',
-    label: 'Quick Post (value content)',
-    icon: <Camera className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
   },
 ]
 
@@ -258,8 +253,9 @@ export default function OwnerDashboard() {
         subtitle={`Ops overview · ${statsHeading.toLowerCase()}`}
       />
 
-      <StaffMain>
+      <StaffMain className="!max-w-7xl">
         <PaymentReconciliationBanner />
+        <StaffOpsSummary role={sessionStorage.getItem('staff_role')} />
         <StaffCard>
           <StaffSectionTitle>AI content</StaffSectionTitle>
           <div className="mt-3">

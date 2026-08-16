@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ChangeEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Loader2, MapPin, Pencil, Plus, Trash2, X } from 'lucide-react'
+import { ExternalLink, ImagePlus, Loader2, MapPin, Pencil, Play, Plus, Trash2, X } from 'lucide-react'
 import {
   StaffButton,
   StaffCard,
@@ -11,6 +11,7 @@ import {
   StaffSelect,
   StaffTextarea,
   staffShellClass,
+  staffTabActiveClass,
   staffTabIdleClass,
 } from '../../components/app/staffUi'
 import SpotLocationPicker from '../../components/spots/SpotLocationPicker'
@@ -28,6 +29,8 @@ import {
   deletePhotoSpot,
   listPhotoSpotsAdmin,
   uploadPhotoSpotImage,
+  uploadPhotoSpotVideo,
+  PHOTO_SPOT_VIDEO_TOO_LARGE,
   upsertPhotoSpot,
 } from '../../lib/photoSpotsApi'
 import { fetchToursAdmin } from '../../lib/toursApi'
@@ -63,6 +66,7 @@ type FormState = {
   hero_image_url: string
   thumbnail_url: string
   gallery_image_urls: string[]
+  video_url: string
   is_featured: boolean
   sort_order: string
 }
@@ -103,6 +107,7 @@ function emptyForm(): FormState {
     hero_image_url: '',
     thumbnail_url: '',
     gallery_image_urls: [],
+    video_url: '',
     is_featured: false,
     sort_order: '100',
   }
@@ -138,6 +143,7 @@ function rowToForm(row: PhotoSpotRow): FormState {
     hero_image_url: row.hero_image_url ?? '',
     thumbnail_url: row.thumbnail_url ?? row.hero_image_url ?? '',
     gallery_image_urls: [...(row.gallery_image_urls ?? [])].slice(0, PHOTO_SPOT_MAX_GALLERY),
+    video_url: row.video_url ?? '',
     is_featured: row.is_featured,
     sort_order: String(row.sort_order ?? 100),
   }
@@ -148,6 +154,17 @@ function slugify(title: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '')
+}
+
+function isMissingPhoto(spot: Pick<PhotoSpotRow, 'hero_image_url' | 'thumbnail_url'>): boolean {
+  return !spot.hero_image_url?.trim() && !spot.thumbnail_url?.trim()
+}
+
+function compareSpots(a: PhotoSpotRow, b: PhotoSpotRow): number {
+  const missA = isMissingPhoto(a) ? 0 : 1
+  const missB = isMissingPhoto(b) ? 0 : 1
+  if (missA !== missB) return missA - missB
+  return a.sort_order - b.sort_order || a.title_en.localeCompare(b.title_en)
 }
 
 export default function PhotoSpotsAdminPage() {
@@ -164,7 +181,9 @@ export default function PhotoSpotsAdminPage() {
   const [saving, setSaving] = useState(false)
   const [uploadPhase, setUploadPhase] = useState<'idle' | 'compressing' | 'uploading'>('idle')
   const uploading = uploadPhase !== 'idle'
+  const [videoError, setVideoError] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [listFilter, setListFilter] = useState<'missing' | 'all'>('missing')
 
   const load = useCallback(() => {
     setLoading(true)
@@ -242,6 +261,13 @@ export default function PhotoSpotsAdminPage() {
     return ''
   }, [form])
 
+  const missingCount = useMemo(() => spots.filter(isMissingPhoto).length, [spots])
+  const displayedSpots = useMemo(() => {
+    const sorted = [...spots].sort(compareSpots)
+    if (listFilter === 'missing') return sorted.filter(isMissingPhoto)
+    return sorted
+  }, [spots, listFilter])
+
   const handleUpload = async (
     e: ChangeEvent<HTMLInputElement>,
     slot: 'hero' | 'gallery',
@@ -285,6 +311,28 @@ export default function PhotoSpotsAdminPage() {
     }
   }
 
+  const handleVideoUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setVideoError('')
+    setUploadPhase('uploading')
+    try {
+      const url = await uploadPhotoSpotVideo(file, setUploadPhase)
+      setField('video_url', url)
+      toast('Video uploaded', 'success')
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Upload failed'
+      if (msg.includes('Video too large') || msg === PHOTO_SPOT_VIDEO_TOO_LARGE) {
+        setVideoError(PHOTO_SPOT_VIDEO_TOO_LARGE)
+      } else {
+        toast(msg, 'error')
+      }
+    } finally {
+      setUploadPhase('idle')
+    }
+  }
+
   const handleSave = async () => {
     if (validationError) {
       toast(validationError, 'error')
@@ -323,6 +371,7 @@ export default function PhotoSpotsAdminPage() {
         hero_image_url: form.hero_image_url.trim() || null,
         thumbnail_url: form.thumbnail_url.trim() || form.hero_image_url.trim() || null,
         gallery_image_urls: form.gallery_image_urls,
+        video_url: form.video_url.trim() || null,
         is_featured: form.is_featured,
         sort_order: Number(form.sort_order) || 100,
       })
@@ -330,9 +379,7 @@ export default function PhotoSpotsAdminPage() {
       setFormOpen(false)
       setSpots((prev) => {
         const others = prev.filter((s) => s.id !== saved.id)
-        return [...others, saved].sort(
-          (a, b) => a.sort_order - b.sort_order || a.title_en.localeCompare(b.title_en),
-        )
+        return [...others, saved].sort(compareSpots)
       })
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) {
@@ -386,25 +433,79 @@ export default function PhotoSpotsAdminPage() {
         </button>
       </StaffPageHeader>
 
-      <StaffMain>
+      <StaffMain className="!max-w-7xl">
         {loading ? (
           <DashboardCardSkeleton />
         ) : error ? (
           <PageError message={error} onRetry={load} />
         ) : (
-          <div className="space-y-3">
-            {spots.length === 0 ? (
+          <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setListFilter('missing')}
+                className={`${listFilter === 'missing' ? staffTabActiveClass : staffTabIdleClass} min-h-11 px-4 py-2 text-sm`}
+              >
+                ยังไม่มีรูป (Missing photos)
+                <span className="ml-1.5 opacity-80">{missingCount}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setListFilter('all')}
+                className={`${listFilter === 'all' ? staffTabActiveClass : staffTabIdleClass} min-h-11 px-4 py-2 text-sm`}
+              >
+                All / ทั้งหมด
+                <span className="ml-1.5 opacity-80">{spots.length}</span>
+              </button>
+            </div>
+
+            {displayedSpots.length === 0 ? (
               <StaffCard>
-                <p className="text-sm text-cream-muted">No photo spots yet. Add the first one.</p>
+                <p className="text-base text-cream-muted">
+                  {listFilter === 'missing'
+                    ? 'No spots missing photos. / จุดท่องเที่ยวมีรูปครบแล้ว'
+                    : 'No photo spots yet. Add the first one.'}
+                </p>
               </StaffCard>
             ) : (
-              spots.map((spot) => (
-                <StaffCard key={spot.id}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-cream">{spot.title_en}</p>
-                      <p className="truncate text-xs text-cream-muted">{spot.title_th}</p>
-                      <p className="mt-1.5 flex flex-wrap gap-1.5 text-[11px]">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+              {displayedSpots.map((spot) => {
+                const missing = isMissingPhoto(spot)
+                const thumb = spot.thumbnail_url?.trim() || spot.hero_image_url?.trim() || ''
+                return (
+                  <StaffCard key={spot.id} padding={false} className="flex h-full flex-col p-3">
+                    <div className="relative">
+                    {missing ? (
+                      <div className="flex h-28 w-full items-center justify-center rounded-xl bg-amber/20 text-amber">
+                        <ImagePlus className="h-8 w-8" aria-hidden />
+                      </div>
+                    ) : (
+                      <img
+                        src={storageImageSrc(thumb, STORAGE_IMG.thumb) || thumb}
+                        alt=""
+                        className="h-28 w-full rounded-xl object-cover"
+                      />
+                    )}
+                    {spot.video_url?.trim() ? (
+                      <span className="absolute bottom-1.5 left-1.5 inline-flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold text-cream">
+                        <Play className="h-3 w-3 fill-cream" aria-hidden />
+                        Video
+                      </span>
+                    ) : null}
+                    </div>
+                    <div className="mt-3 flex min-w-0 flex-1 flex-col">
+                      {missing ? (
+                        <span className="mb-1.5 inline-block w-fit rounded-full bg-amber px-2.5 py-0.5 text-[11px] font-bold text-near-black-green">
+                          No photo / ยังไม่มีรูป
+                        </span>
+                      ) : (
+                        <span className="mb-1.5 inline-block w-fit rounded-full bg-teal-500/25 px-2.5 py-0.5 text-[11px] font-medium text-teal-200">
+                          Has photo / มีรูป
+                        </span>
+                      )}
+                      <p className="text-[15px] font-semibold leading-snug text-cream">{spot.title_en}</p>
+                      <p className="mt-0.5 text-[13px] leading-snug text-cream-muted">{spot.title_th}</p>
+                      <p className="mt-2 flex flex-wrap gap-1 text-[11px]">
                         {spot.categories.map((c) => (
                           <span
                             key={c}
@@ -423,48 +524,47 @@ export default function PhotoSpotsAdminPage() {
                           {spot.is_featured ? 'Featured' : 'Live'}
                         </span>
                       </p>
-                      <p className="mt-1 flex items-center gap-1 text-[11px] text-cream-muted">
-                        <MapPin className="h-3 w-3" aria-hidden />
-                        {spot.location_en}
-                        {spot.latitude != null && spot.longitude != null
-                          ? ` · ${spot.latitude.toFixed(3)}, ${spot.longitude.toFixed(3)}`
-                          : ''}
+                      <p className="mt-2 flex items-start gap-1.5 text-[13px] leading-snug text-cream-muted">
+                        <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
+                        <span className="min-w-0">{spot.location_en}</span>
                       </p>
+                      <div className="mt-3 flex flex-col gap-1.5">
+                        <button
+                          type="button"
+                          className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-full bg-white/10 px-3 py-2 text-sm font-medium text-cream hover:bg-white/15"
+                          onClick={() => openEdit(spot)}
+                        >
+                          <Pencil className="h-4 w-4 shrink-0" aria-hidden />
+                          Edit / แก้ไข
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-full bg-coral/20 px-3 py-2 text-sm font-medium text-coral hover:bg-coral/30 disabled:opacity-40"
+                          disabled={deletingId === spot.id}
+                          onClick={() => handleDelete(spot)}
+                        >
+                          {deletingId === spot.id ? (
+                            <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden />
+                          ) : (
+                            <Trash2 className="h-4 w-4 shrink-0" aria-hidden />
+                          )}
+                          Delete / ลบ
+                        </button>
+                        <Link
+                          to={`/spots/${spot.slug}`}
+                          className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-full border border-white/15 px-3 py-2 text-sm font-medium text-teal-200 hover:bg-white/10"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <ExternalLink className="h-4 w-4 shrink-0" aria-hidden />
+                          View public / ดูหน้าเว็บ
+                        </Link>
+                      </div>
                     </div>
-                    <div className="flex shrink-0 flex-col gap-1.5">
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2.5 py-1 text-[11px] text-cream hover:bg-white/15"
-                        onClick={() => openEdit(spot)}
-                      >
-                        <Pencil className="h-3 w-3" aria-hidden />
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="inline-flex items-center gap-1 rounded-full bg-coral/20 px-2.5 py-1 text-[11px] text-coral hover:bg-coral/30 disabled:opacity-40"
-                        disabled={deletingId === spot.id}
-                        onClick={() => handleDelete(spot)}
-                      >
-                        {deletingId === spot.id ? (
-                          <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
-                        ) : (
-                          <Trash2 className="h-3 w-3" aria-hidden />
-                        )}
-                        Delete
-                      </button>
-                      <Link
-                        to={`/spots/${spot.slug}`}
-                        className="text-center text-[10px] text-teal-300 underline-offset-2 hover:underline"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        View public
-                      </Link>
-                    </div>
-                  </div>
-                </StaffCard>
-              ))
+                  </StaffCard>
+                )
+              })}
+              </div>
             )}
           </div>
         )}
@@ -502,6 +602,126 @@ export default function PhotoSpotsAdminPage() {
                       placeholder="บอมโบ เฮดแลนด์"
                     />
                   </StaffField>
+                </div>
+
+                <div className="space-y-2 rounded-xl border border-amber/40 bg-amber/10 p-3">
+                  <p className="text-sm font-semibold text-cream">
+                    Images (max 5 — 1 hero + {PHOTO_SPOT_MAX_GALLERY} gallery)
+                  </p>
+                  <p className="text-xs text-cream-muted">รูปภาพ / อัปโหลดก่อน แล้วค่อยแก้รายละเอียดด้านล่าง</p>
+                  {form.hero_image_url ? (
+                    <div className="relative">
+                      <img
+                        src={storageImageSrc(form.hero_image_url, STORAGE_IMG.card)}
+                        alt="Hero"
+                        className="h-28 w-full rounded-lg object-cover"
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-cream"
+                        onClick={() =>
+                          setForm((prev) => ({ ...prev, hero_image_url: '', thumbnail_url: '' }))
+                        }
+                        aria-label="Remove hero"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-white/20 py-6 text-sm text-cream-muted hover:border-teal-500/40">
+                      {uploadPhase === 'compressing'
+                        ? 'Compressing…'
+                        : uploadPhase === 'uploading'
+                          ? 'Uploading…'
+                          : 'Upload hero image / อัปโหลดรูปหลัก'}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploading}
+                        onChange={(e) => handleUpload(e, 'hero')}
+                      />
+                    </label>
+                  )}
+
+                  <div className="grid grid-cols-4 gap-2">
+                    {form.gallery_image_urls.map((url) => (
+                      <div key={url} className="relative">
+                        <img src={storageImageSrc(url, STORAGE_IMG.thumb)} alt="" className="h-16 w-full rounded object-cover" />
+                        <button
+                          type="button"
+                          className="absolute right-0.5 top-0.5 rounded-full bg-black/60 p-0.5 text-cream"
+                          onClick={() =>
+                            setForm((prev) => ({
+                              ...prev,
+                              gallery_image_urls: prev.gallery_image_urls.filter((u) => u !== url),
+                            }))
+                          }
+                          aria-label="Remove gallery image"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                    {form.gallery_image_urls.length < PHOTO_SPOT_MAX_GALLERY && (
+                      <label className="flex h-16 cursor-pointer items-center justify-center rounded border border-dashed border-white/20 text-[10px] text-cream-muted hover:border-teal-500/40">
+                        {uploadPhase === 'compressing'
+                          ? 'Compressing…'
+                          : uploadPhase === 'uploading'
+                            ? 'Uploading…'
+                            : '+ Gallery'}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploading}
+                          onChange={(e) => handleUpload(e, 'gallery')}
+                        />
+                      </label>
+                    )}
+                  </div>
+
+                  <div className="border-t border-white/10 pt-3">
+                    <p className="text-sm font-semibold text-cream">
+                      Video (optional) / วิดีโอ (ไม่บังคับ)
+                    </p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-cream-muted">
+                      Keep videos short and compressed to protect site performance and hosting costs.
+                      / วิดีโอควรสั้นและบีบอัดแล้ว เพื่อรักษาความเร็วเว็บและต้นทุนโฮสติ้ง
+                    </p>
+                    {form.video_url ? (
+                      <div className="mt-2 flex items-center gap-2">
+                        <video
+                          src={form.video_url}
+                          className="h-16 w-24 rounded object-cover"
+                          muted
+                          playsInline
+                          preload="metadata"
+                        />
+                        <button
+                          type="button"
+                          className="rounded-full bg-coral/20 px-3 py-1.5 text-xs text-coral"
+                          onClick={() => setField('video_url', '')}
+                        >
+                          Remove video / ลบวิดีโอ
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="mt-2 flex min-h-12 cursor-pointer items-center justify-center rounded-lg border border-dashed border-white/20 px-3 py-3 text-xs text-cream-muted hover:border-teal-500/40">
+                        {uploading ? 'Uploading…' : 'Upload .mp4 / อัปโหลด .mp4'}
+                        <input
+                          type="file"
+                          accept="video/mp4,.mp4"
+                          className="hidden"
+                          disabled={uploading}
+                          onChange={handleVideoUpload}
+                        />
+                      </label>
+                    )}
+                    {videoError ? (
+                      <p className="mt-2 text-xs leading-relaxed text-coral">{videoError}</p>
+                    ) : null}
+                  </div>
                 </div>
 
                 <StaffField label="URL slug">
@@ -776,83 +996,6 @@ export default function PhotoSpotsAdminPage() {
                     onChange={(e) => setField('sort_order', e.target.value)}
                   />
                 </StaffField>
-
-                <div className="space-y-2 rounded-xl border border-white/10 p-3">
-                  <p className="text-xs font-semibold text-cream">
-                    Images (max 5 — 1 hero + {PHOTO_SPOT_MAX_GALLERY} gallery)
-                  </p>
-                  {form.hero_image_url ? (
-                    <div className="relative">
-                      <img
-                        src={storageImageSrc(form.hero_image_url, STORAGE_IMG.card)}
-                        alt="Hero"
-                        className="h-28 w-full rounded-lg object-cover"
-                      />
-                      <button
-                        type="button"
-                        className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-cream"
-                        onClick={() =>
-                          setForm((prev) => ({ ...prev, hero_image_url: '', thumbnail_url: '' }))
-                        }
-                        aria-label="Remove hero"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-white/20 py-6 text-xs text-cream-muted hover:border-teal-500/40">
-                      {uploadPhase === 'compressing'
-                        ? 'Compressing…'
-                        : uploadPhase === 'uploading'
-                          ? 'Uploading…'
-                          : 'Upload hero image'}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        disabled={uploading}
-                        onChange={(e) => handleUpload(e, 'hero')}
-                      />
-                    </label>
-                  )}
-
-                  <div className="grid grid-cols-4 gap-2">
-                    {form.gallery_image_urls.map((url) => (
-                      <div key={url} className="relative">
-                        <img src={storageImageSrc(url, STORAGE_IMG.thumb)} alt="" className="h-16 w-full rounded object-cover" />
-                        <button
-                          type="button"
-                          className="absolute right-0.5 top-0.5 rounded-full bg-black/60 p-0.5 text-cream"
-                          onClick={() =>
-                            setForm((prev) => ({
-                              ...prev,
-                              gallery_image_urls: prev.gallery_image_urls.filter((u) => u !== url),
-                            }))
-                          }
-                          aria-label="Remove gallery image"
-                        >
-                          <X className="h-3 w-3" />
-                        </button>
-                      </div>
-                    ))}
-                    {form.gallery_image_urls.length < PHOTO_SPOT_MAX_GALLERY && (
-                      <label className="flex h-16 cursor-pointer items-center justify-center rounded border border-dashed border-white/20 text-[10px] text-cream-muted hover:border-teal-500/40">
-                        {uploadPhase === 'compressing'
-                          ? 'Compressing…'
-                          : uploadPhase === 'uploading'
-                            ? 'Uploading…'
-                            : '+ Gallery'}
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          disabled={uploading}
-                          onChange={(e) => handleUpload(e, 'gallery')}
-                        />
-                      </label>
-                    )}
-                  </div>
-                </div>
 
                 {validationError ? (
                   <p className="text-xs text-coral">{validationError}</p>

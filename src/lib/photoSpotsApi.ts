@@ -370,6 +370,7 @@ export type PhotoSpotAdminPayload = {
   hero_image_url?: string | null
   thumbnail_url?: string | null
   gallery_image_urls?: string[]
+  video_url?: string | null
   is_featured?: boolean
   sort_order?: number
   review_notes?: string | null
@@ -448,6 +449,43 @@ export async function uploadPhotoSpotImage(
   })
   if (error) {
     logSupabaseError('uploadPhotoSpotImage', error)
+    throw error
+  }
+
+  const { data } = supabase.storage.from('photo-spots').getPublicUrl(path)
+  return data.publicUrl
+}
+
+export const PHOTO_SPOT_VIDEO_MAX_BYTES = 15 * 1024 * 1024
+
+export const PHOTO_SPOT_VIDEO_TOO_LARGE =
+  'Video too large — please compress before uploading (recommend under 15MB, short clips only) / วิดีโอใหญ่เกินไป กรุณาบีบอัดก่อนอัปโหลด (แนะนำไม่เกิน 15MB คลิปสั้นๆ)'
+
+/** Upload one .mp4 as `{uuid}/{ts}_web.mp4` (no transcoding). */
+export async function uploadPhotoSpotVideo(
+  file: File,
+  onPhase?: (phase: PhotoSpotUploadPhase) => void,
+): Promise<string> {
+  const name = file.name.toLowerCase()
+  const isMp4 = file.type === 'video/mp4' || name.endsWith('.mp4')
+  if (!isMp4) {
+    throw new Error('Video must be an .mp4 file / ต้องเป็นไฟล์ .mp4 เท่านั้น')
+  }
+  if (file.size > PHOTO_SPOT_VIDEO_MAX_BYTES) {
+    throw new Error(PHOTO_SPOT_VIDEO_TOO_LARGE)
+  }
+
+  onPhase?.('uploading')
+  const uuid = crypto.randomUUID()
+  const path = `${uuid}/${Date.now()}_web.mp4`
+
+  const { error } = await supabase.storage.from('photo-spots').upload(path, file, {
+    upsert: false,
+    contentType: 'video/mp4',
+    cacheControl: '31536000',
+  })
+  if (error) {
+    logSupabaseError('uploadPhotoSpotVideo', error)
     throw error
   }
 

@@ -85,7 +85,7 @@ export default function AiContentGenerationToggle({
       สร้าง content ด้วย AI (เปิด/ปิด)
       <span className="mt-0.5 block text-xs text-cream-muted">
         {enabled
-          ? 'Trip Manager + Quick Post เรียก Anthropic ตามปกติ'
+          ? 'Trip Manager เรียก Anthropic ตามปกติ'
           : 'ปิดชั่วคราว — ประหยัดเครดิต Anthropic'}
       </span>
     </StaffCheckRow>
