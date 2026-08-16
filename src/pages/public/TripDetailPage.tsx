@@ -4,12 +4,16 @@ import {
   ArrowLeft,
   CalendarDays,
   Camera,
+  CheckCircle2,
   ChevronRight,
   Heart,
+  Hotel,
+  IdCard,
   MapPin,
   MessageCircle,
   Sparkles,
   Users,
+  XCircle,
 } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites'
@@ -156,6 +160,8 @@ export default function TripDetailPage() {
   const includesBi = tt('detail.includes')
   const excludesBi = tt('detail.excludes')
   const accomBi = tt('detail.accommodation')
+  const visaBi = tt('detail.visa')
+  const visaGuideBi = tt('detail.visaGuide')
   const prepBi = tt('detail.prep')
   const guideBi = tt('detail.photoGuide')
   const moreBi = tt('detail.moreTrips')
@@ -524,13 +530,20 @@ export default function TripDetailPage() {
                 />
                 <ul className="mt-2 space-y-1.5 text-sm text-ink/70">
                   {details.includes.en.map((item, i) => (
-                    <li key={item}>
-                      ✓ <b>{item}</b>
-                      {details.includes.th[i] && (
-                        <em className="mt-0.5 block font-thai text-[11px] not-italic text-ink-soft">
-                          {details.includes.th[i]}
-                        </em>
-                      )}
+                    <li key={item} className="flex gap-2">
+                      <CheckCircle2
+                        className="mt-0.5 h-4 w-4 shrink-0 text-teal-700"
+                        strokeWidth={2.25}
+                        aria-hidden
+                      />
+                      <span className="min-w-0">
+                        <b>{item}</b>
+                        {details.includes.th[i] && (
+                          <em className="mt-0.5 block font-thai text-[11px] not-italic text-ink-soft">
+                            {details.includes.th[i]}
+                          </em>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -547,13 +560,20 @@ export default function TripDetailPage() {
                 />
                 <ul className="mt-2 space-y-1.5 text-sm text-ink/70">
                   {details.excludes.en.map((item, i) => (
-                    <li key={item}>
-                      ✗ {item}
-                      {details.excludes.th[i] && (
-                        <em className="mt-0.5 block font-thai text-[11px] not-italic text-ink-soft">
-                          {details.excludes.th[i]}
-                        </em>
-                      )}
+                    <li key={item} className="flex gap-2">
+                      <XCircle
+                        className="mt-0.5 h-4 w-4 shrink-0 text-ink-soft"
+                        strokeWidth={2.25}
+                        aria-hidden
+                      />
+                      <span className="min-w-0">
+                        {item}
+                        {details.excludes.th[i] && (
+                          <em className="mt-0.5 block font-thai text-[11px] not-italic text-ink-soft">
+                            {details.excludes.th[i]}
+                          </em>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -565,19 +585,60 @@ export default function TripDetailPage() {
             <section
               className={`rounded-editorial border border-line bg-mint-100/80 p-4 ${pane('details')}`}
             >
-              <BiText
-                as="h2"
-                en={accomBi.en}
-                th={accomBi.th}
-                className="text-sm font-medium text-ink"
-                thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
-              />
+              <div className="flex items-start gap-2">
+                <Hotel
+                  className="mt-0.5 h-4 w-4 shrink-0 text-teal-dark"
+                  strokeWidth={2.25}
+                  aria-hidden
+                />
+                <BiText
+                  as="h2"
+                  en={accomBi.en}
+                  th={accomBi.th}
+                  className="text-sm font-medium text-ink"
+                  thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+                />
+              </div>
               <p className="mt-2 text-sm leading-relaxed text-ink/80">
                 {details.accommodationNote.en}
               </p>
               <p className="mt-1 font-thai text-[12px] leading-relaxed text-ink/70">
                 {details.accommodationNote.th}
               </p>
+            </section>
+          )}
+
+          {details?.visaNote && (
+            <section
+              className={`rounded-editorial border border-line bg-mint-100/80 p-4 ${pane('details')}`}
+            >
+              <div className="flex items-start gap-2">
+                <IdCard
+                  className="mt-0.5 h-4 w-4 shrink-0 text-orange"
+                  strokeWidth={2.25}
+                  aria-hidden
+                />
+                <BiText
+                  as="h2"
+                  en={visaBi.en}
+                  th={visaBi.th}
+                  className="text-sm font-medium text-ink"
+                  thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+                />
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-ink/80">
+                {details.visaNote.en}
+              </p>
+              <p className="mt-1 font-thai text-[12px] leading-relaxed text-ink/70">
+                {details.visaNote.th}
+              </p>
+              <Link
+                to="/photo-guide/nz-visa"
+                className="mt-3 inline-flex flex-col text-[12px] font-bold text-teal-700"
+              >
+                <span>{visaGuideBi.en}</span>
+                <span className="font-thai text-[11px] font-medium opacity-85">{visaGuideBi.th}</span>
+              </Link>
             </section>
           )}
 

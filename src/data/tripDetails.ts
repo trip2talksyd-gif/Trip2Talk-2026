@@ -10,8 +10,15 @@ export type TripDetailContent = {
   excludes: BilingualList
   /** Optional stay policy shown on Trip Detail (e.g. dorm vs private upgrade). */
   accommodationNote?: BilingualText
+  /** Optional visa / entry requirement shown on Trip Detail (e.g. NZeTA). */
+  visaNote?: BilingualText
   /** When true, waiver requires the accommodation_dorm clause. */
   requiresDormAck?: boolean
+}
+
+const NZ_VISA_NOTE: BilingualText = {
+  en: 'Non-Australian PR/citizens are responsible for their own NZ visa (NZeTA). If you’d like our team to apply for the online visa on your behalf, the service fee is $100 AUD plus the actual visa cost.',
+  th: 'ลูกทริปที่ไม่ได้ถือ PR หรือสัญชาติออสเตรเลีย ต้องดำเนินการขอวีซ่านิวซีแลนด์ (NZeTA) เอง หากต้องการให้ทีมงานช่วยขอวีซ่าออนไลน์ให้ คิดค่าบริการเพิ่ม $100 AUD บวกค่าวีซ่าจริง',
 }
 
 export const TRIP_DETAILS: Record<string, TripDetailContent> = {
@@ -134,13 +141,24 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
       th: ['รถ SUV & คนขับ 6 วัน', 'ที่พัก 5 คืน (เราช่วยจอง)', 'Milford Sound cruise', 'ช่างภาพมืออาชีพ', 'ช่วยจองตั๋วเครื่องบิน'],
     },
     excludes: {
-      en: ['International/domestic flights (we coordinate booking)', 'Meals', 'Travel insurance'],
-      th: ['ตั๋วเครื่องบิน (เราช่วยจอง)', 'ค่าอาหาร', 'ประกันการเดินทาง'],
+      en: [
+        'International/domestic flights (we coordinate booking)',
+        'Meals',
+        'Travel insurance',
+        'NZ visa / NZeTA for non-Australian PR/citizens (optional $100 AUD apply-on-behalf + visa cost)',
+      ],
+      th: [
+        'ตั๋วเครื่องบิน (เราช่วยจอง)',
+        'ค่าอาหาร',
+        'ประกันการเดินทาง',
+        'วีซ่านิวซีแลนด์ (NZeTA) สำหรับผู้ที่ไม่มี PR/สัญชาติออสเตรเลีย (บริการช่วยขอออนไลน์ $100 AUD + ค่าวีซ่าจริง — ไม่บังคับ)',
+      ],
     },
     accommodationNote: {
       en: 'Standard accommodation: Backpackers/Motels (clean & safe), shared dormitory-style. Private room upgrade available for $150–$350 AUD/night — please request before departure.',
       th: 'ที่พักมาตรฐาน: แนว Backpackers/Motels ที่เน้นความสะอาดและปลอดภัย พักร่วมกันแบบห้องรวม (Dormitory) หากต้องการห้องส่วนตัว มีค่าใช้จ่ายเพิ่ม $150–350 AUD ต่อคืน กรุณาแจ้งก่อนออกเดินทาง',
     },
+    visaNote: NZ_VISA_NOTE,
     requiresDormAck: true,
   },
   'NZ-10D9N': {
@@ -190,18 +208,21 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
         'All meals',
         'Personal travel insurance',
         'Optional private room upgrade ($150–$350 AUD/night — request before departure)',
+        'NZ visa / NZeTA for non-Australian PR/citizens (optional $100 AUD apply-on-behalf + visa cost)',
       ],
       th: [
         'ตั๋วบินระหว่างประเทศ และในประเทศ Auckland → Christchurch (จองเอง — ในประเทศมักราว AUD 100–150)',
         'อาหารทุกมื้อ',
         'ประกันการเดินทางส่วนตัว',
         'อัปเกรดห้องส่วนตัว ($150–350 AUD ต่อคืน — กรุณาแจ้งก่อนออกเดินทาง)',
+        'วีซ่านิวซีแลนด์ (NZeTA) สำหรับผู้ที่ไม่มี PR/สัญชาติออสเตรเลีย (บริการช่วยขอออนไลน์ $100 AUD + ค่าวีซ่าจริง — ไม่บังคับ)',
       ],
     },
     accommodationNote: {
       en: 'Standard accommodation: Backpackers/Motels (clean & safe), shared dormitory-style. Private room upgrade available for $150–$350 AUD/night — please request before departure.',
       th: 'ที่พักมาตรฐาน: แนว Backpackers/Motels ที่เน้นความสะอาดและปลอดภัย พักร่วมกันแบบห้องรวม (Dormitory) หากต้องการห้องส่วนตัว มีค่าใช้จ่ายเพิ่ม $150–350 AUD ต่อคืน กรุณาแจ้งก่อนออกเดินทาง',
     },
+    visaNote: NZ_VISA_NOTE,
     requiresDormAck: true,
   },
   'TAS-3D2N': {

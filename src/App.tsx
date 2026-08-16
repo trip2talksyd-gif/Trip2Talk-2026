@@ -24,6 +24,7 @@ import PhotoGuideHubPage from './pages/public/PhotoGuideHubPage'
 import PosingGuidePage from './pages/public/PosingGuidePage'
 import CameraGuidePage from './pages/public/CameraGuidePage'
 import MobileGuidePage from './pages/public/MobileGuidePage'
+import NzVisaGuidePage from './pages/public/NzVisaGuidePage'
 import {
   CancellationPage,
   HelpSupportPage,
@@ -94,6 +95,8 @@ export default function App() {
           <Route path="photo-guide/posing" element={<PosingGuidePage />} />
           <Route path="photo-guide/camera" element={<CameraGuidePage />} />
           <Route path="photo-guide/mobile" element={<MobileGuidePage />} />
+          <Route path="photo-guide/nz-visa" element={<NzVisaGuidePage />} />
+          <Route path="photo-guide/nzeta" element={<Navigate to="/photo-guide/nz-visa" replace />} />
           <Route path="terms" element={<TermsPage />} />
           <Route path="privacy" element={<PrivacyPage />} />
           <Route path="cancellation" element={<CancellationPage />} />

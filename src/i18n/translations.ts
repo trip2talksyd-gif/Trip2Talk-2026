@@ -108,6 +108,8 @@ export type TranslationKey =
   | 'detail.includes'
   | 'detail.excludes'
   | 'detail.accommodation'
+  | 'detail.visa'
+  | 'detail.visaGuide'
   | 'detail.prep'
   | 'detail.photoGuide'
   | 'detail.swipePhotos'
@@ -365,6 +367,17 @@ export type TranslationKey =
   | 'photoGuide.mobile.angles.cta.sub'
   | 'photoGuide.mobile.angles.cta.button'
   | 'photoGuide.follow'
+  | 'photoGuide.nzVisa.eyebrow'
+  | 'photoGuide.nzVisa.title'
+  | 'photoGuide.nzVisa.sub'
+  | 'photoGuide.nzVisa.body'
+  | 'photoGuide.nzVisa.processTitle'
+  | 'photoGuide.nzVisa.process'
+  | 'photoGuide.nzVisa.disclaimer'
+  | 'photoGuide.nzVisa.officialCta'
+  | 'photoGuide.nzVisa.videoTitle'
+  | 'photoGuide.nzVisa.videoCredit'
+  | 'photoGuide.nzVisa.videoNote'
   | 'favorites.saved'
   | 'favorites.savedTripsLabel'
   | 'trips.suggested'
@@ -710,6 +723,8 @@ const en: Map = {
   'detail.includes': "What's included",
   'detail.excludes': 'Not included',
   'detail.accommodation': 'Accommodation',
+  'detail.visa': 'Visa',
+  'detail.visaGuide': 'Read the self-apply guide →',
   'detail.prep': 'Trip Preparation',
   'detail.photoGuide': 'Read the Photo Guide before you go',
   'detail.swipePhotos': '↔ Swipe for more photos',
@@ -947,7 +962,7 @@ const en: Map = {
   'photoGuide.back': 'Back to Photo Guide',
   'photoGuide.hub.badge': "Let's Learn and Practice",
   'photoGuide.hub.title': 'Photo Guide',
-  'photoGuide.hub.subtitle': 'Three guides for three kinds of travelers.',
+  'photoGuide.hub.subtitle': 'Guides for posing, camera, mobile — and NZ visa.',
   'photoGuide.readGuide': 'Read guide →',
   'photoGuide.hub.albumTitle': 'Photos from Saen',
   'photoGuide.hub.albumSub': 'Curated shots from past trips — drag or browse the slideshow below.',
@@ -1001,6 +1016,23 @@ const en: Map = {
     'Pick the trip that matches the style you just read about — our photographers take you straight to the best spots.',
   'photoGuide.mobile.angles.cta.button': 'Find your trip →',
   'photoGuide.follow': 'Follow Trip2Talk',
+  'photoGuide.nzVisa.eyebrow': 'Photo Guide · NZ Visa',
+  'photoGuide.nzVisa.title':
+    'New Zealand Visitor Visa — What Thai Passport Holders Need to Know',
+  'photoGuide.nzVisa.sub':
+    'Thai passport holders need a full NZ Visitor Visa (not the simplified NZeTA) to enter New Zealand.',
+  'photoGuide.nzVisa.body':
+    'Requirements typically include a completed application, passport, proof of sufficient funds for your stay, a return/onward ticket, and a clear travel purpose. Exact fund requirements and required documents can change and depend on individual circumstances — always check the current list on the official Immigration New Zealand website before applying. Your Trip2Talk itinerary can be used as supporting evidence of your travel plan — ask our team for a copy. If you’d like our team to help with the online visa application, our service fee is $100 AUD plus the actual visa cost.',
+  'photoGuide.nzVisa.processTitle': 'What the process looks like',
+  'photoGuide.nzVisa.process':
+    'The Visitor Visa process involves an online application, document upload, and processing time that varies. We recommend starting the process at least 6-8 weeks before departure. Full current steps and document checklists are on the official Immigration New Zealand website (link above).',
+  'photoGuide.nzVisa.disclaimer':
+    'Fees and requirements change — always confirm current details on the official Immigration New Zealand website before applying.',
+  'photoGuide.nzVisa.officialCta': 'Official site →',
+  'photoGuide.nzVisa.videoTitle': 'Watch: Step-by-step visa application walkthrough (Thai)',
+  'photoGuide.nzVisa.videoCredit': 'Video by Gograph Journey on YouTube.',
+  'photoGuide.nzVisa.videoNote':
+    'This is a helpful community tutorial, not an official government guide — always cross-check with the official Immigration New Zealand website.',
   'favorites.saved': 'saved',
   'favorites.savedTripsLabel': 'saved trips',
   'trips.suggested': 'You might also like',
@@ -1358,6 +1390,8 @@ const th: Map = {
   'detail.includes': 'รวมในราคา',
   'detail.excludes': 'ไม่รวม',
   'detail.accommodation': 'ที่พัก',
+  'detail.visa': 'วีซ่า',
+  'detail.visaGuide': 'อ่านคู่มือขอวีซ่าด้วยตัวเอง →',
   'detail.prep': 'เตรียมตัวก่อนเดินทาง',
   'detail.photoGuide': 'อ่านคู่มือถ่ายภาพก่อนออกเดินทาง',
   'detail.swipePhotos': '↔ ปัดดูรูปเพิ่มเติม',
@@ -1595,7 +1629,7 @@ const th: Map = {
   'photoGuide.back': 'กลับไปหน้าคลังเคล็ดลับ',
   'photoGuide.hub.badge': 'มาเรียนรู้และฝึกฝนไปด้วยกัน',
   'photoGuide.hub.title': 'คลังเคล็ดลับถ่ายภาพ',
-  'photoGuide.hub.subtitle': 'สามคู่มือสำหรับสามสไตล์นักเดินทาง',
+  'photoGuide.hub.subtitle': 'คู่มือโพส กล้อง มือถือ — และวีซ่า NZ',
   'photoGuide.readGuide': 'อ่านคู่มือ →',
   'photoGuide.hub.albumTitle': 'อัลบั้มรูปจากพี่แสน',
   'photoGuide.hub.albumSub': 'รูปคัดสรรจากทริปที่ผ่านมา — ลากหรือดูสไลด์ด้านล่าง',
@@ -1649,6 +1683,22 @@ const th: Map = {
     'เลือกทริปที่เหมาะกับสไตล์ภาพที่คุณชอบ มีช่างภาพมืออาชีพพาไปยังจุดถ่ายภาพที่ดีที่สุด',
   'photoGuide.mobile.angles.cta.button': 'เลือกทริปของคุณ →',
   'photoGuide.follow': 'ติดตามเรา',
+  'photoGuide.nzVisa.eyebrow': 'คลังเคล็ดลับ · วีซ่า NZ',
+  'photoGuide.nzVisa.title': 'วีซ่านักท่องเที่ยวนิวซีแลนด์ — สิ่งที่ผู้ถือพาสปอร์ตไทยต้องรู้',
+  'photoGuide.nzVisa.sub':
+    'ผู้ถือพาสปอร์ตไทยต้องขอวีซ่านักท่องเที่ยวนิวซีแลนด์แบบเต็มรูปแบบ (ไม่ใช่ NZeTA)',
+  'photoGuide.nzVisa.body':
+    'เอกสารที่มักต้องใช้ ได้แก่ ใบสมัคร พาสปอร์ต หลักฐานการเงินที่เพียงพอสำหรับการเดินทาง ตั๋วเดินทางไป-กลับ และวัตถุประสงค์การเดินทางที่ชัดเจน — จำนวนเงินและเอกสารที่ต้องใช้อาจเปลี่ยนแปลงและขึ้นอยู่กับสถานการณ์แต่ละคน กรุณาตรวจสอบรายการล่าสุดจากเว็บไซต์ Immigration New Zealand ทางการก่อนสมัครเสมอ แผนการเดินทางจาก Trip2Talk สามารถใช้เป็นหลักฐานประกอบการยื่นวีซ่าได้ — แจ้งทีมงานเพื่อขอสำเนา หากต้องการให้ทีมงานช่วยขอวีซ่าออนไลน์ให้ คิดค่าบริการเพิ่ม $100 AUD บวกค่าวีซ่าจริง',
+  'photoGuide.nzVisa.processTitle': 'ภาพรวมขั้นตอน',
+  'photoGuide.nzVisa.process':
+    'ขั้นตอนขอวีซ่านักท่องเที่ยวมีการสมัครออนไลน์ อัปโหลดเอกสาร และใช้เวลาพิจารณาที่แตกต่างกันไป แนะนำให้เริ่มดำเนินการอย่างน้อย 6-8 สัปดาห์ก่อนเดินทาง ขั้นตอนและรายการเอกสารล่าสุดดูได้จากเว็บไซต์ Immigration New Zealand ทางการ (ลิงก์ด้านบน)',
+  'photoGuide.nzVisa.disclaimer':
+    'ค่าธรรมเนียมและเงื่อนไขอาจเปลี่ยนแปลง กรุณาตรวจสอบข้อมูลล่าสุดจากเว็บไซต์ Immigration New Zealand ทางการก่อนสมัครเสมอ',
+  'photoGuide.nzVisa.officialCta': 'เว็บไซต์ทางการ →',
+  'photoGuide.nzVisa.videoTitle': 'ดูวิดีโอ: ขั้นตอนขอวีซ่าแบบละเอียด (ภาษาไทย)',
+  'photoGuide.nzVisa.videoCredit': 'วิดีโอโดยช่อง Gograph Journey บน YouTube',
+  'photoGuide.nzVisa.videoNote':
+    'วิดีโอนี้เป็นคำแนะนำจากผู้ใช้ทั่วไป ไม่ใช่ช่องทางทางการของรัฐบาล กรุณาตรวจสอบข้อมูลกับเว็บไซต์ Immigration New Zealand ทางการเสมอ',
   'favorites.saved': 'บันทึกไว้',
   'favorites.savedTripsLabel': 'ทริป',
   'trips.suggested': 'ทริปที่คุณอาจสนใจ',

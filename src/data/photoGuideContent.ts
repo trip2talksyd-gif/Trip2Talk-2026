@@ -420,3 +420,9 @@ export const MOBILE_ANGLES = [
     photoIds: ['mel-001', 'mel-002', 'ber-004'] as const,
   },
 ] as const
+
+/** Official NZ Visitor Visa overview — user-supplied apply-for-a-visa URL 404s (Aug 2026). */
+export const NZ_VISITOR_VISA_URL = 'https://www.immigration.govt.nz/visas/visitor-visa/'
+
+/** Community Thai walkthrough (not INZ). Click-to-load on /photo-guide/nz-visa. */
+export const NZ_VISA_TUTORIAL_YOUTUBE_ID = 'egYQHAOW7jI'

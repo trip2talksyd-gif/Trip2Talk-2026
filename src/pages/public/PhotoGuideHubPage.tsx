@@ -52,6 +52,21 @@ const HUB_CARDS = [
     bodyTh: 'เทคนิคทิวทัศน์และพอร์ตเทรตด้วยมือถือ ไม่ต้องมีอุปกรณ์เพิ่ม',
     photoId: 'nsw-010',
   },
+  {
+    to: '/photo-guide/nz-visa',
+    badgeEn: 'Thai passports',
+    badgeTh: 'พาสปอร์ตไทย',
+    badgeClass: 'bg-orange',
+    tagEn: 'NZ Trips',
+    tagTh: 'ทริปนิวซีแลนด์',
+    titleEn: 'New Zealand Visitor Visa — What Thai Passport Holders Need to Know',
+    titleTh: 'วีซ่านักท่องเที่ยวนิวซีแลนด์ — สิ่งที่ผู้ถือพาสปอร์ตไทยต้องรู้',
+    bodyEn:
+      'Thai passport holders need a full NZ Visitor Visa (not the simplified NZeTA) to enter New Zealand.',
+    bodyTh:
+      'ผู้ถือพาสปอร์ตไทยต้องขอวีซ่านักท่องเที่ยวนิวซีแลนด์แบบเต็มรูปแบบ (ไม่ใช่ NZeTA)',
+    photoId: 'nz-013',
+  },
 ] as const
 
 export default function PhotoGuideHubPage() {
@@ -99,7 +114,7 @@ export default function PhotoGuideHubPage() {
         />
       </PageVideoHero>
 
-      <div className="grid gap-[22px] md:grid-cols-3">
+      <div className="grid gap-[22px] sm:grid-cols-2 xl:grid-cols-4">
         {HUB_CARDS.map((card) => {
           const photo = GALLERY_PHOTOS.find((p) => p.id === card.photoId) ?? GALLERY_PHOTOS[0]
           return (

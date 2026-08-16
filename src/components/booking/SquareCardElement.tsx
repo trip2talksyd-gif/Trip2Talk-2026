@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../../hooks/useLang'
 import { fetchSquarePaymentConfig, chargeSquareCardToken, createSquareCheckout } from '../../lib/toursApi'
-import SquareAcceptedPaymentIcons from './SquareAcceptedPaymentIcons'
+import SquareAcceptedPaymentIcons, { AfterpayIcon } from './SquareAcceptedPaymentIcons'
 
 /** Matches square-create-payment CARD_SURCHARGE_RATE. Display only — server recomputes. */
 export const CARD_SURCHARGE_RATE = 0.02
@@ -411,8 +411,9 @@ export default function SquareCardElement({
 
       {showAmountOptions && (
         <div className="mt-3 rounded-[10px] border border-line bg-white px-3 py-2.5">
-          <p className="text-[11px] font-semibold text-ink">
-            {lang === 'th' ? 'Afterpay / Clearpay' : 'Afterpay / Clearpay'}
+          <p className="flex items-center gap-1.5 text-[11px] font-semibold text-ink">
+            <AfterpayIcon labelled={false} />
+            <span>{lang === 'th' ? 'Afterpay / Clearpay' : 'Afterpay / Clearpay'}</span>
           </p>
           <p className="mt-1 text-[10px] leading-relaxed text-ink-soft">
             {lang === 'th'
