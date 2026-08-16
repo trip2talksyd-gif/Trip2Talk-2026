@@ -100,7 +100,7 @@ function MastercardIcon({ tone = 'light', labelled = true }: { tone?: Tone; labe
   )
 }
 
-function AfterpayIcon({ tone = 'light', labelled = true }: { tone?: Tone; labelled?: boolean }) {
+export function AfterpayIcon({ tone = 'light', labelled = true }: { tone?: Tone; labelled?: boolean }) {
   return (
     <BrandShell className="!border-[#b2fce4] !bg-[#b2fce4]" title="Afterpay" tone={tone} labelled={labelled}>
       <svg viewBox="0 0 72 16" className="h-2.5 w-[3rem] sm:h-3 sm:w-[3.6rem]" aria-hidden>

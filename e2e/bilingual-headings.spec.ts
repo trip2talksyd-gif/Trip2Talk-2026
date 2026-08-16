@@ -20,7 +20,6 @@ const COPY = {
     en: 'Capture Moments Worth Showing Off',
     th: 'ออกไปเก็บภาพ ที่ทุกคนอยากดู',
   },
-  spots: { en: 'Photo Spots', th: 'พิกัดถ่ายภาพ' },
   discover: { en: 'Where to shoot next?', th: 'วันนี้อยากเห็นมุมไหน?' },
   trips: { en: 'Find Your Trip', th: 'เลือกทริปของคุณ' },
   pricing: { en: 'Pricing', th: 'ราคา' },
@@ -105,9 +104,10 @@ test.describe('bilingual headings', () => {
     expect(thFont, `Thai must not inherit Geist: ${thFont}`).not.toMatch(/Geist/i)
   })
 
-  test('spots page BiDisplayHeading keeps both languages and correct fonts', async ({ page }) => {
+  test('/spots redirects to /discover and keeps bilingual heading fonts', async ({ page }) => {
     await page.goto('/spots')
-    await assertBiDisplayHeading(page, COPY.spots.en, COPY.spots.th)
+    await expect(page).toHaveURL(/\/discover(?:\?|$)/)
+    await assertBiDisplayHeading(page, COPY.discover.en, COPY.discover.th)
   })
 
   test('discover page BiDisplayHeading keeps both languages and correct fonts', async ({ page }) => {
@@ -148,8 +148,8 @@ test.describe('bilingual headings', () => {
   test('EN/TH pill reorders BiDisplayHeading primary line without hiding either language', async ({
     page,
   }) => {
-    await page.goto('/spots')
-    const root = biHeading(page, COPY.spots.en, COPY.spots.th)
+    await page.goto('/discover')
+    const root = biHeading(page, COPY.discover.en, COPY.discover.th)
     await expect(root).toBeVisible()
 
     const group = page.getByRole('group', { name: 'Language' })
@@ -169,8 +169,8 @@ test.describe('bilingual headings', () => {
     await expect.poll(order).toEqual(['th', 'en'])
     await expect(root.locator('[lang="en"]')).toBeVisible()
     await expect(root.locator('[lang="th"]')).toBeVisible()
-    await expect(root.locator('[lang="th"]')).toHaveText(COPY.spots.th)
-    await expect(root.locator('[lang="en"]')).toHaveText(COPY.spots.en)
+    await expect(root.locator('[lang="th"]')).toHaveText(COPY.discover.th)
+    await expect(root.locator('[lang="en"]')).toHaveText(COPY.discover.en)
 
     await group.getByRole('button', { name: 'EN', exact: true }).click()
     await expect.poll(order).toEqual(['en', 'th'])
@@ -179,7 +179,7 @@ test.describe('bilingual headings', () => {
   })
 
   test('nav CTA is single-language chrome (Book Now / จองเลย)', async ({ page }) => {
-    await page.goto('/spots')
+    await page.goto('/discover')
     const cta = page.locator('a.nav-cta')
     await expect(cta).toBeVisible()
     await expect(cta).toHaveText('Book Now')

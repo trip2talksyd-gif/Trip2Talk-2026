@@ -206,6 +206,11 @@ export const WAIVER_CLAUSES = {
       title: 'No On-Trip Extensions',
       text: 'Due to staff commitments to subsequent trips, extending the trip or adding days mid-trip is not possible under any circumstances, regardless of willingness to pay extra.',
     },
+    {
+      id: 'accommodation_dorm',
+      title: 'Accommodation Type Acknowledgment',
+      text: 'Standard overnight accommodation on this trip is shared/dormitory-style. A private room upgrade is available at extra cost — arranging the upgrade is free, but the room itself is not. Any upgrade must be requested and paid for BEFORE departure; we cannot guarantee private rooms arranged on-site. Refund requests for accommodation costs made after the trip has started will not be approved, regardless of reason.',
+    },
   ],
   th: [
     {
@@ -253,7 +258,23 @@ export const WAIVER_CLAUSES = {
       title: 'ห้ามขยายทริประหว่างเดินทาง',
       text: 'เนื่องจากทีมงานมีภาระผูกพันกับทริปถัดไป จึงไม่สามารถขยายทริปหรือเพิ่มวันระหว่างเดินทางได้ในทุกกรณี แม้ยินดีจ่ายเพิ่มก็ตาม',
     },
+    {
+      id: 'accommodation_dorm',
+      title: 'รับทราบประเภทที่พัก',
+      text: 'ที่พักมาตรฐานของทริปนี้เป็นแบบห้องรวม (Dormitory) การอัปเกรดเป็นห้องส่วนตัวมีค่าใช้จ่ายเพิ่มเติม — การจัดการฟรี แต่ตัวห้องไม่ฟรี ต้องแจ้งและชำระค่าอัปเกรดก่อนวันเดินทางเท่านั้น เราไม่สามารถการันตีห้องส่วนตัวที่ขอเปลี่ยนหน้างานได้ คำขอคืนเงินค่าที่พักหลังจากทริปเริ่มไปแล้ว จะไม่ได้รับการอนุมัติไม่ว่าด้วยเหตุผลใด',
+    },
   ],
+}
+
+export const DORM_ACK_CLAUSE_ID = 'accommodation_dorm'
+
+export function visibleWaiverClauses(
+  locale: 'en' | 'th',
+  opts: { includeDormAck: boolean },
+): (typeof WAIVER_CLAUSES.en)[number][] {
+  const all = WAIVER_CLAUSES[locale]
+  if (opts.includeDormAck) return all
+  return all.filter((c) => c.id !== DORM_ACK_CLAUSE_ID)
 }
 
 export const PAYID_NOTICE = {

@@ -4,12 +4,16 @@ import {
   ArrowLeft,
   CalendarDays,
   Camera,
+  CheckCircle2,
   ChevronRight,
   Heart,
+  Hotel,
+  IdCard,
   MapPin,
   MessageCircle,
   Sparkles,
   Users,
+  XCircle,
 } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites'
@@ -17,6 +21,7 @@ import {
   fetchFeaturedTours,
   fetchTourByCode,
   formatAud,
+  isListedPriceHidden,
   isTourBookable,
   seatsRemaining,
 } from '../../lib/toursApi'
@@ -139,6 +144,7 @@ export default function TripDetailPage() {
   const mapCfg = getTripMap(tour.trip_code)
   const coverVideoUrl = getTripCoverVideoUrl(tour.trip_code)
   const bookable = isTourBookable(tour)
+  const priceHidden = isListedPriceHidden(tour)
   const remaining = seatsRemaining(tour)
   const testimonials = getTestimonialsForTrip(tour.trip_code)
   const lowSeats =
@@ -154,11 +160,14 @@ export default function TripDetailPage() {
   const includesBi = tt('detail.includes')
   const excludesBi = tt('detail.excludes')
   const accomBi = tt('detail.accommodation')
+  const visaBi = tt('detail.visa')
+  const visaGuideBi = tt('detail.visaGuide')
   const prepBi = tt('detail.prep')
   const guideBi = tt('detail.photoGuide')
   const moreBi = tt('detail.moreTrips')
   const auroraBi = tt('common.aurora')
   const fromBi = tt('detail.fromPrice')
+  const priceTba = tt('trips.priceTba')
 
   const seatsValue = bookable
     ? { en: `${remaining} left`, th: `เหลือ ${remaining}` }
@@ -174,7 +183,7 @@ export default function TripDetailPage() {
       label: tt('detail.stat.seats'),
     },
     {
-      value: formatAud(tour.price_aud),
+      value: priceHidden ? priceTba.en : formatAud(tour.price_aud),
       label: tt('detail.stat.perPerson'),
     },
   ]
@@ -323,18 +332,26 @@ export default function TripDetailPage() {
       <div className="hidden items-center gap-3 rounded-2xl border border-line bg-card p-3 shadow-[0_8px_22px_-14px_rgba(15,28,30,0.35)] md:flex">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-1.5">
-            <span className="text-[10px] font-semibold text-ink-soft">{fromBi.en}</span>
-            <SplitFlapPrice
-              amountAud={tour.price_aud}
-              board
-              className="text-[15px] font-extrabold leading-none"
-            />
-            <span className="text-[10px] font-semibold text-ink-soft">AUD</span>
+            {priceHidden ? (
+              <span className="text-[15px] font-extrabold text-ink">{priceTba.en}</span>
+            ) : (
+              <>
+                <span className="text-[10px] font-semibold text-ink-soft">{fromBi.en}</span>
+                <SplitFlapPrice
+                  amountAud={tour.price_aud}
+                  board
+                  className="text-[15px] font-extrabold leading-none"
+                />
+                <span className="text-[10px] font-semibold text-ink-soft">AUD</span>
+              </>
+            )}
           </div>
           <p className="mt-0.5 truncate text-[10px] text-ink-soft">
-            {bookable && lowSeats
-              ? `${remaining} seats left · deposit locks your seat / เหลือ ${remaining} · มัดจำล็อคที่นั่ง`
-              : 'per person · deposit locks your seat / ต่อคน · มัดจำล็อคที่นั่ง'}
+            {priceHidden
+              ? `${priceTba.th} · ${tour.max_seats} pax private / กลุ่มส่วนตัว ${tour.max_seats} คน`
+              : bookable && lowSeats
+                ? `${remaining} seats left · deposit locks your seat / เหลือ ${remaining} · มัดจำล็อคที่นั่ง`
+                : 'per person · deposit locks your seat / ต่อคน · มัดจำล็อคที่นั่ง'}
           </p>
         </div>
         <TripBookButton tour={tour} variant="deep" className="!w-auto shrink-0 !px-5 !py-2.5" />
@@ -513,13 +530,20 @@ export default function TripDetailPage() {
                 />
                 <ul className="mt-2 space-y-1.5 text-sm text-ink/70">
                   {details.includes.en.map((item, i) => (
-                    <li key={item}>
-                      ✓ <b>{item}</b>
-                      {details.includes.th[i] && (
-                        <em className="mt-0.5 block font-thai text-[11px] not-italic text-ink-soft">
-                          {details.includes.th[i]}
-                        </em>
-                      )}
+                    <li key={item} className="flex gap-2">
+                      <CheckCircle2
+                        className="mt-0.5 h-4 w-4 shrink-0 text-teal-700"
+                        strokeWidth={2.25}
+                        aria-hidden
+                      />
+                      <span className="min-w-0">
+                        <b>{item}</b>
+                        {details.includes.th[i] && (
+                          <em className="mt-0.5 block font-thai text-[11px] not-italic text-ink-soft">
+                            {details.includes.th[i]}
+                          </em>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -536,13 +560,20 @@ export default function TripDetailPage() {
                 />
                 <ul className="mt-2 space-y-1.5 text-sm text-ink/70">
                   {details.excludes.en.map((item, i) => (
-                    <li key={item}>
-                      ✗ {item}
-                      {details.excludes.th[i] && (
-                        <em className="mt-0.5 block font-thai text-[11px] not-italic text-ink-soft">
-                          {details.excludes.th[i]}
-                        </em>
-                      )}
+                    <li key={item} className="flex gap-2">
+                      <XCircle
+                        className="mt-0.5 h-4 w-4 shrink-0 text-ink-soft"
+                        strokeWidth={2.25}
+                        aria-hidden
+                      />
+                      <span className="min-w-0">
+                        {item}
+                        {details.excludes.th[i] && (
+                          <em className="mt-0.5 block font-thai text-[11px] not-italic text-ink-soft">
+                            {details.excludes.th[i]}
+                          </em>
+                        )}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -554,19 +585,60 @@ export default function TripDetailPage() {
             <section
               className={`rounded-editorial border border-line bg-mint-100/80 p-4 ${pane('details')}`}
             >
-              <BiText
-                as="h2"
-                en={accomBi.en}
-                th={accomBi.th}
-                className="text-sm font-medium text-ink"
-                thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
-              />
+              <div className="flex items-start gap-2">
+                <Hotel
+                  className="mt-0.5 h-4 w-4 shrink-0 text-teal-dark"
+                  strokeWidth={2.25}
+                  aria-hidden
+                />
+                <BiText
+                  as="h2"
+                  en={accomBi.en}
+                  th={accomBi.th}
+                  className="text-sm font-medium text-ink"
+                  thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+                />
+              </div>
               <p className="mt-2 text-sm leading-relaxed text-ink/80">
                 {details.accommodationNote.en}
               </p>
               <p className="mt-1 font-thai text-[12px] leading-relaxed text-ink/70">
                 {details.accommodationNote.th}
               </p>
+            </section>
+          )}
+
+          {details?.visaNote && (
+            <section
+              className={`rounded-editorial border border-line bg-mint-100/80 p-4 ${pane('details')}`}
+            >
+              <div className="flex items-start gap-2">
+                <IdCard
+                  className="mt-0.5 h-4 w-4 shrink-0 text-orange"
+                  strokeWidth={2.25}
+                  aria-hidden
+                />
+                <BiText
+                  as="h2"
+                  en={visaBi.en}
+                  th={visaBi.th}
+                  className="text-sm font-medium text-ink"
+                  thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+                />
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-ink/80">
+                {details.visaNote.en}
+              </p>
+              <p className="mt-1 font-thai text-[12px] leading-relaxed text-ink/70">
+                {details.visaNote.th}
+              </p>
+              <Link
+                to="/photo-guide/nz-visa"
+                className="mt-3 inline-flex flex-col text-[12px] font-bold text-teal-700"
+              >
+                <span>{visaGuideBi.en}</span>
+                <span className="font-thai text-[11px] font-medium opacity-85">{visaGuideBi.th}</span>
+              </Link>
             </section>
           )}
 
@@ -668,7 +740,7 @@ export default function TripDetailPage() {
                       </span>
                     </p>
                     <p className="mt-1 text-[12px] font-extrabold text-coral">
-                      {formatAud(rec.price_aud)} AUD
+                      {isListedPriceHidden(rec) ? priceTba.en : `${formatAud(rec.price_aud)} AUD`}
                     </p>
                   </div>
                 </Link>

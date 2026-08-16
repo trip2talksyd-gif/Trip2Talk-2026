@@ -3,6 +3,10 @@ import { useLang } from '../../hooks/useLang'
 import { GALLERY_PHOTOS, photoThumbSrc } from '../../data/galleryPhotos'
 import PhotoSlideshow, { galleryByIds } from '../../components/photoGuide/PhotoSlideshow'
 import BiText from '../../components/ui/BiText'
+import PageVideoHero from '../../components/layout/PageVideoHero'
+import { getTripVideoUrl } from '../../data/tripVideos'
+
+const GUIDE_HERO_VIDEO = getTripVideoUrl('ULU') ?? '/trip-videos/Uluru_web.mp4'
 
 const HUB_CARDS = [
   {
@@ -48,6 +52,21 @@ const HUB_CARDS = [
     bodyTh: 'เทคนิคทิวทัศน์และพอร์ตเทรตด้วยมือถือ ไม่ต้องมีอุปกรณ์เพิ่ม',
     photoId: 'nsw-010',
   },
+  {
+    to: '/photo-guide/nz-visa',
+    badgeEn: 'Thai passports',
+    badgeTh: 'พาสปอร์ตไทย',
+    badgeClass: 'bg-orange',
+    tagEn: 'NZ Trips',
+    tagTh: 'ทริปนิวซีแลนด์',
+    titleEn: 'New Zealand Visitor Visa — What Thai Passport Holders Need to Know',
+    titleTh: 'วีซ่านักท่องเที่ยวนิวซีแลนด์ — สิ่งที่ผู้ถือพาสปอร์ตไทยต้องรู้',
+    bodyEn:
+      'Thai passport holders need a full NZ Visitor Visa (not the simplified NZeTA) to enter New Zealand.',
+    bodyTh:
+      'ผู้ถือพาสปอร์ตไทยต้องขอวีซ่านักท่องเที่ยวนิวซีแลนด์แบบเต็มรูปแบบ (ไม่ใช่ NZeTA)',
+    photoId: 'nz-013',
+  },
 ] as const
 
 export default function PhotoGuideHubPage() {
@@ -73,8 +92,8 @@ export default function PhotoGuideHubPage() {
 
   return (
     <div className="space-y-8 pb-4">
-      <header className="text-center">
-        <span className="mb-3.5 inline-flex flex-col items-center gap-0.5 rounded-full bg-mint-100 px-3.5 py-[7px] text-[11.5px] font-bold text-teal-800">
+      <PageVideoHero src={GUIDE_HERO_VIDEO}>
+        <span className="mb-2 inline-flex flex-col gap-0.5 rounded-full bg-cream/90 px-3.5 py-[7px] text-[11.5px] font-bold text-teal-800">
           <span>✨ {badgeBi.en}</span>
           <span className="font-thai text-[10px] font-medium opacity-85">{badgeBi.th}</span>
         </span>
@@ -83,19 +102,19 @@ export default function PhotoGuideHubPage() {
           en={titleBi.en}
           th={titleBi.th}
           serif
-          className="mt-2 text-[22px] text-ink sm:text-3xl"
-          thClassName="mt-1 block font-thai text-[13px] font-medium text-ink-soft sm:text-[15px]"
+          className="mt-2 text-[22px] text-cream sm:text-3xl"
+          thClassName="mt-1 block font-thai text-[13px] font-medium text-cream/80 sm:text-[15px]"
         />
         <BiText
           as="p"
           en={subBi.en}
           th={subBi.th}
-          className="mx-auto mt-1 max-w-lg text-[13.5px] leading-relaxed text-ink-soft"
-          thClassName="mt-1 block font-thai text-[12px] font-medium text-ink-soft/90"
+          className="mt-1 max-w-lg text-[13.5px] leading-relaxed text-cream/85"
+          thClassName="mt-1 block font-thai text-[12px] font-medium text-cream/70"
         />
-      </header>
+      </PageVideoHero>
 
-      <div className="grid gap-[22px] md:grid-cols-3">
+      <div className="grid gap-[22px] sm:grid-cols-2 xl:grid-cols-4">
         {HUB_CARDS.map((card) => {
           const photo = GALLERY_PHOTOS.find((p) => p.id === card.photoId) ?? GALLERY_PHOTOS[0]
           return (

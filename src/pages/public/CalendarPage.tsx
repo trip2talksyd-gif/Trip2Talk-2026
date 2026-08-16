@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Camera } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
-import { fetchConfirmedTours } from '../../lib/toursApi'
+import { fetchAllTours } from '../../lib/toursApi'
 import type { Tour } from '../../types/tour'
 import { PageError } from '../../components/ui/PageError'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
@@ -34,7 +34,7 @@ export default function CalendarPage() {
   const load = useCallback(() => {
     setLoading(true)
     setError('')
-    fetchConfirmedTours()
+    fetchAllTours()
       .then(setTours)
       .catch(() => setError(t('common.error')))
       .finally(() => setLoading(false))

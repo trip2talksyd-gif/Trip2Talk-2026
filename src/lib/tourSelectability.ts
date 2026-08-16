@@ -55,9 +55,26 @@ export function isSeasonInstanceTripCode(tripCode: string): boolean {
   return Boolean(last && SEASON_SUFFIXES.has(last))
 }
 
+type CatalogTour = {
+  trip_code: string
+  departure_date: string | null | undefined
+  status?: string | null
+}
+
+/** Family key: SYD-1DAY-AUG1_1 → SYD-1DAY, TAS-LH-3D2N-WIN → TAS-LH-3D2N. */
+export function tourFamilyBase(tripCode: string): string {
+  return stripDateSuffixFromTripCode(tripCode).toUpperCase()
+}
+
+function isSuffixedDatedCode(tripCode: string): boolean {
+  return tourFamilyBase(tripCode) !== tripCode.trim().toUpperCase()
+}
+
 /**
  * Tours staff/customers may pick in booking / waiver / cashier selectors.
- * Templates stay in DB for itinerary resolution + Trip Manager cloning.
+ * Month-only shells and generic -1DAY SKUs stay in DB for CMS / cloning.
+ * CMS-exact keys WITH a real departure date (MEL-4D3N, TAS-LH-3D2N-WIN) are
+ * bookable — they are the product row, not a month-only clone shell.
  */
 export function isSelectableBookableTour(tour: {
   trip_code: string
@@ -65,12 +82,45 @@ export function isSelectableBookableTour(tour: {
 }): boolean {
   if (!tour.departure_date) return false
   const code = tour.trip_code
-  if (isCmsItineraryTemplateCode(code)) return false
   if (isMonthOnlyTripCode(code)) return false
   if (isGenericOneDaySku(code)) return false
-  // Prefer explicit day-range or season instances; anything else with a date
-  // that survived the filters above (rare custom codes) stays selectable.
   return true
+}
+
+function publicStatusOk(status: string | null | undefined): boolean {
+  const s = (status ?? '').toLowerCase()
+  return s === 'confirmed' || s === 'published' || s === 'active'
+}
+
+function selectableFamilySiblings(tour: CatalogTour, catalog: ReadonlyArray<CatalogTour>): CatalogTour[] {
+  const base = tourFamilyBase(tour.trip_code)
+  return catalog.filter((other) => {
+    if (other.trip_code === tour.trip_code) return false
+    if (!publicStatusOk(other.status)) return false
+    if (!isSelectableBookableTour(other)) return false
+    return tourFamilyBase(other.trip_code) === base
+  })
+}
+
+/**
+ * Public /trips + /calendar catalog:
+ * - Dated bookable rows (including sole CMS-exact products with a real date).
+ * - Hide a bare family code when a suffixed dated instance exists.
+ * - Undated published templates only when no selectable sibling exists.
+ */
+export function isPublicCatalogTour(tour: CatalogTour, catalog: ReadonlyArray<CatalogTour>): boolean {
+  if (!publicStatusOk(tour.status)) return false
+
+  const siblings = selectableFamilySiblings(tour, catalog)
+  const hasSuffixedClone = siblings.some((other) => isSuffixedDatedCode(other.trip_code))
+
+  if (isSelectableBookableTour(tour)) {
+    if (!isSuffixedDatedCode(tour.trip_code) && hasSuffixedClone) return false
+    return true
+  }
+
+  if (tour.departure_date) return false
+  return siblings.length === 0
 }
 
 /** Strip month / day-range / season suffix so Trip Manager can re-derive. */

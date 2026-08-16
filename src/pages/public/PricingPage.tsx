@@ -5,6 +5,8 @@ import type { TranslationKey } from '../../i18n/translations'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import BiText from '../../components/ui/BiText'
 import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
+import PageVideoHero from '../../components/layout/PageVideoHero'
+import { getTripCoverVideoUrl } from '../../data/tripVideos'
 import SquareAcceptedPaymentIcons, {
   AcceptedPaymentIcons,
   AFTERPAY_HOW_IT_WORKS,
@@ -37,6 +39,9 @@ const CHECK_SUFFIXES = ['check.1', 'check.2', 'check.3', 'check.4'] as const
 
 const CANCEL_RULES = [1, 2, 3, 4, 5] as const
 
+/** Compressed Vercel copy only — never Storage VDO/NZ/NZ02.mp4. */
+const PRICING_HERO_VIDEO = getTripCoverVideoUrl('NZ') ?? '/trip-videos/NZ02_web.mp4'
+
 export default function PricingPage() {
   const { tt } = useLang()
 
@@ -51,23 +56,23 @@ export default function PricingPage() {
 
   return (
     <div className="space-y-8 pb-4">
-      <header>
+      <PageVideoHero src={PRICING_HERO_VIDEO}>
         <BiText
           as="h1"
           en={pageTitle.en}
           th={pageTitle.th}
           serif
-          className="text-2xl text-ink sm:text-3xl"
-          thClassName="mt-0.5 block font-thai text-[0.75em] font-medium text-ink-soft"
+          className="text-2xl text-cream sm:text-3xl"
+          thClassName="mt-0.5 block font-thai text-[0.75em] font-medium text-cream/80"
         />
         <BiText
           as="p"
           en={subtitle.en}
           th={subtitle.th}
-          className="mt-1 text-sm text-ink-soft"
-          thClassName="mt-0.5 block font-thai text-[12px] text-ink-soft/90"
+          className="mt-1 text-sm text-cream/85"
+          thClassName="mt-0.5 block font-thai text-[12px] text-cream/70"
         />
-      </header>
+      </PageVideoHero>
 
       <div className="grid gap-5 lg:grid-cols-3">
         {TIERS.map((tier) => {

@@ -49,6 +49,7 @@ export type PhotoSpotRow = {
   drone_notes: string | null
   linked_trip_code: string | null
   related_trip_code: string | null
+  video_url: string | null
   photo_id: string | null
   hero_image_url: string | null
   thumbnail_url: string | null
@@ -138,6 +139,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     hero_image_url: null,
     thumbnail_url: null,
     gallery_image_urls: [],
+    video_url: null,
     rating: 4.9,
     sort_order: 10,
     is_featured: true,
@@ -200,6 +202,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     hero_image_url: null,
     thumbnail_url: null,
     gallery_image_urls: [],
+    video_url: null,
     rating: 4.7,
     sort_order: 20,
     is_featured: true,
@@ -264,6 +267,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     hero_image_url: null,
     thumbnail_url: null,
     gallery_image_urls: [],
+    video_url: null,
     rating: 4.9,
     sort_order: 30,
     is_featured: false,
@@ -322,6 +326,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     hero_image_url: null,
     thumbnail_url: null,
     gallery_image_urls: [],
+    video_url: null,
     rating: 4.8,
     sort_order: 40,
     is_featured: false,
@@ -385,6 +390,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     hero_image_url: null,
     thumbnail_url: null,
     gallery_image_urls: [],
+    video_url: null,
     rating: 4.9,
     sort_order: 50,
     is_featured: true,
@@ -446,6 +452,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     hero_image_url: null,
     thumbnail_url: null,
     gallery_image_urls: [],
+    video_url: null,
     rating: 4.9,
     sort_order: 60,
     is_featured: true,
@@ -507,6 +514,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     hero_image_url: null,
     thumbnail_url: null,
     gallery_image_urls: [],
+    video_url: null,
     rating: 4.8,
     sort_order: 70,
     is_featured: false,
@@ -568,6 +576,7 @@ export const PHOTO_SPOTS_DRAFT: PhotoSpotRow[] = [
     hero_image_url: null,
     thumbnail_url: null,
     gallery_image_urls: [],
+    video_url: null,
     rating: 4.8,
     sort_order: 80,
     is_featured: true,

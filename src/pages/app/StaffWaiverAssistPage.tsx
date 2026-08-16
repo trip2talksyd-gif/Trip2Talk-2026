@@ -11,7 +11,8 @@ import {
 } from '../../lib/toursApi'
 import { isSelectableBookableTour } from '../../lib/tourSelectability'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
-import { WAIVER_CLAUSES } from '../../data/risks'
+import { visibleWaiverClauses } from '../../data/risks'
+import { tripRequiresDormAck } from '../../data/tripDetails'
 import type { Tour, TourBooking, WaiverSignature } from '../../types/tour'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
@@ -63,7 +64,9 @@ export default function StaffWaiverAssistPage() {
   const [selectedWaiverId, setSelectedWaiverId] = useState<string | null>(null)
   const isOwner = sessionStorage.getItem('staff_role') === 'OWNER'
 
-  const clauses = WAIVER_CLAUSES[locale]
+  const clauses = visibleWaiverClauses(locale, {
+    includeDormAck: tripRequiresDormAck(tripCode),
+  })
   const allClausesChecked = clauses.every((c) => checked[c.id])
 
   const loadTours = useCallback(() => {

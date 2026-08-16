@@ -1243,8 +1243,8 @@ export const TRIP_ITINERARIES: Record<string, TripItinerary> = {
   'NZ-10D9N': {
     detailed: true,
     headerNote: {
-      en: '10 days / 9 nights — North + South Island grand photo road trip (Auckland → Christchurch → Queenstown). Standard rate listed for groups of 4–6. Flights not included.',
-      th: '10 วัน 9 คืน — ทริปถ่ายภาพใหญ่เกาะเหนือ+เกาะใต้ (Auckland → Christchurch → Queenstown) ราคามาตรฐานสำหรับกลุ่ม 4–6 ท่าน ไม่รวมตั๋วเครื่องบิน',
+      en: '10 days / 9 nights — North + South Island (Auckland arrival → Queenstown departure). Private group of 4–6. Dates and price TBA — we are gathering interest to vote on season. Flights and meals not included.',
+      th: '10 วัน 9 คืน — เกาะเหนือ+เกาะใต้ (ถึง Auckland ออก Queenstown) กลุ่มส่วนตัว 4–6 คน วันเดินทางและราคารอประกาศ — กำลังรวบรวมความสนใจเพื่อโหวตซีซัน ไม่รวมตั๋วเครื่องบินและอาหาร',
     },
     days: [
       {

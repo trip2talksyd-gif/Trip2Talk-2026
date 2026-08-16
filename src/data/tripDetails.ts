@@ -10,6 +10,15 @@ export type TripDetailContent = {
   excludes: BilingualList
   /** Optional stay policy shown on Trip Detail (e.g. dorm vs private upgrade). */
   accommodationNote?: BilingualText
+  /** Optional visa / entry requirement shown on Trip Detail (e.g. NZeTA). */
+  visaNote?: BilingualText
+  /** When true, waiver requires the accommodation_dorm clause. */
+  requiresDormAck?: boolean
+}
+
+const NZ_VISA_NOTE: BilingualText = {
+  en: 'Non-Australian PR/citizens are responsible for their own NZ visa (NZeTA). If you’d like our team to apply for the online visa on your behalf, the service fee is $100 AUD plus the actual visa cost.',
+  th: 'ลูกทริปที่ไม่ได้ถือ PR หรือสัญชาติออสเตรเลีย ต้องดำเนินการขอวีซ่านิวซีแลนด์ (NZeTA) เอง หากต้องการให้ทีมงานช่วยขอวีซ่าออนไลน์ให้ คิดค่าบริการเพิ่ม $100 AUD บวกค่าวีซ่าจริง',
 }
 
 export const TRIP_DETAILS: Record<string, TripDetailContent> = {
@@ -116,6 +125,7 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
       en: 'Stay at the Outback Lodge — clean, safe, backpacker-style dorm rooms (shared). Want privacy? Upgrade to a private room for an extra $350–$550 AUD/night (please request before departure).',
       th: 'พักที่ Outback Lodge สไตล์ Backpackers สะอาด ปลอดภัย ห้องพักรวม (Dormitory) หากต้องการความเป็นส่วนตัวสามารถอัปเกรดเป็นห้องเดี่ยว จ่ายเพิ่ม $350-$550 AUD ต่อคืน (กรุณาแจ้งก่อนออกเดินทาง)',
     },
+    requiresDormAck: true,
   },
   'NZ-6D5N': {
     tagline: {
@@ -131,31 +141,45 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
       th: ['รถ SUV & คนขับ 6 วัน', 'ที่พัก 5 คืน (เราช่วยจอง)', 'Milford Sound cruise', 'ช่างภาพมืออาชีพ', 'ช่วยจองตั๋วเครื่องบิน'],
     },
     excludes: {
-      en: ['International/domestic flights (we coordinate booking)', 'Meals', 'Travel insurance'],
-      th: ['ตั๋วเครื่องบิน (เราช่วยจอง)', 'ค่าอาหาร', 'ประกันการเดินทาง'],
+      en: [
+        'International/domestic flights (we coordinate booking)',
+        'Meals',
+        'Travel insurance',
+        'NZ visa / NZeTA for non-Australian PR/citizens (optional $100 AUD apply-on-behalf + visa cost)',
+      ],
+      th: [
+        'ตั๋วเครื่องบิน (เราช่วยจอง)',
+        'ค่าอาหาร',
+        'ประกันการเดินทาง',
+        'วีซ่านิวซีแลนด์ (NZeTA) สำหรับผู้ที่ไม่มี PR/สัญชาติออสเตรเลีย (บริการช่วยขอออนไลน์ $100 AUD + ค่าวีซ่าจริง — ไม่บังคับ)',
+      ],
     },
+    accommodationNote: {
+      en: 'Standard accommodation: Backpackers/Motels (clean & safe), shared dormitory-style. Private room upgrade available for $150–$350 AUD/night — please request before departure.',
+      th: 'ที่พักมาตรฐาน: แนว Backpackers/Motels ที่เน้นความสะอาดและปลอดภัย พักร่วมกันแบบห้องรวม (Dormitory) หากต้องการห้องส่วนตัว มีค่าใช้จ่ายเพิ่ม $150–350 AUD ต่อคืน กรุณาแจ้งก่อนออกเดินทาง',
+    },
+    visaNote: NZ_VISA_NOTE,
+    requiresDormAck: true,
   },
   'NZ-10D9N': {
     tagline: {
-      en: 'Grand North + South Island photo road trip — Hobbiton, Mt. Taranaki, Tekapo Milky Way, Mt. Cook, Milford Sound & Queenstown. 10 days / 9 nights.',
-      th: 'ทริปถ่ายภาพใหญ่เกาะเหนือ+เกาะใต้ — Hobbiton Mt. Taranaki ทางช้างเผือก Tekapo Mt. Cook Milford Sound และ Queenstown 10 วัน 9 คืน',
+      en: 'Grand North + South Island photo road trip — fly into Auckland, out of Queenstown. Private group of 4–6. Dates TBA while we gather interest.',
+      th: 'ทริปถ่ายภาพใหญ่เกาะเหนือ+เกาะใต้ — บินเข้า Auckland ออก Queenstown กลุ่มส่วนตัว 4–6 คน วันเดินทางรอโหวตซีซัน',
     },
     highlights: {
       en: [
         'Hobbiton Movie Set portraits',
-        'Pouakai Tarns — Mt. Taranaki reflection',
-        'Lake Tekapo Milky Way at Mt. John',
-        'Aoraki/Mt. Cook Hooker Valley',
-        'Milford Sound Fjords Cruise',
-        'Glenorchy Road to Paradise & Skyline Gondola',
+        'Mt. Taranaki reflection / golden hour',
+        'Lake Tekapo Milky Way (Mt. John)',
+        'Aoraki/Mt. Cook alpine trail',
+        'Milford Sound cruise',
       ],
       th: [
         'พอร์ตเทรต Hobbiton Movie Set',
-        'Pouakai Tarns — สะท้อน Mt. Taranaki',
+        'สะท้อน Mt. Taranaki / golden hour',
         'ทางช้างเผือก Lake Tekapo ที่ Mt. John',
-        'Aoraki/Mt. Cook เส้นทาง Hooker Valley',
-        'ล่องเรือฟยord Milford Sound',
-        'Road to Paradise Glenorchy และ Skyline Gondola',
+        'เส้นทางอัลไพน์ Aoraki/Mt. Cook',
+        'ล่องเรือ Milford Sound',
       ],
     },
     includes: {
@@ -183,19 +207,23 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
         'International flights and domestic Auckland → Christchurch (self-booked; domestic often around AUD 100–150)',
         'All meals',
         'Personal travel insurance',
-        'Optional private room upgrade (+AUD 450–650 / person for 9 nights)',
+        'Optional private room upgrade ($150–$350 AUD/night — request before departure)',
+        'NZ visa / NZeTA for non-Australian PR/citizens (optional $100 AUD apply-on-behalf + visa cost)',
       ],
       th: [
         'ตั๋วบินระหว่างประเทศ และในประเทศ Auckland → Christchurch (จองเอง — ในประเทศมักราว AUD 100–150)',
         'อาหารทุกมื้อ',
         'ประกันการเดินทางส่วนตัว',
-        'อัปเกรดห้องส่วนตัว (เพิ่ม AUD 450–650 / คน สำหรับ 9 คืน)',
+        'อัปเกรดห้องส่วนตัว ($150–350 AUD ต่อคืน — กรุณาแจ้งก่อนออกเดินทาง)',
+        'วีซ่านิวซีแลนด์ (NZeTA) สำหรับผู้ที่ไม่มี PR/สัญชาติออสเตรเลีย (บริการช่วยขอออนไลน์ $100 AUD + ค่าวีซ่าจริง — ไม่บังคับ)',
       ],
     },
     accommodationNote: {
-      en: 'Standard stay is shared dorm/motel style for 9 nights. Prefer a private room? Ask us about the optional upgrade (+AUD 450–650 / person). Prefer a smaller private group of 2–3? Contact us for private guaranteed departure pricing.',
-      th: 'ที่พักมาตรฐานเป็นแบบแชร์ dorm/โมเต็ล 9 คืน ต้องการห้องส่วนตัว? สอบถามอัปเกรด (เพิ่ม AUD 450–650 / คน) อยากกลุ่มเล็กส่วนตัว 2–3 ท่าน? ติดต่อเราสำหรับราคา Private Guarantee',
+      en: 'Standard accommodation: Backpackers/Motels (clean & safe), shared dormitory-style. Private room upgrade available for $150–$350 AUD/night — please request before departure.',
+      th: 'ที่พักมาตรฐาน: แนว Backpackers/Motels ที่เน้นความสะอาดและปลอดภัย พักร่วมกันแบบห้องรวม (Dormitory) หากต้องการห้องส่วนตัว มีค่าใช้จ่ายเพิ่ม $150–350 AUD ต่อคืน กรุณาแจ้งก่อนออกเดินทาง',
     },
+    visaNote: NZ_VISA_NOTE,
+    requiresDormAck: true,
   },
   'TAS-3D2N': {
     tagline: {
@@ -340,6 +368,11 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
       en: ['Meals', 'Japanese Garden entry', 'Travel insurance'],
       th: ['ค่าอาหาร', 'ค่าเข้าสวนญี่ปุ่น', 'ประกันการเดินทาง'],
     },
+    accommodationNote: {
+      en: 'Standard accommodation: Backpackers/Motels (clean & safe), shared dormitory-style, 1 night. Private room upgrade available for $150–$350 AUD/night — please request before departure.',
+      th: 'ที่พักมาตรฐาน: แนว Backpackers/Motels ที่เน้นความสะอาดและปลอดภัย พักร่วมกันแบบห้องรวม (Dormitory) 1 คืน หากต้องการห้องส่วนตัว มีค่าใช้จ่ายเพิ่ม $150–350 AUD ต่อคืน กรุณาแจ้งก่อนออกเดินทาง',
+    },
+    requiresDormAck: true,
   },
   'KIA-1DAY': {
     tagline: {
@@ -478,6 +511,10 @@ export function getTripDetails(tripCode: string): TripDetailContent | undefined 
   if (TRIP_DETAILS[code]) return TRIP_DETAILS[code]
   const template = resolveTemplateTripCode(tripCode, Object.keys(TRIP_DETAILS))
   return template ? TRIP_DETAILS[template] : undefined
+}
+
+export function tripRequiresDormAck(tripCode: string): boolean {
+  return getTripDetails(tripCode)?.requiresDormAck === true
 }
 
 export function textFor(item: BilingualText, lang: 'en' | 'th'): string {

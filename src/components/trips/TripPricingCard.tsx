@@ -2,7 +2,7 @@ import { Camera, Car, Check, MapPin, Plane, BedDouble } from 'lucide-react'
 import type { Tour } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
 import { isOneDayTrip, tourDestination, tourDurationLabel } from '../../lib/tourDisplay'
-import { formatAud, formatDate, getUnbookableReason, seatsRemaining } from '../../lib/toursApi'
+import { formatAud, formatDate, getUnbookableReason, isListedPriceHidden, seatsRemaining } from '../../lib/toursApi'
 import { isPremiumTrip } from '../../data/tripTiers'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 import TripBookButton from './TripBookButton'
@@ -34,6 +34,7 @@ export default function TripPricingCard({ tour, includes }: Props) {
   const more = Math.max(0, tour.booked_seats - 4)
   const icons = oneDay ? ONE_DAY_FEATURE_ICONS : TRAVEL_FEATURE_ICONS
   const cancelled = getUnbookableReason(tour) === 'cancelled'
+  const priceHidden = isListedPriceHidden(tour)
 
   if (cancelled) {
     return (
@@ -71,10 +72,25 @@ export default function TripPricingCard({ tour, includes }: Props) {
       </p>
 
       <div className="group mt-3">
-        <SplitFlapPrice amountAud={tour.price_aud} className="text-[28px] font-extrabold text-ink" board />
-        <span className="ml-1 text-xs font-semibold text-ink-soft">
-          {lang === 'th' ? 'AUD / คน' : 'AUD / person'}
-        </span>
+        {priceHidden ? (
+          <>
+            <p className="text-[22px] font-extrabold text-ink">
+              {lang === 'th' ? 'ราคารอประกาศ' : 'Price TBA'}
+            </p>
+            <p className="mt-1 text-[11px] leading-relaxed text-ink-soft">
+              {lang === 'th'
+                ? 'กำลังรวบรวมความสนใจ — ยังไม่เปิดจองออนไลน์'
+                : 'Gathering interest — not open for online booking yet'}
+            </p>
+          </>
+        ) : (
+          <>
+            <SplitFlapPrice amountAud={tour.price_aud} className="text-[28px] font-extrabold text-ink" board />
+            <span className="ml-1 text-xs font-semibold text-ink-soft">
+              {lang === 'th' ? 'AUD / คน' : 'AUD / person'}
+            </span>
+          </>
+        )}
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2">
@@ -95,7 +111,13 @@ export default function TripPricingCard({ tour, includes }: Props) {
         <div className="mt-2 space-y-1 text-[10.5px] text-ink-soft">
           <p>
             📅 {formatDate(tour.departure_date, lang)}
-            {lang === 'th' ? ' · นัดพบเช้าวันเดินทาง' : ' · meetup morning of'}
+            {tour.departure_date
+              ? lang === 'th'
+                ? ' · นัดพบเช้าวันเดินทาง'
+                : ' · meetup morning of'
+              : lang === 'th'
+                ? ' — สอบถามวันเดินทาง'
+                : ' — inquire for dates'}
           </p>
           <p>
             📍{' '}
@@ -110,7 +132,11 @@ export default function TripPricingCard({ tour, includes }: Props) {
         </div>
         <div className="mt-3 flex items-center justify-between gap-2">
           <span className="text-[11px] font-semibold text-teal-700">
-            {seats} {lang === 'th' ? 'ที่นั่งว่าง' : 'seats left'}
+            {priceHidden
+              ? lang === 'th'
+                ? `กลุ่มส่วนตัว สูงสุด ${tour.max_seats} คน`
+                : `Private group · max ${tour.max_seats}`
+              : `${seats} ${lang === 'th' ? 'ที่นั่งว่าง' : 'seats left'}`}
             {oneDay && (
               <span className="mt-0.5 block text-[9px] font-medium text-ink-soft">
                 {lang === 'th'
@@ -157,7 +183,11 @@ export default function TripPricingCard({ tour, includes }: Props) {
       )}
 
       <p className="mt-3 text-[10.5px] text-ink-soft">
-        {lang === 'th' ? 'มัดจำ' : 'Deposit'}: {formatAud(tour.deposit_aud)}
+        {priceHidden
+          ? lang === 'th'
+            ? 'มัดจำจะประกาศพร้อมวันเดินทาง'
+            : 'Deposit announced with departure dates'
+          : `${lang === 'th' ? 'มัดจำ' : 'Deposit'}: ${formatAud(tour.deposit_aud)}`}
       </p>
 
       <TripBookButton tour={tour} variant="deep" className="mt-1.5" />
