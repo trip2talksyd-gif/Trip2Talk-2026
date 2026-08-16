@@ -1,10 +1,23 @@
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { ExternalLink } from 'lucide-react'
+import { ClipboardList, ExternalLink, IdCard, Info, Youtube } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { NZ_VISA_TUTORIAL_YOUTUBE_ID, NZ_VISITOR_VISA_URL } from '../../data/photoGuideContent'
 import LazyYouTubeEmbed from '../../components/photoGuide/LazyYouTubeEmbed'
 import BiText from '../../components/ui/BiText'
+
+function DisclaimerBox({ children }: { children: ReactNode }) {
+  return (
+    <aside className="flex items-start gap-2 rounded-editorial border border-line bg-mint-100/80 p-4">
+      <Info
+        className="mt-0.5 h-4 w-4 shrink-0 text-orange"
+        strokeWidth={2.25}
+        aria-hidden
+      />
+      <div className="min-w-0">{children}</div>
+    </aside>
+  )
+}
 
 export default function NzVisaGuidePage() {
   const { tt } = useLang()
@@ -62,7 +75,7 @@ export default function NzVisaGuidePage() {
         />
       </header>
 
-      <aside className="rounded-editorial border border-line bg-mint-100/80 p-4">
+      <DisclaimerBox>
         <BiText
           as="p"
           en={disclaimerBi.en}
@@ -70,7 +83,7 @@ export default function NzVisaGuidePage() {
           className="text-sm leading-relaxed text-ink/80"
           thClassName="mt-1 block font-thai text-[12px] leading-relaxed text-ink/70"
         />
-      </aside>
+      </DisclaimerBox>
 
       <a
         href={NZ_VISITOR_VISA_URL}
@@ -78,6 +91,7 @@ export default function NzVisaGuidePage() {
         rel="noopener noreferrer"
         className="inline-flex items-center gap-1.5 text-[12px] font-bold text-teal-700"
       >
+        <IdCard className="h-4 w-4 shrink-0 text-teal-dark" strokeWidth={2.25} aria-hidden />
         {officialBi.en}
         <ExternalLink className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
         <span className="font-thai text-[11px] font-medium opacity-85">{officialBi.th}</span>
@@ -100,13 +114,20 @@ export default function NzVisaGuidePage() {
             title="5 Steps วิธีทำวีซ่า New Zealand Online ผ่านใน 1 วัน"
           />
         </div>
-        <BiText
-          as="p"
-          en={videoCreditBi.en}
-          th={videoCreditBi.th}
-          className="mt-2 text-[12px] leading-relaxed text-ink-soft"
-          thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft/90"
-        />
+        <div className="mt-2 flex items-start gap-1.5">
+          <Youtube
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-soft"
+            strokeWidth={2.25}
+            aria-hidden
+          />
+          <BiText
+            as="p"
+            en={videoCreditBi.en}
+            th={videoCreditBi.th}
+            className="text-[12px] leading-relaxed text-ink-soft"
+            thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft/90"
+          />
+        </div>
         <BiText
           as="p"
           en={videoNoteBi.en}
@@ -116,13 +137,20 @@ export default function NzVisaGuidePage() {
         />
       </section>
 
-      <BiText
-        as="p"
-        en={bodyBi.en}
-        th={bodyBi.th}
-        className="max-w-2xl text-[15px] leading-[1.7] text-ink"
-        thClassName="mt-2 block font-thai text-[14px] font-medium leading-[1.7] text-ink-soft"
-      />
+      <div className="flex max-w-2xl items-start gap-2">
+        <ClipboardList
+          className="mt-0.5 h-4 w-4 shrink-0 text-teal-dark"
+          strokeWidth={2.25}
+          aria-hidden
+        />
+        <BiText
+          as="p"
+          en={bodyBi.en}
+          th={bodyBi.th}
+          className="min-w-0 text-[15px] leading-[1.7] text-ink"
+          thClassName="mt-2 block font-thai text-[14px] font-medium leading-[1.7] text-ink-soft"
+        />
+      </div>
 
       <section className="rounded-[14px] border border-line bg-card p-4 shadow-[0_8px_18px_-12px_rgba(15,28,30,0.25)] sm:p-5">
         <BiText
@@ -142,7 +170,7 @@ export default function NzVisaGuidePage() {
         />
       </section>
 
-      <aside className="rounded-editorial border border-line bg-mint-100/80 p-4">
+      <DisclaimerBox>
         <BiText
           as="p"
           en={disclaimerBi.en}
@@ -150,7 +178,7 @@ export default function NzVisaGuidePage() {
           className="text-sm leading-relaxed text-ink/80"
           thClassName="mt-1 block font-thai text-[12px] leading-relaxed text-ink/70"
         />
-      </aside>
+      </DisclaimerBox>
     </div>
   )
 }

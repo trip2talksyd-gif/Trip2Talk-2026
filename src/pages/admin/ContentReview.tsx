@@ -249,7 +249,8 @@ function ReviewCard({
   const navigate = useNavigate()
   const { toast } = useToast()
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = useState(false)
+  const [uploadPhase, setUploadPhase] = useState<'idle' | 'compressing' | 'uploading'>('idle')
+  const uploading = uploadPhase !== 'idle'
   const tour = post.tours
   const noTrip = !post.trip_id
   const isManual = isManualTargetAccount(post.target_account)
@@ -336,11 +337,11 @@ function ReviewCard({
       toast(`อัปโหลดได้เพิ่มอีก ${slots} รูป (สูงสุด ${MAX_PHOTOS})`, 'info')
     }
 
-    setUploading(true)
+    setUploadPhase('compressing')
     try {
       const uploaded: string[] = []
       for (const file of toUpload) {
-        uploaded.push(await uploadContentPhoto(file))
+        uploaded.push(await uploadContentPhoto(file, setUploadPhase))
       }
       onDraftChange({
         availableUrls: [...new Set([...draft.availableUrls, ...uploaded])],
@@ -355,7 +356,7 @@ function ReviewCard({
       }
       toast('อัปโหลดรูปไม่สำเร็จ ลองอีกครั้ง', 'error')
     } finally {
-      setUploading(false)
+      setUploadPhase('idle')
     }
   }
 
@@ -592,7 +593,9 @@ function ReviewCard({
                   {uploading ? (
                     <>
                       <Loader2 className="h-7 w-7 animate-spin text-gold" aria-hidden />
-                      <span className="text-xs font-medium text-cream-muted">กำลังอัปโหลด…</span>
+                      <span className="text-xs font-medium text-cream-muted">
+                        {uploadPhase === 'compressing' ? 'กำลังย่อรูป…' : 'กำลังอัปโหลด…'}
+                      </span>
                     </>
                   ) : (
                     <>

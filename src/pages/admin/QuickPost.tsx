@@ -21,7 +21,7 @@ import {
   staffShellClass,
 } from '../../components/app/staffUi'
 
-type Phase = 'idle' | 'uploading' | 'generating' | 'saving' | 'done'
+type Phase = 'idle' | 'compressing' | 'uploading' | 'generating' | 'saving' | 'done'
 
 export default function QuickPost() {
   const navigate = useNavigate()
@@ -42,7 +42,11 @@ export default function QuickPost() {
       })
   }, [navigate])
 
-  const busy = phase === 'uploading' || phase === 'generating' || phase === 'saving'
+  const busy =
+    phase === 'compressing' ||
+    phase === 'uploading' ||
+    phase === 'generating' ||
+    phase === 'saving'
 
   async function handleFile(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -64,7 +68,7 @@ export default function QuickPost() {
       return
     }
 
-    setPhase('uploading')
+    setPhase('compressing')
     const localPreview = URL.createObjectURL(file)
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev)
@@ -74,7 +78,7 @@ export default function QuickPost() {
     try {
       let imageUrl: string
       try {
-        imageUrl = await uploadContentPhoto(file)
+        imageUrl = await uploadContentPhoto(file, setPhase)
       } catch (err) {
         console.error('[QuickPost] upload failed:', err)
         if (err instanceof StaffSessionExpiredError) throw err
@@ -143,7 +147,9 @@ export default function QuickPost() {
   }
 
   const statusLabel =
-    phase === 'uploading'
+    phase === 'compressing'
+      ? 'กำลังย่อรูป…'
+      : phase === 'uploading'
       ? 'กำลังอัปโหลดรูป…'
       : phase === 'generating'
         ? 'กำลังเขียนแคปชัน…'

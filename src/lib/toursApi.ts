@@ -1,3 +1,4 @@
+import { compressUploadImage } from './compressUploadImage'
 import { supabase, supabaseConfig } from './supabase'
 import { callStaffApi, clearStaffSession, StaffSessionExpiredError } from './supabaseStaff'
 import { SeatsFullError } from '../types/errors'
@@ -1597,15 +1598,23 @@ export async function insertContentPostDraft(input: {
   })
 }
 
-/** Upload to public content-photos/{uuid}/… and return the public URL. */
-export async function uploadContentPhoto(file: File): Promise<string> {
-  const uuid = crypto.randomUUID()
-  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg'
-  const path = `${uuid}/${Date.now()}.${ext}`
+export type ContentPhotoUploadPhase = 'compressing' | 'uploading'
 
-  const { error } = await supabase.storage.from('content-photos').upload(path, file, {
+/** Upload to public content-photos/{uuid}/… after client-side WebP resize (cover preset). */
+export async function uploadContentPhoto(
+  file: File,
+  onPhase?: (phase: ContentPhotoUploadPhase) => void,
+): Promise<string> {
+  onPhase?.('compressing')
+  const compressed = await compressUploadImage(file, 'cover')
+  onPhase?.('uploading')
+
+  const uuid = crypto.randomUUID()
+  const path = `${uuid}/${Date.now()}.${compressed.ext}`
+
+  const { error } = await supabase.storage.from('content-photos').upload(path, compressed.blob, {
     upsert: false,
-    contentType: file.type || `image/${ext}`,
+    contentType: compressed.contentType,
     cacheControl: '31536000',
   })
   if (error) {
