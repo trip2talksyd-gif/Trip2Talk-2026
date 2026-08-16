@@ -38,10 +38,12 @@ export function useSplitFlapChars(
   const glyphs = kind === 'digits' ? DIGIT_GLYPHS : LETTER_GLYPHS
   const rootRef = useRef<HTMLElement | null>(null)
   const [chars, setChars] = useState(() => asChars(text))
+  const [settled, setSettled] = useState(true)
 
   useEffect(() => {
     if (prefersReducedMotion()) {
       setChars(asChars(text))
+      setSettled(true)
       return
     }
 
@@ -63,12 +65,14 @@ export function useSplitFlapChars(
       const len = target.length
       if (len === 0) {
         setChars([])
+        setSettled(true)
         return
       }
 
       let frame = 0
       const lastFlipIndex = target.reduce((acc, ch, i) => (isFlippable(ch, kind) ? i : acc), 0)
       const totalFrames = lastFlipIndex * STAGGER_FRAMES + SPIN_FRAMES + 1
+      setSettled(false)
       setChars(target.map((ch) => (isFlippable(ch, kind) ? randomGlyph(glyphs) : ch)))
 
       intervalId = window.setInterval(() => {
@@ -82,7 +86,10 @@ export function useSplitFlapChars(
             return ch
           }),
         )
-        if (frame >= totalFrames) stop()
+        if (frame >= totalFrames) {
+          stop()
+          setSettled(true)
+        }
       }, TICK_MS)
     }
 
@@ -107,6 +114,7 @@ export function useSplitFlapChars(
         }
         stop()
         setChars(asChars(text))
+        setSettled(true)
       },
       {
         threshold: [0, 0.5, 1],
@@ -122,5 +130,5 @@ export function useSplitFlapChars(
     }
   }, [text, mode, kind, glyphs, intersectRootSelector])
 
-  return { chars, rootRef }
+  return { chars, settled, rootRef }
 }

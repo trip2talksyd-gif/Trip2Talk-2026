@@ -13,7 +13,7 @@
 ## Safety gates (mandatory)
 
 1. Never deploy Edge Functions / migrations / CLI to any Supabase ref except `bljhnelgmkulxwuhedbi`.
-2. Before `git push` to `main` or any Edge Function deploy: show change summary → wait for user confirmation.
+2. **MERGE TO MAIN — HARD RULE:** Before merging any PR or pushing to `main` (or deploying an Edge Function), summarize the change and wait for Saen's explicit confirmation in chat. No exceptions for small/obvious changes. The only exception is a confirmed live outage on trip2talk.com.au — then merge the *minimal* hotfix after stating it is an emergency merge *before* merging, and report after. If unsure, it is not an emergency — ask first. Feature-branch push is OK when Saen asked to push that branch; merging it to `main` still needs confirmation.
 3. If unsure which Supabase project — ask; do not guess.
 
 **Current mismatch (2026-07-20):** CLI link + `.env.local` still point at `xwdtjwzjkqunewxjpimm`. Relink / env switch needs **explicit user OK**. A mistaken `staff-api` deploy earlier today went to the wrong project.
