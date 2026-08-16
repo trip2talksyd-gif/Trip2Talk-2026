@@ -13,6 +13,10 @@ import { GALLERY_PHOTOS, photoSrc, type GalleryPhoto } from '../data/galleryPhot
 import { storageImageSrc, STORAGE_IMG } from './storageImage'
 import { supabase } from './supabase'
 import { callStaffApi } from './supabaseStaff'
+import {
+  compressUploadImage,
+  type UploadImagePreset,
+} from './compressUploadImage'
 
 export type { CameraModeSettings, CameraSettings, DroneAllowed, PhotoSpotRow }
 export { tripCtaHref }
@@ -415,53 +419,31 @@ export async function deletePhotoSpot(id: string): Promise<void> {
   await callStaffApi('delete_photo_spot', { id })
 }
 
-const PHOTO_SPOT_UPLOAD_MAX_BYTES = 5 * 1024 * 1024
-const PHOTO_SPOT_SOURCE_MAX_BYTES = 15 * 1024 * 1024
+export type PhotoSpotUploadSlot = 'hero' | 'gallery'
 
-/** Compress to JPEG ≤ ~1920px wide, quality 0.82. Rejects oversized source files. */
-export async function compressPhotoSpotImage(file: File): Promise<Blob> {
-  if (!file.type.startsWith('image/')) {
-    throw new Error('File must be an image')
-  }
-  if (file.size > PHOTO_SPOT_SOURCE_MAX_BYTES) {
-    throw new Error('Image must be under 15 MB before compression')
-  }
-
-  const bitmap = await createImageBitmap(file)
-  const maxW = 1920
-  const scale = bitmap.width > maxW ? maxW / bitmap.width : 1
-  const w = Math.max(1, Math.round(bitmap.width * scale))
-  const h = Math.max(1, Math.round(bitmap.height * scale))
-  const canvas = document.createElement('canvas')
-  canvas.width = w
-  canvas.height = h
-  const ctx = canvas.getContext('2d')
-  if (!ctx) {
-    bitmap.close()
-    throw new Error('Could not compress image')
-  }
-  ctx.drawImage(bitmap, 0, 0, w, h)
-  bitmap.close()
-
-  const blob: Blob | null = await new Promise((resolve) =>
-    canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.82),
-  )
-  if (!blob) throw new Error('Could not compress image')
-  if (blob.size > PHOTO_SPOT_UPLOAD_MAX_BYTES) {
-    throw new Error('Compressed image still exceeds 5 MB — try a smaller photo')
-  }
-  return blob
+const SLOT_PRESET: Record<PhotoSpotUploadSlot, UploadImagePreset> = {
+  hero: 'hero',
+  gallery: 'gallery',
 }
 
-/** Upload to public photo-spots/{uuid}/… and return the public URL. */
-export async function uploadPhotoSpotImage(file: File): Promise<string> {
-  const compressed = await compressPhotoSpotImage(file)
-  const uuid = crypto.randomUUID()
-  const path = `${uuid}/${Date.now()}.jpg`
+export type PhotoSpotUploadPhase = 'compressing' | 'uploading'
 
-  const { error } = await supabase.storage.from('photo-spots').upload(path, compressed, {
+/** Upload to public photo-spots/{uuid}/… after client-side WebP resize. */
+export async function uploadPhotoSpotImage(
+  file: File,
+  slot: PhotoSpotUploadSlot = 'hero',
+  onPhase?: (phase: PhotoSpotUploadPhase) => void,
+): Promise<string> {
+  onPhase?.('compressing')
+  const compressed = await compressUploadImage(file, SLOT_PRESET[slot])
+  onPhase?.('uploading')
+
+  const uuid = crypto.randomUUID()
+  const path = `${uuid}/${Date.now()}.${compressed.ext}`
+
+  const { error } = await supabase.storage.from('photo-spots').upload(path, compressed.blob, {
     upsert: false,
-    contentType: 'image/jpeg',
+    contentType: compressed.contentType,
     cacheControl: '31536000',
   })
   if (error) {

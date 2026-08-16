@@ -61,6 +61,7 @@ type FormState = {
   drone_notes: string
   related_trip_code: string
   hero_image_url: string
+  thumbnail_url: string
   gallery_image_urls: string[]
   is_featured: boolean
   sort_order: string
@@ -100,6 +101,7 @@ function emptyForm(): FormState {
     drone_notes: '',
     related_trip_code: '',
     hero_image_url: '',
+    thumbnail_url: '',
     gallery_image_urls: [],
     is_featured: false,
     sort_order: '100',
@@ -134,6 +136,7 @@ function rowToForm(row: PhotoSpotRow): FormState {
     drone_notes: row.drone_notes ?? '',
     related_trip_code: row.related_trip_code ?? row.linked_trip_code ?? '',
     hero_image_url: row.hero_image_url ?? '',
+    thumbnail_url: row.thumbnail_url ?? row.hero_image_url ?? '',
     gallery_image_urls: [...(row.gallery_image_urls ?? [])].slice(0, PHOTO_SPOT_MAX_GALLERY),
     is_featured: row.is_featured,
     sort_order: String(row.sort_order ?? 100),
@@ -159,7 +162,8 @@ export default function PhotoSpotsAdminPage() {
   const [form, setForm] = useState<FormState>(emptyForm)
   const [slugTouched, setSlugTouched] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [uploading, setUploading] = useState(false)
+  const [uploadPhase, setUploadPhase] = useState<'idle' | 'compressing' | 'uploading'>('idle')
+  const uploading = uploadPhase !== 'idle'
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const load = useCallback(() => {
@@ -251,11 +255,21 @@ export default function PhotoSpotsAdminPage() {
       return
     }
 
-    setUploading(true)
+    setUploadPhase('compressing')
     try {
-      const url = await uploadPhotoSpotImage(file)
+      const url = await uploadPhotoSpotImage(file, slot, setUploadPhase)
       if (slot === 'hero') {
-        setField('hero_image_url', url)
+        let thumbUrl = url
+        try {
+          thumbUrl = await uploadPhotoSpotImage(file, 'gallery', setUploadPhase)
+        } catch {
+          thumbUrl = url
+        }
+        setForm((prev) => ({
+          ...prev,
+          hero_image_url: url,
+          thumbnail_url: thumbUrl,
+        }))
       } else {
         setForm((prev) => ({
           ...prev,
@@ -267,7 +281,7 @@ export default function PhotoSpotsAdminPage() {
       console.error('[PhotoSpotsAdmin] upload failed:', err)
       toast(err instanceof Error ? err.message : 'Upload failed', 'error')
     } finally {
-      setUploading(false)
+      setUploadPhase('idle')
     }
   }
 
@@ -307,7 +321,7 @@ export default function PhotoSpotsAdminPage() {
         drone_notes: form.drone_notes.trim() || null,
         related_trip_code: form.related_trip_code.trim() || null,
         hero_image_url: form.hero_image_url.trim() || null,
-        thumbnail_url: form.hero_image_url.trim() || null,
+        thumbnail_url: form.thumbnail_url.trim() || form.hero_image_url.trim() || null,
         gallery_image_urls: form.gallery_image_urls,
         is_featured: form.is_featured,
         sort_order: Number(form.sort_order) || 100,
@@ -777,7 +791,9 @@ export default function PhotoSpotsAdminPage() {
                       <button
                         type="button"
                         className="absolute right-2 top-2 rounded-full bg-black/60 p-1 text-cream"
-                        onClick={() => setField('hero_image_url', '')}
+                        onClick={() =>
+                          setForm((prev) => ({ ...prev, hero_image_url: '', thumbnail_url: '' }))
+                        }
                         aria-label="Remove hero"
                       >
                         <X className="h-3.5 w-3.5" />
@@ -785,7 +801,11 @@ export default function PhotoSpotsAdminPage() {
                     </div>
                   ) : (
                     <label className="flex cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-white/20 py-6 text-xs text-cream-muted hover:border-teal-500/40">
-                      {uploading ? 'Uploading…' : 'Upload hero image'}
+                      {uploadPhase === 'compressing'
+                        ? 'Compressing…'
+                        : uploadPhase === 'uploading'
+                          ? 'Uploading…'
+                          : 'Upload hero image'}
                       <input
                         type="file"
                         accept="image/*"
@@ -817,7 +837,11 @@ export default function PhotoSpotsAdminPage() {
                     ))}
                     {form.gallery_image_urls.length < PHOTO_SPOT_MAX_GALLERY && (
                       <label className="flex h-16 cursor-pointer items-center justify-center rounded border border-dashed border-white/20 text-[10px] text-cream-muted hover:border-teal-500/40">
-                        + Gallery
+                        {uploadPhase === 'compressing'
+                          ? 'Compressing…'
+                          : uploadPhase === 'uploading'
+                            ? 'Uploading…'
+                            : '+ Gallery'}
                         <input
                           type="file"
                           accept="image/*"
