@@ -5,7 +5,10 @@ import type { TranslationKey } from '../../i18n/translations'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import BiText from '../../components/ui/BiText'
 import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
-import SquareAcceptedPaymentIcons from '../../components/booking/SquareAcceptedPaymentIcons'
+import SquareAcceptedPaymentIcons, {
+  AcceptedPaymentIcons,
+  AFTERPAY_HOW_IT_WORKS,
+} from '../../components/booking/SquareAcceptedPaymentIcons'
 import { BUSINESS_ENTITY, PAYID_OPTIONS } from '../../data/paymentDetails'
 import { preferSquareCardCheckout } from '../../lib/preferredPayment'
 
@@ -146,6 +149,124 @@ export default function PricingPage() {
           )
         })}
       </div>
+
+      <section className="scroll-mt-24 rounded-xl border border-line bg-card p-5 shadow-mockup sm:p-6">
+        <BiDisplayHeading
+          en={tt('pricing.ways.title').en}
+          th={tt('pricing.ways.title').th}
+          as="h2"
+          thAs="p"
+          enClassName="text-lg font-semibold text-ink"
+          thClassName="mt-0.5 text-[14px] font-medium text-ink-soft"
+        />
+        <BiText
+          as="p"
+          en={tt('pricing.ways.intro').en}
+          th={tt('pricing.ways.intro').th}
+          className="mt-3 text-sm leading-relaxed text-ink-soft"
+          thClassName="mt-1 block font-thai text-[13px] leading-relaxed text-ink-soft/90"
+        />
+        <ul className="mt-4 space-y-2">
+          <li
+            id="card-payment"
+            className="scroll-mt-24 rounded-editorial border border-line bg-mint-100/60 px-3 py-2.5"
+          >
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <BiText
+                as="h3"
+                en={tt('pricing.ways.card.title').en}
+                th={tt('pricing.ways.card.title').th}
+                className="text-[12px] font-semibold text-ink"
+                thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+              />
+              <span className="text-[12px] font-bold text-teal-800">
+                {tt('pricing.ways.card.fee').en}
+                <span className="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft">
+                  {tt('pricing.ways.card.fee').th}
+                </span>
+              </span>
+            </div>
+            <BiText
+              as="p"
+              en={tt('pricing.ways.card.body').en}
+              th={tt('pricing.ways.card.body').th}
+              className="mt-2 text-[12px] leading-relaxed text-ink-soft"
+              thClassName="mt-0.5 block font-thai text-[11px] leading-relaxed text-ink-soft/90"
+            />
+            <AcceptedPaymentIcons
+              brands={['visa', 'mastercard']}
+              className="mt-2"
+              label="Visa, Mastercard"
+            />
+          </li>
+          <li
+            id="afterpay"
+            className="scroll-mt-24 rounded-editorial border border-line bg-mint-100/60 px-3 py-2.5"
+          >
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <BiText
+                as="h3"
+                en={tt('pricing.ways.afterpay.title').en}
+                th={tt('pricing.ways.afterpay.title').th}
+                className="text-[12px] font-semibold text-ink"
+                thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+              />
+              <span className="text-[12px] font-bold text-teal-800">
+                {tt('pricing.ways.afterpay.fee').en}
+                <span className="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft">
+                  {tt('pricing.ways.afterpay.fee').th}
+                </span>
+              </span>
+            </div>
+            <BiText
+              as="p"
+              en={tt('pricing.ways.afterpay.body').en}
+              th={tt('pricing.ways.afterpay.body').th}
+              className="mt-2 text-[12px] leading-relaxed text-ink-soft"
+              thClassName="mt-0.5 block font-thai text-[11px] leading-relaxed text-ink-soft/90"
+            />
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <AcceptedPaymentIcons brands={['afterpay']} label="Afterpay" />
+              <a
+                href={AFTERPAY_HOW_IT_WORKS}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[12px] font-semibold text-teal-800 underline decoration-teal-800/30 underline-offset-2 hover:decoration-teal-800"
+              >
+                {tt('pricing.ways.afterpay.link').en}
+                <span className="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft no-underline">
+                  {tt('pricing.ways.afterpay.link').th}
+                </span>
+              </a>
+            </div>
+          </li>
+          <li className="rounded-editorial border border-line bg-mint-100/60 px-3 py-2.5">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <BiText
+                as="h3"
+                en={tt('pricing.ways.payid.title').en}
+                th={tt('pricing.ways.payid.title').th}
+                className="text-[12px] font-semibold text-ink"
+                thClassName="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft"
+              />
+              <span className="text-[12px] font-bold text-teal-800">
+                {tt('pricing.ways.payid.fee').en}
+                <span className="mt-0.5 block font-thai text-[11px] font-medium text-ink-soft">
+                  {tt('pricing.ways.payid.fee').th}
+                </span>
+              </span>
+            </div>
+            <BiText
+              as="p"
+              en={tt('pricing.ways.payid.body').en}
+              th={tt('pricing.ways.payid.body').th}
+              className="mt-2 text-[12px] leading-relaxed text-ink-soft"
+              thClassName="mt-0.5 block font-thai text-[11px] leading-relaxed text-ink-soft/90"
+            />
+            <AcceptedPaymentIcons brands={['payid']} className="mt-2" label="PayID" />
+          </li>
+        </ul>
+      </section>
 
       <section
         id="payid"

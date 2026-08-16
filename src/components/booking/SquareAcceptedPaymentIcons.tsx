@@ -6,7 +6,7 @@ import { Landmark } from 'lucide-react'
 
 type Tone = 'light' | 'dark'
 
-const AFTERPAY_HOW_IT_WORKS = 'https://www.afterpay.com/en-AU/how-it-works'
+export const AFTERPAY_HOW_IT_WORKS = 'https://www.afterpay.com/en-AU/how-it-works'
 
 type BrandLink =
   | { kind: 'internal'; to: string; label: string }

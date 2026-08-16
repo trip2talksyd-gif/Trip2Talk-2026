@@ -251,6 +251,18 @@ export type TranslationKey =
   | 'pricing.card.intro'
   | 'pricing.card.cta'
   | 'pricing.card.fee'
+  | 'pricing.ways.title'
+  | 'pricing.ways.intro'
+  | 'pricing.ways.card.title'
+  | 'pricing.ways.card.body'
+  | 'pricing.ways.card.fee'
+  | 'pricing.ways.afterpay.title'
+  | 'pricing.ways.afterpay.body'
+  | 'pricing.ways.afterpay.fee'
+  | 'pricing.ways.afterpay.link'
+  | 'pricing.ways.payid.title'
+  | 'pricing.ways.payid.body'
+  | 'pricing.ways.payid.fee'
   | 'pricing.cancel.title'
   | 'pricing.cancel.intro'
   | 'pricing.cancel.col.condition'
@@ -854,6 +866,22 @@ const en: Map = {
   'pricing.card.cta': 'Pay by Card',
   'pricing.card.fee':
     'Opens the same Square card checkout as booking after you choose a trip. A 2% card fee applies — PayID has no fee.',
+  'pricing.ways.title': 'Ways to pay',
+  'pricing.ways.intro':
+    'Compare card, Afterpay, and PayID. PayID is the no-fee option from us.',
+  'pricing.ways.card.title': 'Card (Visa / Mastercard)',
+  'pricing.ways.card.body':
+    'Pay securely via Square. We accept Visa and Mastercard, including Thai-issued cards. A 2% surcharge is added at checkout and shown clearly before you pay.',
+  'pricing.ways.card.fee': '2% surcharge',
+  'pricing.ways.afterpay.title': 'Afterpay',
+  'pricing.ways.afterpay.body':
+    'Pay in 4 instalments through Square. No surcharge from us.',
+  'pricing.ways.afterpay.fee': 'No surcharge',
+  'pricing.ways.afterpay.link': 'How Afterpay works',
+  'pricing.ways.payid.title': 'PayID',
+  'pricing.ways.payid.body':
+    'Instant bank transfer in Australia. No fee from us — details are in the PayID section below.',
+  'pricing.ways.payid.fee': 'No fee',
   'pricing.cancel.title': 'Cancellation & refund policy',
   'pricing.cancel.intro':
     'Trip2Talk takes PayID (AUD) deposits before travel. All amounts are in Australian dollars.',
@@ -1482,6 +1510,22 @@ const th: Map = {
   'pricing.card.cta': 'จ่ายด้วยบัตร',
   'pricing.card.fee':
     'เปิดฟอร์มบัตร Square เดียวกับหน้าจอง หลังจากเลือกทริป — มีค่าธรรมเนียมบัตร 2% โอน PayID ไม่มีค่าธรรมเนียม',
+  'pricing.ways.title': 'วิธีชำระเงิน',
+  'pricing.ways.intro':
+    'เปรียบเทียบบัตร Afterpay และ PayID — PayID คือตัวเลือกที่ไม่มีค่าธรรมเนียมจากเรา',
+  'pricing.ways.card.title': 'บัตร (Visa / Mastercard)',
+  'pricing.ways.card.body':
+    'ชำระผ่าน Square อย่างปลอดภัย รับ Visa และ Mastercard รวมบัตรที่ออกในไทย มีค่าธรรมเนียม 2% ที่หน้าชำระ และแสดงให้เห็นชัดก่อนจ่าย',
+  'pricing.ways.card.fee': 'ค่าธรรมเนียม 2%',
+  'pricing.ways.afterpay.title': 'Afterpay',
+  'pricing.ways.afterpay.body':
+    'แบ่งจ่าย 4 งวดผ่าน Square ไม่มีค่าธรรมเนียมเพิ่มจากเรา',
+  'pricing.ways.afterpay.fee': 'ไม่มีค่าธรรมเนียมเพิ่ม',
+  'pricing.ways.afterpay.link': 'วิธีใช้ Afterpay',
+  'pricing.ways.payid.title': 'PayID',
+  'pricing.ways.payid.body':
+    'โอนธนาคารในออสเตรเลียแบบทันที ไม่มีค่าธรรมเนียมจากเรา — รายละเอียดอยู่ที่ส่วน PayID ด้านล่าง',
+  'pricing.ways.payid.fee': 'ไม่มีค่าธรรมเนียม',
   'pricing.cancel.title': 'นโยบายการยกเลิกและคืนเงิน',
   'pricing.cancel.intro':
     'Trip2Talk รับชำระผ่าน PayID (AUD) โดยมัดจำก่อนเดินทาง ราคาทั้งหมดเป็นดอลลาร์ออสเตรเลีย',
