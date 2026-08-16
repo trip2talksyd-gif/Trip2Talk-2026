@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import PublicLayout from './components/layout/PublicLayout'
 import ScrollToTop from './components/layout/ScrollToTop'
+import CanonicalPathRepair from './components/layout/CanonicalPathRepair'
 import HomePage from './pages/public/HomePage'
 import TripsPage from './pages/public/TripsPage'
 import TripDetailPage from './pages/public/TripDetailPage'
@@ -64,6 +65,7 @@ function RedirectToDiscover() {
 export default function App() {
   return (
     <BrowserRouter>
+      <CanonicalPathRepair />
       <ScrollToTop />
       <Routes>
         <Route element={<PublicLayout />}>
@@ -80,6 +82,7 @@ export default function App() {
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="gallery" element={<GalleryPage />} />
           <Route path="pricing" element={<PricingPage />} />
+          <Route path="pricing/*" element={<Navigate to="/pricing" replace />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="waiver/:token" element={<CustomerWaiverPage />} />
           <Route path="waiver" element={<WaiverPage />} />
