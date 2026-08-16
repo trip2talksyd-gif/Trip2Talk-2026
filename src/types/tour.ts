@@ -157,6 +157,7 @@ export interface BookingPayment {
   paid_at?: string | null
   receipt_invoice_number?: string | null
   recorded_by_staff_id?: string | null
+  staff_note?: string | null
   created_at: string
   extension_quote_id?: string | null
 }

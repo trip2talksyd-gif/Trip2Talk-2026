@@ -9,7 +9,7 @@ import {
   type ConfirmationSummaryData,
 } from '../../lib/waiverSession'
 import { formatAud, formatDate, lookupMyTrip } from '../../lib/toursApi'
-import { isSquareGatewayMethod, remainingTripBalanceAud } from '../../lib/paymentCredit'
+import { isInPersonCardMethod, isSquareGatewayMethod, remainingTripBalanceAud } from '../../lib/paymentCredit'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import BiText from '../../components/ui/BiText'
 import { useToast } from '../../components/ui/Toast'
@@ -186,14 +186,19 @@ export default function ConfirmationSummaryPage() {
 
   const cardDepositReceived =
     optimisticPaid ||
-    (data.depositPaid && isSquareGatewayMethod(data.paymentMethod))
+    (data.depositPaid &&
+      (isSquareGatewayMethod(data.paymentMethod) || isInPersonCardMethod(data.paymentMethod)))
 
   const remainingBalance = cardDepositReceived
     ? remainingTripBalanceAud({
         priceAud: data.priceAud,
         depositAud: data.depositAud,
         amountPaidAud: data.amountPaidAud,
-        paymentMethod: data.paymentMethod === 'afterpay' ? 'afterpay' : 'square',
+        paymentMethod: data.paymentMethod === 'afterpay'
+          ? 'afterpay'
+          : isInPersonCardMethod(data.paymentMethod)
+            ? 'card_in_person'
+            : 'square',
         bookingStatus:
           data.bookingStatus ?? (data.depositPaid ? 'deposit_paid' : 'pending_payment'),
       })

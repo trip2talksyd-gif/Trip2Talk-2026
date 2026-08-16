@@ -18,6 +18,7 @@ import {
   type CustomerPaymentSearchRow,
 } from '../../lib/toursApi'
 import { parseTravelDateFromTripCode } from '../../lib/tourSelectability'
+import { paymentMethodLabelEn } from '../../lib/paymentCredit'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
@@ -364,7 +365,7 @@ export default function StaffPaymentsPage() {
                               #{p.installment_no} {p.label ?? 'Payment'} · {formatAud(p.amount_aud)}
                             </p>
                             <p className="text-cream-muted">
-                              {p.status ?? 'paid'}
+                              {paymentMethodLabelEn(p.payment_method)} · {p.status ?? 'paid'}
                               {p.due_date ? ` · due ${p.due_date}` : ''}
                               {p.receipt_invoice_number ? ` · ${p.receipt_invoice_number}` : ''}
                             </p>

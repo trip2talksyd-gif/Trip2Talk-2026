@@ -5,6 +5,7 @@ import {
   fetchPendingBookings,
   fetchToursAdmin,
   recordPayment,
+  recordInPersonCardPayment,
   cancelBooking,
   isBookingCancelled,
   resolveBookingTravelDate,
@@ -12,7 +13,7 @@ import {
   flagPendingBooking,
 } from '../../lib/toursApi'
 import { isSelectableBookableTour } from '../../lib/tourSelectability'
-import { isSquareGatewayMethod, remainingTripBalanceAud } from '../../lib/paymentCredit'
+import { isInPersonCardMethod, isSquareGatewayMethod, remainingTripBalanceAud } from '../../lib/paymentCredit'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { Tour, TourBooking } from '../../types/tour'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
@@ -34,6 +35,7 @@ import {
   StaffField,
   StaffInput,
   StaffSelect,
+  StaffTextarea,
 } from '../../components/app/staffUi'
 
 const PAY_METHOD_OPTIONS: { value: string; label: string }[] = [
@@ -47,6 +49,7 @@ const PAY_METHOD_OPTIONS: { value: string; label: string }[] = [
 
 function cashierMethodLabel(method: string | null | undefined): string {
   const value = (method ?? '').trim().toLowerCase()
+  if (value === 'card_in_person') return 'Card (in person) / บัตรหน้างาน'
   return PAY_METHOD_OPTIONS.find((o) => o.value === value)?.label ?? (method || '—')
 }
 
@@ -87,6 +90,11 @@ export default function CashierPOS() {
   const [flagNote, setFlagNote] = useState('Follow up — PayID slip')
   const [flagSubmitting, setFlagSubmitting] = useState(false)
   const [verifyId, setVerifyId] = useState<string | null>(null)
+  const [readerBooking, setReaderBooking] = useState<TourBooking | null>(null)
+  const [readerAmount, setReaderAmount] = useState('')
+  const [readerReceipt, setReaderReceipt] = useState('')
+  const [readerNote, setReaderNote] = useState('')
+  const [readerSubmitting, setReaderSubmitting] = useState(false)
   const staffRole = sessionStorage.getItem('staff_role') ?? ''
   const canIssueQuote = staffRole === 'OWNER' || staffRole === 'MANAGER'
 
@@ -223,6 +231,7 @@ export default function CashierPOS() {
       setBookings((prev) => prev.filter((b) => b.id !== cancelling.id))
       setCancelling(null)
       if (payingId === cancelling.id) closePaymentRow()
+      if (readerBooking?.id === cancelling.id) closeReaderForm()
       toast('ยกเลิกการจองแล้ว', 'success')
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) {
@@ -303,6 +312,89 @@ export default function CashierPOS() {
       toast(t('toast.paymentFailed'), 'error')
     } finally {
       setVerifyId(null)
+    }
+  }
+
+  function expectedReaderAmount(booking: TourBooking): string {
+    const tour = tours.find((tr) => tr.trip_code === booking.trip_code)
+    const paid = Number(booking.amount_paid_aud ?? 0)
+    const deposit = Number(tour?.deposit_aud ?? 0)
+    const remaining = tour
+      ? remainingTripBalanceAud({
+          priceAud: tour.price_aud,
+          depositAud: tour.deposit_aud,
+          amountPaidAud: booking.amount_paid_aud,
+          paymentMethod: booking.payment_method,
+          bookingStatus: booking.booking_status,
+        })
+      : null
+    const prefill =
+      paid <= 0 && deposit > 0 ? deposit : remaining != null && remaining > 0 ? remaining : 0
+    return prefill > 0 ? String(Math.round(prefill * 100) / 100) : ''
+  }
+
+  function openReaderForm(booking: TourBooking) {
+    setReaderBooking(booking)
+    setReaderAmount(expectedReaderAmount(booking))
+    setReaderReceipt('')
+    setReaderNote('')
+  }
+
+  function closeReaderForm() {
+    setReaderBooking(null)
+    setReaderAmount('')
+    setReaderReceipt('')
+    setReaderNote('')
+  }
+
+  async function submitReaderPayment() {
+    if (!readerBooking) return
+    const amount = Number(readerAmount)
+    const receipt = readerReceipt.trim()
+    if (!amount || amount <= 0 || receipt.length < 2) return
+    setReaderSubmitting(true)
+    try {
+      const result = await recordInPersonCardPayment({
+        bookingId: readerBooking.id,
+        amount,
+        squareReceiptRef: receipt,
+        note: readerNote.trim() || undefined,
+      })
+      toast(
+        result.skipped ? 'Already recorded for this Square receipt' : t('toast.paymentUpdated'),
+        result.skipped ? 'info' : 'success',
+      )
+      const tour = tours.find((tr) => tr.trip_code === readerBooking.trip_code)
+      const booking = readerBooking
+      closeReaderForm()
+      load()
+      navigate('/app/receipt', {
+        state: {
+          bookingId: booking.id,
+          bookingReference: booking.booking_reference,
+          customerName: `${booking.first_name_en} ${booking.last_name_en}`,
+          customerEmail: booking.email || null,
+          tripName: tour?.name_en ?? booking.trip_code,
+          tripCode: booking.trip_code,
+          departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
+          amountPaid: amount,
+          paymentMethod: 'card_in_person',
+          bookingStatus: result.booking_status,
+          source: booking.source ?? null,
+          installmentNo: result.installment_no,
+          installmentPlan: result.installment_plan,
+          priceAud: result.price_aud,
+          balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
+        },
+      })
+    } catch (err) {
+      if (err instanceof StaffSessionExpiredError) {
+        navigate('/app')
+        return
+      }
+      toast(t('toast.paymentFailed'), 'error')
+    } finally {
+      setReaderSubmitting(false)
     }
   }
 
@@ -521,8 +613,12 @@ export default function CashierPOS() {
                   })
                 : null
               const cardPaid = isSquareGatewayMethod(b.payment_method)
+              const inPersonCard = isInPersonCardMethod(b.payment_method)
               const isPaying = payingId === b.id
               const cancelled = isBookingCancelled(b)
+              const status = (b.booking_status ?? '').trim().toLowerCase()
+              const canRecordReader =
+                !cancelled && status !== 'fully_paid' && status !== 'paid'
 
               return (
                 <li key={b.id}>
@@ -552,7 +648,11 @@ export default function CashierPOS() {
                         <span className="mt-0.5 block text-teal-500/90">
                           {b.payment_method === 'afterpay'
                             ? 'Afterpay via Square — no PayID slip'
-                            : 'Card via Square — no PayID slip'}
+                            : 'Card via Square (online) — no PayID slip'}
+                        </span>
+                      ) : inPersonCard ? (
+                        <span className="mt-0.5 block text-teal-500/90">
+                          Card (in person) via Square Reader
                         </span>
                       ) : bookingHasSlip(b) ? (
                         <span className="mt-0.5 block">PayID slip on file</span>
@@ -579,7 +679,7 @@ export default function CashierPOS() {
                             onSessionExpired={() => navigate('/app')}
                           />
                         ) : null}
-                        {cardPaid && b.booking_reference ? (
+                        {(cardPaid || inPersonCard) && b.booking_reference ? (
                           <StaffButton
                             type="button"
                             variant="secondary"
@@ -604,7 +704,7 @@ export default function CashierPOS() {
                             {slipBusyId === b.id ? 'Opening…' : 'View slip'}
                           </StaffButton>
                         ) : null}
-                        {!cardPaid ? (
+                        {!cardPaid && !inPersonCard ? (
                           <StaffButton
                             type="button"
                             disabled={verifyId === b.id}
@@ -612,6 +712,19 @@ export default function CashierPOS() {
                             className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
                           >
                             {verifyId === b.id ? 'Verifying…' : 'Verify PayID'}
+                          </StaffButton>
+                        ) : null}
+                        {canRecordReader ? (
+                          <StaffButton
+                            type="button"
+                            variant="secondary"
+                            onClick={() => openReaderForm(b)}
+                            className="w-auto flex-col px-3 py-1.5 text-xs tracking-wide"
+                          >
+                            Record card payment
+                            <span className="mt-0.5 block font-thai text-[10px] font-medium normal-case tracking-normal">
+                              บันทึกการรับบัตรหน้างาน
+                            </span>
                           </StaffButton>
                         ) : null}
                         <StaffButton
@@ -780,6 +893,90 @@ export default function CashierPOS() {
           onConfirm={confirmCancel}
           onClose={() => !cancelSubmitting && setCancelling(null)}
         />
+      )}
+      {readerBooking && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reader-pay-title"
+          onClick={() => !readerSubmitting && closeReaderForm()}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border border-white/15 bg-near-black-green p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 id="reader-pay-title" className="text-sm font-semibold text-cream">
+              Record in-person card payment
+              <span className="mt-0.5 block font-thai text-xs font-medium text-cream-muted">
+                บันทึกการรับบัตรหน้างาน
+              </span>
+            </h2>
+            <p className="mt-2 text-xs text-cream-muted">
+              {readerBooking.first_name_en} {readerBooking.last_name_en} · {readerBooking.trip_code}
+              {readerBooking.booking_reference
+                ? ` · ${readerBooking.booking_reference}`
+                : ''}
+            </p>
+            <p className="mt-1 text-[11px] text-amber-200/90">
+              Charge the card in the Square Point of Sale app first, then copy the receipt number
+              here. This does not talk to Square.
+              <span className="mt-0.5 block font-thai">
+                รูดบัตรในแอป Square POS ก่อน แล้วคัดลอกเลขใบเสร็จมาใส่ — ระบบไม่ดึงข้อมูลจาก Square อัตโนมัติ
+              </span>
+            </p>
+            <div className="mt-3 space-y-3">
+              <StaffField label="Amount paid (AUD) / ยอดที่รับ">
+                <StaffInput
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  autoFocus
+                  value={readerAmount}
+                  onChange={(e) => setReaderAmount(e.target.value)}
+                />
+              </StaffField>
+              <StaffField label="Square receipt / reference / เลขใบเสร็จ Square">
+                <StaffInput
+                  value={readerReceipt}
+                  onChange={(e) => setReaderReceipt(e.target.value)}
+                  placeholder="From Square POS receipt screen"
+                />
+              </StaffField>
+              <StaffField label="Note (optional) / หมายเหตุ">
+                <StaffTextarea
+                  rows={2}
+                  value={readerNote}
+                  onChange={(e) => setReaderNote(e.target.value)}
+                />
+              </StaffField>
+            </div>
+            <div className="mt-4 flex gap-2">
+              <StaffButton
+                type="button"
+                disabled={
+                  readerSubmitting ||
+                  !readerAmount ||
+                  Number(readerAmount) <= 0 ||
+                  readerReceipt.trim().length < 2
+                }
+                onClick={() => void submitReaderPayment()}
+                className="flex-1 text-xs uppercase tracking-wider"
+              >
+                {readerSubmitting ? 'Saving…' : 'Save payment'}
+              </StaffButton>
+              <StaffButton
+                type="button"
+                variant="secondary"
+                disabled={readerSubmitting}
+                onClick={closeReaderForm}
+                className="text-xs"
+              >
+                Cancel
+              </StaffButton>
+            </div>
+          </div>
+        </div>
       )}
       {slipViewer && (
         <div

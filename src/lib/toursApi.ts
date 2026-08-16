@@ -958,6 +958,18 @@ export async function recordPayment(
   return callStaffApi<RecordPaymentResult>('record_payment', { bookingId, amount, paymentMethod })
 }
 
+export type RecordInPersonCardResult = RecordPaymentResult & { skipped?: boolean }
+
+/** Manual Square Reader / POS-app charge — staff-api → apply_square_payment. */
+export async function recordInPersonCardPayment(params: {
+  bookingId: string
+  amount: number
+  squareReceiptRef: string
+  note?: string
+}): Promise<RecordInPersonCardResult> {
+  return callStaffApi<RecordInPersonCardResult>('record_in_person_card_payment', params)
+}
+
 export async function fetchPaymentsForBooking(bookingId: string): Promise<BookingPayment[]> {
   return callStaffApi<BookingPayment[]>('list_payments_for_booking', { bookingId })
 }

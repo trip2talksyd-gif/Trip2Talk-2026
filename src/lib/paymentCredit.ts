@@ -38,7 +38,29 @@ export function remainingTripBalanceAud(opts: {
   return Math.max(0, Math.round((price - credit) * 100) / 100)
 }
 
+/** Online Square Web Payments (card-not-present). Not Square Reader. */
 export function isSquareGatewayMethod(method?: string | null): boolean {
   const m = (method ?? '').trim().toLowerCase()
   return m === 'square' || m === 'afterpay'
+}
+
+/** Physical Square Reader / POS app, entered manually in Cashier. */
+export function isInPersonCardMethod(method?: string | null): boolean {
+  return (method ?? '').trim().toLowerCase() === 'card_in_person'
+}
+
+const PAYMENT_METHOD_LABEL_EN: Record<string, string> = {
+  cash: 'Cash',
+  payid: 'PayID',
+  bank_transfer: 'Bank Transfer',
+  manual: 'Other',
+  square: 'Card via Square',
+  afterpay: 'Afterpay via Square',
+  card_in_person: 'Card (in person)',
+}
+
+export function paymentMethodLabelEn(method?: string | null): string {
+  const value = (method ?? '').trim().toLowerCase()
+  if (!value) return '—'
+  return PAYMENT_METHOD_LABEL_EN[value] ?? method!.trim()
 }

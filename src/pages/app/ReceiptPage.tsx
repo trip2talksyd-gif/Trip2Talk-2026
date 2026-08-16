@@ -9,7 +9,7 @@ import {
   resolveBookingTravelDate,
   type BookingReceiptLookup,
 } from '../../lib/toursApi'
-import { remainingTripBalanceAud } from '../../lib/paymentCredit'
+import { paymentMethodLabelEn, remainingTripBalanceAud } from '../../lib/paymentCredit'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import {
   StaffButton,
@@ -46,14 +46,6 @@ export type ReceiptData = {
 
 // Tax invoice is an AU legal/customer-facing document — English + AUD only,
 // regardless of what language the internal staff tools use.
-const PAYMENT_METHOD_LABEL: Record<string, string> = {
-  cash: 'Cash',
-  payid: 'PayID',
-  bank_transfer: 'Bank Transfer',
-  manual: 'Other',
-  square: 'Card via Square',
-  afterpay: 'Afterpay via Square',
-}
 
 const STATUS_LABEL: Record<string, string> = {
   deposit_paid: 'Deposit Paid',
@@ -457,7 +449,7 @@ export default function ReceiptPage() {
             <Row label="Status" value={STATUS_LABEL[data.bookingStatus] ?? data.bookingStatus} />
             <Row
               label="Payment Method"
-              value={data.paymentMethod ? PAYMENT_METHOD_LABEL[data.paymentMethod] ?? data.paymentMethod : '—'}
+              value={paymentMethodLabelEn(data.paymentMethod)}
             />
           </div>
         </div>
@@ -468,13 +460,17 @@ export default function ReceiptPage() {
             <p className="font-bold" style={{ color: ACCENT }}>
               Payment Details
             </p>
-            {data.paymentMethod === 'square' || data.paymentMethod === 'afterpay' ? (
+            {data.paymentMethod === 'square' ||
+            data.paymentMethod === 'afterpay' ||
+            data.paymentMethod === 'card_in_person' ? (
               <>
                 <p className="mt-1 text-black/70">Paid via Square</p>
                 <p className="text-black/70">
                   {data.paymentMethod === 'afterpay'
                     ? 'Afterpay'
-                    : 'Card / Afterpay'}
+                    : data.paymentMethod === 'card_in_person'
+                      ? 'Card (in person)'
+                      : 'Card (online)'}
                 </p>
                 <p className="text-black/70">Trip2Talk · Chapter 99 Photography</p>
               </>

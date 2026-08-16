@@ -375,6 +375,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   update_tour_itinerary: ['OWNER', 'MANAGER'],
   update_tour_max_seats: ['OWNER'],
   record_payment: ['OWNER', 'MANAGER', 'CASHIER'],
+  record_in_person_card_payment: ['OWNER', 'MANAGER', 'CASHIER'],
   sign_payment_slip: ['OWNER', 'MANAGER', 'CASHIER'],
   flag_pending_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   set_marketing_photo_opt_out: ['OWNER', 'MANAGER', 'CASHIER'],
@@ -524,7 +525,7 @@ Deno.serve(async (req) => {
         const { data: cardPaid, error: cardError } = await admin
           .from('tour_bookings')
           .select('*')
-          .in('payment_method', ['square', 'afterpay'])
+          .in('payment_method', ['square', 'afterpay', 'card_in_person'])
           .in('booking_status', ['deposit_paid', 'fully_paid', 'paid'])
           .is('cancelled_at', null)
           .order('booked_at', { ascending: false })
@@ -1593,6 +1594,94 @@ Deno.serve(async (req) => {
             installment_no: installmentNo,
             installment_plan: booking.payment_plan_installments ?? null,
             receipt_invoice_number: invoiceNo,
+          },
+        })
+      }
+
+      case 'record_in_person_card_payment': {
+        // Square Reader / POS app — staff types the receipt after the tap.
+        // Ledger + booking_status go through apply_square_payment only.
+        const { bookingId, amount, squareReceiptRef, note } = params as {
+          bookingId?: string
+          amount?: number
+          squareReceiptRef?: string
+          note?: string
+        }
+        const receipt = typeof squareReceiptRef === 'string' ? squareReceiptRef.trim() : ''
+        if (!bookingId || !amount || amount <= 0 || receipt.length < 2) {
+          return json({ error: 'invalid_params' }, 400)
+        }
+        if (receipt.length > 80) return json({ error: 'receipt_too_long' }, 400)
+
+        const { data: booking, error: bookingError } = await admin
+          .from('tour_bookings')
+          .select('*')
+          .eq('id', bookingId)
+          .maybeSingle()
+        if (bookingError) throw bookingError
+        if (!booking) return json({ error: 'booking_not_found' }, 404)
+        const bookingRef =
+          typeof booking.booking_reference === 'string' ? booking.booking_reference.trim() : ''
+        if (!bookingRef) return json({ error: 'missing_booking_reference' }, 422)
+
+        const { data: tour } = await admin
+          .from('tours')
+          .select('price_aud')
+          .eq('id', booking.tour_id)
+          .maybeSingle()
+        const priceAud = tour ? Number(tour.price_aud ?? 0) : 0
+        const amountCents = Math.round(Number(amount) * 100)
+        const paymentId = `in_person:${bookingRef}:${receipt}`
+        const staffNote = typeof note === 'string' ? note.trim().slice(0, 500) : ''
+        const staffId =
+          typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+
+        const { data: rpcResult, error: rpcError } = await admin.rpc('apply_square_payment', {
+          p_booking_ref: bookingRef,
+          p_amount_cents: amountCents,
+          p_payment_id: paymentId,
+          p_payment_method: 'card_in_person',
+          p_recorded_by_staff_id: staffId,
+          p_staff_note: staffNote || null,
+        })
+        if (rpcError) throw rpcError
+        const row = (rpcResult ?? {}) as {
+          ok?: boolean
+          error?: string
+          skipped?: boolean
+          booking_status?: string
+          amount_paid_aud?: number
+          installment_no?: number
+        }
+        if (!row.ok) {
+          return json({ error: row.error || 'mark_paid_failed' }, 422)
+        }
+
+        const { data: payment, error: payErr } = await admin
+          .from('booking_payments')
+          .select('*')
+          .eq('external_payment_id', paymentId)
+          .maybeSingle()
+        if (payErr) throw payErr
+        if (payment && payment.booking_id !== bookingId) {
+          return json({ error: 'receipt_already_used' }, 409)
+        }
+
+        const installmentNo =
+          Number(row.installment_no ?? payment?.installment_no ?? 0) || 1
+        const paidTotal = Number(row.amount_paid_aud ?? booking.amount_paid_aud ?? 0)
+        const newStatus = String(row.booking_status ?? booking.booking_status)
+
+        return json({
+          data: {
+            payment,
+            amount_paid_aud: paidTotal,
+            booking_status: newStatus,
+            price_aud: priceAud,
+            installment_no: installmentNo,
+            installment_plan: booking.payment_plan_installments ?? null,
+            receipt_invoice_number: payment?.receipt_invoice_number ?? null,
+            skipped: Boolean(row.skipped),
           },
         })
       }
