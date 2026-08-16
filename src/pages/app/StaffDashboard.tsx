@@ -37,6 +37,7 @@ import ArchiveTourDialog from '../../components/app/ArchiveTourDialog'
 import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
 import TripDaySafetyQuickView from '../../components/app/TripDaySafetyQuickView'
 import PaymentReconciliationBanner from '../../components/app/PaymentReconciliationBanner'
+import StaffOpsSummary from '../../components/app/StaffOpsSummary'
 import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
 import StaffWaiverRecordButton from '../../components/app/StaffWaiverRecordButton'
@@ -343,8 +344,9 @@ export default function StaffDashboard() {
         />
       </StaffPageHeader>
 
-      <StaffMain>
+      <StaffMain className="!max-w-7xl">
         <PaymentReconciliationBanner />
+        <StaffOpsSummary role={staffRole} tours={tours} toursLoading={loading} />
         {loading && <ListRowSkeleton count={4} />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
 
@@ -379,92 +381,89 @@ export default function StaffDashboard() {
                 {tourTab === 'archived' ? 'No archived tours' : 'No active tours'}
               </p>
             ) : (
-              <ul className="mt-4 space-y-3">
+              <ul className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
                 {visibleTours.map((tour) => {
                   const theme = tripTheme(tour.trip_code)
                   const TripIcon = theme.Icon
                   const selectedCard = selected?.id === tour.id
                   const left = seatsRemaining(tour)
                   return (
-                    <li key={tour.id}>
+                    <li key={tour.id} className="h-full">
                       <div
-                        className={`group relative w-full overflow-hidden rounded-3xl border text-left shadow-[0_12px_28px_-18px_rgba(0,0,0,0.65)] transition-[border-color,background-color] ${
+                        className={`group relative flex h-full flex-col overflow-hidden rounded-3xl border text-left shadow-[0_12px_28px_-18px_rgba(0,0,0,0.65)] transition-[border-color,background-color] ${
                           selectedCard
                             ? 'border-teal-500/50 bg-surface-card ring-1 ring-teal-500/30'
                             : 'border-white/8 bg-surface-card/70'
                         }`}
                       >
                         <div className={`h-1 w-full ${theme.bar}`} />
-                        <div className="flex items-stretch">
-                          <button
-                            type="button"
-                            onClick={() => setSelected(tour)}
-                            className="min-w-0 flex-1 px-4 py-3.5 text-left transition-colors hover:bg-white/[0.03] active:scale-[0.99]"
+                        <button
+                          type="button"
+                          onClick={() => setSelected(tour)}
+                          className="min-w-0 flex-1 px-3 py-3 text-left transition-colors hover:bg-white/[0.03] active:scale-[0.99]"
+                        >
+                          <span
+                            className={`flex h-9 w-9 items-center justify-center rounded-xl ${theme.iconBg}`}
                           >
-                            <div className="flex items-start gap-3">
-                              <span
-                                className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${theme.iconBg}`}
+                            <TripIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
+                          </span>
+                          <p className="mt-2.5 font-serif text-[15px] leading-snug text-cream">
+                            {tour.name_en}
+                          </p>
+                          <p className="mt-0.5 text-[13px] leading-snug text-cream-muted">
+                            {tour.name_th}
+                          </p>
+                          <p className="mt-1.5 text-xs text-cream-muted">
+                            {tour.trip_code} · {tour.departure_date}
+                          </p>
+                          <SeatsProgress
+                            booked={tour.booked_seats}
+                            max={tour.max_seats}
+                            left={left}
+                          />
+                        </button>
+                        {isOwner && (
+                          <div className="flex shrink-0 items-center justify-end gap-1 border-t border-white/8 px-2 py-1.5">
+                            {tourTab === 'upcoming' ? (
+                              <button
+                                type="button"
+                                title="Archive trip"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setTourAction({ tour, mode: 'archive' })
+                                }}
+                                className="rounded-xl p-2 text-cream-muted transition-colors hover:bg-amber/15 hover:text-amber"
                               >
-                                <TripIcon className="h-4 w-4" strokeWidth={2} aria-hidden />
-                              </span>
-                              <div className="min-w-0 flex-1">
-                                <p className="font-serif text-[15px] leading-snug text-cream sm:text-base">
-                                  {tour.name_en}
-                                </p>
-                                <p className="mt-1 text-xs text-cream-muted">
-                                  {tour.trip_code} · {tour.departure_date}
-                                </p>
-                                <SeatsProgress
-                                  booked={tour.booked_seats}
-                                  max={tour.max_seats}
-                                  left={left}
-                                />
-                              </div>
-                            </div>
-                          </button>
-                          {isOwner && (
-                            <div className="flex shrink-0 flex-col justify-center gap-1 border-l border-white/8 px-2 py-2">
-                              {tourTab === 'upcoming' ? (
+                                <Archive className="h-4 w-4" strokeWidth={2} aria-hidden />
+                              </button>
+                            ) : (
+                              <>
                                 <button
                                   type="button"
-                                  title="Archive trip"
+                                  title="Restore trip"
                                   onClick={(e) => {
                                     e.stopPropagation()
-                                    setTourAction({ tour, mode: 'archive' })
+                                    setTourAction({ tour, mode: 'unarchive' })
                                   }}
-                                  className="rounded-xl p-2 text-cream-muted transition-colors hover:bg-amber/15 hover:text-amber"
+                                  className="rounded-xl p-2 text-cream-muted transition-colors hover:bg-teal-500/15 hover:text-teal-400"
                                 >
-                                  <Archive className="h-4 w-4" strokeWidth={2} aria-hidden />
+                                  <RotateCcw className="h-4 w-4" strokeWidth={2} aria-hidden />
                                 </button>
-                              ) : (
-                                <>
-                                  <button
-                                    type="button"
-                                    title="Restore trip"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setTourAction({ tour, mode: 'unarchive' })
-                                    }}
-                                    className="rounded-xl p-2 text-cream-muted transition-colors hover:bg-teal-500/15 hover:text-teal-400"
-                                  >
-                                    <RotateCcw className="h-4 w-4" strokeWidth={2} aria-hidden />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    title="Delete permanently (only if zero bookings ever)"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setTourAction({ tour, mode: 'delete' })
-                                    }}
-                                    className="rounded-xl p-2 text-cream-muted transition-colors hover:bg-coral/15 hover:text-coral"
-                                  >
-                                    <Trash2 className="h-4 w-4" strokeWidth={2} aria-hidden />
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          )}
-                        </div>
+                                <button
+                                  type="button"
+                                  title="Delete permanently (only if zero bookings ever)"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setTourAction({ tour, mode: 'delete' })
+                                  }}
+                                  className="rounded-xl p-2 text-cream-muted transition-colors hover:bg-coral/15 hover:text-coral"
+                                >
+                                  <Trash2 className="h-4 w-4" strokeWidth={2} aria-hidden />
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </li>
                   )

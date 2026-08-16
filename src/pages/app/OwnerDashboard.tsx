@@ -43,6 +43,7 @@ import {
   staffShellClass,
 } from '../../components/app/staffUi'
 import PaymentReconciliationBanner from '../../components/app/PaymentReconciliationBanner'
+import StaffOpsSummary from '../../components/app/StaffOpsSummary'
 import AiContentGenerationToggle from '../../components/app/AiContentGenerationToggle'
 import { useToast } from '../../components/ui/Toast'
 
@@ -258,8 +259,9 @@ export default function OwnerDashboard() {
         subtitle={`Ops overview · ${statsHeading.toLowerCase()}`}
       />
 
-      <StaffMain>
+      <StaffMain className="!max-w-7xl">
         <PaymentReconciliationBanner />
+        <StaffOpsSummary role={sessionStorage.getItem('staff_role')} />
         <StaffCard>
           <StaffSectionTitle>AI content</StaffSectionTitle>
           <div className="mt-3">

@@ -1244,6 +1244,32 @@ export async function fetchOwnerOpsMetrics(): Promise<OwnerOpsMetrics> {
   return callStaffApi<OwnerOpsMetrics>('owner_ops_metrics')
 }
 
+export type BookingStatusCounts = {
+  pending_payment: number
+  deposit_paid: number
+  fully_paid: number
+  cancelled: number
+  no_show: number
+}
+
+export async function fetchBookingStatusCounts(): Promise<BookingStatusCounts> {
+  return callStaffApi<BookingStatusCounts>('booking_status_counts')
+}
+
+export type InsuranceAlert = {
+  id: string
+  title?: string | null
+  item_name?: string | null
+  note?: string | null
+  is_active: boolean
+  expiry_date: string | null
+  created_at?: string
+}
+
+export async function fetchInsuranceAlerts(): Promise<InsuranceAlert[]> {
+  return callStaffApi<InsuranceAlert[]>('insurance_alerts')
+}
+
 /** Fixes a typo'd name/phone/email on an existing booking. Does not touch
  * payment amounts, status, or seat counts. Pass only the fields to change. */
 export async function updateBookingDetails(
