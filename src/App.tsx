@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import PublicLayout from './components/layout/PublicLayout'
 import ScrollToTop from './components/layout/ScrollToTop'
 import HomePage from './pages/public/HomePage'
@@ -11,7 +11,6 @@ import PricingPage from './pages/public/PricingPage'
 import AboutPage from './pages/public/AboutPage'
 import DiscoverPage from './pages/public/DiscoverPage'
 import SpotDetailPage from './pages/public/SpotDetailPage'
-import SpotsPage from './pages/public/SpotsPage'
 import ExperiencePage from './pages/public/ExperiencePage'
 import WaiverPage from './pages/public/WaiverPage'
 import CustomerWaiverPage from './pages/public/CustomerWaiverPage'
@@ -57,6 +56,11 @@ import ContentReview from './pages/admin/ContentReview'
 import QuickPost from './pages/admin/QuickPost'
 import RequireStaffRole from './components/app/RequireStaffRole'
 
+function RedirectToDiscover() {
+  const { search } = useLocation()
+  return <Navigate to={`/discover${search}`} replace />
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -66,9 +70,9 @@ export default function App() {
           <Route index element={<HomePage />} />
           <Route path="discover" element={<DiscoverPage />} />
           <Route path="discover/spot/:id" element={<SpotDetailPage />} />
-          <Route path="spots" element={<SpotsPage />} />
+          <Route path="spots" element={<RedirectToDiscover />} />
           <Route path="spots/:slug" element={<SpotDetailPage />} />
-          <Route path="photo-spots" element={<SpotsPage />} />
+          <Route path="photo-spots" element={<RedirectToDiscover />} />
           <Route path="experience" element={<ExperiencePage />} />
           <Route path="trips" element={<TripsPage />} />
           <Route path="trips/:tripCode" element={<TripDetailPage />} />

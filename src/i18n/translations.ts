@@ -14,7 +14,6 @@ export type TranslationKey =
   | 'nav.myTrip'
   | 'nav.account'
   | 'nav.photoGuide'
-  | 'nav.spots'
   | 'nav.help'
   | 'btn.bookNow'
   | 'btn.exploreTrips'
@@ -536,6 +535,9 @@ export type TranslationKey =
   | 'discover.chip.aurora'
   | 'discover.chip.portrait'
   | 'discover.chip.nature'
+  | 'discover.chip.landscape'
+  | 'discover.chip.coastal'
+  | 'discover.chip.night'
   | 'discover.masterpiece'
   | 'discover.nearby'
   | 'discover.seeAll'
@@ -546,6 +548,8 @@ export type TranslationKey =
   | 'discover.cta'
   | 'discover.ctaLead'
   | 'discover.ctaBold'
+  | 'discover.feedCta.trip'
+  | 'discover.feedCta.allTrips'
   | 'discover.back'
   | 'discover.favorite'
   | 'discover.unfavorite'
@@ -607,7 +611,6 @@ const en: Map = {
   'nav.myTrip': 'My Trip',
   'nav.account': 'Account',
   'nav.photoGuide': 'Photo Guide',
-  'nav.spots': 'Photo Spots',
   'nav.help': 'Help',
   'btn.bookNow': 'Book Now',
   'btn.exploreTrips': 'Explore Trips',
@@ -1181,6 +1184,9 @@ const en: Map = {
   'discover.chip.aurora': 'Aurora',
   'discover.chip.portrait': 'Portrait',
   'discover.chip.nature': 'Nature',
+  'discover.chip.landscape': 'Landscape',
+  'discover.chip.coastal': 'Coastal',
+  'discover.chip.night': 'Night',
   'discover.masterpiece': "Today's Masterpiece",
   'discover.nearby': 'Featured spots',
   'discover.seeAll': 'See all',
@@ -1192,6 +1198,8 @@ const en: Map = {
     'Want this shot without driving yourself? Let our photographer take you there.',
   'discover.ctaLead': 'Want this shot without driving yourself?',
   'discover.ctaBold': 'Let our photographer take you there.',
+  'discover.feedCta.trip': 'Let our photographer take you there',
+  'discover.feedCta.allTrips': 'See all trips',
   'discover.back': 'Back',
   'discover.favorite': 'Save favorite',
   'discover.unfavorite': 'Remove favorite',
@@ -1252,7 +1260,6 @@ const th: Map = {
   'nav.myTrip': 'ทริปของฉัน',
   'nav.account': 'บัญชี',
   'nav.photoGuide': 'คู่มือถ่ายภาพ',
-  'nav.spots': 'พิกัดถ่ายภาพ',
   'nav.help': 'ช่วยเหลือ',
   'btn.bookNow': 'จองเลย',
   'btn.exploreTrips': 'ดูทริปทั้งหมด',
@@ -1825,16 +1832,21 @@ const th: Map = {
   'discover.chip.aurora': 'ออโรร่า',
   'discover.chip.portrait': 'พอร์ตเทรต',
   'discover.chip.nature': 'ธรรมชาติ',
+  'discover.chip.landscape': 'วิว',
+  'discover.chip.coastal': 'ชายฝั่ง',
+  'discover.chip.night': 'กลางคืน',
   'discover.masterpiece': 'Masterpiece วันนี้',
   'discover.nearby': 'พิกัดแนะนำ',
   'discover.seeAll': 'ดูทั้งหมด',
   'discover.latest': 'ผลงานล่าสุดจากพี่แสน',
   'discover.mapTeaser': 'สำรวจพิกัดใกล้คุณ · {n} จุด',
   'discover.mapTeaserSub': '{n} จุด · แผนที่มุมงามทั้งหมด',
-  'discover.loadMore': 'โหลดมุมถ่ายเพิ่ม',
+  'discover.loadMore': 'ดูจุดเพิ่มเติม',
   'discover.cta': 'อยากได้มุมนี้แต่ไม่อยากขับรถเอง? ให้ช่างภาพของเราพาไปสิ',
   'discover.ctaLead': 'อยากได้รูปมุมนี้แต่เดินทางลำบาก?',
   'discover.ctaBold': 'ให้ช่างภาพของเราพาไปสิ',
+  'discover.feedCta.trip': 'ให้ช่างภาพของเราพาไปสิ',
+  'discover.feedCta.allTrips': 'ดูทริปทั้งหมด',
   'discover.back': 'กลับ',
   'discover.favorite': 'บันทึกรายการโปรด',
   'discover.unfavorite': 'ลบออกจากรายการโปรด',

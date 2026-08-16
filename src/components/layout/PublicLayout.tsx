@@ -9,26 +9,23 @@ import OfflineBanner from './OfflineBanner'
 import BrandLogo from '../brand/BrandLogo'
 
 const menuLinks = [
-  { to: '/trips', key: 'nav.trips' as const },
   { to: '/discover', key: 'nav.discover' as const },
-  { to: '/spots', key: 'nav.spots' as const },
+  { to: '/photo-guide', key: 'nav.photoGuide' as const },
+  { to: '/trips', key: 'nav.trips' as const },
+  { to: '/calendar', key: 'nav.calendar' as const },
+  { to: '/pricing', key: 'nav.pricing' as const },
+  { to: '/about', key: 'nav.about' as const },
   { to: '/favorites', key: 'nav.favorites' as const },
   { to: '/my-trip', key: 'nav.myTrip' as const },
   { to: '/account', key: 'nav.account' as const },
-  { to: '/photo-guide', key: 'nav.photoGuide' as const },
-  { to: '/calendar', key: 'nav.calendar' as const },
-  { to: '/pricing', key: 'nav.pricing' as const },
   { to: '/help', key: 'nav.help' as const },
-  { to: '/about', key: 'nav.about' as const },
   { to: '/app', key: 'nav.portal' as const },
 ]
 
-// Desktop top bar — Discover replaces Gallery as the photo feed entry.
 const desktopNavOrder = [
-  '/trips',
   '/discover',
-  '/spots',
   '/photo-guide',
+  '/trips',
   '/calendar',
   '/pricing',
   '/about',
