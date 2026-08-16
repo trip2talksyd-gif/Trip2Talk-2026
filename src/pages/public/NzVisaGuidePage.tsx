@@ -1,6 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { ClipboardList, ExternalLink, IdCard, Info, Youtube } from 'lucide-react'
+import { ClipboardList, ExternalLink, IdCard, Info, Video } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import { NZ_VISA_TUTORIAL_YOUTUBE_ID, NZ_VISITOR_VISA_URL } from '../../data/photoGuideContent'
 import LazyYouTubeEmbed from '../../components/photoGuide/LazyYouTubeEmbed'
@@ -115,7 +115,7 @@ export default function NzVisaGuidePage() {
           />
         </div>
         <div className="mt-2 flex items-start gap-1.5">
-          <Youtube
+          <Video
             className="mt-0.5 h-3.5 w-3.5 shrink-0 text-ink-soft"
             strokeWidth={2.25}
             aria-hidden
