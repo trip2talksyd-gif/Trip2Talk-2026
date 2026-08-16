@@ -13,6 +13,7 @@ import {
   fetchTourByCode,
   formatAud,
   formatDate,
+  getUnbookableReason,
   insertBooking,
   uploadPaymentSlip,
 } from '../../lib/toursApi'
@@ -155,7 +156,20 @@ export default function BookingPage() {
       return
     }
     fetchTourByCode(tripCode)
-      .then(setTour)
+      .then((row) => {
+        const reason = row ? getUnbookableReason(row) : null
+        if (
+          reason === 'no_date' ||
+          reason === 'template' ||
+          reason === 'draft' ||
+          reason === 'cancelled' ||
+          reason === 'completed'
+        ) {
+          navigate(`/trips/${tripCode}`, { replace: true })
+          return
+        }
+        setTour(row)
+      })
       .catch(() => setLoadError(t('common.error')))
       .finally(() => setLoading(false))
   }, [tripCode, navigate, t])
@@ -671,7 +685,9 @@ export default function BookingPage() {
           </p>
         </div>
         <span className="shrink-0 rounded-full bg-[#e5f6ec] px-2 py-0.5 text-[8.5px] font-extrabold text-[#1a7a4c]">
-          {lang === 'th' ? 'บริการฟรี' : 'Free to arrange'}
+          {lang === 'th'
+            ? 'จัดการให้ฟรี — ห้องส่วนตัวมีค่าใช้จ่ายเพิ่ม'
+            : 'Arranging is free — private room has an extra cost'}
         </span>
       </div>
       )}

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { Tour } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
-import { formatDate, isTourBookable } from '../../lib/toursApi'
+import { formatDate, isListedPriceHidden, isTourBookable } from '../../lib/toursApi'
 import { squarePayQuerySuffix } from '../../lib/preferredPayment'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 
@@ -18,6 +18,8 @@ export default function TripStickyBookBar({ tour }: Props) {
   const soon = tt('btn.comingSoon')
   const from = tt('detail.fromPrice')
   const perPerson = tt('detail.stat.perPerson')
+  const priceTba = tt('trips.priceTba')
+  const priceHidden = isListedPriceHidden(tour)
 
   return (
     <div
@@ -28,12 +30,18 @@ export default function TripStickyBookBar({ tour }: Props) {
       <div className="pointer-events-auto mx-auto flex max-w-lg items-center justify-between gap-3 rounded-full bg-ink px-4 py-2.5 text-cream shadow-[0_12px_28px_-10px_rgba(0,0,0,0.55)]">
         <div className="min-w-0 leading-tight">
           <div className="flex items-baseline gap-1">
-            <span className="text-[9px] font-medium text-cream/70">{from.en}</span>
-            <SplitFlapPrice
-              amountAud={tour.price_aud}
-              board
-              className="text-[13px] font-extrabold leading-none"
-            />
+            {priceHidden ? (
+              <span className="text-[13px] font-extrabold leading-none">{priceTba.en}</span>
+            ) : (
+              <>
+                <span className="text-[9px] font-medium text-cream/70">{from.en}</span>
+                <SplitFlapPrice
+                  amountAud={tour.price_aud}
+                  board
+                  className="text-[13px] font-extrabold leading-none"
+                />
+              </>
+            )}
           </div>
           <p className="mt-0.5 truncate font-thai text-[9px] font-medium text-cream/75">
             {formatDate(tour.departure_date, 'en')}

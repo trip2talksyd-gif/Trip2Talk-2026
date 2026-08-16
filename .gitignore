@@ -22,6 +22,9 @@ supabase/seed/staff_profiles_seed.sql
 # One-off local ops (lockout PIN reset, etc.) — never commit
 scripts/one-off/
 
+# Local scratch (SQL probes, image reprocess) — never commit
+.temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

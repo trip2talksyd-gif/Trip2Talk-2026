@@ -92,6 +92,7 @@ export type TranslationKey =
   | 'trips.cat.influencer'
   | 'trips.seatsLeft'
   | 'trips.seatsFull'
+  | 'trips.priceTba'
   | 'common.clearSearch'
   | 'detail.tab.details'
   | 'detail.tab.itinerary'
@@ -694,6 +695,7 @@ const en: Map = {
   'trips.cat.influencer': 'Influencer',
   'trips.seatsLeft': 'left',
   'trips.seatsFull': 'Full',
+  'trips.priceTba': 'Price TBA',
   'detail.tab.details': 'Details',
   'detail.tab.itinerary': 'Itinerary',
   'detail.tab.reviews': 'Reviews',
@@ -945,8 +947,7 @@ const en: Map = {
   'photoGuide.back': 'Back to Photo Guide',
   'photoGuide.hub.badge': "Let's Learn and Practice",
   'photoGuide.hub.title': 'Photo Guide',
-  'photoGuide.hub.subtitle':
-    'Three guides for three kinds of travelers — linked from Home and Trip Prep.',
+  'photoGuide.hub.subtitle': 'Three guides for three kinds of travelers.',
   'photoGuide.readGuide': 'Read guide →',
   'photoGuide.hub.albumTitle': 'Photos from Saen',
   'photoGuide.hub.albumSub': 'Curated shots from past trips — drag or browse the slideshow below.',
@@ -1342,6 +1343,7 @@ const th: Map = {
   'trips.cat.influencer': 'อินฟลู',
   'trips.seatsLeft': 'เหลือ',
   'trips.seatsFull': 'เต็ม',
+  'trips.priceTba': 'ราคารอประกาศ',
   'detail.tab.details': 'รายละเอียด',
   'detail.tab.itinerary': 'เส้นทาง',
   'detail.tab.reviews': 'รีวิว',
@@ -1593,8 +1595,7 @@ const th: Map = {
   'photoGuide.back': 'กลับไปหน้าคลังเคล็ดลับ',
   'photoGuide.hub.badge': 'มาเรียนรู้และฝึกฝนไปด้วยกัน',
   'photoGuide.hub.title': 'คลังเคล็ดลับถ่ายภาพ',
-  'photoGuide.hub.subtitle':
-    'สามคู่มือสำหรับสามสไตล์นักเดินทาง — ลิงก์จากหน้าแรกและหน้าเตรียมตัว',
+  'photoGuide.hub.subtitle': 'สามคู่มือสำหรับสามสไตล์นักเดินทาง',
   'photoGuide.readGuide': 'อ่านคู่มือ →',
   'photoGuide.hub.albumTitle': 'อัลบั้มรูปจากพี่แสน',
   'photoGuide.hub.albumSub': 'รูปคัดสรรจากทริปที่ผ่านมา — ลากหรือดูสไลด์ด้านล่าง',

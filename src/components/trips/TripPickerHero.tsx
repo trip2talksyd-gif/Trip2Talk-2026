@@ -7,7 +7,7 @@ import {
   tourDestinationLabel,
   tourDurationLabel,
 } from '../../lib/tourDisplay'
-import { formatAud, seatsRemaining } from '../../lib/toursApi'
+import { formatAud, isListedPriceHidden, seatsRemaining } from '../../lib/toursApi'
 import { getPreviewPhotoForTrip, photoThumbSrc } from '../../data/galleryPhotos'
 import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 import BiDisplayHeading from '../ui/BiDisplayHeading'
@@ -63,10 +63,14 @@ export default function TripPickerHero({ tours }: Props) {
 
   const active = tours[Math.min(activeIndex, tours.length - 1)]!
   const seats = seatsRemaining(active)
-  const showScarcity = seats > 0 && seats <= LOW_SEATS_MAX
+  const priceHidden = isListedPriceHidden(active)
+  const showScarcity = !priceHidden && seats > 0 && seats <= LOW_SEATS_MAX
   const fromBi = tt('common.fromPrice')
   const seatsLeft = tt('trips.seatsLeft')
   const bookBi = tt('btn.bookNow')
+  const viewBi = tt('btn.viewTrip')
+  const priceTba = tt('trips.priceTba')
+  const ctaBi = priceHidden ? viewBi : bookBi
   const destEn = tourDestinationLabel(active.trip_code, 'en')
   const destTh = tourDestinationLabel(active.trip_code, 'th')
   const durationEn = tourDurationLabel(active, 'en')
@@ -198,14 +202,27 @@ export default function TripPickerHero({ tours }: Props) {
               className="trip-picker-fade min-w-0"
             >
               <p className="text-[15px] font-extrabold leading-none text-cream sm:text-base">
-                <span className="mr-1 text-[10px] font-bold uppercase tracking-wide text-cream/70">
-                  {fromBi.en}
-                </span>
-                {formatAud(active.price_aud)}
+                {priceHidden ? (
+                  <>
+                    <span className="block">{priceTba.en}</span>
+                    <span className="mt-0.5 block font-thai text-[10px] font-medium text-cream/65">
+                      {priceTba.th}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="mr-1 text-[10px] font-bold uppercase tracking-wide text-cream/70">
+                      {fromBi.en}
+                    </span>
+                    {formatAud(active.price_aud)}
+                  </>
+                )}
               </p>
-              <p className="mt-0.5 font-thai text-[10px] font-medium text-cream/65">
-                {fromBi.th} {formatAud(active.price_aud)}
-              </p>
+              {!priceHidden && (
+                <p className="mt-0.5 font-thai text-[10px] font-medium text-cream/65">
+                  {fromBi.th} {formatAud(active.price_aud)}
+                </p>
+              )}
               {showScarcity && (
                 <span className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-coral/95 px-2 py-0.5 text-[10px] font-bold text-cream">
                   <Flame className="h-2.5 w-2.5" strokeWidth={2.5} aria-hidden />
@@ -221,9 +238,9 @@ export default function TripPickerHero({ tours }: Props) {
               to={`/trips/${active.trip_code}`}
               className="inline-flex shrink-0 items-center justify-center rounded-xl bg-orange px-4 py-2.5 text-[12px] font-bold text-teal-darker shadow-[0_8px_20px_-10px_rgba(230,147,90,0.85)] transition-colors hover:bg-orange-soft sm:px-5 sm:text-[13px]"
             >
-              <span>{bookBi.en}</span>
+              <span>{ctaBi.en}</span>
               <span className="ml-1.5 font-thai text-[11px] font-semibold opacity-90 sm:text-xs">
-                {bookBi.th}
+                {ctaBi.th}
               </span>
             </Link>
           </div>

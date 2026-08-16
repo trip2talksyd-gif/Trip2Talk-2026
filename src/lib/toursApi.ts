@@ -1,7 +1,12 @@
 import { supabase, supabaseConfig } from './supabase'
 import { callStaffApi, clearStaffSession, StaffSessionExpiredError } from './supabaseStaff'
 import { SeatsFullError } from '../types/errors'
-import { deriveDatedTripCode, isSelectableBookableTour, parseTravelDateFromTripCode } from './tourSelectability'
+import {
+  deriveDatedTripCode,
+  isPublicCatalogTour,
+  isSelectableBookableTour,
+  parseTravelDateFromTripCode,
+} from './tourSelectability'
 import type {
   BookingPayment,
   ComplianceItem,
@@ -182,14 +187,9 @@ export async function fetchFeaturedTours(limit = 3): Promise<Tour[]> {
       logSupabaseError('fetchFeaturedTours', error)
       throw error
     }
-    const tours = sortByDepartureDate(normalizeTours(data as TourRow[])).filter((t) => {
-      const s = statusLower(t)
-      return (
-        (s === 'confirmed' || s === 'published' || s === 'active') &&
-        isSelectableBookableTour(t)
-      )
-    })
-    return sortToursForListing(tours).slice(0, limit)
+    const tours = sortByDepartureDate(normalizeTours(data as TourRow[]))
+    const catalog = tours.filter((t) => isPublicCatalogTour(t, tours))
+    return sortToursForListing(catalog).slice(0, limit)
   } catch (err) {
     if (!(err && typeof err === 'object' && 'code' in err)) {
       logSupabaseError('fetchFeaturedTours', err)
@@ -207,13 +207,12 @@ export async function fetchAllTours(): Promise<Tour[]> {
       logSupabaseError('fetchAllTours', error)
       throw error
     }
-    const tours = sortByDepartureDate(normalizeTours(data as TourRow[])).filter((t) => {
+    const tours = sortByDepartureDate(normalizeTours(data as TourRow[]))
+    return tours.filter((t) => {
       const s = statusLower(t)
       if (s === 'cancelled' || s === 'archived') return false
-      // Public catalog: dated bookable instances only (templates stay for CMS resolve).
-      return isSelectableBookableTour(t)
+      return isPublicCatalogTour(t, tours)
     })
-    return tours
   } catch (err) {
     if (!(err && typeof err === 'object' && 'code' in err)) {
       logSupabaseError('fetchAllTours', err)
@@ -875,6 +874,12 @@ export function getUnbookableReason(tour: Tour): UnbookableReason {
   if (!isSelectableBookableTour(tour)) return 'template'
   if (tour.max_seats <= 0 || tour.booked_seats >= tour.max_seats) return 'full'
   return null
+}
+
+/** Hide listed AUD on Coming soon / template shells (price still TBD). */
+export function isListedPriceHidden(tour: Tour): boolean {
+  const reason = getUnbookableReason(tour)
+  return reason === 'no_date' || reason === 'template' || reason === 'draft'
 }
 
 // ---------------------------------------------------------------------------

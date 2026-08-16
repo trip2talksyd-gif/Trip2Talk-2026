@@ -17,6 +17,7 @@ import {
   fetchFeaturedTours,
   fetchTourByCode,
   formatAud,
+  isListedPriceHidden,
   isTourBookable,
   seatsRemaining,
 } from '../../lib/toursApi'
@@ -139,6 +140,7 @@ export default function TripDetailPage() {
   const mapCfg = getTripMap(tour.trip_code)
   const coverVideoUrl = getTripCoverVideoUrl(tour.trip_code)
   const bookable = isTourBookable(tour)
+  const priceHidden = isListedPriceHidden(tour)
   const remaining = seatsRemaining(tour)
   const testimonials = getTestimonialsForTrip(tour.trip_code)
   const lowSeats =
@@ -159,6 +161,7 @@ export default function TripDetailPage() {
   const moreBi = tt('detail.moreTrips')
   const auroraBi = tt('common.aurora')
   const fromBi = tt('detail.fromPrice')
+  const priceTba = tt('trips.priceTba')
 
   const seatsValue = bookable
     ? { en: `${remaining} left`, th: `เหลือ ${remaining}` }
@@ -174,7 +177,7 @@ export default function TripDetailPage() {
       label: tt('detail.stat.seats'),
     },
     {
-      value: formatAud(tour.price_aud),
+      value: priceHidden ? priceTba.en : formatAud(tour.price_aud),
       label: tt('detail.stat.perPerson'),
     },
   ]
@@ -323,18 +326,26 @@ export default function TripDetailPage() {
       <div className="hidden items-center gap-3 rounded-2xl border border-line bg-card p-3 shadow-[0_8px_22px_-14px_rgba(15,28,30,0.35)] md:flex">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-baseline gap-1.5">
-            <span className="text-[10px] font-semibold text-ink-soft">{fromBi.en}</span>
-            <SplitFlapPrice
-              amountAud={tour.price_aud}
-              board
-              className="text-[15px] font-extrabold leading-none"
-            />
-            <span className="text-[10px] font-semibold text-ink-soft">AUD</span>
+            {priceHidden ? (
+              <span className="text-[15px] font-extrabold text-ink">{priceTba.en}</span>
+            ) : (
+              <>
+                <span className="text-[10px] font-semibold text-ink-soft">{fromBi.en}</span>
+                <SplitFlapPrice
+                  amountAud={tour.price_aud}
+                  board
+                  className="text-[15px] font-extrabold leading-none"
+                />
+                <span className="text-[10px] font-semibold text-ink-soft">AUD</span>
+              </>
+            )}
           </div>
           <p className="mt-0.5 truncate text-[10px] text-ink-soft">
-            {bookable && lowSeats
-              ? `${remaining} seats left · deposit locks your seat / เหลือ ${remaining} · มัดจำล็อคที่นั่ง`
-              : 'per person · deposit locks your seat / ต่อคน · มัดจำล็อคที่นั่ง'}
+            {priceHidden
+              ? `${priceTba.th} · ${tour.max_seats} pax private / กลุ่มส่วนตัว ${tour.max_seats} คน`
+              : bookable && lowSeats
+                ? `${remaining} seats left · deposit locks your seat / เหลือ ${remaining} · มัดจำล็อคที่นั่ง`
+                : 'per person · deposit locks your seat / ต่อคน · มัดจำล็อคที่นั่ง'}
           </p>
         </div>
         <TripBookButton tour={tour} variant="deep" className="!w-auto shrink-0 !px-5 !py-2.5" />
@@ -668,7 +679,7 @@ export default function TripDetailPage() {
                       </span>
                     </p>
                     <p className="mt-1 text-[12px] font-extrabold text-coral">
-                      {formatAud(rec.price_aud)} AUD
+                      {isListedPriceHidden(rec) ? priceTba.en : `${formatAud(rec.price_aud)} AUD`}
                     </p>
                   </div>
                 </Link>

@@ -11,7 +11,7 @@ import {
   tourDestinationLabel,
   tourDurationLabel,
 } from '../../lib/tourDisplay'
-import { seatsRemaining } from '../../lib/toursApi'
+import { seatsRemaining, isListedPriceHidden } from '../../lib/toursApi'
 import { getPreviewPhotoForTrip, photoThumbSrc } from '../../data/galleryPhotos'
 import TripCoverImage from './TripCoverImage'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
@@ -32,7 +32,7 @@ const TYPE_PILL: Record<TripType, CatPill> = {
 /** Mockup Popular / Desert / Flagship-style tags when a specialty applies. */
 function categoryPill(tour: Tour): CatPill {
   const code = tour.trip_code.toUpperCase()
-  if (code === 'NZ-6D5N') return { key: 'trips.cat.flagship', className: 'bg-teal-800' }
+  if (code === 'NZ-6D5N' || code === 'NZ-10D9N') return { key: 'trips.cat.flagship', className: 'bg-teal-800' }
   if (code.startsWith('ULU')) return { key: 'trips.cat.desert', className: 'bg-teal-600' }
   if (isAuroraTrip(tour)) return { key: 'trips.cat.aurora', className: 'bg-teal-700' }
   if (code === 'SYD-INFLU-3H') return { key: 'trips.cat.influencer', className: 'bg-coral' }
@@ -52,6 +52,8 @@ export default function TripCard({ tour }: Props) {
   const toggleFavorite = useToggleFavorite()
   const seatsLeft = tt('trips.seatsLeft')
   const seatsFull = tt('trips.seatsFull')
+  const priceTba = tt('trips.priceTba')
+  const comingSoon = tt('btn.comingSoon')
   const favAdd = tt('favorites.add')
   const favRemove = tt('favorites.remove')
 
@@ -65,6 +67,8 @@ export default function TripCard({ tour }: Props) {
   const destTh = tourDestinationLabel(tour.trip_code, 'th')
   const durationEn = tourDurationLabel(tour, 'en')
   const durationTh = tourDurationLabel(tour, 'th')
+
+  const comingSoonListing = isListedPriceHidden(tour)
 
   return (
     <article className="group relative flex gap-2.5 rounded-2xl border border-line bg-card p-2 shadow-[0_6px_18px_-10px_rgba(10,61,58,0.25)]">
@@ -101,17 +105,30 @@ export default function TripCard({ tour }: Props) {
             {durationEn}
             <span className="font-thai text-[9px] opacity-85"> · {durationTh}</span>
           </span>
-          <SplitFlapPrice
-            amountAud={tour.price_aud}
-            board
-            className="shrink-0 text-[11px] font-extrabold leading-none"
-          />
+          {comingSoonListing ? (
+            <span className="shrink-0 text-[11px] font-extrabold leading-none text-ink">
+              {priceTba.en}
+              <span className="mt-0.5 block font-thai text-[8px] font-medium text-ink-soft">
+                {priceTba.th}
+              </span>
+            </span>
+          ) : (
+            <SplitFlapPrice
+              amountAud={tour.price_aud}
+              board
+              className="shrink-0 text-[11px] font-extrabold leading-none"
+            />
+          )}
         </div>
         <p className="mt-0.5 text-[9px] font-bold text-coral">
-          {seats === 0
-            ? `${seatsFull.en} / ${seatsFull.th}`
-            : `${seats} ${seatsLeft.en} · ${seatsLeft.th} ${seats}`}
-          {lowSeats && seats > 0 && <Flame className="ml-0.5 inline h-2.5 w-2.5" />}
+          {comingSoonListing
+            ? `${comingSoon.en} / ${comingSoon.th}`
+            : seats === 0
+              ? `${seatsFull.en} / ${seatsFull.th}`
+              : `${seats} ${seatsLeft.en} · ${seatsLeft.th} ${seats}`}
+          {!comingSoonListing && lowSeats && seats > 0 && (
+            <Flame className="ml-0.5 inline h-2.5 w-2.5" />
+          )}
         </p>
       </div>
 

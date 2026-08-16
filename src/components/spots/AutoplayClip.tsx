@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 /** Only compressed derivatives — never Storage masters or other .mp4. */
 export function isCompressedWebMp4(url: string): boolean {
@@ -6,23 +6,62 @@ export function isCompressedWebMp4(url: string): boolean {
   return /_web\.mp4$/i.test(path)
 }
 
+function prefersReducedMotion(): boolean {
+  try {
+    return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  } catch {
+    return false
+  }
+}
+
 type Props = {
   src: string
   className?: string
   poster?: string
+  /** Pause when mostly off-screen (default). Set false for always-on heroes. */
+  pauseOffscreen?: boolean
 }
 
 /**
- * Reels-style muted loop. Plays only while mostly on screen.
- * Refuses to mount if `src` is not a `*_web.mp4` URL.
+ * Muted loop. Plays only `*_web.mp4` URLs.
+ * `prefers-reduced-motion`: freeze on the first frame (no autoplay).
  */
-export default function AutoplayClip({ src, className = '', poster }: Props) {
+export default function AutoplayClip({
+  src,
+  className = '',
+  poster,
+  pauseOffscreen = true,
+}: Props) {
   const ref = useRef<HTMLVideoElement | null>(null)
   const allowed = isCompressedWebMp4(src)
+  const [reduced, setReduced] = useState(false)
+
+  useEffect(() => {
+    setReduced(prefersReducedMotion())
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onChange = () => setReduced(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
 
   useEffect(() => {
     const el = ref.current
     if (!allowed || !el) return
+
+    if (reduced) {
+      const freeze = () => {
+        el.pause()
+        el.currentTime = 0
+      }
+      freeze()
+      el.addEventListener('loadeddata', freeze)
+      return () => el.removeEventListener('loadeddata', freeze)
+    }
+
+    if (!pauseOffscreen) {
+      void el.play().catch(() => undefined)
+      return () => el.pause()
+    }
 
     const io = new IntersectionObserver(
       ([entry]) => {
@@ -40,7 +79,7 @@ export default function AutoplayClip({ src, className = '', poster }: Props) {
       io.disconnect()
       el.pause()
     }
-  }, [allowed, src])
+  }, [allowed, src, pauseOffscreen, reduced])
 
   if (!allowed) return null
 
@@ -53,7 +92,7 @@ export default function AutoplayClip({ src, className = '', poster }: Props) {
       muted
       loop
       playsInline
-      autoPlay
+      autoPlay={!reduced}
       preload="metadata"
       controls={false}
       disablePictureInPicture

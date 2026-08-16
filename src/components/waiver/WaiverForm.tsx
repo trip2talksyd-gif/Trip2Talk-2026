@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
-import { WAIVER_CLAUSES } from '../../data/risks'
+import { visibleWaiverClauses } from '../../data/risks'
+import { tripRequiresDormAck } from '../../data/tripDetails'
 import type { InsuranceType, WaiverFlightInfo, WaiverSafetyInfo } from '../../lib/waiverSession'
 import BiText from '../ui/BiText'
 
@@ -28,8 +29,9 @@ type Props = {
 
 export default function WaiverForm({ tripCode, defaultSignedName = '', backTo, onSubmit }: Props) {
   const { tt } = useLang()
-  const clausesEn = WAIVER_CLAUSES.en
-  const clausesTh = WAIVER_CLAUSES.th
+  const includeDormAck = tripRequiresDormAck(tripCode)
+  const clausesEn = visibleWaiverClauses('en', { includeDormAck })
+  const clausesTh = visibleWaiverClauses('th', { includeDormAck })
 
   const [checked, setChecked] = useState<Record<string, boolean>>({})
   const [signedName, setSignedName] = useState(defaultSignedName)
