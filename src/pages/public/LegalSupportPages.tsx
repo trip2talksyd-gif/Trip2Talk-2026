@@ -147,19 +147,10 @@ export function PrivacyPage() {
       title={lang === 'th' ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy'}
       subtitle={
         lang === 'th'
-          ? 'ข้อมูลที่เราเก็บ เก็บอย่างไร และใช้ทำอะไร — ฉบับร่างรอตรวจ'
-          : 'What we collect, where it is stored, and how we use it — draft pending review.'
+          ? 'ข้อมูลที่เราเก็บ เก็บอย่างไร และใช้ทำอะไร'
+          : 'What we collect, where it is stored, and how we use it.'
       }
     >
-      <p className="rounded-xl border border-amber-500/40 bg-amber-50 px-3 py-2 text-[11px] text-ink-soft">
-        <strong>Draft — not a final published policy.</strong> Owner and (if you choose) an Australian
-        privacy lawyer should review before this is treated as live.
-        <span className="mt-1 block font-thai">
-          <strong>ฉบับร่าง — ยังไม่ใช่นโยบายที่ประกาศใช้จริง</strong> ควรให้เจ้าของธุรกิจ
-          และที่ปรึกษากฎหมายตรวจก่อนถือว่าเป็นฉบับสมบูรณ์
-        </span>
-      </p>
-
       <section>
         <PolicyHeading en="1. Who we are" th="1. เราคือใคร" />
         <BiText
@@ -308,8 +299,8 @@ export function PrivacyPage() {
       <BiText
         as="p"
         className="text-[11px] text-ink-soft"
-        en="Last updated: 15 August 2026 (draft)."
-        th="อัปเดตล่าสุด: 15 สิงหาคม 2026 (ฉบับร่าง)"
+        en="Last updated: 16 August 2026."
+        th="อัปเดตล่าสุด: 16 สิงหาคม 2026"
       />
     </ContentPage>
   )
