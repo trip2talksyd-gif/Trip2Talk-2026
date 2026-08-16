@@ -43,13 +43,6 @@
       ]
     }
   ],
-  "redirects": [
-    {
-      "source": "/pricing/:path*",
-      "destination": "/pricing",
-      "permanent": false
-    }
-  ],
   "rewrites": [
     {
       "source": "/((?!api/|assets/|hero/|trip-videos/|icons/|icon-|apple-touch|favicon|manifest|registerSW|sw\\.js|workbox|brand/|team/).*)",
