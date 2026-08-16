@@ -11,11 +11,17 @@ type Props = {
  * Only `*_web.mp4` — never Storage masters.
  */
 export default function PageVideoHero({ src, children }: Props) {
+  const safeSrc = src.startsWith('http') || src.startsWith('/') ? src : `/${src}`
+
   return (
     <header className="relative -mx-4 overflow-hidden sm:-mx-6 lg:-mx-10">
       <div className="relative h-[200px] bg-teal-900 sm:h-[240px] md:h-[280px]">
-        {isCompressedWebMp4(src) ? (
-          <AutoplayClip src={src} className="absolute inset-0 h-full w-full object-cover" />
+        {isCompressedWebMp4(safeSrc) ? (
+          <AutoplayClip
+            src={safeSrc}
+            className="absolute inset-0 h-full w-full object-cover"
+            pauseOffscreen={false}
+          />
         ) : null}
         <div
           className="absolute inset-0"
