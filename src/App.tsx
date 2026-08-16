@@ -54,7 +54,6 @@ import SystemCheckPage from './pages/app/SystemCheckPage'
 import PhotoSpotsAdminPage from './pages/app/PhotoSpotsAdminPage'
 import ConfirmationSummaryPage from './pages/public/ConfirmationSummaryPage'
 import ContentReview from './pages/admin/ContentReview'
-import QuickPost from './pages/admin/QuickPost'
 import RequireStaffRole from './components/app/RequireStaffRole'
 
 function RedirectToDiscover() {
@@ -250,22 +249,6 @@ export default function App() {
           element={
             <RequireStaffRole allow={['OWNER']}>
               <ContentReview />
-            </RequireStaffRole>
-          }
-        />
-        <Route
-          path="app/quick-post"
-          element={
-            <RequireStaffRole allow={['OWNER']}>
-              <QuickPost />
-            </RequireStaffRole>
-          }
-        />
-        <Route
-          path="admin/quick-post"
-          element={
-            <RequireStaffRole allow={['OWNER']}>
-              <QuickPost />
             </RequireStaffRole>
           }
         />

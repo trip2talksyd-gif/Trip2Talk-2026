@@ -4,7 +4,6 @@ import {
   Banknote,
   CalendarDays,
   CalendarPlus,
-  Camera,
   ChevronLeft,
   ChevronRight,
   ClipboardList,
@@ -118,11 +117,6 @@ const NAV_LINKS: { to: string; label: string; icon: ReactNode; highlighted?: boo
     to: '/app/content-review',
     label: 'Content Review (Facebook drafts)',
     icon: <FilePen className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
-  },
-  {
-    to: '/app/quick-post',
-    label: 'Quick Post (value content)',
-    icon: <Camera className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />,
   },
 ]
 

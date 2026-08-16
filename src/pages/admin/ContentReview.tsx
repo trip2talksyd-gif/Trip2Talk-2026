@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Check, Download, ExternalLink, ImagePlus, Loader2 } from 'lucide-react'
 import {
   approveContentPost,
@@ -749,14 +749,9 @@ export default function ContentReview() {
           <StaffCard className="bg-surface-card/50 py-10 text-center">
             <p className="text-base text-cream">ยังไม่มีโพสต์ร่างให้รีวิว</p>
             <p className="mt-2 text-sm text-cream-muted">
-              เมื่อมีร่างใหม่จาก Quick Post หรือ Make.com จะโชว์ที่นี่
+              เมื่อมีร่างใหม่จาก Trip Manager จะโชว์ที่นี่
             </p>
             <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
-              <Link to="/app/quick-post" className="block sm:inline-block">
-                <StaffButton variant="secondary" className="min-h-12 text-sm">
-                  ไป Quick Post
-                </StaffButton>
-              </Link>
               <StaffButton
                 variant="secondary"
                 className="min-h-12 text-sm"
