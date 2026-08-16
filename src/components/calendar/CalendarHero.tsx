@@ -2,7 +2,7 @@ import BiText from '../ui/BiText'
 
 /** The Neck, Tasmania — direct public object (Free plan has no /render/image/). */
 const CALENDAR_HERO_SRC =
-  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Tasmania/Hobat/the%20neckweb.jpg'
+  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Tasmania/Hobat/the%20neckweb_web.webp'
 
 type Props = {
   titleEn: string

@@ -154,7 +154,7 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
   },
   {
     id: 'tas-004',
-    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Tasmania/Cover/490868468_1217905067001259_7839854174223812476_n.jpg',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Tasmania/Cover/490868468_1217905067001259_7839854174223812476_n_web.webp',
     category: 'tasmania',
     caption_en: 'Tasmania Trip2Talk',
     caption_th: 'ทริปแทสเมเนีย',
@@ -170,7 +170,7 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
   },
   {
     id: 'tas-101',
-    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Tasmania/Cover/536122313_10238000037770173_4217421636888874064_n.jpg',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Tasmania/Cover/536122313_10238000037770173_4217421636888874064_n_web.webp',
     category: 'tasmania',
     caption_en: 'Tasmania Trip2Talk',
     caption_th: 'ทริปแทสเมเนีย',
@@ -498,7 +498,7 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
   },
   {
     id: 'mel-005',
-    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Melbourne/cover/Mel04.jpg',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Melbourne/cover/Mel04_web.webp',
     category: 'melbourne',
     caption_en: 'Melbourne & Great Ocean Road',
     caption_th: 'ทริปเมลเบิร์น & เกรทโอเชียนโร้ด',

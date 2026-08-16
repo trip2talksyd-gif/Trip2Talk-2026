@@ -12,7 +12,7 @@ const LOCKOUT_MS = 30_000
 
 /** Full-bleed PIN gate background (The Neck, Tasmania). */
 const PIN_GATE_BG_SRC =
-  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Tasmania/Hobat/the%20neckweb.jpg'
+  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/Photos/Tasmania/Hobat/the%20neckweb_web.webp'
 
 function redirectForRole(role: StaffRole): string {
   switch (role) {
