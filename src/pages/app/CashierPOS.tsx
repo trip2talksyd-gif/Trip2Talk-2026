@@ -13,7 +13,7 @@ import {
   flagPendingBooking,
 } from '../../lib/toursApi'
 import { isSelectableBookableTour } from '../../lib/tourSelectability'
-import { isInPersonCardMethod, isSquareGatewayMethod, remainingTripBalanceAud } from '../../lib/paymentCredit'
+import { isInPersonCardMethod, isSquareGatewayMethod, paymentMethodBadge, remainingTripBalanceAud } from '../../lib/paymentCredit'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { Tour, TourBooking } from '../../types/tour'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
@@ -26,6 +26,7 @@ import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import StaffWaiverRecordButton from '../../components/app/StaffWaiverRecordButton'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
 import MarketingPhotoOptOutCard from '../../components/app/MarketingPhotoOptOutCard'
+import { staffReceiptPath, type ReceiptData } from './ReceiptPage'
 import {
   staffShellClass,
   StaffPageHeader,
@@ -51,6 +52,15 @@ function cashierMethodLabel(method: string | null | undefined): string {
   const value = (method ?? '').trim().toLowerCase()
   if (value === 'card_in_person') return 'Card (in person) / บัตรหน้างาน'
   return PAY_METHOD_OPTIONS.find((o) => o.value === value)?.label ?? (method || '—')
+}
+
+function goToReceipt(
+  navigate: ReturnType<typeof useNavigate>,
+  state: ReceiptData,
+) {
+  const ref = state.bookingReference?.trim()
+  if (ref) navigate(staffReceiptPath(ref, state.installmentNo), { state })
+  else navigate('/app/receipt', { state })
 }
 
 export default function CashierPOS() {
@@ -90,6 +100,7 @@ export default function CashierPOS() {
   const [flagNote, setFlagNote] = useState('Follow up — PayID slip')
   const [flagSubmitting, setFlagSubmitting] = useState(false)
   const [verifyId, setVerifyId] = useState<string | null>(null)
+  const [unpaidOnly, setUnpaidOnly] = useState(false)
   const [readerBooking, setReaderBooking] = useState<TourBooking | null>(null)
   const [readerAmount, setReaderAmount] = useState('')
   const [readerReceipt, setReaderReceipt] = useState('')
@@ -154,27 +165,25 @@ export default function CashierPOS() {
       setInstallmentPlan('1')
       load()
       if (paidAmount > 0) {
-        navigate('/app/receipt', {
-          state: {
-            bookingId: booking.id,
-            bookingReference: booking.booking_reference,
-            customerName: `${firstName.trim()} ${lastName.trim()}`,
-            customerEmail: email.trim() || null,
-            tripName: tour?.name_en ?? tripCode,
-            tripCode,
-            departureDate: resolveBookingTravelDate(
-              { travel_date: booking.travel_date, trip_code: tripCode },
-              tour?.departure_date,
-            ),
-            amountPaid: paidAmount,
-            paymentMethod,
-            bookingStatus,
-            source,
-            installmentNo: 1,
-            installmentPlan: Number(installmentPlan),
-            priceAud: tour?.price_aud ?? null,
-            balanceRemaining: tour ? Math.max(0, tour.price_aud - paidAmount) : null,
-          },
+        goToReceipt(navigate, {
+          bookingId: booking.id,
+          bookingReference: booking.booking_reference,
+          customerName: `${firstName.trim()} ${lastName.trim()}`,
+          customerEmail: email.trim() || null,
+          tripName: tour?.name_en ?? tripCode,
+          tripCode,
+          departureDate: resolveBookingTravelDate(
+            { travel_date: booking.travel_date, trip_code: tripCode },
+            tour?.departure_date,
+          ),
+          amountPaid: paidAmount,
+          paymentMethod,
+          bookingStatus,
+          source,
+          installmentNo: 1,
+          installmentPlan: Number(installmentPlan),
+          priceAud: tour?.price_aud ?? null,
+          balanceRemaining: tour ? Math.max(0, tour.price_aud - paidAmount) : null,
         })
       }
     } catch (err) {
@@ -198,6 +207,14 @@ export default function CashierPOS() {
       ),
     [tours],
   )
+
+  const visibleBookings = useMemo(() => {
+    if (!unpaidOnly) return bookings
+    return bookings.filter((b) => {
+      const status = (b.booking_status ?? '').trim().toLowerCase()
+      return status === 'pending_payment' || status === 'pending'
+    })
+  }, [bookings, unpaidOnly])
 
   function openPaymentRow(booking: TourBooking) {
     const tour = tours.find((tr) => tr.trip_code === booking.trip_code)
@@ -285,24 +302,22 @@ export default function CashierPOS() {
       const result = await recordPayment(booking.id, deposit, 'payid')
       toast(t('toast.paymentUpdated'), 'success')
       load()
-      navigate('/app/receipt', {
-        state: {
-          bookingId: booking.id,
-          bookingReference: booking.booking_reference,
-          customerName: `${booking.first_name_en} ${booking.last_name_en}`,
-          customerEmail: booking.email || null,
-          tripName: tour?.name_en ?? booking.trip_code,
-          tripCode: booking.trip_code,
-          departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
-          amountPaid: deposit,
-          paymentMethod: 'payid',
-          bookingStatus: result.booking_status,
-          source: booking.source ?? null,
-          installmentNo: result.installment_no,
-          installmentPlan: result.installment_plan,
-          priceAud: result.price_aud,
-          balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
-        },
+      goToReceipt(navigate, {
+        bookingId: booking.id,
+        bookingReference: booking.booking_reference,
+        customerName: `${booking.first_name_en} ${booking.last_name_en}`,
+        customerEmail: booking.email || null,
+        tripName: tour?.name_en ?? booking.trip_code,
+        tripCode: booking.trip_code,
+        departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
+        amountPaid: deposit,
+        paymentMethod: 'payid',
+        bookingStatus: result.booking_status,
+        source: booking.source ?? null,
+        installmentNo: result.installment_no,
+        installmentPlan: result.installment_plan,
+        priceAud: result.price_aud,
+        balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
       })
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) {
@@ -368,24 +383,22 @@ export default function CashierPOS() {
       const booking = readerBooking
       closeReaderForm()
       load()
-      navigate('/app/receipt', {
-        state: {
-          bookingId: booking.id,
-          bookingReference: booking.booking_reference,
-          customerName: `${booking.first_name_en} ${booking.last_name_en}`,
-          customerEmail: booking.email || null,
-          tripName: tour?.name_en ?? booking.trip_code,
-          tripCode: booking.trip_code,
-          departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
-          amountPaid: amount,
-          paymentMethod: 'card_in_person',
-          bookingStatus: result.booking_status,
-          source: booking.source ?? null,
-          installmentNo: result.installment_no,
-          installmentPlan: result.installment_plan,
-          priceAud: result.price_aud,
-          balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
-        },
+      goToReceipt(navigate, {
+        bookingId: booking.id,
+        bookingReference: booking.booking_reference,
+        customerName: `${booking.first_name_en} ${booking.last_name_en}`,
+        customerEmail: booking.email || null,
+        tripName: tour?.name_en ?? booking.trip_code,
+        tripCode: booking.trip_code,
+        departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
+        amountPaid: amount,
+        paymentMethod: 'card_in_person',
+        bookingStatus: result.booking_status,
+        source: booking.source ?? null,
+        installmentNo: result.installment_no,
+        installmentPlan: result.installment_plan,
+        priceAud: result.price_aud,
+        balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
       })
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) {
@@ -428,24 +441,22 @@ export default function CashierPOS() {
       const tour = tours.find((tr) => tr.trip_code === booking.trip_code)
       closePaymentRow()
       load()
-      navigate('/app/receipt', {
-        state: {
-          bookingId: booking.id,
-          bookingReference: booking.booking_reference,
-          customerName: `${booking.first_name_en} ${booking.last_name_en}`,
-          customerEmail: booking.email || null,
-          tripName: tour?.name_en ?? booking.trip_code,
-          tripCode: booking.trip_code,
-          departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
-          amountPaid: amount,
-          paymentMethod: payMethod,
-          bookingStatus: result.booking_status,
-          source: booking.source ?? null,
-          installmentNo: result.installment_no,
-          installmentPlan: result.installment_plan,
-          priceAud: result.price_aud,
-          balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
-        },
+      goToReceipt(navigate, {
+        bookingId: booking.id,
+        bookingReference: booking.booking_reference,
+        customerName: `${booking.first_name_en} ${booking.last_name_en}`,
+        customerEmail: booking.email || null,
+        tripName: tour?.name_en ?? booking.trip_code,
+        tripCode: booking.trip_code,
+        departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
+        amountPaid: amount,
+        paymentMethod: payMethod,
+        bookingStatus: result.booking_status,
+        source: booking.source ?? null,
+        installmentNo: result.installment_no,
+        installmentPlan: result.installment_plan,
+        priceAud: result.price_aud,
+        balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
       })
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) {
@@ -594,13 +605,25 @@ export default function CashierPOS() {
         {loading && <ListRowSkeleton count={3} />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
 
-        {!loading && !error && bookings.length === 0 && (
-          <p className="text-sm text-cream-muted">No pending bookings</p>
+        {!loading && !error && (
+          <label className="flex items-center gap-2 text-xs text-cream-muted">
+            <input
+              type="checkbox"
+              checked={unpaidOnly}
+              onChange={(e) => setUnpaidOnly(e.target.checked)}
+              className="accent-teal-500"
+            />
+            Unpaid only / เฉพาะรอชำระ
+          </label>
+        )}
+
+        {!loading && !error && visibleBookings.length === 0 && (
+          <p className="text-sm text-cream-muted">No bookings in this list</p>
         )}
 
         {!loading && !error && (
           <ul className="space-y-3">
-            {bookings.map((b) => {
+            {visibleBookings.map((b) => {
               const tour = tours.find((tr) => tr.trip_code === b.trip_code)
               const plan = b.payment_plan_installments ?? 1
               const remaining = tour
@@ -627,6 +650,9 @@ export default function CashierPOS() {
                   >
                     <p className="font-medium text-cream">
                       {b.first_name_en} {b.last_name_en}
+                      <span className="ml-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-teal-400">
+                        {paymentMethodBadge(b.payment_method)}
+                      </span>
                       {cancelled && (
                         <span className="ml-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-cream-muted">
                           Cancelled
@@ -684,9 +710,7 @@ export default function CashierPOS() {
                             type="button"
                             variant="secondary"
                             onClick={() =>
-                              navigate(
-                                `/app/receipt?ref=${encodeURIComponent(b.booking_reference ?? '')}`,
-                              )
+                              navigate(staffReceiptPath(b.booking_reference ?? ''))
                             }
                             className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
                           >

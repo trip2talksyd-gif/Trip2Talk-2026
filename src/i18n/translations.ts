@@ -466,6 +466,8 @@ export type TranslationKey =
   | 'confirm.nextTitle'
   | 'confirm.next.1'
   | 'confirm.next.card.1'
+  | 'confirm.next.card.pending'
+  | 'confirm.next.afterpay.1'
   | 'confirm.next.card.remaining'
   | 'confirm.next.2'
   | 'confirm.next.3'
@@ -1131,7 +1133,11 @@ const en: Map = {
   'confirm.nextTitle': 'What happens next',
   'confirm.next.1': 'Transfer your deposit via PayID and send the slip on Facebook.',
   'confirm.next.card.1':
-    'Your card deposit was received via Square (card or Afterpay). No PayID slip is needed.',
+    'Your card deposit was received via Square. No PayID transfer or slip is needed.',
+  'confirm.next.card.pending':
+    'Pay the deposit with card via Square — do not send a PayID slip for this booking.',
+  'confirm.next.afterpay.1':
+    'Your Afterpay payment was received via Square. Afterpay collects remaining instalments on its own schedule. No PayID transfer is needed.',
   'confirm.next.card.remaining':
     'Remaining trip balance: {amount} (deposit credited; the 2% card surcharge is not trip credit).',
   'confirm.next.2': 'We confirm your seat and add you to the trip group chat.',
@@ -1797,7 +1803,11 @@ const th: Map = {
   'confirm.nextTitle': 'ขั้นตอนถัดไป',
   'confirm.next.1': 'โอนมัดจำผ่าน PayID แล้วส่งสลิปทาง Facebook',
   'confirm.next.card.1':
-    'เราได้รับมัดจำผ่าน Square แล้ว (บัตรหรือ Afterpay) ไม่ต้องส่งสลิป PayID',
+    'เราได้รับมัดจำบัตรผ่าน Square แล้ว ไม่ต้องโอน PayID หรือส่งสลิป',
+  'confirm.next.card.pending':
+    'ชำระมัดจำด้วยบัตรผ่าน Square — การจองนี้ไม่ต้องส่งสลิป PayID',
+  'confirm.next.afterpay.1':
+    'เราได้รับชำระ Afterpay ผ่าน Square แล้ว Afterpay จะเก็บงวดที่เหลือตามกำหนดของ Afterpay ไม่ต้องโอน PayID',
   'confirm.next.card.remaining':
     'ยอดคงเหลือของทริป: {amount} (นับมัดจำแล้ว ไม่รวมค่าธรรมเนียมบัตร 2%)',
   'confirm.next.2': 'เรายืนยันที่นั่งและเชิญเข้ากลุ่มแชททริป',

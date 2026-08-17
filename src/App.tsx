@@ -183,6 +183,14 @@ export default function App() {
           }
         />
         <Route
+          path="app/receipt/:bookingRef"
+          element={
+            <RequireStaffRole allow={['CASHIER', 'OWNER', 'MANAGER']}>
+              <ReceiptPage />
+            </RequireStaffRole>
+          }
+        />
+        <Route
           path="app/receipt"
           element={
             <RequireStaffRole allow={['CASHIER', 'OWNER', 'MANAGER']}>

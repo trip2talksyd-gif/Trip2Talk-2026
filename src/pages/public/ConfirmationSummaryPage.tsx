@@ -9,7 +9,7 @@ import {
   type ConfirmationSummaryData,
 } from '../../lib/waiverSession'
 import { formatAud, formatDate, lookupMyTrip } from '../../lib/toursApi'
-import { isInPersonCardMethod, isSquareGatewayMethod, remainingTripBalanceAud } from '../../lib/paymentCredit'
+import { isInPersonCardMethod, remainingTripBalanceAud } from '../../lib/paymentCredit'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import BiText from '../../components/ui/BiText'
 import { useToast } from '../../components/ui/Toast'
@@ -18,6 +18,18 @@ import type { TranslationKey } from '../../i18n/translations'
 
 function statusMeansDepositPaid(status: string | undefined): boolean {
   return status === 'deposit_paid' || status === 'fully_paid'
+}
+
+/** Next-steps copy must follow stored payment_method, not default to PayID. */
+function confirmationPayKind(
+  method: string | null | undefined,
+  optimisticPaid: boolean,
+): 'afterpay' | 'card' | 'payid' {
+  const m = (method ?? '').trim().toLowerCase()
+  if (m === 'afterpay') return 'afterpay'
+  if (m === 'square' || m === 'card_in_person') return 'card'
+  if (optimisticPaid) return 'card'
+  return 'payid'
 }
 
 function sleep(ms: number) {
@@ -184,10 +196,10 @@ export default function ConfirmationSummaryPage() {
     )
   }
 
-  const cardDepositReceived =
-    optimisticPaid ||
-    (data.depositPaid &&
-      (isSquareGatewayMethod(data.paymentMethod) || isInPersonCardMethod(data.paymentMethod)))
+  // Was: PayID "transfer deposit" copy unless depositPaid AND Square — so Square/Afterpay
+  // guests still saw PayID bank instructions whenever the session had not flipped paid yet.
+  const payKind = confirmationPayKind(data.paymentMethod, optimisticPaid)
+  const cardDepositReceived = payKind !== 'payid' && (optimisticPaid || Boolean(data.depositPaid))
 
   const remainingBalance = cardDepositReceived
     ? remainingTripBalanceAud({
@@ -212,9 +224,15 @@ export default function ConfirmationSummaryPage() {
           th: tt('confirm.next.card.remaining').th.replace('{amount}', formatAud(remainingBalance)),
         }
 
-  const nextStepKeys: TranslationKey[] = cardDepositReceived
-    ? ['confirm.next.card.1', 'confirm.next.2', 'confirm.next.3']
-    : ['confirm.next.1', 'confirm.next.2', 'confirm.next.3']
+  const firstNextKey: TranslationKey =
+    payKind === 'afterpay'
+      ? 'confirm.next.afterpay.1'
+      : payKind === 'card'
+        ? data.depositPaid || optimisticPaid
+          ? 'confirm.next.card.1'
+          : 'confirm.next.card.pending'
+        : 'confirm.next.1'
+  const nextStepKeys: TranslationKey[] = [firstNextKey, 'confirm.next.2', 'confirm.next.3']
 
   const checks: { done: boolean; en: string; th: string; pendingLabel?: boolean }[] = [
     {
