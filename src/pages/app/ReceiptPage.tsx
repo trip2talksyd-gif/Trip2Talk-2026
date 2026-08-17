@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useToast } from '../../components/ui/Toast'
 import { PAYID_OPTIONS } from '../../data/paymentDetails'
 import { BRAND_BADGE_PNG_SRC } from '../../data/brand'
@@ -19,8 +19,19 @@ import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
 import type { BookingPayment } from '../../types/tour'
 
-/** Data handed off via router state right after a payment is recorded —
- * no extra staff-api round trip, since the caller already has everything. */
+/** Staff receipt URL — booking ref lives in the path so refresh/direct open still work. */
+export function staffReceiptPath(
+  bookingReference: string,
+  installmentNo?: number | null,
+): string {
+  const ref = bookingReference.trim()
+  const q =
+    installmentNo != null && Number.isFinite(installmentNo)
+      ? `?installment=${installmentNo}`
+      : ''
+  if (!ref) return `/app/receipt${q}`
+  return `/app/receipt/${encodeURIComponent(ref)}${q}`
+}
 export type ReceiptData = {
   bookingId?: string | null
   bookingReference: string | null
@@ -148,33 +159,56 @@ function receiptFromLookup(
 
 export default function ReceiptPage() {
   const location = useLocation()
+  const { bookingRef: pathRef } = useParams<{ bookingRef?: string }>()
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const { toast } = useToast()
-  const refParam = params.get('ref')?.trim() || null
-  const installmentParam = params.get('installment')
-  const installmentNo = installmentParam ? Number(installmentParam) : null
   const stateData = location.state as ReceiptData | null
-  const [data, setData] = useState<ReceiptData | null>(
-    refParam ? null : stateData,
+  const refParam =
+    pathRef?.trim() || params.get('ref')?.trim() || stateData?.bookingReference?.trim() || null
+  const installmentParam = params.get('installment')
+  const installmentNo = installmentParam ? Number(installmentParam) : stateData?.installmentNo ?? null
+  const [data, setData] = useState<ReceiptData | null>(() =>
+    stateData &&
+    (!refParam || stateData.bookingReference?.trim() === refParam)
+      ? stateData
+      : null,
   )
   const [loadError, setLoadError] = useState('')
+  const [loading, setLoading] = useState(() => Boolean(refParam))
   const issuedAt = new Date()
   const cardRef = useRef<HTMLDivElement>(null)
   const [downloading, setDownloading] = useState(false)
 
+  const queryRef = params.get('ref')
   useEffect(() => {
+    if (!pathRef && !queryRef && stateData?.bookingReference) {
+      navigate(staffReceiptPath(stateData.bookingReference, stateData.installmentNo), {
+        replace: true,
+        state: stateData,
+      })
+    }
+  }, [pathRef, queryRef, stateData, navigate])
+
+  useEffect(() => {
+    // Router state is a fast path after checkout; always re-fetch by ref so
+    // refresh / shared / bookmarked URLs still load (state is empty then).
     if (!refParam) {
-      setData(stateData)
-      setLoadError('')
+      setLoading(false)
+      if (!stateData) {
+        setData(null)
+        setLoadError('')
+      }
       return
     }
     let cancelled = false
     setLoadError('')
+    setLoading(true)
     fetchReceiptByReference(refParam)
       .then((lookup) => {
         if (cancelled) return
         setData(receiptFromLookup(lookup, installmentNo))
+        setLoading(false)
       })
       .catch((err) => {
         if (cancelled) return
@@ -183,12 +217,15 @@ export default function ReceiptPage() {
           return
         }
         setLoadError('Could not load receipt from booking reference')
-        setData(null)
+        if (!stateData) setData(null)
+        setLoading(false)
       })
     return () => {
       cancelled = true
     }
-  }, [refParam, installmentNo, navigate, stateData])
+    // stateData is only a display fallback — identity changes on every location update.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetch by ref, not by state object
+  }, [refParam, installmentNo, navigate])
 
   async function handleDownloadImage() {
     if (!cardRef.current) return
@@ -283,9 +320,12 @@ export default function ReceiptPage() {
         </header>
         <main className="app-scroll mx-auto w-full max-w-md px-4 py-6" data-app-scroll>
           <p className="text-sm text-cream-muted">
-            {refParam && !loadError
+            {loading
               ? 'Loading receipt…'
-              : loadError || 'ไม่พบข้อมูลใบเสร็จ'}
+              : loadError ||
+                (refParam
+                  ? 'Booking not found for this receipt link.'
+                  : 'ไม่พบข้อมูลใบเสร็จ')}
           </p>
         </main>
       </div>

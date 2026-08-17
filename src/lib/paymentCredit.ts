@@ -64,3 +64,16 @@ export function paymentMethodLabelEn(method?: string | null): string {
   if (!value) return '—'
   return PAYMENT_METHOD_LABEL_EN[value] ?? method!.trim()
 }
+
+/** Compact Cashier badge — short names, case-insensitive (legacy rows used "PayID"). */
+export function paymentMethodBadge(method?: string | null): string {
+  const value = (method ?? '').trim().toLowerCase()
+  if (!value) return '—'
+  if (value === 'square' || value === 'card_in_person') return 'Square'
+  if (value === 'afterpay') return 'Afterpay'
+  if (value === 'payid') return 'PayID'
+  if (value === 'bank_transfer') return 'Bank'
+  if (value === 'cash') return 'Cash'
+  if (value === 'manual') return 'Other'
+  return method!.trim()
+}

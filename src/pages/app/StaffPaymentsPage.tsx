@@ -25,6 +25,7 @@ import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import { useLang } from '../../hooks/useLang'
 import type { BookingPayment, TourBooking } from '../../types/tour'
+import { staffReceiptPath } from './ReceiptPage'
 import {
   staffShellClass,
   StaffPageHeader,
@@ -151,7 +152,7 @@ export default function StaffPaymentsPage() {
     } catch {
       /* receipt still works */
     }
-    navigate('/app/receipt', {
+    navigate(staffReceiptPath(booking.booking_reference ?? '', payment.installment_no), {
       state: {
         bookingId: booking.id,
         bookingReference: booking.booking_reference,
@@ -195,7 +196,7 @@ export default function StaffPaymentsPage() {
         departureDate = resolveBookingTravelDate(booking, null)
       }
       // Hand off to tax invoice page for this installment
-      navigate('/app/receipt', {
+      navigate(staffReceiptPath(booking.booking_reference ?? '', payment.installment_no), {
         state: {
           bookingId: booking.id,
           bookingReference: booking.booking_reference,

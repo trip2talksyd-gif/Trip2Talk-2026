@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { Ban, Check, MessageSquare } from 'lucide-react'
 import type { TourBooking } from '../../types/tour'
 import { StaffButton, StaffTextarea } from './staffUi'
+import StaffTaskView, { TaskFieldLabel } from './StaffTaskView'
 
 type Props = {
   booking: TourBooking
@@ -12,58 +14,56 @@ type Props = {
 /** Staff confirmation sheet for soft-cancelling a booking. Reason is optional. */
 export default function CancelBookingDialog({ booking, submitting, onConfirm, onClose }: Props) {
   const [reason, setReason] = useState('')
+  const subtitle = [
+    `${booking.first_name_en} ${booking.last_name_en}`.trim(),
+    booking.trip_code,
+    booking.booking_reference,
+  ]
+    .filter(Boolean)
+    .join(' · ')
 
   return (
-    <div
-      className="staff-shell fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-4 text-cream sm:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="cancel-booking-title"
-      onClick={onClose}
+    <StaffTaskView
+      icon={Ban}
+      title="Cancel booking"
+      titleTh="ยกเลิกการจอง"
+      subtitle={subtitle}
+      onClose={onClose}
+      closeDisabled={submitting}
     >
-      <div
-        className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-near-black-green p-4 shadow-[0_20px_50px_-20px_rgba(0,0,0,0.7)]"
-        onClick={(e) => e.stopPropagation()}
+      <p className="text-sm leading-relaxed text-cream-muted">
+        Soft-cancel only — the row is kept for records. ที่นั่งจะถูกคืน ข้อมูลยังอยู่ในระบบ
+      </p>
+      <label className="mt-5 block">
+        <TaskFieldLabel icon={MessageSquare}>เหตุผล (ไม่บังคับ) / Reason (optional)</TaskFieldLabel>
+        <StaffTextarea
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          rows={3}
+          maxLength={500}
+          placeholder="e.g. customer request, duplicate booking…"
+          className="min-h-16 resize-none text-base"
+        />
+      </label>
+      <StaffButton
+        type="button"
+        variant="danger"
+        disabled={submitting}
+        onClick={() => onConfirm(reason)}
+        className="mt-5 flex min-h-14 w-full items-center justify-center gap-2 bg-coral text-[17px] font-bold text-white hover:bg-coral/90"
       >
-        <h2 id="cancel-booking-title" className="font-serif text-lg text-cream">
-          Cancel booking?
-        </h2>
-        <p className="mt-1 text-sm text-cream-muted">
-          {booking.first_name_en} {booking.last_name_en}
-          {booking.trip_code ? ` · ${booking.trip_code}` : ''}
-          {booking.booking_reference ? ` · ${booking.booking_reference}` : ''}
-        </p>
-        <p className="mt-2 text-xs text-cream-muted">
-          ยกเลิกการจอง — ข้อมูลยังเก็บไว้ในระบบ (ไม่ลบแถว) · Soft-cancel only; row is kept for records.
-        </p>
-
-        <label className="mt-4 block">
-          <span className="text-xs text-cream-muted">เหตุผล (ไม่บังคับ) / Reason (optional)</span>
-          <StaffTextarea
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            rows={3}
-            maxLength={500}
-            placeholder="e.g. customer request, duplicate booking…"
-            className="resize-none"
-          />
-        </label>
-
-        <div className="mt-4 flex gap-2">
-          <StaffButton
-            type="button"
-            variant="danger"
-            disabled={submitting}
-            onClick={() => onConfirm(reason)}
-            className="min-h-11 flex-1 bg-coral px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-coral/90"
-          >
-            {submitting ? 'Cancelling…' : 'Confirm cancel'}
-          </StaffButton>
-          <StaffButton type="button" variant="secondary" disabled={submitting} onClick={onClose}>
-            Keep booking
-          </StaffButton>
-        </div>
-      </div>
-    </div>
+        <Check className="h-5 w-5" />
+        {submitting ? 'Cancelling…' : 'Confirm cancel'}
+      </StaffButton>
+      <StaffButton
+        type="button"
+        variant="secondary"
+        disabled={submitting}
+        onClick={onClose}
+        className="mt-2 min-h-11 w-full"
+      >
+        Keep booking
+      </StaffButton>
+    </StaffTaskView>
   )
 }

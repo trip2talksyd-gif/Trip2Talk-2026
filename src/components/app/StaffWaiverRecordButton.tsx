@@ -5,14 +5,21 @@ import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import { useToast } from '../ui/Toast'
 import { StaffButton, StaffCard } from './staffUi'
 import WaiverRecordActions from './WaiverRecordActions'
+import StaffActionTile from './StaffActionTile'
 
 type Props = {
   bookingId: string
   tripName?: string | null
   onSessionExpired?: () => void
+  layout?: 'button' | 'tile'
 }
 
-export default function StaffWaiverRecordButton({ bookingId, tripName, onSessionExpired }: Props) {
+export default function StaffWaiverRecordButton({
+  bookingId,
+  tripName,
+  onSessionExpired,
+  layout = 'button',
+}: Props) {
   const { toast } = useToast()
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -47,16 +54,27 @@ export default function StaffWaiverRecordButton({ bookingId, tripName, onSession
 
   return (
     <>
-      <StaffButton
-        type="button"
-        variant="secondary"
-        className="!w-auto gap-1.5 px-3 py-1.5 text-[11px]"
-        disabled={busy}
-        onClick={() => void openRecord()}
-      >
-        <FileDown className="h-3.5 w-3.5" />
-        {busy ? '…' : 'Download waiver'}
-      </StaffButton>
+      {layout === 'tile' ? (
+        <StaffActionTile
+          icon={FileDown}
+          label="Download"
+          labelTh="ดาวน์โหลด"
+          busy={busy}
+          disabled={busy}
+          onClick={() => void openRecord()}
+        />
+      ) : (
+        <StaffButton
+          type="button"
+          variant="secondary"
+          className="!w-auto gap-1.5 px-3 py-1.5 text-[11px]"
+          disabled={busy}
+          onClick={() => void openRecord()}
+        >
+          <FileDown className="h-3.5 w-3.5" />
+          {busy ? '…' : 'Download waiver'}
+        </StaffButton>
+      )}
       {open && record && b ? (
         <div
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-4 sm:items-center"

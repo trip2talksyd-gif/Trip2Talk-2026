@@ -1,6 +1,23 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
+  Ban,
+  BadgeCheck,
+  Check,
+  Coins,
+  CreditCard,
+  FileImage,
+  FilePlus2,
+  Flag,
+  Hash,
+  MessageSquare,
+  Pencil,
+  Receipt,
+  RotateCcw,
+  Route,
+  Wallet,
+} from 'lucide-react'
+import {
   createBookingManual,
   fetchPendingBookings,
   fetchToursAdmin,
@@ -13,7 +30,7 @@ import {
   flagPendingBooking,
 } from '../../lib/toursApi'
 import { isSelectableBookableTour } from '../../lib/tourSelectability'
-import { isInPersonCardMethod, isSquareGatewayMethod, remainingTripBalanceAud } from '../../lib/paymentCredit'
+import { isInPersonCardMethod, isSquareGatewayMethod, paymentMethodBadge, remainingTripBalanceAud } from '../../lib/paymentCredit'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { Tour, TourBooking } from '../../types/tour'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
@@ -24,8 +41,13 @@ import CancelBookingDialog from '../../components/app/CancelBookingDialog'
 import PaymentReconciliationBanner from '../../components/app/PaymentReconciliationBanner'
 import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import StaffWaiverRecordButton from '../../components/app/StaffWaiverRecordButton'
+import ResetWaiverButton from '../../components/app/ResetWaiverButton'
+import EditWaiverButton from '../../components/app/EditWaiverButton'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
 import MarketingPhotoOptOutCard from '../../components/app/MarketingPhotoOptOutCard'
+import StaffActionTile from '../../components/app/StaffActionTile'
+import StaffTaskView, { TaskFieldLabel } from '../../components/app/StaffTaskView'
+import { staffReceiptPath, type ReceiptData } from './ReceiptPage'
 import {
   staffShellClass,
   StaffPageHeader,
@@ -51,6 +73,78 @@ function cashierMethodLabel(method: string | null | undefined): string {
   const value = (method ?? '').trim().toLowerCase()
   if (value === 'card_in_person') return 'Card (in person) / บัตรหน้างาน'
   return PAY_METHOD_OPTIONS.find((o) => o.value === value)?.label ?? (method || '—')
+}
+
+function bookingSubtitle(b: TourBooking): string {
+  return [`${b.first_name_en} ${b.last_name_en}`.trim(), b.trip_code, b.booking_reference]
+    .filter(Boolean)
+    .join(' · ')
+}
+
+function amountMatches(current: string, target: number | null | undefined): boolean {
+  if (target == null || target <= 0) return false
+  const n = Number(current)
+  return Number.isFinite(n) && Math.abs(n - target) < 0.005
+}
+
+function AmountShortcuts({
+  deposit,
+  remaining,
+  current,
+  onPick,
+}: {
+  deposit?: number | null
+  remaining?: number | null
+  current: string
+  onPick: (n: number) => void
+}) {
+  const tile =
+    'flex min-h-11 items-center justify-center gap-1.5 rounded-2xl border px-2 py-2 text-center text-[12px] font-semibold transition-colors'
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      {deposit && deposit > 0 ? (
+        <button
+          type="button"
+          onClick={() => onPick(deposit)}
+          className={`${tile} ${
+            amountMatches(current, deposit)
+              ? 'border-teal-400 bg-teal-500/15 text-cream'
+              : 'border-white/12 bg-white/[0.06] text-cream hover:border-teal-500/40'
+          }`}
+        >
+          <Wallet className="h-4 w-4 shrink-0" aria-hidden />
+          <span lang="th">มัดจำ {deposit}</span>
+        </button>
+      ) : (
+        <span />
+      )}
+      {remaining && remaining > 0 ? (
+        <button
+          type="button"
+          onClick={() => onPick(remaining)}
+          className={`${tile} ${
+            amountMatches(current, remaining)
+              ? 'border-teal-400 bg-teal-500/15 text-cream'
+              : 'border-white/12 bg-white/[0.06] text-cream hover:border-teal-500/40'
+          }`}
+        >
+          <Check className="h-4 w-4 shrink-0" aria-hidden />
+          <span lang="th">จ่ายครบ {remaining}</span>
+        </button>
+      ) : (
+        <span />
+      )}
+    </div>
+  )
+}
+
+function goToReceipt(
+  navigate: ReturnType<typeof useNavigate>,
+  state: ReceiptData,
+) {
+  const ref = state.bookingReference?.trim()
+  if (ref) navigate(staffReceiptPath(ref, state.installmentNo), { state })
+  else navigate('/app/receipt', { state })
 }
 
 export default function CashierPOS() {
@@ -89,7 +183,9 @@ export default function CashierPOS() {
   const [flaggingId, setFlaggingId] = useState<string | null>(null)
   const [flagNote, setFlagNote] = useState('Follow up — PayID slip')
   const [flagSubmitting, setFlagSubmitting] = useState(false)
+  const [quoteBookingId, setQuoteBookingId] = useState<string | null>(null)
   const [verifyId, setVerifyId] = useState<string | null>(null)
+  const [unpaidOnly, setUnpaidOnly] = useState(false)
   const [readerBooking, setReaderBooking] = useState<TourBooking | null>(null)
   const [readerAmount, setReaderAmount] = useState('')
   const [readerReceipt, setReaderReceipt] = useState('')
@@ -154,27 +250,25 @@ export default function CashierPOS() {
       setInstallmentPlan('1')
       load()
       if (paidAmount > 0) {
-        navigate('/app/receipt', {
-          state: {
-            bookingId: booking.id,
-            bookingReference: booking.booking_reference,
-            customerName: `${firstName.trim()} ${lastName.trim()}`,
-            customerEmail: email.trim() || null,
-            tripName: tour?.name_en ?? tripCode,
-            tripCode,
-            departureDate: resolveBookingTravelDate(
-              { travel_date: booking.travel_date, trip_code: tripCode },
-              tour?.departure_date,
-            ),
-            amountPaid: paidAmount,
-            paymentMethod,
-            bookingStatus,
-            source,
-            installmentNo: 1,
-            installmentPlan: Number(installmentPlan),
-            priceAud: tour?.price_aud ?? null,
-            balanceRemaining: tour ? Math.max(0, tour.price_aud - paidAmount) : null,
-          },
+        goToReceipt(navigate, {
+          bookingId: booking.id,
+          bookingReference: booking.booking_reference,
+          customerName: `${firstName.trim()} ${lastName.trim()}`,
+          customerEmail: email.trim() || null,
+          tripName: tour?.name_en ?? tripCode,
+          tripCode,
+          departureDate: resolveBookingTravelDate(
+            { travel_date: booking.travel_date, trip_code: tripCode },
+            tour?.departure_date,
+          ),
+          amountPaid: paidAmount,
+          paymentMethod,
+          bookingStatus,
+          source,
+          installmentNo: 1,
+          installmentPlan: Number(installmentPlan),
+          priceAud: tour?.price_aud ?? null,
+          balanceRemaining: tour ? Math.max(0, tour.price_aud - paidAmount) : null,
         })
       }
     } catch (err) {
@@ -198,6 +292,14 @@ export default function CashierPOS() {
       ),
     [tours],
   )
+
+  const visibleBookings = useMemo(() => {
+    if (!unpaidOnly) return bookings
+    return bookings.filter((b) => {
+      const status = (b.booking_status ?? '').trim().toLowerCase()
+      return status === 'pending_payment' || status === 'pending'
+    })
+  }, [bookings, unpaidOnly])
 
   function openPaymentRow(booking: TourBooking) {
     const tour = tours.find((tr) => tr.trip_code === booking.trip_code)
@@ -285,24 +387,22 @@ export default function CashierPOS() {
       const result = await recordPayment(booking.id, deposit, 'payid')
       toast(t('toast.paymentUpdated'), 'success')
       load()
-      navigate('/app/receipt', {
-        state: {
-          bookingId: booking.id,
-          bookingReference: booking.booking_reference,
-          customerName: `${booking.first_name_en} ${booking.last_name_en}`,
-          customerEmail: booking.email || null,
-          tripName: tour?.name_en ?? booking.trip_code,
-          tripCode: booking.trip_code,
-          departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
-          amountPaid: deposit,
-          paymentMethod: 'payid',
-          bookingStatus: result.booking_status,
-          source: booking.source ?? null,
-          installmentNo: result.installment_no,
-          installmentPlan: result.installment_plan,
-          priceAud: result.price_aud,
-          balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
-        },
+      goToReceipt(navigate, {
+        bookingId: booking.id,
+        bookingReference: booking.booking_reference,
+        customerName: `${booking.first_name_en} ${booking.last_name_en}`,
+        customerEmail: booking.email || null,
+        tripName: tour?.name_en ?? booking.trip_code,
+        tripCode: booking.trip_code,
+        departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
+        amountPaid: deposit,
+        paymentMethod: 'payid',
+        bookingStatus: result.booking_status,
+        source: booking.source ?? null,
+        installmentNo: result.installment_no,
+        installmentPlan: result.installment_plan,
+        priceAud: result.price_aud,
+        balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
       })
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) {
@@ -368,24 +468,22 @@ export default function CashierPOS() {
       const booking = readerBooking
       closeReaderForm()
       load()
-      navigate('/app/receipt', {
-        state: {
-          bookingId: booking.id,
-          bookingReference: booking.booking_reference,
-          customerName: `${booking.first_name_en} ${booking.last_name_en}`,
-          customerEmail: booking.email || null,
-          tripName: tour?.name_en ?? booking.trip_code,
-          tripCode: booking.trip_code,
-          departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
-          amountPaid: amount,
-          paymentMethod: 'card_in_person',
-          bookingStatus: result.booking_status,
-          source: booking.source ?? null,
-          installmentNo: result.installment_no,
-          installmentPlan: result.installment_plan,
-          priceAud: result.price_aud,
-          balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
-        },
+      goToReceipt(navigate, {
+        bookingId: booking.id,
+        bookingReference: booking.booking_reference,
+        customerName: `${booking.first_name_en} ${booking.last_name_en}`,
+        customerEmail: booking.email || null,
+        tripName: tour?.name_en ?? booking.trip_code,
+        tripCode: booking.trip_code,
+        departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
+        amountPaid: amount,
+        paymentMethod: 'card_in_person',
+        bookingStatus: result.booking_status,
+        source: booking.source ?? null,
+        installmentNo: result.installment_no,
+        installmentPlan: result.installment_plan,
+        priceAud: result.price_aud,
+        balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
       })
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) {
@@ -428,24 +526,22 @@ export default function CashierPOS() {
       const tour = tours.find((tr) => tr.trip_code === booking.trip_code)
       closePaymentRow()
       load()
-      navigate('/app/receipt', {
-        state: {
-          bookingId: booking.id,
-          bookingReference: booking.booking_reference,
-          customerName: `${booking.first_name_en} ${booking.last_name_en}`,
-          customerEmail: booking.email || null,
-          tripName: tour?.name_en ?? booking.trip_code,
-          tripCode: booking.trip_code,
-          departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
-          amountPaid: amount,
-          paymentMethod: payMethod,
-          bookingStatus: result.booking_status,
-          source: booking.source ?? null,
-          installmentNo: result.installment_no,
-          installmentPlan: result.installment_plan,
-          priceAud: result.price_aud,
-          balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
-        },
+      goToReceipt(navigate, {
+        bookingId: booking.id,
+        bookingReference: booking.booking_reference,
+        customerName: `${booking.first_name_en} ${booking.last_name_en}`,
+        customerEmail: booking.email || null,
+        tripName: tour?.name_en ?? booking.trip_code,
+        tripCode: booking.trip_code,
+        departureDate: resolveBookingTravelDate(booking, tour?.departure_date),
+        amountPaid: amount,
+        paymentMethod: payMethod,
+        bookingStatus: result.booking_status,
+        source: booking.source ?? null,
+        installmentNo: result.installment_no,
+        installmentPlan: result.installment_plan,
+        priceAud: result.price_aud,
+        balanceRemaining: Math.max(0, result.price_aud - result.amount_paid_aud),
       })
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) {
@@ -457,6 +553,39 @@ export default function CashierPOS() {
       setPayingSubmitting(false)
     }
   }
+
+  const payingBooking = payingId ? bookings.find((row) => row.id === payingId) ?? null : null
+  const payingTour = payingBooking
+    ? tours.find((tr) => tr.trip_code === payingBooking.trip_code)
+    : undefined
+  const payingRemaining = payingBooking && payingTour
+    ? remainingTripBalanceAud({
+        priceAud: payingTour.price_aud,
+        depositAud: payingTour.deposit_aud,
+        amountPaidAud: payingBooking.amount_paid_aud,
+        paymentMethod: payingBooking.payment_method,
+        bookingStatus: payingBooking.booking_status,
+      })
+    : null
+  const flaggingBooking = flaggingId ? bookings.find((row) => row.id === flaggingId) ?? null : null
+  const quoteBooking = quoteBookingId
+    ? bookings.find((row) => row.id === quoteBookingId) ?? null
+    : null
+  const quoteTour = quoteBooking
+    ? tours.find((tr) => tr.trip_code === quoteBooking.trip_code)
+    : undefined
+  const readerTour = readerBooking
+    ? tours.find((tr) => tr.trip_code === readerBooking.trip_code)
+    : undefined
+  const readerRemaining = readerBooking && readerTour
+    ? remainingTripBalanceAud({
+        priceAud: readerTour.price_aud,
+        depositAud: readerTour.deposit_aud,
+        amountPaidAud: readerBooking.amount_paid_aud,
+        paymentMethod: readerBooking.payment_method,
+        bookingStatus: readerBooking.booking_status,
+      })
+    : null
 
   return (
     <div className={staffShellClass}>
@@ -594,13 +723,25 @@ export default function CashierPOS() {
         {loading && <ListRowSkeleton count={3} />}
         {error && !loading && <PageError message={error} onRetry={load} dark />}
 
-        {!loading && !error && bookings.length === 0 && (
-          <p className="text-sm text-cream-muted">No pending bookings</p>
+        {!loading && !error && (
+          <label className="flex items-center gap-2 text-xs text-cream-muted">
+            <input
+              type="checkbox"
+              checked={unpaidOnly}
+              onChange={(e) => setUnpaidOnly(e.target.checked)}
+              className="accent-teal-500"
+            />
+            Unpaid only / เฉพาะรอชำระ
+          </label>
+        )}
+
+        {!loading && !error && visibleBookings.length === 0 && (
+          <p className="text-sm text-cream-muted">No bookings in this list</p>
         )}
 
         {!loading && !error && (
           <ul className="space-y-3">
-            {bookings.map((b) => {
+            {visibleBookings.map((b) => {
               const tour = tours.find((tr) => tr.trip_code === b.trip_code)
               const plan = b.payment_plan_installments ?? 1
               const remaining = tour
@@ -614,7 +755,6 @@ export default function CashierPOS() {
                 : null
               const cardPaid = isSquareGatewayMethod(b.payment_method)
               const inPersonCard = isInPersonCardMethod(b.payment_method)
-              const isPaying = payingId === b.id
               const cancelled = isBookingCancelled(b)
               const status = (b.booking_status ?? '').trim().toLowerCase()
               const canRecordReader =
@@ -627,6 +767,9 @@ export default function CashierPOS() {
                   >
                     <p className="font-medium text-cream">
                       {b.first_name_en} {b.last_name_en}
+                      <span className="ml-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-teal-400">
+                        {paymentMethodBadge(b.payment_method)}
+                      </span>
                       {cancelled && (
                         <span className="ml-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-cream-muted">
                           Cancelled
@@ -666,205 +809,129 @@ export default function CashierPOS() {
                       ) : null}
                     </p>
 
-                    {cancelled ? null : !isPaying ? (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <CopyWaiverLinkButton
-                          bookingId={b.id}
-                          onSessionExpired={() => navigate('/app')}
-                        />
-                        {b.waiver_signed ? (
+                    {cancelled ? null : (
+                      <>
+                        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                          <CopyWaiverLinkButton
+                            bookingId={b.id}
+                            layout="tile"
+                            onSessionExpired={() => navigate('/app')}
+                          />
                           <StaffWaiverRecordButton
                             bookingId={b.id}
                             tripName={tour?.name_en}
+                            layout="tile"
                             onSessionExpired={() => navigate('/app')}
                           />
-                        ) : null}
-                        {(cardPaid || inPersonCard) && b.booking_reference ? (
-                          <StaffButton
-                            type="button"
-                            variant="secondary"
-                            onClick={() =>
-                              navigate(
-                                `/app/receipt?ref=${encodeURIComponent(b.booking_reference ?? '')}`,
-                              )
-                            }
-                            className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
-                          >
-                            Receipt
-                          </StaffButton>
-                        ) : null}
-                        {bookingHasSlip(b) ? (
-                          <StaffButton
-                            type="button"
-                            variant="secondary"
-                            disabled={slipBusyId === b.id}
-                            onClick={() => void viewSlip(b)}
-                            className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
-                          >
-                            {slipBusyId === b.id ? 'Opening…' : 'View slip'}
-                          </StaffButton>
-                        ) : null}
-                        {!cardPaid && !inPersonCard ? (
-                          <StaffButton
-                            type="button"
-                            disabled={verifyId === b.id}
-                            onClick={() => void verifyPayId(b)}
-                            className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
-                          >
-                            {verifyId === b.id ? 'Verifying…' : 'Verify PayID'}
-                          </StaffButton>
-                        ) : null}
-                        {canRecordReader ? (
-                          <StaffButton
-                            type="button"
-                            variant="secondary"
+                          <StaffActionTile
+                            icon={Receipt}
+                            label="Receipt"
+                            labelTh="ใบเสร็จ"
+                            disabled={!b.booking_reference}
+                            onClick={() => {
+                              if (!b.booking_reference) {
+                                toast('ยังไม่มีรหัสใบเสร็จ', 'error')
+                                return
+                              }
+                              navigate(staffReceiptPath(b.booking_reference))
+                            }}
+                          />
+                          <StaffActionTile
+                            icon={Flag}
+                            label="Flag"
+                            labelTh="ติดตาม"
+                            onClick={() => {
+                              setFlaggingId(b.id)
+                              setFlagNote(b.staff_follow_up_note?.trim() || 'Follow up — PayID slip')
+                            }}
+                          />
+                          <StaffActionTile
+                            icon={CreditCard}
+                            label="Card pay"
+                            labelTh="รับบัตร"
+                            disabled={!canRecordReader}
                             onClick={() => openReaderForm(b)}
-                            className="w-auto flex-col px-3 py-1.5 text-xs tracking-wide"
-                          >
-                            Record card payment
-                            <span className="mt-0.5 block font-thai text-[10px] font-medium normal-case tracking-normal">
-                              บันทึกการรับบัตรหน้างาน
-                            </span>
-                          </StaffButton>
-                        ) : null}
-                        <StaffButton
-                          type="button"
-                          variant="secondary"
-                          onClick={() => {
-                            setFlaggingId(b.id)
-                            setFlagNote(b.staff_follow_up_note?.trim() || 'Follow up — PayID slip')
-                          }}
-                          className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
-                        >
-                          Flag
-                        </StaffButton>
+                          />
+                          {b.waiver_signed ? (
+                            <ResetWaiverButton
+                              bookingId={b.id}
+                              layout="tile"
+                              subtitle={bookingSubtitle(b)}
+                              onSessionExpired={() => navigate('/app')}
+                              onReset={() =>
+                                setBookings((prev) =>
+                                  prev.map((row) =>
+                                    row.id === b.id
+                                      ? { ...row, waiver_signed: false, waiver_signed_at: null }
+                                      : row,
+                                  ),
+                                )
+                              }
+                            />
+                          ) : (
+                            <StaffActionTile
+                              icon={RotateCcw}
+                              label="Reset waiver"
+                              labelTh="รีเซ็ต"
+                              disabled
+                              onClick={() => undefined}
+                            />
+                          )}
+                          <StaffActionTile
+                            icon={Ban}
+                            label="Cancel"
+                            labelTh="ยกเลิก"
+                            danger
+                            onClick={() => setCancelling(b)}
+                          />
+                          <StaffActionTile
+                            icon={FilePlus2}
+                            label="Extra quote"
+                            labelTh="ต่อทริป"
+                            onClick={() => setQuoteBookingId(b.id)}
+                          />
+                        </div>
                         <StaffButton
                           onClick={() => openPaymentRow(b)}
-                          className="w-auto px-3 py-1.5 text-xs uppercase tracking-wider"
+                          className="mt-2 flex min-h-14 w-full items-center justify-center gap-2 text-[17px] font-bold"
                         >
                           + บันทึกการชำระ
                         </StaffButton>
-                        <StaffButton
-                          variant="danger"
-                          onClick={() => setCancelling(b)}
-                          className="px-3 py-1.5 text-xs uppercase tracking-wider"
-                        >
-                          Cancel booking
-                        </StaffButton>
-                      </div>
-                    ) : (
-                      <StaffCard className="mt-3 border-teal-500/30 bg-near-black-green p-3" padding={false}>
-                        <div className="space-y-2 p-3">
-                          <div className="grid grid-cols-2 gap-2">
-                            <StaffField label="จำนวนเงิน (AUD)">
-                              <StaffInput
-                                type="number"
-                                min={0}
-                                autoFocus
-                                value={payAmount}
-                                onChange={(e) => setPayAmount(e.target.value)}
-                              />
-                            </StaffField>
-                            <StaffField label="ช่องทาง">
-                              <StaffSelect
-                                value={payMethod}
-                                onChange={(e) => setPayMethod(e.target.value)}
-                              >
-                                {PAY_METHOD_OPTIONS.map((o) => (
-                                  <option key={o.value} value={o.value}>
-                                    {o.label}
-                                  </option>
-                                ))}
-                              </StaffSelect>
-                            </StaffField>
-                          </div>
-                          <div className="flex flex-wrap gap-1.5">
-                            {tour?.deposit_aud ? (
-                              <StaffButton
-                                type="button"
-                                variant="ghost"
-                                onClick={() => setPayAmount(String(tour.deposit_aud))}
-                                className="px-2.5 py-1 text-[11px]"
-                              >
-                                มัดจำ {tour.deposit_aud}
-                              </StaffButton>
-                            ) : null}
-                            {remaining ? (
-                              <StaffButton
-                                type="button"
-                                variant="ghost"
-                                onClick={() => setPayAmount(String(remaining))}
-                                className="px-2.5 py-1 text-[11px]"
-                              >
-                                จ่ายครบ {remaining}
-                              </StaffButton>
-                            ) : null}
-                          </div>
-                          <div className="flex gap-2 pt-1">
-                            <StaffButton
-                              disabled={!payAmount || Number(payAmount) <= 0 || payingSubmitting}
-                              onClick={() => submitPayment(b)}
-                              className="flex-1 text-xs uppercase tracking-wider"
-                            >
-                              {payingSubmitting ? 'กำลังบันทึก...' : 'ยืนยันรับเงิน'}
-                            </StaffButton>
-                            <StaffButton
-                              variant="secondary"
-                              onClick={closePaymentRow}
-                              className="text-xs"
-                            >
-                              ยกเลิก
-                            </StaffButton>
-                          </div>
-                        </div>
-                      </StaffCard>
-                    )}
-
-                    {cancelled ? null : (
-                      <div className="mt-3 border-t border-white/10 pt-3">
-                        <BookingExtensionQuotes
-                          bookingId={b.id}
-                          travelDate={b.travel_date}
-                          tourDepartureDate={tour?.departure_date}
-                          extraDaysPaid={b.extra_days_paid}
-                          durationDays={tour?.duration_days}
-                          canIssue={canIssueQuote}
-                          canMarkPaid
-                          onSessionExpired={() => navigate('/app')}
-                          onChanged={load}
-                        />
-                      </div>
-                    )}
-
-                    {flaggingId === b.id && !cancelled ? (
-                      <div className="mt-3 space-y-2 rounded-xl border border-amber-200/25 bg-near-black-green p-3">
-                        <StaffField label="Follow-up note (booking stays pending)">
-                          <StaffInput
-                            value={flagNote}
-                            onChange={(e) => setFlagNote(e.target.value)}
-                            maxLength={500}
+                        <div className="mt-2 grid grid-cols-3 gap-2">
+                          {b.waiver_signed ? (
+                            <EditWaiverButton
+                              bookingId={b.id}
+                              layout="tile"
+                              onSessionExpired={() => navigate('/app')}
+                            />
+                          ) : (
+                            <StaffActionTile
+                              icon={Pencil}
+                              label="Edit waiver"
+                              labelTh="แก้ไข"
+                              disabled
+                              onClick={() => undefined}
+                            />
+                          )}
+                          <StaffActionTile
+                            icon={FileImage}
+                            label="View slip"
+                            labelTh="ดูสลิป"
+                            disabled={!bookingHasSlip(b) || slipBusyId === b.id}
+                            busy={slipBusyId === b.id}
+                            onClick={() => void viewSlip(b)}
                           />
-                        </StaffField>
-                        <div className="flex gap-2">
-                          <StaffButton
-                            type="button"
-                            disabled={!flagNote.trim() || flagSubmitting}
-                            onClick={() => void submitFlag(b)}
-                            className="flex-1 text-xs uppercase tracking-wider"
-                          >
-                            {flagSubmitting ? 'Saving…' : 'Save flag'}
-                          </StaffButton>
-                          <StaffButton
-                            type="button"
-                            variant="secondary"
-                            onClick={() => setFlaggingId(null)}
-                            className="text-xs"
-                          >
-                            Cancel
-                          </StaffButton>
+                          <StaffActionTile
+                            icon={BadgeCheck}
+                            label="Verify PayID"
+                            labelTh="ยืนยัน"
+                            disabled={cardPaid || inPersonCard || verifyId === b.id}
+                            busy={verifyId === b.id}
+                            onClick={() => void verifyPayId(b)}
+                          />
                         </div>
-                      </div>
-                    ) : null}
+                      </>
+                    )}
 
                     <div className="mt-3 border-t border-white/10 pt-3">
                       <MarketingPhotoOptOutCard
@@ -894,89 +961,178 @@ export default function CashierPOS() {
           onClose={() => !cancelSubmitting && setCancelling(null)}
         />
       )}
-      {readerBooking && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="reader-pay-title"
-          onClick={() => !readerSubmitting && closeReaderForm()}
+      {payingBooking ? (
+        <StaffTaskView
+          icon={Coins}
+          title="Record payment"
+          titleTh="บันทึกการชำระ"
+          subtitle={bookingSubtitle(payingBooking)}
+          onClose={closePaymentRow}
+          closeDisabled={payingSubmitting}
         >
-          <div
-            className="w-full max-w-md rounded-2xl border border-white/15 bg-near-black-green p-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 id="reader-pay-title" className="text-sm font-semibold text-cream">
-              Record in-person card payment
-              <span className="mt-0.5 block font-thai text-xs font-medium text-cream-muted">
-                บันทึกการรับบัตรหน้างาน
-              </span>
-            </h2>
-            <p className="mt-2 text-xs text-cream-muted">
-              {readerBooking.first_name_en} {readerBooking.last_name_en} · {readerBooking.trip_code}
-              {readerBooking.booking_reference
-                ? ` · ${readerBooking.booking_reference}`
-                : ''}
-            </p>
-            <p className="mt-1 text-[11px] text-amber-200/90">
-              Charge the card in the Square Point of Sale app first, then copy the receipt number
-              here. This does not talk to Square.
-              <span className="mt-0.5 block font-thai">
-                รูดบัตรในแอป Square POS ก่อน แล้วคัดลอกเลขใบเสร็จมาใส่ — ระบบไม่ดึงข้อมูลจาก Square อัตโนมัติ
-              </span>
-            </p>
-            <div className="mt-3 space-y-3">
-              <StaffField label="Amount paid (AUD) / ยอดที่รับ">
-                <StaffInput
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  autoFocus
-                  value={readerAmount}
-                  onChange={(e) => setReaderAmount(e.target.value)}
-                />
-              </StaffField>
-              <StaffField label="Square receipt / reference / เลขใบเสร็จ Square">
-                <StaffInput
-                  value={readerReceipt}
-                  onChange={(e) => setReaderReceipt(e.target.value)}
-                  placeholder="From Square POS receipt screen"
-                />
-              </StaffField>
-              <StaffField label="Note (optional) / หมายเหตุ">
-                <StaffTextarea
-                  rows={2}
-                  value={readerNote}
-                  onChange={(e) => setReaderNote(e.target.value)}
-                />
-              </StaffField>
-            </div>
-            <div className="mt-4 flex gap-2">
-              <StaffButton
-                type="button"
-                disabled={
-                  readerSubmitting ||
-                  !readerAmount ||
-                  Number(readerAmount) <= 0 ||
-                  readerReceipt.trim().length < 2
-                }
-                onClick={() => void submitReaderPayment()}
-                className="flex-1 text-xs uppercase tracking-wider"
-              >
-                {readerSubmitting ? 'Saving…' : 'Save payment'}
-              </StaffButton>
-              <StaffButton
-                type="button"
-                variant="secondary"
-                disabled={readerSubmitting}
-                onClick={closeReaderForm}
-                className="text-xs"
-              >
-                Cancel
-              </StaffButton>
-            </div>
+          <label className="block">
+            <TaskFieldLabel icon={Coins}>Amount (AUD) / จำนวนเงิน</TaskFieldLabel>
+            <StaffInput
+              type="number"
+              min={0}
+              autoFocus
+              value={payAmount}
+              onChange={(e) => setPayAmount(e.target.value)}
+              className="!mt-0 h-14 text-center text-[22px] font-bold"
+            />
+          </label>
+          <div className="mt-2">
+            <AmountShortcuts
+              deposit={payingTour?.deposit_aud}
+              remaining={payingRemaining}
+              current={payAmount}
+              onPick={(n) => setPayAmount(String(n))}
+            />
           </div>
-        </div>
+          <label className="mt-4 block">
+            <TaskFieldLabel icon={Route}>Payment method / ช่องทาง</TaskFieldLabel>
+            <StaffSelect
+              value={payMethod}
+              onChange={(e) => setPayMethod(e.target.value)}
+              className="!mt-0 h-[52px] text-base"
+            >
+              {PAY_METHOD_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </StaffSelect>
+          </label>
+          <StaffButton
+            disabled={!payAmount || Number(payAmount) <= 0 || payingSubmitting}
+            onClick={() => submitPayment(payingBooking)}
+            className="mt-5 flex min-h-14 w-full items-center justify-center gap-2 text-[17px] font-bold"
+          >
+            <Check className="h-5 w-5" />
+            {payingSubmitting ? 'กำลังบันทึก...' : 'ยืนยันรับเงิน'}
+          </StaffButton>
+        </StaffTaskView>
+      ) : null}
+      {flaggingBooking ? (
+        <StaffTaskView
+          icon={Flag}
+          title="Flag for follow-up"
+          titleTh="ติดตามลูกค้า"
+          subtitle={bookingSubtitle(flaggingBooking)}
+          onClose={() => setFlaggingId(null)}
+          closeDisabled={flagSubmitting}
+        >
+          <label className="block">
+            <TaskFieldLabel icon={MessageSquare}>Follow-up note / หมายเหตุ</TaskFieldLabel>
+            <StaffInput
+              value={flagNote}
+              onChange={(e) => setFlagNote(e.target.value)}
+              maxLength={500}
+              className="!mt-0 min-h-14 text-base"
+            />
+          </label>
+          <p className="mt-2 text-sm text-cream-muted">Booking stays pending.</p>
+          <StaffButton
+            type="button"
+            disabled={!flagNote.trim() || flagSubmitting}
+            onClick={() => void submitFlag(flaggingBooking)}
+            className="mt-5 flex min-h-14 w-full items-center justify-center gap-2 text-[17px] font-bold"
+          >
+            <Check className="h-5 w-5" />
+            {flagSubmitting ? 'Saving…' : 'Save flag'}
+          </StaffButton>
+        </StaffTaskView>
+      ) : null}
+      {quoteBooking ? (
+        <StaffTaskView
+          icon={FilePlus2}
+          title="Extra stay quote"
+          titleTh="ใบเสนอราคาต่อทริป"
+          subtitle={bookingSubtitle(quoteBooking)}
+          onClose={() => setQuoteBookingId(null)}
+        >
+          <BookingExtensionQuotes
+            bookingId={quoteBooking.id}
+            travelDate={quoteBooking.travel_date}
+            tourDepartureDate={quoteTour?.departure_date}
+            extraDaysPaid={quoteBooking.extra_days_paid}
+            durationDays={quoteTour?.duration_days}
+            canIssue={canIssueQuote}
+            canMarkPaid
+            onSessionExpired={() => navigate('/app')}
+            onChanged={load}
+          />
+        </StaffTaskView>
+      ) : null}
+      {readerBooking && (
+        <StaffTaskView
+          icon={CreditCard}
+          title="Record card payment"
+          titleTh="บันทึกการรับบัตรหน้างาน"
+          subtitle={bookingSubtitle(readerBooking)}
+          onClose={() => !readerSubmitting && closeReaderForm()}
+          closeDisabled={readerSubmitting}
+        >
+          <p className="text-sm leading-relaxed text-amber-200/90">
+            Charge the card in the Square Point of Sale app first, then copy the receipt number
+            here. This does not talk to Square.
+            <span className="mt-1 block font-thai" lang="th">
+              รูดบัตรในแอป Square POS ก่อน แล้วคัดลอกเลขใบเสร็จมาใส่ — ระบบไม่ดึงข้อมูลจาก Square อัตโนมัติ
+            </span>
+          </p>
+          <label className="mt-4 block">
+            <TaskFieldLabel icon={Coins}>Amount (AUD) / ยอดที่รับ</TaskFieldLabel>
+            <StaffInput
+              type="number"
+              min={0}
+              step="0.01"
+              autoFocus
+              value={readerAmount}
+              onChange={(e) => setReaderAmount(e.target.value)}
+              className="!mt-0 h-14 text-center text-[22px] font-bold"
+            />
+          </label>
+          <div className="mt-2">
+            <AmountShortcuts
+              deposit={readerTour?.deposit_aud}
+              remaining={readerRemaining}
+              current={readerAmount}
+              onPick={(n) => setReaderAmount(String(n))}
+            />
+          </div>
+          <label className="mt-4 block">
+            <TaskFieldLabel icon={Hash}>Square receipt / เลขใบเสร็จ</TaskFieldLabel>
+            <StaffInput
+              value={readerReceipt}
+              onChange={(e) => setReaderReceipt(e.target.value)}
+              placeholder="From Square POS receipt screen"
+              className="!mt-0 h-[52px] text-base"
+            />
+          </label>
+          <label className="mt-4 block">
+            <TaskFieldLabel icon={MessageSquare}>Note (optional) / หมายเหตุ</TaskFieldLabel>
+            <StaffTextarea
+              rows={2}
+              value={readerNote}
+              onChange={(e) => setReaderNote(e.target.value)}
+              className="!mt-0 text-base"
+            />
+          </label>
+          <StaffButton
+            type="button"
+            disabled={
+              readerSubmitting ||
+              !readerAmount ||
+              Number(readerAmount) <= 0 ||
+              readerReceipt.trim().length < 2
+            }
+            onClick={() => void submitReaderPayment()}
+            className="mt-5 flex min-h-14 w-full items-center justify-center gap-2 text-[17px] font-bold"
+          >
+            <Check className="h-5 w-5" />
+            {readerSubmitting ? 'Saving…' : 'Save payment'}
+          </StaffButton>
+        </StaffTaskView>
       )}
       {slipViewer && (
         <div

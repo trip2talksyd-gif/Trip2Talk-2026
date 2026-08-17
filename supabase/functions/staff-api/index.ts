@@ -635,34 +635,18 @@ Deno.serve(async (req) => {
   try {
     switch (action) {
       case 'list_pending_bookings': {
-        // Pending PayID/cash rows, plus Square/Afterpay deposits that would
-        // otherwise vanish from Cashier after mark-paid (read-only union).
-        const { data: pending, error: pendingError } = await admin
+        // Include every active booking regardless of payment_method.
+        // Previously only pending_payment plus a Square/Afterpay union — rows
+        // whose method was stored as "PayID"/other labels vanished after mark-paid.
+        const { data: rows, error: listError } = await admin
           .from('tour_bookings')
           .select('*')
-          .in('booking_status', ['pending_payment', 'PENDING'])
-          .order('booked_at', { ascending: false })
-        if (pendingError) throw pendingError
-
-        const { data: cardPaid, error: cardError } = await admin
-          .from('tour_bookings')
-          .select('*')
-          .in('payment_method', ['square', 'afterpay', 'card_in_person'])
-          .in('booking_status', ['deposit_paid', 'fully_paid', 'paid'])
+          .in('booking_status', ['pending_payment', 'PENDING', 'deposit_paid', 'fully_paid', 'paid'])
           .is('cancelled_at', null)
           .order('booked_at', { ascending: false })
-          .limit(50)
-        if (cardError) throw cardError
-
-        const seen = new Set<string>()
-        const merged: Record<string, unknown>[] = []
-        for (const row of [...(pending ?? []), ...(cardPaid ?? [])]) {
-          const id = String((row as { id?: string }).id ?? '')
-          if (!id || seen.has(id)) continue
-          seen.add(id)
-          merged.push(row as Record<string, unknown>)
-        }
-        return json({ data: merged })
+          .limit(100)
+        if (listError) throw listError
+        return json({ data: rows ?? [] })
       }
 
       case 'sign_payment_slip': {

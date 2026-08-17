@@ -469,6 +469,20 @@ export async function issueWaiverLink(bookingId: string): Promise<{ token: strin
   return callStaffApi<{ token: string; path: string }>('issue_waiver_link', { bookingId })
 }
 
+export type ResetWaiverResult = {
+  ok: true
+  archived_count: number
+  path: string
+}
+
+/** Archives current waiver row(s) and reopens the same /waiver/:token link. */
+export async function resetWaiver(
+  bookingId: string,
+  reason?: string,
+): Promise<ResetWaiverResult> {
+  return callStaffApi<ResetWaiverResult>('reset_waiver', { bookingId, reason })
+}
+
 export type PublicExtensionQuoteLookup = {
   status: 'pending' | 'paid' | 'expired' | 'cancelled'
   extra_days: number
@@ -550,12 +564,45 @@ export type WaiverRecordPayload = {
     last_name_en: string
     waiver_signed: boolean
     waiver_signed_at: string | null
+    emergency_contact_name?: string | null
+    emergency_contact_phone?: string | null
+    allergies?: string | null
+    medical_conditions?: string | null
+    other_notes?: string | null
+    oshc_membership_number?: string | null
+    travel_insurance_provider?: string | null
+    travel_insurance_policy_number?: string | null
+    insurance_type?: string | null
+    oshc_risk_acknowledged?: boolean | null
+    marketing_photo_opt_out?: boolean | null
+    marketing_photo_opt_out_note?: string | null
   }
   waiver: WaiverSignature | null
 }
 
 export async function getWaiverRecord(bookingId: string): Promise<WaiverRecordPayload> {
   return callStaffApi<WaiverRecordPayload>('get_waiver_record', { bookingId })
+}
+
+export type WaiverDetailFields = {
+  signed_name?: string
+  emergency_contact_name?: string
+  emergency_contact_phone?: string
+  allergies?: string
+  medical_conditions?: string
+  other_notes?: string
+  oshc_membership_number?: string
+  travel_insurance_provider?: string
+  travel_insurance_policy_number?: string
+  marketing_photo_opt_out?: boolean
+  marketing_photo_opt_out_note?: string
+}
+
+export async function updateWaiverDetails(
+  bookingId: string,
+  fields: WaiverDetailFields,
+): Promise<{ ok: true; changes: Record<string, { old: unknown; new: unknown }> }> {
+  return callStaffApi('update_waiver_details', { bookingId, fields })
 }
 
 export async function listWaiversForTour(tripCode: string): Promise<WaiverSignature[]> {
