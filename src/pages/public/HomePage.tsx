@@ -8,6 +8,7 @@ import { heroDestinationBlurbs, uniqueTourDestinations } from '../../lib/tourDis
 import HeroVideo, { type HeroVideoHandle } from '../../components/home/HeroVideo'
 import HomePositioningSection from '../../components/trips/HomePositioningSection'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
+import ShareButton from '../../components/ui/ShareButton'
 
 const CTA_GRADIENT = 'linear-gradient(to bottom, #2B2B2B, #101010)'
 
@@ -161,6 +162,8 @@ export default function HomePage() {
               </button>
             </div>
 
+            <ShareButton tone="hero" />
+
             <Link
               to="/trips"
               onClick={(e) => {
@@ -174,24 +177,27 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <button
-            type="button"
-            className="relative z-50 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-lg md:hidden"
-            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-            aria-expanded={menuOpen}
-            onClick={() => setMenuOpen((o) => !o)}
-          >
-            <Menu
-              className={`absolute h-5 w-5 transition-all duration-300 ${
-                menuOpen ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'
-              }`}
-            />
-            <X
-              className={`absolute h-5 w-5 transition-all duration-300 ${
-                menuOpen ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'
-              }`}
-            />
-          </button>
+          <div className="relative z-50 flex items-center gap-1.5 md:hidden">
+            <ShareButton tone="hero" />
+            <button
+              type="button"
+              className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-lg"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((o) => !o)}
+            >
+              <Menu
+                className={`absolute h-5 w-5 transition-all duration-300 ${
+                  menuOpen ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'
+                }`}
+              />
+              <X
+                className={`absolute h-5 w-5 transition-all duration-300 ${
+                  menuOpen ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'
+                }`}
+              />
+            </button>
+          </div>
         </nav>
 
         {/* Mobile overlay + drawer */}

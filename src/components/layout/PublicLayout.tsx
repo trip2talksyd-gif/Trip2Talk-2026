@@ -7,6 +7,7 @@ import PublicFooter from './PublicFooter'
 import AppTabBar from './AppTabBar'
 import OfflineBanner from './OfflineBanner'
 import BrandLogo from '../brand/BrandLogo'
+import ShareButton from '../ui/ShareButton'
 
 const menuLinks = [
   { to: '/discover', key: 'nav.discover' as const },
@@ -109,6 +110,8 @@ export default function PublicLayout() {
                 TH
               </button>
             </div>
+
+            <ShareButton />
 
             <NavLink
               to="/account"
