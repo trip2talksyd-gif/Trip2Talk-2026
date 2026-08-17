@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useLang } from '../../hooks/useLang'
 
-type HeadingTag = 'h1' | 'h2' | 'h3' | 'p' | 'div'
+type HeadingTag = 'h1' | 'h2' | 'h3' | 'p' | 'div' | 'span'
 
 type Props = {
   en: string
