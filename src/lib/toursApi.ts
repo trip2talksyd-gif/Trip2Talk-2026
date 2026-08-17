@@ -287,8 +287,12 @@ export async function fetchBookingsForTour(tourId: string): Promise<TourBooking[
   return callStaffApi<TourBooking[]>('list_bookings_for_tour', { tourId })
 }
 
-export async function fetchPendingBookings(): Promise<TourBooking[]> {
-  return callStaffApi<TourBooking[]>('list_pending_bookings')
+export async function fetchPendingBookings(opts?: {
+  limit?: number
+  offset?: number
+  page?: number
+}): Promise<TourBooking[]> {
+  return callStaffApi<TourBooking[]>('list_pending_bookings', opts ?? {})
 }
 
 export type SignedPaymentSlip = {

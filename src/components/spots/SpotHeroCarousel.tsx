@@ -2,11 +2,24 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Heart } from 'lucide-react'
 import SpotMedia from './SpotMedia'
 import LetterboxPhoto from './LetterboxPhoto'
+import AutoplayClip, { isCompressedWebMp4 } from './AutoplayClip'
 import type { PhotoSpotDetail } from '../../lib/photoSpotsApi'
 import { storageImageAttrs, STORAGE_SIZES } from '../../lib/storageImage'
 
+type HeroSlide = { kind: 'video'; src: string } | { kind: 'image'; src: string }
+
 const STORY_MS = 3200
+/** Matches the slide CSS duration — user nav cannot stack while a slide is moving. */
+const TRANSITION_MS = 450
 const FAV_KEY = 't2t_spot_favorites'
+
+/** Desktop mouse/trackpad: large tap zones steal hover/tap-to-click. Touch keeps them. */
+function isFinePointerHover() {
+  return (
+    typeof window !== 'undefined' &&
+    window.matchMedia('(hover: hover) and (pointer: fine)').matches
+  )
+}
 
 function readFavorites(): Set<string> {
   try {
@@ -40,10 +53,32 @@ export function spotHeroImages(spot: PhotoSpotDetail): string[] {
   return out.slice(0, 5)
 }
 
+/** Video first (if a compressed `_web.mp4`), then hero + gallery. Video does not replace photos. */
+export function spotHeroSlides(spot: PhotoSpotDetail): HeroSlide[] {
+  const slides: HeroSlide[] = []
+  const video = spot.video_url?.trim()
+  if (video && isCompressedWebMp4(video)) {
+    slides.push({ kind: 'video', src: video })
+  }
+  for (const src of spotHeroImages(spot)) {
+    if (slides.some((s) => s.src === src)) continue
+    slides.push({ kind: 'image', src })
+  }
+  return slides
+}
+
 function ChevronLeftIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="1.7">
       <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function ChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden fill="none" stroke="currentColor" strokeWidth="1.7">
+      <path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
@@ -55,8 +90,8 @@ type Props = {
 }
 
 export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
-  const images = useMemo(() => spotHeroImages(spot), [spot])
-  const multi = images.length > 1
+  const slides = useMemo(() => spotHeroSlides(spot), [spot])
+  const multi = slides.length > 1
   const [index, setIndex] = useState(0)
   const [progress, setProgress] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -67,6 +102,7 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
   const holdTimerRef = useRef<number | null>(null)
   const holdingRef = useRef(false)
   const suppressClickRef = useRef(false)
+  const lastNavAtRef = useRef(0)
 
   useEffect(() => {
     setFav(readFavorites().has(spot.id) || readFavorites().has(spot.slug))
@@ -77,17 +113,20 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
     setProgress(0)
     remainingRef.current = STORY_MS
     setCycle((c) => c + 1)
-  }, [spot.id, images.length])
+  }, [spot.id, slides.length])
 
   const go = useCallback(
-    (dir: -1 | 1) => {
+    (dir: -1 | 1, fromUser = false) => {
       if (!multi) return
-      setIndex((i) => (i + dir + images.length) % images.length)
+      const now = performance.now()
+      if (fromUser && now - lastNavAtRef.current < TRANSITION_MS) return
+      lastNavAtRef.current = now
+      setIndex((i) => (i + dir + slides.length) % slides.length)
       setProgress(0)
       remainingRef.current = STORY_MS
       setCycle((c) => c + 1)
     },
-    [images.length, multi],
+    [slides.length, multi],
   )
 
   // Auto-advance with pause support (rAF drives the active bar fill).
@@ -113,7 +152,7 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
     return () => {
       cancelAnimationFrame(raf)
       const elapsed = performance.now() - start
-      remainingRef.current = Math.max(80, budget - elapsed)
+      remainingRef.current = Math.max(TRANSITION_MS, budget - elapsed)
     }
   }, [multi, paused, cycle, go])
 
@@ -151,11 +190,12 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
     }
   }
   const onTapZone = (dir: -1 | 1) => {
+    if (isFinePointerHover()) return
     if (suppressClickRef.current) {
       suppressClickRef.current = false
       return
     }
-    go(dir)
+    go(dir, true)
   }
 
   const barFill = (i: number) => {
@@ -175,18 +215,32 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
         className="flex h-full transition-transform duration-[450ms] ease-[cubic-bezier(0.22,0.8,0.3,1)]"
         style={{ transform: `translateX(-${index * 100}%)` }}
       >
-        {images.length > 0 ? (
-          images.map((src, i) => {
-            const attrs = storageImageAttrs(src, 'hero', STORAGE_SIZES.fullBleed)
+        {slides.length > 0 ? (
+          slides.map((slide, i) => {
+            const attrs =
+              slide.kind === 'image'
+                ? storageImageAttrs(slide.src, 'hero', STORAGE_SIZES.fullBleed)
+                : null
+            const videoActive = slide.kind === 'video' && i === index && !(multi && paused)
             return (
-            <div key={src} className="relative h-full min-w-full shrink-0">
-              <LetterboxPhoto
-                src={attrs.src}
-                srcSet={attrs.srcSet}
-                sizes={attrs.sizes}
-                alt={`${spot.title_en} ${i + 1}/${images.length}`}
-                loading={i === 0 ? 'eager' : 'lazy'}
-              />
+            <div key={`${slide.kind}-${slide.src}`} className="relative h-full min-w-full shrink-0">
+              {slide.kind === 'video' ? (
+                <AutoplayClip
+                  src={slide.src}
+                  poster={spot.heroSrc ?? undefined}
+                  pauseOffscreen={false}
+                  active={videoActive}
+                  className="h-full w-full object-contain object-center"
+                />
+              ) : attrs ? (
+                <LetterboxPhoto
+                  src={attrs.src}
+                  srcSet={attrs.srcSet}
+                  sizes={attrs.sizes}
+                  alt={`${spot.title_en} ${i + 1}/${slides.length}`}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                />
+              ) : null}
             </div>
             )
           })
@@ -206,9 +260,9 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
       {/* Story progress bars — multi only */}
       {multi ? (
         <div className="absolute left-3.5 right-3.5 top-3 z-[6] flex gap-1" aria-hidden>
-          {images.map((_, i) => (
+          {slides.map((slide, i) => (
             <div
-              key={`${spot.id}-bar-${i}`}
+              key={`${spot.id}-bar-${slide.kind}-${i}`}
               className="h-[2.5px] flex-1 overflow-hidden rounded-sm bg-white/30"
             >
               <div
@@ -223,7 +277,7 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
       {/* Image counter */}
       {multi ? (
         <div className="absolute left-1/2 top-8 z-[9] -translate-x-1/2 rounded-full border border-white/15 bg-[rgba(18,47,42,0.5)] px-2.5 py-1 font-mono text-[9.5px] font-bold text-white backdrop-blur-[10px]">
-          {index + 1} / {images.length}
+          {index + 1} / {slides.length}
         </div>
       ) : null}
 
@@ -251,12 +305,13 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
         />
       </button>
 
-      {/* Tap zones — multi only; leave room above glass pills */}
+      {/* Touch tap zones — disabled for fine-pointer hover so trackpad tap-to-click
+          cannot flip slides while the cursor moves across the image. */}
       {multi ? (
         <>
           <button
             type="button"
-            className="absolute bottom-14 left-0 top-0 z-[8] w-[34%] cursor-w-resize bg-transparent"
+            className="absolute bottom-14 left-0 top-0 z-[8] w-[34%] bg-transparent [@media(hover:hover)_and_(pointer:fine)]:pointer-events-none"
             aria-label="Previous photo"
             onClick={() => onTapZone(-1)}
             onPointerDown={onPointerDownHold}
@@ -265,13 +320,29 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
           />
           <button
             type="button"
-            className="absolute bottom-14 right-0 top-0 z-[8] w-[34%] cursor-e-resize bg-transparent"
+            className="absolute bottom-14 right-0 top-0 z-[8] w-[34%] bg-transparent [@media(hover:hover)_and_(pointer:fine)]:pointer-events-none"
             aria-label="Next photo"
             onClick={() => onTapZone(1)}
             onPointerDown={onPointerDownHold}
             onPointerUp={onPointerUpHold}
             onPointerCancel={onPointerUpHold}
           />
+          <button
+            type="button"
+            className="absolute left-2 top-1/2 z-[9] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-[rgba(18,47,42,0.42)] text-white backdrop-blur-[10px] transition hover:bg-[rgba(18,47,42,0.62)] [@media(hover:hover)_and_(pointer:fine)]:flex"
+            aria-label="Previous photo"
+            onClick={() => go(-1, true)}
+          >
+            <ChevronLeftIcon className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            className="absolute right-2 top-1/2 z-[9] hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-[rgba(18,47,42,0.42)] text-white backdrop-blur-[10px] transition hover:bg-[rgba(18,47,42,0.62)] [@media(hover:hover)_and_(pointer:fine)]:flex"
+            aria-label="Next photo"
+            onClick={() => go(1, true)}
+          >
+            <ChevronRightIcon className="h-5 w-5" />
+          </button>
         </>
       ) : null}
 
