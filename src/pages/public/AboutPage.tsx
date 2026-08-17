@@ -7,6 +7,20 @@ import BiText from '../../components/ui/BiText'
 import CountUpStat from '../../components/ui/CountUpStat'
 import TeamAvatar from '../../components/about/TeamAvatar'
 
+/** Bio copy uses \\n\\n for paragraphs; optional **phrase** renders as <strong>. */
+function BioCopy({ text, className }: { text: string; className: string }) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g)
+  return (
+    <p className={className}>
+      {parts.map((part, i) => {
+        const bold = /^\*\*([^*]+)\*\*$/.exec(part)
+        if (bold) return <strong key={i}>{bold[1]}</strong>
+        return part
+      })}
+    </p>
+  )
+}
+
 export default function AboutPage() {
   const { tt } = useLang()
   const heroPhoto =
@@ -142,12 +156,14 @@ export default function AboutPage() {
               className="text-sm text-teal-700"
               thClassName="mt-0.5 block font-thai text-[12px] font-medium text-teal-700/90"
             />
-            <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink/80">
-              {saenBio.en}
-            </p>
-            <p className="mt-2 whitespace-pre-line font-thai text-[13px] leading-relaxed text-ink/70">
-              {saenBio.th}
-            </p>
+            <BioCopy
+              text={saenBio.en}
+              className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink/80"
+            />
+            <BioCopy
+              text={saenBio.th}
+              className="mt-2 whitespace-pre-line font-thai text-[13px] leading-relaxed text-ink/70"
+            />
           </div>
         </div>
       </section>
@@ -163,8 +179,14 @@ export default function AboutPage() {
               className="text-sm text-teal-700"
               thClassName="mt-0.5 block font-thai text-[12px] font-medium text-teal-700/90"
             />
-            <p className="mt-3 text-sm leading-relaxed text-ink/80">{ployBio.en}</p>
-            <p className="mt-2 font-thai text-[13px] leading-relaxed text-ink/70">{ployBio.th}</p>
+            <BioCopy
+              text={ployBio.en}
+              className="mt-3 whitespace-pre-line text-sm leading-relaxed text-ink/80"
+            />
+            <BioCopy
+              text={ployBio.th}
+              className="mt-2 whitespace-pre-line font-thai text-[13px] leading-relaxed text-ink/70"
+            />
           </div>
         </div>
       </section>
