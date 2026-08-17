@@ -1,17 +1,23 @@
 ---
-description: Never merge to main or deploy Edge Functions without Saen's confirmation, except a genuine live production emergency.
+description: Never merge to main or deploy Edge Functions without Saen typing explicit merge approval in that conversation. Violated on PR #56, #62, #64.
 alwaysApply: true
 ---
 
-# MERGE TO MAIN — HARD RULE
+# MERGE POLICY — CRITICAL
+
+NEVER merge any pull request into `main` without the owner (Saen) explicitly typing a confirmation **in the same conversation**, using words like **merge it**, **ยืนยัน merge**, **approved to merge**, or equivalent unambiguous merge approval.
+
+- Opening a PR is fine and encouraged once work is ready for review.
+- Merging is NOT fine unless that explicit confirmation was given in **that specific conversation/session**.
+- A general “looks good”, “nice work”, “yes”, “yes to all”, “push”, “deploy”, or “push and deploy” comment does **NOT** count as merge approval. Those may mean push a **feature branch** or deploy later — they do **not** authorise `gh pr merge` or a push to `main`.
+- This has been violated on PR **#56**, **#62**, and **#64**. Do not repeat this.
+- When a PR is ready, **stop** and say: `PR #[N] is open and ready for review: [link]. Merge into main once you confirm.` Then **wait**. Do not merge in the same turn or a later turn without that confirmation appearing in the conversation.
 
 ก่อน git push ขึ้น main หรือ deploy Edge Function ทุกครั้ง — ต้องสรุปสิ่งที่เปลี่ยนแล้วขอ confirm จากพี่แสนก่อนเสมอ ห้าม push/deploy เองอัตโนมัติ
 
-Before merging **ANY** pull request or pushing directly to `main`, summarize the change and get **explicit confirmation from Saen in chat first**. This applies every time, with **no exceptions** for "small" or "obviously safe" changes.
+The same **merge-word** confirmation is required before deploying any Edge Function to production (`bljhnelgmkulxwuhedbi`).
 
-The same confirmation is required before deploying any Edge Function to production (`bljhnelgmkulxwuhedbi`).
-
-Pushing a **feature branch** (not `main`) is allowed when Saen asked to commit + push that branch. Merging that branch into `main` (including `gh pr merge`) is **not** allowed until Saen confirms.
+Pushing a **feature branch** (not `main`) is allowed when Saen asked to commit + push that branch. Merging that branch into `main` (including `gh pr merge`) is **not** allowed until Saen confirms with merge language as above.
 
 ## ONE exception
 
@@ -23,4 +29,4 @@ If production (**https://www.trip2talk.com.au**) is confirmed **actively broken 
 
 If you are unsure whether something qualifies as a genuine emergency, **it does not** — ask first.
 
-Shipping a feature, hiding a staff page, or "push to deploy" without a confirmed live outage is **not** an emergency.
+Shipping a feature, hiding a staff page, or “push to deploy” without a confirmed live outage is **not** an emergency.
