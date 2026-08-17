@@ -262,6 +262,8 @@ export type TranslationKey =
   | 'pricing.ways.afterpay.body'
   | 'pricing.ways.afterpay.fee'
   | 'pricing.ways.afterpay.link'
+  | 'afterpay.badge.alt'
+  | 'afterpay.legal'
   | 'pricing.ways.payid.title'
   | 'pricing.ways.payid.body'
   | 'pricing.ways.payid.fee'
@@ -900,6 +902,9 @@ const en: Map = {
     'Pay in 4 instalments through Square. No surcharge from us.',
   'pricing.ways.afterpay.fee': 'No surcharge',
   'pricing.ways.afterpay.link': 'How Afterpay works',
+  'afterpay.badge.alt': 'Afterpay — now accepted here',
+  'afterpay.legal':
+    'Late fees, eligibility criteria and T&Cs apply. Afterpay Australia Pty Ltd Australian Credit Licence 527911.',
   'pricing.ways.payid.title': 'PayID',
   'pricing.ways.payid.body':
     'Instant bank transfer in Australia. No fee from us — details are in the PayID section below.',
@@ -1571,6 +1576,9 @@ const th: Map = {
     'แบ่งจ่าย 4 งวดผ่าน Square ไม่มีค่าธรรมเนียมเพิ่มจากเรา',
   'pricing.ways.afterpay.fee': 'ไม่มีค่าธรรมเนียมเพิ่ม',
   'pricing.ways.afterpay.link': 'วิธีใช้ Afterpay',
+  'afterpay.badge.alt': 'Afterpay — รับชำระที่นี่',
+  'afterpay.legal':
+    'Late fees, eligibility criteria and T&Cs apply. Afterpay Australia Pty Ltd Australian Credit Licence 527911.',
   'pricing.ways.payid.title': 'PayID',
   'pricing.ways.payid.body':
     'โอนธนาคารในออสเตรเลียแบบทันที ไม่มีค่าธรรมเนียมจากเรา — รายละเอียดอยู่ที่ส่วน PayID ด้านล่าง',

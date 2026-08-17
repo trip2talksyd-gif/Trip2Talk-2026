@@ -6,6 +6,7 @@ import { formatAud, formatDate, getUnbookableReason, isListedPriceHidden, seatsR
 import { isPremiumTrip } from '../../data/tripTiers'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 import TripBookButton from './TripBookButton'
+import AfterpayAcceptedBadge from './AfterpayAcceptedBadge'
 
 type Props = {
   tour: Tour
@@ -191,6 +192,7 @@ export default function TripPricingCard({ tour, includes }: Props) {
       </p>
 
       <TripBookButton tour={tour} variant="deep" className="mt-1.5" />
+      <AfterpayAcceptedBadge />
     </aside>
   )
 }
