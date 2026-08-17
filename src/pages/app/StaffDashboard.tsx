@@ -41,6 +41,8 @@ import StaffOpsSummary from '../../components/app/StaffOpsSummary'
 import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
 import StaffWaiverRecordButton from '../../components/app/StaffWaiverRecordButton'
+import ResetWaiverButton from '../../components/app/ResetWaiverButton'
+import EditWaiverButton from '../../components/app/EditWaiverButton'
 import {
   StaffActionChip,
   StaffButton,
@@ -601,11 +603,24 @@ export default function StaffDashboard() {
                             onSessionExpired={() => navigate('/app')}
                           />
                           {(b.waiver_signed || waivers.some((w) => w.booking_id === b.id)) && (
+                            <>
                             <StaffWaiverRecordButton
                               bookingId={b.id}
                               tripName={selected?.name_en}
                               onSessionExpired={() => navigate('/app')}
                             />
+                            <EditWaiverButton
+                              bookingId={b.id}
+                              onSessionExpired={() => navigate('/app')}
+                            />
+                            <ResetWaiverButton
+                              bookingId={b.id}
+                              onSessionExpired={() => navigate('/app')}
+                              onReset={() => {
+                                setWaivers((prev) => prev.filter((w) => w.booking_id !== b.id))
+                              }}
+                            />
+                            </>
                           )}
                           <StaffButton type="button" variant="ghost" onClick={() => openEdit(b)} title="แก้ไขชื่อ/เบอร์/อีเมล">
                             ✏️ แก้ไข

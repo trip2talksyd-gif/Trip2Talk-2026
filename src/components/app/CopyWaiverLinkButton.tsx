@@ -4,13 +4,19 @@ import { issueWaiverLink } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import { useToast } from '../ui/Toast'
 import { StaffButton } from './staffUi'
+import StaffActionTile from './StaffActionTile'
 
 type Props = {
   bookingId: string
   onSessionExpired?: () => void
+  layout?: 'button' | 'tile'
 }
 
-export default function CopyWaiverLinkButton({ bookingId, onSessionExpired }: Props) {
+export default function CopyWaiverLinkButton({
+  bookingId,
+  onSessionExpired,
+  layout = 'button',
+}: Props) {
   const { toast } = useToast()
   const [busy, setBusy] = useState(false)
   const [copied, setCopied] = useState(false)
@@ -33,6 +39,18 @@ export default function CopyWaiverLinkButton({ bookingId, onSessionExpired }: Pr
     } finally {
       setBusy(false)
     }
+  }
+
+  if (layout === 'tile') {
+    return (
+      <StaffActionTile
+        icon={copied ? Copy : Link2}
+        label={copied ? 'Copied' : 'Waiver link'}
+        labelTh="ลิงก์ waiver"
+        busy={busy}
+        onClick={() => void copy()}
+      />
+    )
   }
 
   return (
