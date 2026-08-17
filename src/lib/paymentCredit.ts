@@ -77,3 +77,18 @@ export function paymentMethodBadge(method?: string | null): string {
   if (value === 'manual') return 'Other'
   return method!.trim()
 }
+
+/** Accent used on Cashier summary cards — same tokens as existing staff badges/notes. */
+export function paymentMethodAccent(method?: string | null): {
+  badge: string
+  border: string
+} {
+  const value = (method ?? '').trim().toLowerCase()
+  if (value === 'payid') return { badge: 'text-amber-200', border: 'border-t-amber-200' }
+  if (value === 'afterpay') return { badge: 'text-teal-500', border: 'border-t-teal-500' }
+  if (value === 'cash') return { badge: 'text-cream', border: 'border-t-cream' }
+  if (value === 'square' || value === 'card_in_person') {
+    return { badge: 'text-teal-400', border: 'border-t-teal-400' }
+  }
+  return { badge: 'text-cream-muted', border: 'border-t-white/25' }
+}

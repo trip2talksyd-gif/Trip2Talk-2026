@@ -515,6 +515,8 @@ const ACTION_ROLES: Record<string, Role[]> = {
   create_waiver_staff_assisted: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   list_waivers_for_tour: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   issue_waiver_link: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  reset_waiver: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  update_waiver_details: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   get_waiver_record: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   delete_waiver_signature: ['OWNER'],
   list_outbound_queue: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
@@ -635,16 +637,31 @@ Deno.serve(async (req) => {
   try {
     switch (action) {
       case 'list_pending_bookings': {
-        // Include every active booking regardless of payment_method.
-        // Previously only pending_payment plus a Square/Afterpay union — rows
-        // whose method was stored as "PayID"/other labels vanished after mark-paid.
+        // Newest booking first — Cashier is payment triage (record/verify),
+        // not a trip-day roster. travel_date is optional and trip date lives
+        // on tours, which this query does not join.
+        // Pagination: optional page (1-based) or offset. Cap 300 until the
+        // POS list UI loads further pages; add a "load more" if volume grows.
+        const p = params as { limit?: unknown; offset?: unknown; page?: unknown }
+        const rawLimit = Number(p.limit)
+        const limit = Number.isFinite(rawLimit)
+          ? Math.min(Math.max(Math.trunc(rawLimit), 1), 300)
+          : 300
+        const rawOffset = Number(p.offset)
+        const rawPage = Number(p.page)
+        let offset = 0
+        if (Number.isFinite(rawOffset) && rawOffset >= 0) {
+          offset = Math.trunc(rawOffset)
+        } else if (Number.isFinite(rawPage) && rawPage >= 1) {
+          offset = (Math.trunc(rawPage) - 1) * limit
+        }
         const { data: rows, error: listError } = await admin
           .from('tour_bookings')
           .select('*')
           .in('booking_status', ['pending_payment', 'PENDING', 'deposit_paid', 'fully_paid', 'paid'])
           .is('cancelled_at', null)
           .order('booked_at', { ascending: false })
-          .limit(100)
+          .range(offset, offset + limit - 1)
         if (listError) throw listError
         return json({ data: rows ?? [] })
       }
@@ -1264,13 +1281,139 @@ Deno.serve(async (req) => {
         return json({ data: { token, path: `/waiver/${token}` } })
       }
 
+      case 'reset_waiver': {
+        // Reopen the existing /waiver/:token (do not mint a new token). Archive
+        // current waiver_signatures into waiver_signature_archives, then delete
+        // live rows and clear tour_bookings.waiver_signed so public-waiver
+        // lookup returns status=open again.
+        const { bookingId, bookingReference, reason } = params as {
+          bookingId?: string
+          bookingReference?: string
+          reason?: string
+        }
+        let bookingQuery = admin
+          .from('tour_bookings')
+          .select(
+            'id, trip_code, booking_reference, waiver_signed, waiver_signed_at, waiver_token, first_name_en, last_name_en',
+          )
+        if (bookingId) {
+          bookingQuery = bookingQuery.eq('id', bookingId)
+        } else if (typeof bookingReference === 'string' && bookingReference.trim()) {
+          bookingQuery = bookingQuery.ilike('booking_reference', bookingReference.trim())
+        } else {
+          return json({ error: 'invalid_params' }, 400)
+        }
+        const { data: booking, error: bookingErr } = await bookingQuery.maybeSingle()
+        if (bookingErr) throw bookingErr
+        if (!booking) return json({ error: 'booking_not_found' }, 404)
+
+        const { data: signatures, error: sigErr } = await admin
+          .from('waiver_signatures')
+          .select('*')
+          .eq('booking_id', booking.id)
+        if (sigErr) throw sigErr
+
+        const rows = signatures ?? []
+        if (rows.length === 0 && !booking.waiver_signed) {
+          return json({ error: 'waiver_not_submitted' }, 409)
+        }
+
+        const resetAt = new Date().toISOString()
+        const resetReason =
+          typeof reason === 'string' && reason.trim() ? reason.trim().slice(0, 500) : null
+        const staffId =
+          typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+        const staffName =
+          typeof session.full_name === 'string' ? session.full_name : null
+        const staffRole = typeof session.role === 'string' ? session.role : null
+
+        const archiveRows =
+          rows.length > 0
+            ? rows.map((row) => ({
+                original_signature_id: row.id ?? null,
+                booking_id: booking.id,
+                trip_code: String(row.trip_code ?? booking.trip_code ?? ''),
+                signed_name: String(row.signed_name ?? ''),
+                signed_at: row.signed_at ?? null,
+                clauses: row.clauses ?? null,
+                locale: row.locale ?? null,
+                snapshot: row,
+                reset_by_staff_id: staffId,
+                reset_by_staff_name: staffName,
+                reset_by_role: staffRole,
+                reset_reason: resetReason,
+                reset_at: resetAt,
+              }))
+            : [
+                {
+                  original_signature_id: null,
+                  booking_id: booking.id,
+                  trip_code: String(booking.trip_code ?? ''),
+                  signed_name: `${booking.first_name_en ?? ''} ${booking.last_name_en ?? ''}`.trim(),
+                  signed_at: booking.waiver_signed_at ?? null,
+                  clauses: null,
+                  locale: null,
+                  snapshot: {
+                    source: 'booking_flags_only',
+                    waiver_signed: booking.waiver_signed,
+                    waiver_signed_at: booking.waiver_signed_at,
+                  },
+                  reset_by_staff_id: staffId,
+                  reset_by_staff_name: staffName,
+                  reset_by_role: staffRole,
+                  reset_reason: resetReason,
+                  reset_at: resetAt,
+                },
+              ]
+
+        const { error: archErr } = await admin.from('waiver_signature_archives').insert(archiveRows)
+        if (archErr) {
+          if (archErr.code === '42P01' || /waiver_signature_archives/i.test(archErr.message ?? '')) {
+            return json(
+              {
+                error: 'archive_table_missing',
+                hint: 'Apply supabase/migrations/20260817120000_waiver_signature_archives.sql in the SQL Editor first.',
+              },
+              503,
+            )
+          }
+          throw archErr
+        }
+
+        if (rows.length > 0) {
+          const { error: delErr } = await admin
+            .from('waiver_signatures')
+            .delete()
+            .eq('booking_id', booking.id)
+          if (delErr) throw delErr
+        }
+
+        const { error: clrErr } = await admin
+          .from('tour_bookings')
+          .update({ waiver_signed: false, waiver_signed_at: null })
+          .eq('id', booking.id)
+        if (clrErr) throw clrErr
+
+        const token =
+          typeof booking.waiver_token === 'string' && booking.waiver_token.trim()
+            ? booking.waiver_token.trim()
+            : ''
+        return json({
+          data: {
+            ok: true,
+            archived_count: archiveRows.length,
+            path: token ? `/waiver/${token}` : '',
+          },
+        })
+      }
+
       case 'get_waiver_record': {
         const { bookingId } = params as { bookingId?: string }
         if (!bookingId) return json({ error: 'invalid_params' }, 400)
         const { data: booking, error: bookingErr } = await admin
           .from('tour_bookings')
           .select(
-            'id, trip_code, booking_reference, first_name_en, last_name_en, waiver_signed, waiver_signed_at',
+            'id, trip_code, booking_reference, first_name_en, last_name_en, waiver_signed, waiver_signed_at, emergency_contact_name, emergency_contact_phone, allergies, medical_conditions, other_notes, oshc_membership_number, travel_insurance_provider, travel_insurance_policy_number, insurance_type, oshc_risk_acknowledged, marketing_photo_opt_out, marketing_photo_opt_out_note',
           )
           .eq('id', bookingId)
           .maybeSingle()
@@ -1290,6 +1433,146 @@ Deno.serve(async (req) => {
             waiver: waiver ?? null,
           },
         })
+      }
+
+      case 'update_waiver_details': {
+        // Staff typo/contact corrections only. Legal consent (clauses, signed_at,
+        // oshc_risk_acknowledged, insurance_type) is rejected — use reset_waiver
+        // if the customer must re-acknowledge terms.
+        const LOCKED = new Set([
+          'clauses',
+          'signed_at',
+          'waiver_signed',
+          'waiver_signed_at',
+          'oshc_risk_acknowledged',
+          'insurance_type',
+          'locale',
+          'filled_by_staff',
+          'waiver_token',
+        ])
+        const BOOKING_KEYS = [
+          'emergency_contact_name',
+          'emergency_contact_phone',
+          'allergies',
+          'medical_conditions',
+          'other_notes',
+          'oshc_membership_number',
+          'travel_insurance_provider',
+          'travel_insurance_policy_number',
+          'marketing_photo_opt_out_note',
+        ] as const
+        const { bookingId, fields } = params as {
+          bookingId?: string
+          fields?: Record<string, unknown>
+        }
+        if (!bookingId || !fields || typeof fields !== 'object') {
+          return json({ error: 'invalid_params' }, 400)
+        }
+        const lockedHit = Object.keys(fields).filter((k) => LOCKED.has(k))
+        if (lockedHit.length > 0) {
+          return json({ error: 'consent_fields_locked', fields: lockedHit }, 400)
+        }
+
+        const { data: booking, error: bookingErr } = await admin
+          .from('tour_bookings')
+          .select(
+            'id, waiver_signed, emergency_contact_name, emergency_contact_phone, allergies, medical_conditions, other_notes, oshc_membership_number, travel_insurance_provider, travel_insurance_policy_number, marketing_photo_opt_out, marketing_photo_opt_out_note, marketing_photo_opt_out_at',
+          )
+          .eq('id', bookingId)
+          .maybeSingle()
+        if (bookingErr) throw bookingErr
+        if (!booking) return json({ error: 'booking_not_found' }, 404)
+
+        const { data: waiver, error: wErr } = await admin
+          .from('waiver_signatures')
+          .select('id, signed_name')
+          .eq('booking_id', bookingId)
+          .order('signed_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+        if (wErr) throw wErr
+        if (!booking.waiver_signed && !waiver) {
+          return json({ error: 'waiver_not_submitted' }, 409)
+        }
+
+        const norm = (v: unknown) => (typeof v === 'string' ? v.trim().slice(0, 500) : '')
+        const changes: Record<string, { old: unknown; new: unknown }> = {}
+        const bookingPatch: Record<string, unknown> = {}
+
+        if (fields.signed_name !== undefined) {
+          const next = norm(fields.signed_name).slice(0, 120)
+          if (next.length < 3) return json({ error: 'invalid_signed_name' }, 400)
+          if (!waiver) return json({ error: 'no_signature_row' }, 409)
+          const prev = String(waiver.signed_name ?? '')
+          if (prev !== next) {
+            changes.signed_name = { old: prev, new: next }
+          }
+        }
+
+        for (const key of BOOKING_KEYS) {
+          if (fields[key] === undefined) continue
+          const next = norm(fields[key]) || null
+          const prev = booking[key] != null ? String(booking[key]) : null
+          if (prev !== next) {
+            changes[key] = { old: prev, new: next }
+            bookingPatch[key] = next
+          }
+        }
+
+        if (typeof fields.marketing_photo_opt_out === 'boolean') {
+          const prev = Boolean(booking.marketing_photo_opt_out)
+          const next = fields.marketing_photo_opt_out
+          if (prev !== next) {
+            changes.marketing_photo_opt_out = { old: prev, new: next }
+            bookingPatch.marketing_photo_opt_out = next
+            bookingPatch.marketing_photo_opt_out_at = next ? new Date().toISOString() : null
+          }
+        }
+
+        if (Object.keys(changes).length === 0) {
+          return json({ error: 'no_changes' }, 400)
+        }
+
+        const staffId =
+          typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+        const { error: auditErr } = await admin.from('waiver_detail_edits').insert({
+          booking_id: bookingId,
+          waiver_signature_id: waiver?.id ?? null,
+          changes,
+          edited_by_staff_id: staffId,
+          edited_by_staff_name: typeof session.full_name === 'string' ? session.full_name : null,
+          edited_by_role: typeof session.role === 'string' ? session.role : null,
+        })
+        if (auditErr) {
+          if (auditErr.code === '42P01' || /waiver_detail_edits/i.test(auditErr.message ?? '')) {
+            return json(
+              {
+                error: 'edit_audit_table_missing',
+                hint: 'Apply supabase/migrations/20260817123000_waiver_detail_edits.sql in the SQL Editor first.',
+              },
+              503,
+            )
+          }
+          throw auditErr
+        }
+
+        if (fields.signed_name !== undefined && changes.signed_name && waiver) {
+          const { error: nameErr } = await admin
+            .from('waiver_signatures')
+            .update({ signed_name: changes.signed_name.new })
+            .eq('id', waiver.id)
+          if (nameErr) throw nameErr
+        }
+
+        if (Object.keys(bookingPatch).length > 0) {
+          const { error: updErr } = await admin
+            .from('tour_bookings')
+            .update(bookingPatch)
+            .eq('id', bookingId)
+          if (updErr) throw updErr
+        }
+
+        return json({ data: { ok: true, changes } })
       }
 
       case 'list_waivers_for_tour': {

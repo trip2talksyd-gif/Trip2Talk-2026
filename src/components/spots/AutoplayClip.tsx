@@ -20,6 +20,8 @@ type Props = {
   poster?: string
   /** Pause when mostly off-screen (default). Set false for always-on heroes. */
   pauseOffscreen?: boolean
+  /** Carousel: pause when this slide is off-screen or the story timer is paused. */
+  active?: boolean
 }
 
 /**
@@ -31,6 +33,7 @@ export default function AutoplayClip({
   className = '',
   poster,
   pauseOffscreen = true,
+  active = true,
 }: Props) {
   const ref = useRef<HTMLVideoElement | null>(null)
   const allowed = isCompressedWebMp4(src)
@@ -48,14 +51,18 @@ export default function AutoplayClip({
     const el = ref.current
     if (!allowed || !el) return
 
-    if (reduced) {
-      const freeze = () => {
-        el.pause()
-        el.currentTime = 0
+    if (reduced || !active) {
+      el.pause()
+      if (reduced) {
+        const freeze = () => {
+          el.pause()
+          el.currentTime = 0
+        }
+        freeze()
+        el.addEventListener('loadeddata', freeze)
+        return () => el.removeEventListener('loadeddata', freeze)
       }
-      freeze()
-      el.addEventListener('loadeddata', freeze)
-      return () => el.removeEventListener('loadeddata', freeze)
+      return
     }
 
     if (!pauseOffscreen) {
@@ -79,7 +86,7 @@ export default function AutoplayClip({
       io.disconnect()
       el.pause()
     }
-  }, [allowed, src, pauseOffscreen, reduced])
+  }, [allowed, src, pauseOffscreen, reduced, active])
 
   if (!allowed) return null
 

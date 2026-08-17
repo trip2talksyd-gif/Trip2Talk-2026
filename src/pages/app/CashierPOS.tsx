@@ -46,7 +46,8 @@ import EditWaiverButton from '../../components/app/EditWaiverButton'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
 import MarketingPhotoOptOutCard from '../../components/app/MarketingPhotoOptOutCard'
 import StaffActionTile from '../../components/app/StaffActionTile'
-import StaffTaskView, { TaskFieldLabel } from '../../components/app/StaffTaskView'
+import StaffTaskView, { StaffBackButton, TaskFieldLabel } from '../../components/app/StaffTaskView'
+import BookingSummaryCard from '../../components/app/BookingSummaryCard'
 import { staffReceiptPath, type ReceiptData } from './ReceiptPage'
 import {
   staffShellClass,
@@ -186,6 +187,7 @@ export default function CashierPOS() {
   const [quoteBookingId, setQuoteBookingId] = useState<string | null>(null)
   const [verifyId, setVerifyId] = useState<string | null>(null)
   const [unpaidOnly, setUnpaidOnly] = useState(false)
+  const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null)
   const [readerBooking, setReaderBooking] = useState<TourBooking | null>(null)
   const [readerAmount, setReaderAmount] = useState('')
   const [readerReceipt, setReaderReceipt] = useState('')
@@ -334,6 +336,7 @@ export default function CashierPOS() {
       setCancelling(null)
       if (payingId === cancelling.id) closePaymentRow()
       if (readerBooking?.id === cancelling.id) closeReaderForm()
+      if (selectedBookingId === cancelling.id) setSelectedBookingId(null)
       toast('ยกเลิกการจองแล้ว', 'success')
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) {
@@ -586,6 +589,9 @@ export default function CashierPOS() {
         bookingStatus: readerBooking.booking_status,
       })
     : null
+  const selectedBooking = selectedBookingId
+    ? bookings.find((row) => row.id === selectedBookingId) ?? null
+    : null
 
   return (
     <div className={staffShellClass}>
@@ -735,13 +741,41 @@ export default function CashierPOS() {
           </label>
         )}
 
-        {!loading && !error && visibleBookings.length === 0 && (
+        {!loading && !error && visibleBookings.length === 0 && !selectedBooking && (
           <p className="text-sm text-cream-muted">No bookings in this list</p>
         )}
 
-        {!loading && !error && (
-          <ul className="space-y-3">
+        {!loading && !error && !selectedBooking && visibleBookings.length > 0 && (
+          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {visibleBookings.map((b) => {
+              const tour = tours.find((tr) => tr.trip_code === b.trip_code)
+              const remaining = tour
+                ? remainingTripBalanceAud({
+                    priceAud: tour.price_aud,
+                    depositAud: tour.deposit_aud,
+                    amountPaidAud: b.amount_paid_aud,
+                    paymentMethod: b.payment_method,
+                    bookingStatus: b.booking_status,
+                  })
+                : null
+              return (
+                <li key={b.id}>
+                  <BookingSummaryCard
+                    name={`${b.first_name_en} ${b.last_name_en}`.trim()}
+                    tripCode={b.trip_code}
+                    paymentMethod={b.payment_method}
+                    remainingAud={remaining}
+                    cancelled={isBookingCancelled(b)}
+                    onOpen={() => setSelectedBookingId(b.id)}
+                  />
+                </li>
+              )
+            })}
+          </ul>
+        )}
+
+        {!loading && !error && selectedBooking && (() => {
+              const b = selectedBooking
               const tour = tours.find((tr) => tr.trip_code === b.trip_code)
               const plan = b.payment_plan_installments ?? 1
               const remaining = tour
@@ -761,7 +795,16 @@ export default function CashierPOS() {
                 !cancelled && status !== 'fully_paid' && status !== 'paid'
 
               return (
-                <li key={b.id}>
+                <div>
+                  <div className="mb-3 flex items-start gap-3">
+                    <StaffBackButton onClick={() => setSelectedBookingId(null)} />
+                    <div className="min-w-0 pt-0.5">
+                      <p className="text-lg font-semibold leading-snug text-cream">Booking</p>
+                      <p className="font-thai text-sm text-cream-muted" lang="th">
+                        รายละเอียดการจอง
+                      </p>
+                    </div>
+                  </div>
                   <StaffCard
                     className={cancelled ? 'border-white/5 bg-surface-card/40 opacity-60' : ''}
                   >
@@ -946,11 +989,9 @@ export default function CashierPOS() {
                       />
                     </div>
                   </StaffCard>
-                </li>
+                </div>
               )
-            })}
-          </ul>
-        )}
+            })()}
       </StaffMain>
 
       {cancelling && (

@@ -1,6 +1,26 @@
 import type { ReactNode } from 'react'
 import { ArrowLeft, type LucideIcon } from 'lucide-react'
 
+export function StaffBackButton({
+  onClick,
+  disabled,
+}: {
+  onClick: () => void
+  disabled?: boolean
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label="Back"
+      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/8 text-cream hover:bg-white/12 disabled:opacity-40"
+    >
+      <ArrowLeft className="h-5 w-5" />
+    </button>
+  )
+}
+
 type Props = {
   icon: LucideIcon
   title: string
@@ -36,15 +56,7 @@ export default function StaffTaskView({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-start gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={closeDisabled}
-            aria-label="Back"
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/8 text-cream hover:bg-white/12 disabled:opacity-40"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
+          <StaffBackButton onClick={onClose} disabled={closeDisabled} />
           <div className="min-w-0 pt-0.5">
             <h2 id="staff-task-title" className="flex items-center gap-2 text-lg font-semibold leading-snug text-cream">
               <Icon className="h-5 w-5 shrink-0 text-teal-400" aria-hidden />
