@@ -165,7 +165,7 @@ export default function PublicLayout() {
       </header>
 
       <div className="app-scroll" data-app-scroll>
-        <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-24 pt-4 text-ink sm:px-6 lg:px-10">
+        <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-0 pt-4 text-ink sm:px-6 lg:px-10">
           <Outlet />
         </main>
 

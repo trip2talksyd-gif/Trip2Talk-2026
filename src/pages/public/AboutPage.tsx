@@ -6,6 +6,7 @@ import { TEAM_MEMBERS } from '../../data/teamMembers'
 import BiText from '../../components/ui/BiText'
 import CountUpStat from '../../components/ui/CountUpStat'
 import TeamAvatar from '../../components/about/TeamAvatar'
+import AboutPositioningSection from '../../components/about/AboutPositioningSection'
 
 /** Bio copy uses \\n\\n for paragraphs; optional **phrase** renders as <strong>. */
 function BioCopy({ text, className }: { text: string; className: string }) {
@@ -39,8 +40,6 @@ export default function AboutPage() {
   const ployBio = tt('about.ploy.bio')
   const whatToKnowTitle = tt('about.whatToKnow.title')
   const whatToKnowBody = tt('about.whatToKnow.body')
-  const notTourTitle = tt('about.notTour.title')
-  const notTourBody = tt('about.notTour.body')
   const contactTitle = tt('about.contact')
   const contactStudio = tt('about.contact.studio')
   const contactHours = tt('about.contact.hours')
@@ -130,20 +129,7 @@ export default function AboutPage() {
         </div>
       </div>
 
-      <section className="overflow-hidden rounded-2xl border border-teal-600/25 bg-gradient-to-br from-teal-900 via-teal-800 to-teal-700 p-5 text-cream sm:p-6">
-        <BiText
-          as="h2"
-          en={notTourTitle.en}
-          th={notTourTitle.th}
-          serif
-          className="text-lg text-cream sm:text-xl"
-          thClassName="mt-1 block font-thai text-[14px] font-medium text-teal-200"
-        />
-        <p className="mt-3 text-[13.5px] leading-[1.75] text-cream/90">{notTourBody.en}</p>
-        <p className="mt-2 font-thai text-[13px] leading-[1.75] text-teal-100/90">
-          {notTourBody.th}
-        </p>
-      </section>
+      <AboutPositioningSection />
 
       <section className="rounded-2xl border border-line bg-cream p-5">
         <div className="flex gap-4">

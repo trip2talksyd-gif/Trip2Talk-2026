@@ -163,6 +163,13 @@ export type TranslationKey =
   | 'home.positioning.pillar2.desc'
   | 'home.positioning.pillar3.title'
   | 'home.positioning.pillar3.desc'
+  | 'home.positioning.cta.trips'
+  | 'home.positioning.cta.gallery'
+  | 'home.positioning.readStory'
+  | 'home.positioning.stat.trips'
+  | 'home.positioning.stat.photographers'
+  | 'home.positioning.stat.travelers'
+  | 'home.positioning.stat.spots'
   | 'about.notTour.title'
   | 'about.notTour.body'
   | 'home.showcase.title'
@@ -788,7 +795,7 @@ const en: Map = {
     "Every Trip2Talk trip is a photography package first, a trip second. We take you to each location at its most beautiful light — golden hour, blue hour, aurora windows — with one professional photographer who guides and drives you the whole way. Along the way, we'll show you how to get the shot yourself, so you leave with both stunning photos and new skills. This isn't a guided sightseeing tour with photos as an afterthought — it's a photo trip, built around getting you the shot.",
   'home.positioning.note':
     'Note: our trips are especially popular with those who want to feel like the subject of a real photoshoot, not just a tourist with a phone camera.',
-  'home.positioning.badge': 'PHOTO TRIP · TRIP2TALK',
+  'home.positioning.badge': 'Photo Trip · Trip2Talk',
   'home.positioning.social': 'Real guests · Real photos',
   'home.positioning.pillar1.title': 'Small Group, Full Attention',
   'home.positioning.pillar1.desc':
@@ -799,6 +806,13 @@ const en: Map = {
   'home.positioning.pillar3.title': "Photos You'll Actually Keep",
   'home.positioning.pillar3.desc':
     "Edited, high-quality shots you'll want to look back on — not just another folder of phone pics.",
+  'home.positioning.cta.trips': 'See our trips →',
+  'home.positioning.cta.gallery': 'See sample work',
+  'home.positioning.readStory': 'Want to know how we differ from a regular tour? Read our story →',
+  'home.positioning.stat.trips': 'Trips',
+  'home.positioning.stat.photographers': 'Photographers',
+  'home.positioning.stat.travelers': 'Travelers',
+  'home.positioning.stat.spots': 'Photo Spots',
   'about.notTour.title': "We're not a tour company",
   'about.notTour.body':
     "Trip2Talk is a photography package first — nature as your studio at each location's best light, with one pro photographer who guides and drives. We teach you how to get the shot yourself. This isn't sightseeing with photos as an afterthought.",
@@ -1467,7 +1481,7 @@ const th: Map = {
     'ทุกทริปของ Trip2Talk คือแพ็กเกจถ่ายภาพเป็นหลัก การท่องเที่ยวเป็นเรื่องรอง เราพาคุณไปแต่ละโลเคชันในช่วงแสงที่สวยที่สุด ไม่ว่าจะเป็นโกลเด้นอาวร์ บลูอาวร์ หรือช่วงแสงออโรร่า พร้อมช่างภาพมืออาชีพหนึ่งคนที่เป็นทั้ง Trip Leader และคนขับตลอดทริป ระหว่างทางเราจะสอนวิธีถ่ายภาพให้คุณทำเองได้ด้วย กลับบ้านไปพร้อมทั้งภาพสวยๆ และสกิลใหม่ นี่ไม่ใช่ทริปเที่ยวทั่วไปที่แค่แถมถ่ายรูป แต่คือทริปถ่ายภาพที่ออกแบบมาเพื่อภาพของคุณโดยเฉพาะ',
   'home.positioning.note':
     'หมายเหตุ: ทริปของเราเป็นที่นิยมมากสำหรับคนที่อยากรู้สึกเหมือนเป็นนางแบบในเซ็ตถ่ายภาพจริง ไม่ใช่แค่นักท่องเที่ยวถือมือถือถ่ายรูป',
-  'home.positioning.badge': 'ทริปถ่ายภาพ · Trip2Talk',
+  'home.positioning.badge': 'Photo Trip · Trip2Talk',
   'home.positioning.social': 'ลูกค้าจริง ถ่ายจริง',
   'home.positioning.pillar1.title': 'กลุ่มเล็ก ดูแลทั่วถึง',
   'home.positioning.pillar1.desc':
@@ -1478,6 +1492,13 @@ const th: Map = {
   'home.positioning.pillar3.title': 'รูปที่เก็บไว้ดูได้จริง',
   'home.positioning.pillar3.desc':
     'รูปคุณภาพดี แต่งแล้ว ที่อยากเปิดดูซ้ำ ไม่ใช่แค่โฟลเดอร์รูปมือถือ',
+  'home.positioning.cta.trips': 'ดูทริปของเรา →',
+  'home.positioning.cta.gallery': 'ดูตัวอย่างผลงาน',
+  'home.positioning.readStory': 'อยากรู้เพิ่มว่าเราต่างจากทัวร์ทั่วไปยังไง? อ่านเรื่องราวของเรา →',
+  'home.positioning.stat.trips': 'ทริป',
+  'home.positioning.stat.photographers': 'ช่างภาพ',
+  'home.positioning.stat.travelers': 'นักเดินทาง',
+  'home.positioning.stat.spots': 'พิกัดถ่ายภาพ',
   'about.notTour.title': 'เราไม่ใช่บริษัททัวร์',
   'about.notTour.body':
     'Trip2Talk คือแพ็กเกจถ่ายภาพเป็นหลัก — ธรรมชาติคือสตูดิโอในช่วงแสงที่สวยที่สุดของแต่ละโลเคชัน พร้อมช่างภาพมืออาชีพหนึ่งคนที่เป็นทั้ง Trip Leader และคนขับ และเราจะสอนให้คุณถ่ายเองได้ด้วย นี่ไม่ใช่ทริปเที่ยวที่แค่แถมถ่ายรูป',

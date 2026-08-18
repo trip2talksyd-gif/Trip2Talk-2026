@@ -262,7 +262,7 @@ export default function DiscoverPage() {
   }, [filteredSpots, selected])
 
   return (
-    <div className="bg-cream-app pb-10 text-ink-app">
+    <div className="bg-cream-app text-ink-app">
       <header className="relative -mx-4 overflow-hidden sm:-mx-6 lg:-mx-10">
         <img
           src={storageImageSrc(FRAMES_HERO_IMG, STORAGE_IMG.hero) || FRAMES_HERO_IMG}
@@ -361,8 +361,6 @@ export default function DiscoverPage() {
           </div>
         </div>
       </header>
-
-      <HomePositioningSection />
 
       <div className="mx-auto max-w-[960px]">
         <div className="space-y-8 px-4 pt-7 sm:px-6 sm:pt-8">
@@ -500,6 +498,9 @@ export default function DiscoverPage() {
           ) : null}
         </div>
       </div>
+
+      <div className="h-10 bg-cream-app sm:h-16 md:h-20" aria-hidden />
+      <HomePositioningSection spotCount={spots.length} />
     </div>
   )
 }
