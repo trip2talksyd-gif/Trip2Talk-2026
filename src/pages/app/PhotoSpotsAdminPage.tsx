@@ -180,6 +180,7 @@ export default function PhotoSpotsAdminPage() {
   const [slugTouched, setSlugTouched] = useState(false)
   const [saving, setSaving] = useState(false)
   const [uploadPhase, setUploadPhase] = useState<'idle' | 'compressing' | 'uploading'>('idle')
+  const [uploadProgress, setUploadProgress] = useState('')
   const uploading = uploadPhase !== 'idle'
   const [videoError, setVideoError] = useState('')
   const [deletingId, setDeletingId] = useState<string | null>(null)
@@ -272,19 +273,16 @@ export default function PhotoSpotsAdminPage() {
     e: ChangeEvent<HTMLInputElement>,
     slot: 'hero' | 'gallery',
   ) => {
-    const file = e.target.files?.[0]
+    const selected = Array.from(e.target.files ?? [])
     e.target.value = ''
-    if (!file) return
+    if (selected.length === 0) return
 
-    if (slot === 'gallery' && form.gallery_image_urls.length >= PHOTO_SPOT_MAX_GALLERY) {
-      toast(`Gallery max is ${PHOTO_SPOT_MAX_GALLERY} images`, 'error')
-      return
-    }
-
-    setUploadPhase('compressing')
-    try {
-      const url = await uploadPhotoSpotImage(file, slot, setUploadPhase)
-      if (slot === 'hero') {
+    if (slot === 'hero') {
+      const file = selected[0]
+      setUploadProgress(file.name)
+      setUploadPhase('compressing')
+      try {
+        const url = await uploadPhotoSpotImage(file, slot, setUploadPhase)
         let thumbUrl = url
         try {
           thumbUrl = await uploadPhotoSpotImage(file, 'gallery', setUploadPhase)
@@ -296,19 +294,57 @@ export default function PhotoSpotsAdminPage() {
           hero_image_url: url,
           thumbnail_url: thumbUrl,
         }))
-      } else {
+        toast(`${file.name} uploaded`, 'success')
+      } catch (err) {
+        console.error('[PhotoSpotsAdmin] upload failed:', err)
+        toast(
+          `${file.name}: ${err instanceof Error ? err.message : 'Upload failed'}`,
+          'error',
+        )
+      } finally {
+        setUploadPhase('idle')
+        setUploadProgress('')
+      }
+      return
+    }
+
+    const room = PHOTO_SPOT_MAX_GALLERY - form.gallery_image_urls.length
+    if (room <= 0) {
+      toast(`Gallery max is ${PHOTO_SPOT_MAX_GALLERY} images`, 'error')
+      return
+    }
+
+    const chosen = selected.slice(0, room)
+    const skipped = selected.length - chosen.length
+    if (skipped > 0) {
+      toast(
+        `Only ${room} gallery slot${room === 1 ? '' : 's'} left — skipped ${skipped} extra file${skipped === 1 ? '' : 's'}`,
+        'info',
+      )
+    }
+
+    for (let i = 0; i < chosen.length; i += 1) {
+      const file = chosen[i]
+      setUploadProgress(`${i + 1} / ${chosen.length}: ${file.name}`)
+      setUploadPhase('compressing')
+      try {
+        const url = await uploadPhotoSpotImage(file, 'gallery', setUploadPhase)
         setForm((prev) => ({
           ...prev,
           gallery_image_urls: [...prev.gallery_image_urls, url].slice(0, PHOTO_SPOT_MAX_GALLERY),
         }))
+        toast(`${file.name} uploaded`, 'success')
+      } catch (err) {
+        console.error('[PhotoSpotsAdmin] gallery upload failed:', err)
+        toast(
+          `${file.name}: ${err instanceof Error ? err.message : 'Upload failed'}`,
+          'error',
+        )
       }
-      toast('Photo uploaded', 'success')
-    } catch (err) {
-      console.error('[PhotoSpotsAdmin] upload failed:', err)
-      toast(err instanceof Error ? err.message : 'Upload failed', 'error')
-    } finally {
-      setUploadPhase('idle')
     }
+
+    setUploadPhase('idle')
+    setUploadProgress('')
   }
 
   const handleVideoUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -425,7 +461,7 @@ export default function PhotoSpotsAdminPage() {
         backTo="/app/owner"
         backLabel="Owner"
         title="Photo Spots"
-        subtitle="Add & edit spots — live on /spots and /discover after save"
+        subtitle="Add & edit spots — live on /spots after save"
       >
         <button type="button" className={staffTabIdleClass} onClick={openCreate}>
           <Plus className="mr-1 inline h-3.5 w-3.5" aria-hidden />
@@ -608,7 +644,10 @@ export default function PhotoSpotsAdminPage() {
                   <p className="text-sm font-semibold text-cream">
                     Images (max 5 — 1 hero + {PHOTO_SPOT_MAX_GALLERY} gallery)
                   </p>
-                  <p className="text-xs text-cream-muted">รูปภาพ / อัปโหลดก่อน แล้วค่อยแก้รายละเอียดด้านล่าง</p>
+                  <p className="text-xs text-cream-muted">
+                    รูปภาพ / อัปโหลดก่อน แล้วค่อยแก้รายละเอียดด้านล่าง. Gallery accepts multiple
+                    files (max {PHOTO_SPOT_MAX_GALLERY}).
+                  </p>
                   {form.hero_image_url ? (
                     <div className="relative">
                       <img
@@ -629,7 +668,9 @@ export default function PhotoSpotsAdminPage() {
                     </div>
                   ) : (
                     <label className="flex min-h-24 cursor-pointer flex-col items-center justify-center rounded-lg border border-dashed border-white/20 py-6 text-sm text-cream-muted hover:border-teal-500/40">
-                      {uploadPhase === 'compressing'
+                      {uploading && uploadProgress
+                        ? uploadProgress
+                        : uploadPhase === 'compressing'
                         ? 'Compressing…'
                         : uploadPhase === 'uploading'
                           ? 'Uploading…'
@@ -665,14 +706,17 @@ export default function PhotoSpotsAdminPage() {
                     ))}
                     {form.gallery_image_urls.length < PHOTO_SPOT_MAX_GALLERY && (
                       <label className="flex h-16 cursor-pointer items-center justify-center rounded border border-dashed border-white/20 text-[10px] text-cream-muted hover:border-teal-500/40">
-                        {uploadPhase === 'compressing'
+                        {uploading && uploadProgress
+                          ? uploadProgress
+                          : uploadPhase === 'compressing'
                           ? 'Compressing…'
                           : uploadPhase === 'uploading'
                             ? 'Uploading…'
-                            : '+ Gallery'}
+                            : '+ Gallery (multi)'}
                         <input
                           type="file"
                           accept="image/*"
+                          multiple
                           className="hidden"
                           disabled={uploading}
                           onChange={(e) => handleUpload(e, 'gallery')}

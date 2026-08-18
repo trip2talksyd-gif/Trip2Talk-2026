@@ -73,7 +73,7 @@ export type PhotoSpotRow = {
   rating: number
   sort_order: number
   is_featured: boolean
-  /** Curated 101 Frames set on /discover. Absent on older rows → treat as false. */
+  /** Curated 101 Frames set on the homepage. Absent on older rows → treat as false. */
   collection_101_frames?: boolean
   /** #N of 101 badge. Null when not in the set. */
   collection_rank?: number | null

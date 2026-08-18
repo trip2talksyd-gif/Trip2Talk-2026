@@ -119,7 +119,7 @@ export default function SpotDetailPage() {
               <p className="mt-3 text-[13px] leading-relaxed text-ink-app/70">{soonBi.en}</p>
               <p className="mt-1 font-thai text-[12px] text-ink-app/50">{soonBi.th}</p>
               <div className="mt-4 flex gap-2">
-                <Link to="/discover" className="text-[12px] font-bold text-orange-deep">
+                <Link to="/" className="text-[12px] font-bold text-orange-deep">
                   {discoverNav.en}
                   <span className="ml-1 font-thai font-medium">{discoverNav.th}</span>
                 </Link>
@@ -155,7 +155,7 @@ export default function SpotDetailPage() {
           enClassName="text-2xl font-semibold text-teal-darker"
           thClassName="mt-2 font-thai text-ink-app/60"
         />
-        <Link to="/discover" className="mt-6 inline-block text-sm font-bold text-orange-deep">
+        <Link to="/" className="mt-6 inline-block text-sm font-bold text-orange-deep">
           {discoverNav.en}
           <span className="ml-1.5 font-thai font-medium">{discoverNav.th}</span>
         </Link>

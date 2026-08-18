@@ -9,6 +9,8 @@ import SpotsMap from '../../components/spots/SpotsMap'
 import SpotFeedCard, { SpotCompactRow } from '../../components/spots/SpotFeedCard'
 import SpotListCard from '../../components/spots/SpotListCard'
 import FramesShowcaseRow, { sortFramesCollection } from '../../components/spots/FramesShowcaseRow'
+import HomeVideoIntro from '../../components/home/HomeVideoIntro'
+import HomePositioningSection from '../../components/trips/HomePositioningSection'
 import { useLang } from '../../hooks/useLang'
 import type { TranslationKey } from '../../i18n/translations'
 import {
@@ -184,6 +186,14 @@ export default function DiscoverPage() {
   const [feedVisible, setFeedVisible] = useState(FEED_INITIAL)
   const feedRef = useRef<HTMLElement | null>(null)
 
+  useEffect(() => {
+    document.title = 'Trip2Talk — Photo Trips in Australia'
+    const canonical = document.querySelector("link[rel='canonical']")
+    if (canonical) canonical.setAttribute('href', 'https://trip2talk.com.au/')
+    const ogUrl = document.querySelector("meta[property='og:url']")
+    if (ogUrl) ogUrl.setAttribute('content', 'https://trip2talk.com.au/')
+  }, [])
+
   const helloGuest = tt('discover.hello')
   const helloNamed = tt('discover.helloNamed')
   const headlineBi = tt('discover.headline')
@@ -351,6 +361,9 @@ export default function DiscoverPage() {
           </div>
         </div>
       </header>
+
+      <HomePositioningSection />
+      <HomeVideoIntro />
 
       <div className="mx-auto max-w-[960px]">
         <div className="space-y-8 px-4 pt-7 sm:px-6 sm:pt-8">

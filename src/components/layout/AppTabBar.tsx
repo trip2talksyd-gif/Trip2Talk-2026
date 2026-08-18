@@ -52,7 +52,7 @@ const TABS: {
   labelKey: TranslationKey
   Icon: typeof CompassIcon
 }[] = [
-  { to: '/discover', end: true, labelKey: 'nav.discover', Icon: CompassIcon },
+  { to: '/', end: true, labelKey: 'nav.discover', Icon: CompassIcon },
   { to: '/experience', end: false, labelKey: 'nav.experience', Icon: FilmIcon },
   { to: '/trips', end: false, labelKey: 'nav.packages', Icon: GemIcon },
   { to: '/about', end: false, labelKey: 'nav.thePro', Icon: UserIcon },
@@ -65,7 +65,6 @@ export default function AppTabBar() {
   const { pathname } = useLocation()
   const { tt } = useLang()
 
-  if (pathname === '/') return null
   if (FLOW_PREFIXES.some((p) => pathname.startsWith(p))) return null
   if (pathname.endsWith('/prep')) return null
 

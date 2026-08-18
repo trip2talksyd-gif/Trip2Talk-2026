@@ -15,7 +15,7 @@ const ABN = 'ABN 81 951 461 769'
 
 const navLinks: { to: string; key: TranslationKey }[] = [
   { to: '/trips', key: 'nav.trips' },
-  { to: '/discover', key: 'nav.discover' },
+  { to: '/', key: 'nav.discover' },
   { to: '/calendar', key: 'nav.calendar' },
   { to: '/pricing', key: 'nav.pricing' },
   { to: '/about', key: 'nav.about' },

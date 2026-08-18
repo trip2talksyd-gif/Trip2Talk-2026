@@ -72,11 +72,21 @@ async function assertBiDisplayHeading(page: Page, en: string, th: string) {
 }
 
 test.describe('bilingual headings', () => {
-  test('home hero uses BiDisplayHeading with Noto Serif Thai (not Fraunces)', async ({ page }) => {
+  test('homepage Discover h1 uses BiDisplayHeading with Noto Serif Thai (not Fraunces)', async ({
+    page,
+  }) => {
     await page.goto('/')
+    expect(new URL(page.url()).pathname).toBe('/')
+    await assertBiDisplayHeading(page, COPY.discover.en, COPY.discover.th)
+  })
+
+  test('homepage keeps Capture Moments video section fonts', async ({ page }) => {
+    await page.goto('/')
+    const root = biHeading(page, COPY.home.en, COPY.home.th)
+    await root.scrollIntoViewIfNeeded()
     await assertBiDisplayHeading(page, COPY.home.en, COPY.home.th)
 
-    const thLine = biHeading(page, COPY.home.en, COPY.home.th).locator('[lang="th"]')
+    const thLine = root.locator('[lang="th"]')
     const thText = (await thLine.innerText()).trim()
     expect(thText, 'preceding vowel ไ').toContain('\u0E44')
     expect(thText, 'mai han-akat ็').toContain('\u0E47')
@@ -89,6 +99,7 @@ test.describe('bilingual headings', () => {
     })
     await page.goto('/')
     const root = biHeading(page, COPY.home.en, COPY.home.th)
+    await root.scrollIntoViewIfNeeded()
     await expect(root).toBeVisible()
 
     async function order(): Promise<string[]> {
@@ -111,8 +122,9 @@ test.describe('bilingual headings', () => {
     await assertBiDisplayHeading(page, COPY.spots.en, COPY.spots.th)
   })
 
-  test('discover page BiDisplayHeading keeps both languages and correct fonts', async ({ page }) => {
+  test('/discover redirects to homepage Discover content', async ({ page }) => {
     await page.goto('/discover')
+    expect(new URL(page.url()).pathname).toBe('/')
     await assertBiDisplayHeading(page, COPY.discover.en, COPY.discover.th)
   })
 
@@ -149,7 +161,7 @@ test.describe('bilingual headings', () => {
   test('EN/TH pill reorders BiDisplayHeading primary line without hiding either language', async ({
     page,
   }) => {
-    await page.goto('/discover')
+    await page.goto('/')
     const root = biHeading(page, COPY.discover.en, COPY.discover.th)
     await expect(root).toBeVisible()
 
@@ -180,7 +192,7 @@ test.describe('bilingual headings', () => {
   })
 
   test('nav CTA is single-language chrome (Book Now / จองเลย)', async ({ page }) => {
-    await page.goto('/discover')
+    await page.goto('/')
     const cta = page.locator('a.nav-cta')
     await expect(cta).toBeVisible()
     await expect(cta).toHaveText('Book Now')
