@@ -11,7 +11,7 @@ const CTA_GRADIENT = 'linear-gradient(to bottom, #2B2B2B, #101010)'
 
 /**
  * Marketing video + Capture Moments copy from the old `/` HomePage.
- * Served as a section on Discover (now the homepage) — no overlay nav.
+ * Kept for reuse off Discover — not rendered on the homepage.
  */
 export default function HomeVideoIntro() {
   const { lang, tt } = useLang()
@@ -68,7 +68,7 @@ export default function HomeVideoIntro() {
 
   return (
     <section
-      className="relative -mx-4 overflow-hidden bg-[#0a1214] font-[Geist,-apple-system,BlinkMacSystemFont,sans-serif] antialiased sm:-mx-6 lg:-mx-10"
+      className="relative -mx-4 overflow-x-clip bg-[#0a1214] font-[Geist,-apple-system,BlinkMacSystemFont,sans-serif] antialiased sm:-mx-6 lg:-mx-10"
       onMouseMove={(e) => heroVideoRef.current?.setPointerX(e.clientX)}
       onMouseLeave={() => heroVideoRef.current?.setPointerX(null)}
       onTouchMove={(e) => {
@@ -83,16 +83,17 @@ export default function HomeVideoIntro() {
           <HeroVideo ref={heroVideoRef} />
         </div>
 
-        <div className="col-start-1 row-start-1 z-10 flex min-h-0 flex-col">
-          <div className="mt-auto flex min-h-0 flex-col gap-5 overflow-y-auto px-5 pb-8 sm:gap-7 sm:px-8 sm:pb-10 lg:flex-row lg:items-end lg:justify-between lg:px-12 lg:pb-12">
-            <div className="max-w-xl">
+        <div className="col-start-1 row-start-1 z-10 flex min-h-0 flex-col overflow-visible">
+          <div className="mt-auto flex min-h-0 flex-col gap-5 overflow-visible px-5 pb-8 sm:gap-7 sm:px-8 sm:pb-10 lg:flex-row lg:items-end lg:justify-between lg:px-12 lg:pb-12">
+            <div className="max-w-xl overflow-visible">
               <BiDisplayHeading
                 en={heroEn}
                 th={heroTh}
                 as="h2"
                 thAs="p"
+                className="overflow-visible py-0.5"
                 enClassName="text-3xl font-semibold leading-[1.1] tracking-tight text-white sm:text-4xl lg:text-[3.25rem]"
-                thClassName="mt-2 text-sm font-medium text-white/75"
+                thClassName="mt-2 text-sm font-medium leading-normal text-white/75"
               />
               <p
                 lang={lang === 'th' ? 'th' : 'en'}

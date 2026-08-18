@@ -9,12 +9,10 @@ import SpotsMap from '../../components/spots/SpotsMap'
 import SpotFeedCard, { SpotCompactRow } from '../../components/spots/SpotFeedCard'
 import SpotListCard from '../../components/spots/SpotListCard'
 import FramesShowcaseRow, { sortFramesCollection } from '../../components/spots/FramesShowcaseRow'
-import HomeVideoIntro from '../../components/home/HomeVideoIntro'
 import HomePositioningSection from '../../components/trips/HomePositioningSection'
 import { useLang } from '../../hooks/useLang'
 import type { TranslationKey } from '../../i18n/translations'
 import {
-  countCollection101Frames,
   fetchPhotoSpots,
   filterSpotsByCategory,
   type PhotoSpotDetail,
@@ -179,7 +177,7 @@ export default function DiscoverPage() {
   const [chip, setChip] = useState<DiscoverChip>('All')
   const [query, setQuery] = useState('')
   const [spots, setSpots] = useState<PhotoSpotDetail[]>([])
-  const [framesCount, setFramesCount] = useState(0)
+  const [framesCount, setFramesCount] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'map' | 'list'>('map')
   const [selected, setSelected] = useState<PhotoSpotDetail | null>(null)
@@ -213,11 +211,11 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     let cancelled = false
-    Promise.all([fetchPhotoSpots(), countCollection101Frames()]).then(([rows, count]) => {
+    fetchPhotoSpots().then((rows) => {
       if (cancelled) return
       setSpots(rows)
       const fromRows = rows.filter((r) => r.collection_101_frames === true).length
-      setFramesCount(Math.max(count, fromRows))
+      setFramesCount(fromRows > 0 ? fromRows : null)
       setLoading(false)
     })
     return () => {
@@ -315,14 +313,16 @@ export default function DiscoverPage() {
                 />
               </p>
             </div>
-            <div className="shrink-0 self-start rounded-[18px] bg-white px-3 py-2 shadow-[0_6px_18px_rgba(18,47,42,0.06)] ring-1 ring-line">
-              <p className="font-display text-[13px] font-semibold text-teal-dark">
-                {spotCountBi.en.replace('{x}', String(framesCount))}
-              </p>
-              <p className="font-thai text-[10px] font-medium text-ink-app/50">
-                {spotCountBi.th.replace('{x}', String(framesCount))}
-              </p>
-            </div>
+            {framesCount != null && framesCount > 0 ? (
+              <div className="shrink-0 self-start rounded-[18px] bg-white px-3 py-2 shadow-[0_6px_18px_rgba(18,47,42,0.06)] ring-1 ring-line">
+                <p className="font-display text-[13px] font-semibold text-teal-dark">
+                  {spotCountBi.en.replace('{x}', String(framesCount))}
+                </p>
+                <p className="font-thai text-[10px] font-medium text-ink-app/50">
+                  {spotCountBi.th.replace('{x}', String(framesCount))}
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <FramesShowcaseRow spots={framesSpots} />
@@ -363,7 +363,6 @@ export default function DiscoverPage() {
       </header>
 
       <HomePositioningSection />
-      <HomeVideoIntro />
 
       <div className="mx-auto max-w-[960px]">
         <div className="space-y-8 px-4 pt-7 sm:px-6 sm:pt-8">

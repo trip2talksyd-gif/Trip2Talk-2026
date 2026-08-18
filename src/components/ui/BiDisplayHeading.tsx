@@ -18,16 +18,19 @@ type Props = {
 }
 
 const FONT_CLASS = /\bfont-(display|serif|thai)\b/g
-/** Tight Latin tracking/leading clips Thai vowels and tone marks (่ ้ ี ็ ไ). */
+/**
+ * Tight Latin tracking/leading clips Thai vowels and tone marks (่ ้ ี ็ ไ).
+ * Do not use `\b` after `]` — `]` is non-word so `leading-[1.1]` never matched.
+ */
 const THAI_UNSAFE =
-  /\b(tracking-(tighter|tight)|tracking-\[[^\]]+\]|leading-(none|tight)|leading-\[[^\]]+\])\b/g
+  /\b(?:tracking-(?:tighter|tight)|leading-(?:none|tight))\b|(?:tracking|leading)-\[[^\]]*\]/g
 
 /** Size/weight/color/spacing only — fonts stay language-specific. */
 function visualClasses(className: string, forThai = false) {
   let next = className.replace(FONT_CLASS, '')
   if (forThai) {
     next = next.replace(THAI_UNSAFE, '')
-    if (!/\bleading-/.test(next)) next = `${next} leading-snug`
+    if (!/\bleading-/.test(next)) next = `${next} leading-normal`
   }
   return next.replace(/\s+/g, ' ').trim()
 }
@@ -69,14 +72,14 @@ export default function BiDisplayHeading({
   const thNode = (
     <ThTag
       lang="th"
-      className={`font-serif ${thaiPrimary ? thPrimaryVisual : thSecondaryVisual}`.trim()}
+      className={`overflow-visible font-serif ${thaiPrimary ? thPrimaryVisual : thSecondaryVisual}`.trim()}
     >
       {th}
     </ThTag>
   )
 
   return (
-    <div id={id} data-bi-heading="" className={className}>
+    <div id={id} data-bi-heading="" className={`overflow-visible ${className}`.trim()}>
       {thaiPrimary ? thNode : enNode}
       {thaiPrimary ? enNode : thNode}
       {children}
