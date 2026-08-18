@@ -8,7 +8,23 @@ import { getTripVideoUrl } from '../../data/tripVideos'
 
 const GUIDE_HERO_VIDEO = getTripVideoUrl('ULU') ?? '/trip-videos/Uluru_web.mp4'
 
-const HUB_CARDS = [
+const MOBILE_GUIDE_COVER =
+  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/content-photos/mobile%20photos/uluru.jpg'
+
+const HUB_CARDS: {
+  to: string
+  badgeEn: string
+  badgeTh: string
+  badgeClass: string
+  tagEn: string
+  tagTh: string
+  titleEn: string
+  titleTh: string
+  bodyEn: string
+  bodyTh: string
+  photoId?: string
+  photoSrc?: string
+}[] = [
   {
     to: '/photo-guide/posing',
     badgeEn: '6 tips',
@@ -50,7 +66,7 @@ const HUB_CARDS = [
     titleTh: 'คู่มือถ่ายภาพด้วยมือถือ',
     bodyEn: 'Simple landscape and portrait tips using just your phone — no extra gear needed.',
     bodyTh: 'เทคนิคทิวทัศน์และพอร์ตเทรตด้วยมือถือ ไม่ต้องมีอุปกรณ์เพิ่ม',
-    photoId: 'nsw-010',
+    photoSrc: MOBILE_GUIDE_COVER,
   },
   {
     to: '/photo-guide/nz-visa',
@@ -116,7 +132,12 @@ export default function PhotoGuideHubPage() {
 
       <div className="grid gap-[22px] sm:grid-cols-2 xl:grid-cols-4">
         {HUB_CARDS.map((card) => {
-          const photo = GALLERY_PHOTOS.find((p) => p.id === card.photoId) ?? GALLERY_PHOTOS[0]
+          const photo = card.photoId
+            ? GALLERY_PHOTOS.find((p) => p.id === card.photoId)
+            : undefined
+          const thumbSrc =
+            card.photoSrc ??
+            (photo ? photoThumbSrc(photo, { width: 720, quality: 70, format: 'webp' }) : undefined)
           return (
             <Link
               key={card.to}
@@ -129,11 +150,13 @@ export default function PhotoGuideHubPage() {
                 <span>{card.badgeEn}</span>
                 <span className="font-thai text-[9px] font-medium opacity-90">{card.badgeTh}</span>
               </span>
-              <img
-                src={photoThumbSrc(photo, { width: 720, quality: 70, format: 'webp' })}
-                alt={`${card.titleEn} / ${card.titleTh}`}
-                className="h-[150px] w-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+              {thumbSrc ? (
+                <img
+                  src={thumbSrc}
+                  alt={`${card.titleEn} / ${card.titleTh}`}
+                  className="h-[150px] w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              ) : null}
               <div className="px-5 pb-[22px] pt-[18px]">
                 <p className="text-[9.5px] font-extrabold uppercase tracking-[0.05em] text-teal-600">
                   {card.tagEn}

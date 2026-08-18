@@ -22,6 +22,33 @@ const ALBUM_IDS = [
   'nz-014',
 ] as const
 
+const MOBILE_PHOTOS_BASE =
+  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/content-photos/mobile%20photos'
+
+/** Example album strip on this page only — not the slideshow below. */
+const MOBILE_EXAMPLE_ALBUM = [
+  {
+    src: `${MOBILE_PHOTOS_BASE}/cover.jpg`,
+    caption_en: 'Cover shot',
+    caption_th: 'ภาพปก',
+  },
+  {
+    src: `${MOBILE_PHOTOS_BASE}/focus.jpg`,
+    caption_en: 'Focus example',
+    caption_th: 'ตัวอย่างโฟกัส',
+  },
+  {
+    src: `${MOBILE_PHOTOS_BASE}/model.jpg`,
+    caption_en: 'Portrait example',
+    caption_th: 'ตัวอย่างพอร์ตเทรต',
+  },
+  {
+    src: `${MOBILE_PHOTOS_BASE}/uluru.jpg`,
+    caption_en: 'Uluru landscape',
+    caption_th: 'ทิวทัศน์อุลูรู',
+  },
+] as const
+
 const HERO_SLIDE_META = [
   {
     sceneEn: 'Landscape',
@@ -220,10 +247,10 @@ export default function MobileGuidePage() {
         </div>
         <div className="gallery-scroll-wrap">
           <div className="gallery-scroll">
-            {album.map((photo) => (
+            {MOBILE_EXAMPLE_ALBUM.map((photo) => (
               <img
-                key={photo.id}
-                src={photoThumbSrc(photo, { width: 720, quality: 70, format: 'webp' })}
+                key={photo.src}
+                src={photo.src}
                 alt={`${photo.caption_en} / ${photo.caption_th}`}
                 loading="lazy"
               />
