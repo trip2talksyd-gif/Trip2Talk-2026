@@ -81,6 +81,7 @@ export type TranslationKey =
   | 'trips.title'
   | 'trips.subtitle'
   | 'trips.empty'
+  | 'trips.allList'
   | 'trips.search'
   | 'trips.search.empty'
   | 'trips.going'
@@ -547,6 +548,9 @@ export type TranslationKey =
   | 'discover.hello'
   | 'discover.helloNamed'
   | 'discover.headline'
+  | 'discover.tagline'
+  | 'discover.credit'
+  | 'discover.spotCount'
   | 'discover.search'
   | 'discover.filter'
   | 'discover.chip.all'
@@ -607,6 +611,7 @@ export type TranslationKey =
   | 'spots.tripCta'
   | 'spots.tips'
   | 'spots.cameraSettings'
+  | 'spot.exampleShot'
   | 'nav.appTabs'
   | 'experience.badge'
   | 'experience.title'
@@ -701,6 +706,7 @@ const en: Map = {
   'trips.title': 'Find Your Trip',
   'trips.subtitle': 'Small groups, pro photographer on every trip.',
   'trips.empty': 'No trips in this category yet — check back soon.',
+  'trips.allList': 'All trips',
   'trips.search': 'Search destination...',
   'trips.search.empty': 'No trips match your search.',
   'trips.going': 'Connect with people going',
@@ -1047,7 +1053,7 @@ const en: Map = {
   'account.guestSub': 'Guest booking — no account login required',
   'account.language': 'Language',
   'about.positioning': 'Who we are',
-  'about.page.eyebrow': 'About Trip2Talk',
+  'about.page.eyebrow': 'Our story',
   'about.page.title': 'About Trip2Talk',
   'about.hero.heading': "We're photographers — you're the subject",
   'about.hero.story':
@@ -1221,7 +1227,10 @@ const en: Map = {
   'nav.appTabs': 'App tabs',
   'discover.hello': 'Hi traveler,',
   'discover.helloNamed': 'Hi {name},',
-  'discover.headline': 'Where to shoot next?',
+  'discover.headline': '101 Frames',
+  'discover.tagline': "Light we've already caught",
+  'discover.credit': 'By Saen · 10 years travel photography',
+  'discover.spotCount': 'Spot {x}/101',
   'discover.search': 'Search a spot or style',
   'discover.filter': 'Filter spots',
   'discover.chip.all': 'All',
@@ -1283,6 +1292,7 @@ const en: Map = {
   'spots.tripCta': 'Go here with Trip2Talk',
   'spots.tips': 'Tips',
   'spots.cameraSettings': 'Camera settings',
+  'spot.exampleShot': 'Example Shot',
   'experience.badge': 'Experience',
   'experience.title': 'Stories from the road',
   'experience.body':
@@ -1375,6 +1385,7 @@ const th: Map = {
   'trips.title': 'เลือกทริปของคุณ',
   'trips.subtitle': 'กลุ่มเล็ก มีช่างภาพมืออาชีพทุกทริป',
   'trips.empty': 'ยังไม่มีทริปในหมวดนี้ — กลับมาเช็คใหม่เร็วๆ นี้',
+  'trips.allList': 'ทริปทั้งหมด',
   'trips.search': 'ค้นหาจุดหมาย',
   'trips.search.empty': 'ไม่พบทริปที่ตรงกับคำค้นหา',
   'trips.going': 'เจอเพื่อนร่วมทริป',
@@ -1720,7 +1731,7 @@ const th: Map = {
   'account.guestSub': 'จองแบบแขก — ไม่ต้องล็อกอิน',
   'account.language': 'ภาษา',
   'about.positioning': 'เราคือใคร',
-  'about.page.eyebrow': 'เกี่ยวกับ Trip2Talk',
+  'about.page.eyebrow': 'เรื่องราวของเรา',
   'about.page.title': 'เกี่ยวกับ Trip2Talk',
   'about.hero.heading': 'เราคือช่างภาพ — คุณคือนางเอกของเฟรม',
   'about.hero.story':
@@ -1894,7 +1905,10 @@ const th: Map = {
   'nav.appTabs': 'แท็บแอป',
   'discover.hello': 'สวัสดีนักเดินทาง,',
   'discover.helloNamed': 'สวัสดี {name},',
-  'discover.headline': 'วันนี้อยากเห็นมุมไหน?',
+  'discover.headline': '101 มุมกล้อง',
+  'discover.tagline': 'แสงที่เราเก็บมาแล้ว',
+  'discover.credit': 'โดยพี่แสน · ช่างภาพเดินทาง 10 ปี',
+  'discover.spotCount': 'จุด {x}/101',
   'discover.search': 'ค้นหาพิกัด / สไตล์ภาพ',
   'discover.filter': 'กรองมุมถ่าย',
   'discover.chip.all': 'ทั้งหมด',
@@ -1955,6 +1969,7 @@ const th: Map = {
   'spots.tripCta': 'ไปกับ Trip2Talk',
   'spots.tips': 'เคล็ดลับ',
   'spots.cameraSettings': 'ค่ากล้อง',
+  'spot.exampleShot': 'ภาพตัวอย่าง',
   'experience.badge': 'ประสบการณ์',
   'experience.title': 'เรื่องราวจากทริปถ่ายภาพ',
   'experience.body': 'เร็วๆ นี้ — รีลทริป ไฮไลท์รายวัน และโมเมนต์จากทริปจริง',

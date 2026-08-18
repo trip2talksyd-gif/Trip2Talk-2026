@@ -2,11 +2,14 @@ import {
   PHOTO_SPOTS_DRAFT,
   PHOTO_SPOT_MAX_GALLERY,
   PHOTO_SPOT_MAX_IMAGES,
+  PHOTO_SPOT_MAX_EXAMPLE_PER_ORIENTATION,
   findDraftPhotoSpot,
   tripCtaHref,
   type CameraModeSettings,
   type CameraSettings,
   type DroneAllowed,
+  type ExampleShotOrientation,
+  type PhotoSpotExampleShot,
   type PhotoSpotRow,
 } from '../data/photoSpotsDraft'
 import { GALLERY_PHOTOS, photoSrc, type GalleryPhoto } from '../data/galleryPhotos'
@@ -18,8 +21,8 @@ import {
   type UploadImagePreset,
 } from './compressUploadImage'
 
-export type { CameraModeSettings, CameraSettings, DroneAllowed, PhotoSpotRow }
-export { tripCtaHref }
+export type { CameraModeSettings, CameraSettings, DroneAllowed, ExampleShotOrientation, PhotoSpotExampleShot, PhotoSpotRow }
+export { tripCtaHref, PHOTO_SPOT_MAX_EXAMPLE_PER_ORIENTATION }
 
 export type PhotoSpotDetail = PhotoSpotRow & {
   photo: GalleryPhoto | null
@@ -58,6 +61,28 @@ function numOrNull(value: unknown): number | null {
 
 function boolOrFalse(value: unknown): boolean {
   return value === true || value === 'true' || value === 1
+}
+
+function parseExampleShots(value: unknown): PhotoSpotExampleShot[] {
+  if (!Array.isArray(value)) return []
+  const out: PhotoSpotExampleShot[] = []
+  for (const item of value) {
+    if (!item || typeof item !== 'object') continue
+    const o = item as Record<string, unknown>
+    const id = strOrNull(o.id)
+    const image_url = strOrNull(o.image_url)
+    const orientation = o.orientation === 'portrait' ? 'portrait' : o.orientation === 'landscape' ? 'landscape' : null
+    if (!id || !image_url || !orientation) continue
+    out.push({
+      id,
+      spot_id: strOrNull(o.spot_id) ?? undefined,
+      orientation,
+      image_url,
+      sort_order: numOrNull(o.sort_order) ?? 0,
+      created_at: strOrNull(o.created_at) ?? undefined,
+    })
+  }
+  return out.sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id))
 }
 
 function parseUrlList(value: unknown): string[] {
@@ -158,10 +183,13 @@ function parseRow(raw: Record<string, unknown>): PhotoSpotRow | null {
     hero_image_url: strOrNull(raw.hero_image_url),
     thumbnail_url: strOrNull(raw.thumbnail_url),
     gallery_image_urls: parseUrlList(raw.gallery_image_urls),
+    example_shots: parseExampleShots(raw.example_shots),
     video_url: strOrNull(raw.video_url),
     rating: ratingRaw ?? 0,
     sort_order: numOrNull(raw.sort_order) ?? 0,
     is_featured: boolOrFalse(raw.is_featured),
+    collection_101_frames: boolOrFalse(raw.collection_101_frames),
+    collection_rank: numOrNull(raw.collection_rank),
     review_notes: strOrNull(raw.review_notes),
     created_at: strOrNull(raw.created_at) ?? undefined,
     updated_at: strOrNull(raw.updated_at) ?? undefined,
@@ -208,6 +236,20 @@ export function mergePhotoSpot(row: PhotoSpotRow): PhotoSpotDetail {
   }
 }
 
+/** Live count of spots flagged for the 101 Frames header badge. Returns 0 if the column is not applied yet. */
+export async function countCollection101Frames(): Promise<number> {
+  try {
+    const { count, error } = await supabase
+      .from('photo_spots')
+      .select('id', { count: 'exact', head: true })
+      .eq('collection_101_frames', true)
+    if (error) return 0
+    return count ?? 0
+  } catch {
+    return 0
+  }
+}
+
 /** Prefer live Supabase rows; fall back to local draft seed when table missing/empty. */
 export async function fetchPhotoSpots(): Promise<PhotoSpotDetail[]> {
   if (import.meta.env.DEV) {
@@ -230,6 +272,28 @@ export async function fetchPhotoSpots(): Promise<PhotoSpotDetail[]> {
 
     if (rows.length === 0) {
       return PHOTO_SPOTS_DRAFT.map(mergePhotoSpot)
+    }
+
+    const ids = rows.map((r) => r.id)
+    const { data: shotRows, error: shotErr } = await supabase
+      .from('photo_spot_example_shots')
+      .select('id, spot_id, orientation, image_url, sort_order, created_at')
+      .in('spot_id', ids)
+      .order('sort_order', { ascending: true })
+
+    if (!shotErr && Array.isArray(shotRows)) {
+      const bySpot = new Map<string, PhotoSpotExampleShot[]>()
+      for (const raw of shotRows) {
+        const parsed = parseExampleShots([raw])
+        const sid = strOrNull((raw as { spot_id?: unknown }).spot_id)
+        if (!sid || parsed.length === 0) continue
+        const list = bySpot.get(sid) ?? []
+        list.push(...parsed)
+        bySpot.set(sid, list)
+      }
+      for (const row of rows) {
+        row.example_shots = bySpot.get(row.id) ?? []
+      }
     }
 
     return rows.map(mergePhotoSpot)
@@ -372,6 +436,8 @@ export type PhotoSpotAdminPayload = {
   gallery_image_urls?: string[]
   video_url?: string | null
   is_featured?: boolean
+  collection_101_frames?: boolean
+  collection_rank?: number | null
   sort_order?: number
   review_notes?: string | null
 }
@@ -418,6 +484,27 @@ export async function upsertPhotoSpot(payload: PhotoSpotAdminPayload): Promise<P
 
 export async function deletePhotoSpot(id: string): Promise<void> {
   await callStaffApi('delete_photo_spot', { id })
+}
+
+export async function upsertPhotoSpotExampleShot(payload: {
+  id?: string
+  spotId?: string
+  orientation?: ExampleShotOrientation
+  imageUrl?: string
+  sortOrder?: number
+}): Promise<PhotoSpotExampleShot> {
+  const data = await callStaffApi<Record<string, unknown>>('upsert_photo_spot_example_shot', payload)
+  const parsed = parseExampleShots([data])
+  if (parsed.length === 0) throw new Error('Invalid example shot response')
+  return parsed[0]
+}
+
+export async function deletePhotoSpotExampleShot(id: string): Promise<void> {
+  await callStaffApi('delete_photo_spot_example_shot', { id })
+}
+
+export async function reorderPhotoSpotExampleShot(id: string, direction: 'up' | 'down'): Promise<void> {
+  await callStaffApi('reorder_photo_spot_example_shot', { id, direction })
 }
 
 export type PhotoSpotUploadSlot = 'hero' | 'gallery'

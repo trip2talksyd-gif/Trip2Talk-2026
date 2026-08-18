@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Flame } from 'lucide-react'
+import { ChevronRight, Flame } from 'lucide-react'
 import type { Tour } from '../../types/tour'
 import { useLang } from '../../hooks/useLang'
 import {
@@ -11,6 +11,7 @@ import { formatAud, isListedPriceHidden, seatsRemaining } from '../../lib/toursA
 import { getPreviewPhotoForTrip, photoThumbSrc } from '../../data/galleryPhotos'
 import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 import BiDisplayHeading from '../ui/BiDisplayHeading'
+import BiText from '../ui/BiText'
 import TripCoverImage from './TripCoverImage'
 
 type Props = {
@@ -43,6 +44,7 @@ export default function TripPickerHero({ tours }: Props) {
   const { tt } = useLang()
   const [activeIndex, setActiveIndex] = useState(0)
   const activeCodeRef = useRef<string | null>(null)
+  const pickerRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     if (tours.length === 0) {
@@ -58,6 +60,24 @@ export default function TripPickerHero({ tours }: Props) {
     const tour = tours[activeIndex]
     if (tour) activeCodeRef.current = tour.trip_code
   }, [tours, activeIndex])
+
+  function scrollHeroIntoView() {
+    const el = pickerRef.current
+    if (!el) return
+    const scroller = el.closest('[data-app-scroll]')
+    if (scroller instanceof HTMLElement) {
+      const top =
+        el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop - 8
+      scroller.scrollTo({ top: Math.max(0, top), behavior: 'smooth' })
+      return
+    }
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  function selectTrip(i: number, scrollToHero = false) {
+    setActiveIndex(i)
+    if (scrollToHero) scrollHeroIntoView()
+  }
 
   if (tours.length === 0) return null
 
@@ -76,8 +96,12 @@ export default function TripPickerHero({ tours }: Props) {
   const durationEn = tourDurationLabel(active, 'en')
   const durationTh = tourDurationLabel(active, 'th')
 
+  const listBi = tt('trips.allList')
+
   return (
+    <>
     <section
+      ref={pickerRef}
       className="trip-picker relative w-full overflow-hidden rounded-2xl border border-teal-mid/30 bg-teal-darker shadow-spot lg:rounded-3xl"
       style={{ minHeight: 'min(68dvh, 640px)', height: 'calc(100dvh - 17.5rem)' }}
       aria-roledescription="trip picker"
@@ -160,7 +184,7 @@ export default function TripPickerHero({ tours }: Props) {
                   role="option"
                   aria-selected={on}
                   aria-label={`${tour.name_en} / ${tour.name_th}`}
-                  onClick={() => setActiveIndex(i)}
+                  onClick={() => selectTrip(i)}
                   className="relative shrink-0 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
                 >
                   <span
@@ -247,5 +271,72 @@ export default function TripPickerHero({ tours }: Props) {
         </div>
       </div>
     </section>
+
+    <div className="mt-5">
+      <BiDisplayHeading
+        en={listBi.en}
+        th={listBi.th}
+        as="h2"
+        enClassName="font-display text-[15px] font-semibold tracking-tight text-teal-darker"
+        thClassName="mt-0.5 font-thai text-[11px] font-medium text-ink-app/55"
+      />
+      <ul className="mt-3 space-y-2">
+        {tours.map((tour, i) => {
+          const on = i === activeIndex
+          const thumb = tripThumbSrc(tour)
+          const destEn = tourDestinationLabel(tour.trip_code, 'en')
+          const destTh = tourDestinationLabel(tour.trip_code, 'th')
+          const durationEn = tourDurationLabel(tour, 'en')
+          const durationTh = tourDurationLabel(tour, 'th')
+          return (
+            <li key={tour.id}>
+              <button
+                type="button"
+                onClick={() => selectTrip(i, true)}
+                aria-current={on ? 'true' : undefined}
+                aria-label={`${tour.name_en} / ${tour.name_th}`}
+                className={`flex w-full items-center gap-3 rounded-[16px] border bg-card px-2.5 py-2 text-left shadow-[0_4px_14px_rgba(18,47,42,0.05)] ${
+                  on ? 'border-orange' : 'border-line'
+                }`}
+              >
+                <span className="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-[12px] bg-teal-soft">
+                  {thumb ? (
+                    <img
+                      src={thumb}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  ) : (
+                    <span className="flex h-full w-full items-center justify-center text-[10px] font-bold text-teal-dark">
+                      {tour.trip_code.slice(0, 3)}
+                    </span>
+                  )}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <BiText
+                    as="span"
+                    en={tour.name_en}
+                    th={tour.name_th}
+                    className="block truncate text-[14px] font-bold leading-snug text-ink"
+                    thClassName="mt-0.5 block truncate font-thai text-[11px] font-medium text-ink-soft"
+                  />
+                  <BiText
+                    as="span"
+                    en={`${destEn} · ${durationEn}`}
+                    th={`${destTh} · ${durationTh}`}
+                    className="mt-0.5 block truncate text-[11px] text-ink-soft"
+                    thClassName="truncate font-thai text-[10px] text-ink-soft/80"
+                  />
+                </span>
+                <ChevronRight className="h-4 w-4 shrink-0 text-ink-soft" aria-hidden />
+              </button>
+            </li>
+          )
+        })}
+      </ul>
+    </div>
+    </>
   )
 }

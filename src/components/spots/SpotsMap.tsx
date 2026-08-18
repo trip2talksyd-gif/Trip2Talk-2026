@@ -122,7 +122,7 @@ export default function SpotsMap({ spots, selectedId, onSelect, className }: Pro
 
   return (
     <div className={className}>
-      <div ref={containerRef} className="h-full w-full overflow-hidden rounded-[18px] bg-teal-soft" />
+      <div ref={containerRef} className="h-full w-full overflow-hidden rounded-[22px] bg-teal-soft" />
       <style>{`
         .t2t-spot-pin { background: transparent; border: 0; }
         .leaflet-container { font: inherit; background: #e3ece8; }
