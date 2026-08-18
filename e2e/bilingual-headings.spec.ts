@@ -20,7 +20,8 @@ const COPY = {
     en: 'Capture Moments Worth Showing Off',
     th: 'ออกไปเก็บภาพ ที่ทุกคนอยากดู',
   },
-  discover: { en: 'Where to shoot next?', th: 'วันนี้อยากเห็นมุมไหน?' },
+  discover: { en: '101 Frames', th: '101 มุมกล้อง' },
+  spots: { en: 'Photo Spots', th: 'พิกัดถ่ายภาพ' },
   trips: { en: 'Find Your Trip', th: 'เลือกทริปของคุณ' },
   pricing: { en: 'Pricing', th: 'ราคา' },
 } as const
@@ -104,10 +105,10 @@ test.describe('bilingual headings', () => {
     expect(thFont, `Thai must not inherit Geist: ${thFont}`).not.toMatch(/Geist/i)
   })
 
-  test('/spots redirects to /discover and keeps bilingual heading fonts', async ({ page }) => {
+  test('/spots list page keeps bilingual heading fonts', async ({ page }) => {
     await page.goto('/spots')
-    await expect(page).toHaveURL(/\/discover(?:\?|$)/)
-    await assertBiDisplayHeading(page, COPY.discover.en, COPY.discover.th)
+    await expect(page).toHaveURL(/\/spots(?:\?|$)/)
+    await assertBiDisplayHeading(page, COPY.spots.en, COPY.spots.th)
   })
 
   test('discover page BiDisplayHeading keeps both languages and correct fonts', async ({ page }) => {

@@ -1,22 +1,29 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { List, Map as MapIcon } from 'lucide-react'
+import { Camera, List, Map as MapIcon } from 'lucide-react'
 import { GALLERY_PHOTOS, photoThumbSrc, type GalleryPhoto } from '../../data/galleryPhotos'
 import GalleryAuthenticityNote from '../../components/gallery/GalleryAuthenticityNote'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
+import BiText from '../../components/ui/BiText'
 import SpotsMap from '../../components/spots/SpotsMap'
 import SpotFeedCard, { SpotCompactRow } from '../../components/spots/SpotFeedCard'
-import SplitFlapText from '../../components/spots/SplitFlapText'
+import SpotListCard from '../../components/spots/SpotListCard'
+import FramesShowcaseRow, { sortFramesCollection } from '../../components/spots/FramesShowcaseRow'
 import { useLang } from '../../hooks/useLang'
 import type { TranslationKey } from '../../i18n/translations'
 import {
+  countCollection101Frames,
   fetchPhotoSpots,
   filterSpotsByCategory,
   type PhotoSpotDetail,
 } from '../../lib/photoSpotsApi'
 import { supabase } from '../../lib/supabase'
+import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 
 type DiscoverChip = 'All' | 'Aurora' | 'Portrait' | 'Landscape' | 'Coastal' | 'Night'
+
+const FRAMES_HERO_IMG =
+  'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/content-photos/494005384_1232342625557503_5488091950624198364_n.jpg'
 
 const ICON = {
   stroke: 'currentColor',
@@ -31,14 +38,6 @@ function SearchIcon({ className }: { className?: string }) {
     <svg viewBox="0 0 24 24" className={className} aria-hidden {...ICON}>
       <circle cx="11" cy="11" r="7" />
       <path d="M21 21l-4.3-4.3" />
-    </svg>
-  )
-}
-
-function ChevronRightIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden {...ICON}>
-      <path d="M9 6l6 6-6 6" />
     </svg>
   )
 }
@@ -172,45 +171,13 @@ function LatestWorkGrid({ photos }: { photos: GalleryPhoto[] }) {
   )
 }
 
-function NearbySpotCard({ spot }: { spot: PhotoSpotDetail }) {
-  const img = spot.thumbSrc ?? spot.heroSrc
-  return (
-    <Link
-      to={`/spots/${spot.slug}`}
-      className="w-[46%] shrink-0 overflow-hidden rounded-[18px] bg-white shadow-[0_6px_18px_rgba(18,47,42,0.06)] sm:w-44"
-    >
-      <div className="relative h-24 bg-teal-soft">
-        {img ? (
-          <img
-            src={img}
-            alt={`${spot.title_en} / ${spot.title_th}`}
-            className="h-full w-full object-cover"
-            loading="lazy"
-          />
-        ) : null}
-      </div>
-      <div className="px-2.5 pb-2.5 pt-2">
-        <SplitFlapText text={spot.title_en} />
-        <p className="mt-0.5 line-clamp-1 font-thai text-[10px] text-ink-app/55">{spot.title_th}</p>
-        <div className="mt-2 flex items-center justify-between gap-2">
-          <span className="truncate text-[8.5px] text-ink-app/50">
-            {spot.best_time ?? spot.location_en}
-          </span>
-          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-teal-dark text-orange-soft">
-            <ChevronRightIcon className="h-2.5 w-2.5" />
-          </span>
-        </div>
-      </div>
-    </Link>
-  )
-}
-
 export default function DiscoverPage() {
   const { tt, lang } = useLang()
   const authName = useAuthDisplayName()
   const [chip, setChip] = useState<DiscoverChip>('All')
   const [query, setQuery] = useState('')
   const [spots, setSpots] = useState<PhotoSpotDetail[]>([])
+  const [framesCount, setFramesCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState<'map' | 'list'>('map')
   const [selected, setSelected] = useState<PhotoSpotDetail | null>(null)
@@ -220,6 +187,9 @@ export default function DiscoverPage() {
   const helloGuest = tt('discover.hello')
   const helloNamed = tt('discover.helloNamed')
   const headlineBi = tt('discover.headline')
+  const taglineBi = tt('discover.tagline')
+  const creditBi = tt('discover.credit')
+  const spotCountBi = tt('discover.spotCount')
   const searchBi = tt('discover.search')
   const mapBi = tt('spots.viewMap')
   const listBi = tt('spots.viewList')
@@ -233,9 +203,11 @@ export default function DiscoverPage() {
 
   useEffect(() => {
     let cancelled = false
-    fetchPhotoSpots().then((rows) => {
+    Promise.all([fetchPhotoSpots(), countCollection101Frames()]).then(([rows, count]) => {
       if (cancelled) return
       setSpots(rows)
+      const fromRows = rows.filter((r) => r.collection_101_frames === true).length
+      setFramesCount(Math.max(count, fromRows))
       setLoading(false)
     })
     return () => {
@@ -265,19 +237,8 @@ export default function DiscoverPage() {
     )
   }, [spots, chip, q])
 
-  function scrollToFeed() {
-    const el = feedRef.current
-    if (!el) return
-    const scroller = el.closest('[data-app-scroll]')
-    if (scroller instanceof HTMLElement) {
-      const top = el.getBoundingClientRect().top - scroller.getBoundingClientRect().top + scroller.scrollTop
-      scroller.scrollTo({ top, behavior: 'smooth' })
-      return
-    }
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-
   const nearbySpots = useMemo(() => filteredSpots.slice(0, 8), [filteredSpots])
+  const framesSpots = useMemo(() => sortFramesCollection(spots), [spots])
   const visibleSpots = filteredSpots.slice(0, feedVisible)
   const largeSpots = visibleSpots.slice(0, FEED_LARGE)
   const compactSpots = visibleSpots.slice(FEED_LARGE)
@@ -293,20 +254,68 @@ export default function DiscoverPage() {
   }, [filteredSpots, selected])
 
   return (
-    <div className="-mx-4 bg-cream-app pb-10 text-ink-app sm:-mx-6 lg:mx-0">
-      <div className="mx-auto max-w-[960px]">
-        <header className="bg-gradient-to-b from-teal-soft/80 from-0% to-cream-app to-[78%] px-4 pb-3.5 pt-3 sm:px-6">
-          <p className="text-[10px] font-semibold tracking-[0.04em] text-ink-app/55">
+    <div className="bg-cream-app pb-10 text-ink-app">
+      <header className="relative -mx-4 overflow-hidden sm:-mx-6 lg:-mx-10">
+        <img
+          src={storageImageSrc(FRAMES_HERO_IMG, STORAGE_IMG.hero) || FRAMES_HERO_IMG}
+          alt=""
+          className="absolute inset-0 h-full w-full object-cover object-center"
+          width={1920}
+          height={1080}
+          fetchPriority="high"
+          decoding="async"
+        />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              'linear-gradient(180deg, rgba(12,33,29,.42) 0%, rgba(12,33,29,.38) 38%, rgba(12,33,29,.88) 100%)',
+          }}
+          aria-hidden
+        />
+        <div className="relative z-[1] mx-auto max-w-[960px] px-4 pb-3.5 pt-3 sm:px-6">
+          <p className="text-[10px] font-semibold tracking-[0.04em] text-cream/75">
             {helloLine.en}
             <span className="ml-1.5 font-thai font-medium">{helloLine.th}</span>
           </p>
-          <BiDisplayHeading
-            en={headlineBi.en}
-            th={headlineBi.th}
-            as="h1"
-            enClassName="font-display text-[22px] font-bold text-teal-darker sm:text-[26px]"
-            thClassName="mt-0.5 font-thai text-[13px] text-ink-app/55"
-          />
+          <div className="mt-1 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <BiDisplayHeading
+                en={headlineBi.en}
+                th={headlineBi.th}
+                as="h1"
+                enClassName="font-display text-[26px] font-bold text-cream sm:text-[32px]"
+                thClassName="mt-0.5 font-serif text-[15px] text-cream/75 sm:text-[17px]"
+              />
+              <BiDisplayHeading
+                en={taglineBi.en}
+                th={taglineBi.th}
+                as="p"
+                className="mt-2"
+                enClassName="font-display text-[14px] font-medium italic text-cream/90 sm:text-[16px]"
+                thClassName="mt-0.5 font-serif text-[12px] text-cream/70 sm:text-[13px]"
+              />
+              <p className="mt-2 flex items-start gap-1.5 text-cream/75">
+                <Camera className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange" aria-hidden />
+                <BiText
+                  en={creditBi.en}
+                  th={creditBi.th}
+                  className="text-[11px] leading-snug sm:text-[12px]"
+                  thClassName="mt-0.5 block font-thai text-[10px] font-medium text-cream/65"
+                />
+              </p>
+            </div>
+            <div className="shrink-0 self-start rounded-[18px] bg-white px-3 py-2 shadow-[0_6px_18px_rgba(18,47,42,0.06)] ring-1 ring-line">
+              <p className="font-display text-[13px] font-semibold text-teal-dark">
+                {spotCountBi.en.replace('{x}', String(framesCount))}
+              </p>
+              <p className="font-thai text-[10px] font-medium text-ink-app/50">
+                {spotCountBi.th.replace('{x}', String(framesCount))}
+              </p>
+            </div>
+          </div>
+
+          <FramesShowcaseRow spots={framesSpots} />
 
           <label className="relative mt-3 block">
             <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-app/40" />
@@ -340,11 +349,13 @@ export default function DiscoverPage() {
               )
             })}
           </div>
-        </header>
+        </div>
+      </header>
 
-        <div className="space-y-4 px-4 sm:px-6">
+      <div className="mx-auto max-w-[960px]">
+        <div className="space-y-8 px-4 pt-7 sm:px-6 sm:pt-8">
           {view === 'map' ? (
-            <div className="relative overflow-hidden rounded-[18px] border border-line bg-white shadow-[0_8px_22px_rgba(18,47,42,0.08)]">
+            <div className="relative overflow-hidden rounded-[22px] border border-line bg-white shadow-[0_14px_36px_rgba(18,47,42,0.12)]">
               <div className="absolute right-2.5 top-2.5 z-[1000] inline-flex rounded-full border border-line bg-white/95 p-0.5 shadow-sm">
                 <button
                   type="button"
@@ -371,7 +382,7 @@ export default function DiscoverPage() {
                 spots={filteredSpots}
                 selectedId={selected?.id ?? null}
                 onSelect={setSelected}
-                className="h-[240px] w-full sm:h-[300px]"
+                className="h-[240px] w-full overflow-hidden rounded-[22px] sm:h-[300px]"
               />
             </div>
           ) : (
@@ -404,13 +415,13 @@ export default function DiscoverPage() {
               <SectionLabel
                 en={nearbyBi.en}
                 th={nearbyBi.th}
-                onSeeAll={scrollToFeed}
+                seeAllTo="/spots"
                 seeAllEn={seeAllBi.en}
                 seeAllTh={seeAllBi.th}
               />
-              <div data-featured-strip className="hide-scrollbar flex gap-2.5 overflow-x-auto pb-1">
+              <div data-featured-strip className="hide-scrollbar flex snap-x gap-2.5 overflow-x-auto pb-1">
                 {nearbySpots.map((spot) => (
-                  <NearbySpotCard key={spot.id} spot={spot} />
+                  <SpotListCard key={spot.id} spot={spot} variant="carousel" />
                 ))}
               </div>
             </section>

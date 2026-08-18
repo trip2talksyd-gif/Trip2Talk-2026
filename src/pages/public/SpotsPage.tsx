@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronRight, Heart, List, Map as MapIcon, X } from 'lucide-react'
+import { List, Map as MapIcon, X } from 'lucide-react'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import SpotMedia from '../../components/spots/SpotMedia'
+import SpotListCard from '../../components/spots/SpotListCard'
 import SpotsMap from '../../components/spots/SpotsMap'
 import { useLang } from '../../hooks/useLang'
 import {
-  badgeForSpot,
   fetchPhotoSpots,
   filterSpotsByCategory,
   sortPhotoSpots,
@@ -22,139 +22,6 @@ const CATEGORY_CHIPS = [
   { id: 'Coastal', en: 'Coastal', th: 'ชายฝั่ง' },
   { id: 'Night', en: 'Night', th: 'กลางคืน' },
 ] as const
-
-const FAV_KEY = 't2t_spot_favorites'
-
-function readFavorites(): Set<string> {
-  try {
-    const raw = localStorage.getItem(FAV_KEY)
-    if (!raw) return new Set()
-    const parsed = JSON.parse(raw) as unknown
-    return new Set(Array.isArray(parsed) ? parsed.map(String) : [])
-  } catch {
-    return new Set()
-  }
-}
-
-function writeFavorites(ids: Set<string>) {
-  localStorage.setItem(FAV_KEY, JSON.stringify([...ids]))
-}
-
-function topBadgeLabel(spot: PhotoSpotDetail): string {
-  const best = spot.best_time?.trim()
-  if (best) {
-    const night = /night|dark|aurora|moon|blue\s*hour|after\s*dark/i.test(best)
-    return `${night ? '🌙' : '☀️'} ${best}`
-  }
-  const cat = badgeForSpot(spot)
-  if (/night|aurora/i.test(cat)) return `🌙 ${cat}`
-  return cat
-}
-
-function SpotCard({ spot }: { spot: PhotoSpotDetail }) {
-  const { lang } = useLang()
-  const [fav, setFav] = useState(false)
-  const category = badgeForSpot(spot)
-  const title = lang === 'th' ? spot.title_th : spot.title_en
-  const location = lang === 'th' ? spot.location_th : spot.location_en
-
-  useEffect(() => {
-    setFav(readFavorites().has(spot.id) || readFavorites().has(spot.slug))
-  }, [spot.id, spot.slug])
-
-  const toggleFav = (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-    const next = !fav
-    setFav(next)
-    const set = readFavorites()
-    if (next) {
-      set.add(spot.id)
-      set.add(spot.slug)
-    } else {
-      set.delete(spot.id)
-      set.delete(spot.slug)
-    }
-    writeFavorites(set)
-  }
-
-  return (
-    <article className="relative h-[158px] overflow-hidden rounded-[20px] bg-teal-darker shadow-[0_10px_24px_rgba(18,47,42,0.1)] sm:h-[180px] lg:h-[200px]">
-      <Link
-        to={`/spots/${spot.slug}`}
-        className="absolute inset-0 block focus:outline-none focus-visible:ring-2 focus-visible:ring-orange focus-visible:ring-offset-2"
-        aria-label={`${spot.title_en} / ${spot.title_th}`}
-      >
-        <SpotMedia
-          spot={spot}
-          variant="wide"
-          className="absolute inset-0 h-full w-full"
-          iconSize="lg"
-          alt=""
-        />
-        <div
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(0deg, rgba(12,33,29,0.9), rgba(12,33,29,0.15) 60%, transparent)',
-          }}
-          aria-hidden
-        />
-
-        {/* Top-left light/category badge */}
-        <span className="absolute left-3 top-3 z-[1] max-w-[70%] truncate rounded-full bg-[rgba(255,255,255,0.92)] px-2.5 py-1 text-[9.5px] font-bold text-teal-darker">
-          {topBadgeLabel(spot)}
-        </span>
-
-        {/* Bottom copy + glass pills */}
-        <div className="absolute inset-x-0 bottom-0 z-[1] flex items-end justify-between gap-2 p-3.5">
-          <div className="min-w-0 flex-1 pr-1">
-            <p
-              lang={lang === 'th' ? 'th' : 'en'}
-              className={`truncate text-[14.5px] font-bold leading-snug text-white ${
-                lang === 'th' ? 'font-serif' : 'font-display'
-              }`}
-            >
-              {title}
-            </p>
-            <p className="mt-0.5 truncate text-[11px] font-medium text-white/70">{location}</p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {spot.drive_time_from_sydney ? (
-                <span className="rounded-full border border-[rgba(230,147,90,0.55)] bg-[rgba(230,147,90,0.35)] px-2 py-0.5 text-[9.5px] font-semibold text-orange-soft backdrop-blur-[8px]">
-                  {spot.drive_time_from_sydney}
-                </span>
-              ) : null}
-              <span className="rounded-full border border-white/20 bg-white/[0.14] px-2 py-0.5 text-[9.5px] font-semibold text-white/90 backdrop-blur-[8px]">
-                {category}
-              </span>
-            </div>
-          </div>
-
-          <span
-            className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-orange text-teal-darker shadow-[0_6px_14px_rgba(230,147,90,0.45)]"
-            aria-hidden
-          >
-            <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
-          </span>
-        </div>
-      </Link>
-
-      {/* Favorite — outside Link so it doesn't navigate */}
-      <button
-        type="button"
-        onClick={toggleFav}
-        className="absolute right-3 top-3 z-[2] flex h-[26px] w-[26px] items-center justify-center rounded-full border border-white/25 bg-white/25 text-white backdrop-blur-[8px] transition hover:bg-white/40"
-        aria-label={fav ? 'Remove favorite' : 'Save favorite'}
-        aria-pressed={fav}
-      >
-        <Heart
-          className={`h-3.5 w-3.5 ${fav ? 'fill-orange text-orange' : ''}`}
-          strokeWidth={1.9}
-        />
-      </button>
-    </article>
-  )
-}
 
 function MapPreviewCard({
   spot,
@@ -224,7 +91,7 @@ export default function SpotsPage() {
 
   const [spots, setSpots] = useState<PhotoSpotDetail[]>([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState<'map' | 'list'>('map')
+  const [view, setView] = useState<'map' | 'list'>('list')
   const [category, setCategory] = useState('All')
   const [sort, setSort] = useState<SpotSort>('nearest')
   const [selected, setSelected] = useState<PhotoSpotDetail | null>(null)
@@ -376,7 +243,7 @@ export default function SpotsPage() {
               </div>
               <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
                 {filtered.map((spot) => (
-                  <SpotCard key={spot.id} spot={spot} />
+                  <SpotListCard key={spot.id} spot={spot} />
                 ))}
               </div>
             </>

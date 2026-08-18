@@ -81,6 +81,7 @@ export type TranslationKey =
   | 'trips.title'
   | 'trips.subtitle'
   | 'trips.empty'
+  | 'trips.allList'
   | 'trips.search'
   | 'trips.search.empty'
   | 'trips.going'
@@ -262,6 +263,8 @@ export type TranslationKey =
   | 'pricing.ways.afterpay.body'
   | 'pricing.ways.afterpay.fee'
   | 'pricing.ways.afterpay.link'
+  | 'afterpay.badge.alt'
+  | 'afterpay.legal'
   | 'pricing.ways.payid.title'
   | 'pricing.ways.payid.body'
   | 'pricing.ways.payid.fee'
@@ -545,6 +548,9 @@ export type TranslationKey =
   | 'discover.hello'
   | 'discover.helloNamed'
   | 'discover.headline'
+  | 'discover.tagline'
+  | 'discover.credit'
+  | 'discover.spotCount'
   | 'discover.search'
   | 'discover.filter'
   | 'discover.chip.all'
@@ -605,6 +611,7 @@ export type TranslationKey =
   | 'spots.tripCta'
   | 'spots.tips'
   | 'spots.cameraSettings'
+  | 'spot.exampleShot'
   | 'nav.appTabs'
   | 'experience.badge'
   | 'experience.title'
@@ -699,6 +706,7 @@ const en: Map = {
   'trips.title': 'Find Your Trip',
   'trips.subtitle': 'Small groups, pro photographer on every trip.',
   'trips.empty': 'No trips in this category yet — check back soon.',
+  'trips.allList': 'All trips',
   'trips.search': 'Search destination...',
   'trips.search.empty': 'No trips match your search.',
   'trips.going': 'Connect with people going',
@@ -900,6 +908,9 @@ const en: Map = {
     'Pay in 4 instalments through Square. No surcharge from us.',
   'pricing.ways.afterpay.fee': 'No surcharge',
   'pricing.ways.afterpay.link': 'How Afterpay works',
+  'afterpay.badge.alt': 'Afterpay — now accepted here',
+  'afterpay.legal':
+    'Late fees, eligibility criteria and T&Cs apply. Afterpay Australia Pty Ltd Australian Credit Licence 527911.',
   'pricing.ways.payid.title': 'PayID',
   'pricing.ways.payid.body':
     'Instant bank transfer in Australia. No fee from us — details are in the PayID section below.',
@@ -1042,7 +1053,7 @@ const en: Map = {
   'account.guestSub': 'Guest booking — no account login required',
   'account.language': 'Language',
   'about.positioning': 'Who we are',
-  'about.page.eyebrow': 'About Trip2Talk',
+  'about.page.eyebrow': 'Our story',
   'about.page.title': 'About Trip2Talk',
   'about.hero.heading': "We're photographers — you're the subject",
   'about.hero.story':
@@ -1051,9 +1062,9 @@ const en: Map = {
   'about.hero.stat.photographers': 'Photographers',
   'about.hero.stat.travelers': 'Travelers',
   'about.saen.bio':
-    "Hello — I'm Saen, a photographer captivated by nature and light. I taught myself the craft and, through that passion, connected with Thai communities in Sydney who shared the same love for exploring and photographing this city.\n\nOver the past 10 years I've honed landscape photography. For me, photography isn't just recording a scene — it's preserving a story, a feeling, and the experience of that moment in time.",
+    "Hello — I'm Saen. My journey behind the lens began right here in Sydney, teaching myself the art of landscape photography. That shared passion for capturing the world eventually led me to found Trip2Talk alongside a group of friends who love photography as much as I do.\n\nSince 2019, I've expanded my craft into high-end wedding and portrait photography. I've had the honor of capturing the love stories of over 100 couples, blending raw emotion with Australia's most breathtaking landscapes.\n\nToday, I bring those two worlds together. I believe that nature is the widest, most spectacular studio in the world. That's exactly why I created this app and our exclusive private trips—to take Thais, both living in Australia and visiting from home, on a journey to capture masterpieces where you are the subject in the best light possible.",
   'about.ploy.bio':
-    'Monsicha Chayakorn (Ploy) — Admin & Trip Staff. She coordinates bookings and makes sure every guest is prepared before departure.',
+    "Hello — I'm Ploy. My journey with Trip2Talk actually began on the other side of the lens, as a guest on one of P'Saen's trips.\n\nI've always had a deep love for traveling, but experiencing a trip where every location was meticulously chosen for the perfect light and the most stunning, unseen angles completely blew me away. That shared passion for exploration quickly turned a guest into a partner.\n\nToday, as the Admin and Trip Coordinator, I work behind the scenes to ensure your journey is as magical as my very first one. From managing bookings to making sure you are 100% prepared before departure, I'm here to take care of every little detail so you can just pack your bags, enjoy the ride, and get those perfect shots.",
   'about.whatToKnow.title': 'What you should know',
   'about.whatToKnow.body':
     "We're not a traditional tour company — Trip2Talk is a Photo Trip service focused on photography-led travel. Accommodation is typically hostel, backpacker, or motel standard — clean and safe. Private room upgrades are available on request. Meals are not included.",
@@ -1216,7 +1227,10 @@ const en: Map = {
   'nav.appTabs': 'App tabs',
   'discover.hello': 'Hi traveler,',
   'discover.helloNamed': 'Hi {name},',
-  'discover.headline': 'Where to shoot next?',
+  'discover.headline': '101 Frames',
+  'discover.tagline': "Light we've already caught",
+  'discover.credit': 'By Saen · 10 years travel photography',
+  'discover.spotCount': 'Spot {x}/101',
   'discover.search': 'Search a spot or style',
   'discover.filter': 'Filter spots',
   'discover.chip.all': 'All',
@@ -1278,6 +1292,7 @@ const en: Map = {
   'spots.tripCta': 'Go here with Trip2Talk',
   'spots.tips': 'Tips',
   'spots.cameraSettings': 'Camera settings',
+  'spot.exampleShot': 'Example Shot',
   'experience.badge': 'Experience',
   'experience.title': 'Stories from the road',
   'experience.body':
@@ -1370,6 +1385,7 @@ const th: Map = {
   'trips.title': 'เลือกทริปของคุณ',
   'trips.subtitle': 'กลุ่มเล็ก มีช่างภาพมืออาชีพทุกทริป',
   'trips.empty': 'ยังไม่มีทริปในหมวดนี้ — กลับมาเช็คใหม่เร็วๆ นี้',
+  'trips.allList': 'ทริปทั้งหมด',
   'trips.search': 'ค้นหาจุดหมาย',
   'trips.search.empty': 'ไม่พบทริปที่ตรงกับคำค้นหา',
   'trips.going': 'เจอเพื่อนร่วมทริป',
@@ -1571,6 +1587,9 @@ const th: Map = {
     'แบ่งจ่าย 4 งวดผ่าน Square ไม่มีค่าธรรมเนียมเพิ่มจากเรา',
   'pricing.ways.afterpay.fee': 'ไม่มีค่าธรรมเนียมเพิ่ม',
   'pricing.ways.afterpay.link': 'วิธีใช้ Afterpay',
+  'afterpay.badge.alt': 'Afterpay — รับชำระที่นี่',
+  'afterpay.legal':
+    'Late fees, eligibility criteria and T&Cs apply. Afterpay Australia Pty Ltd Australian Credit Licence 527911.',
   'pricing.ways.payid.title': 'PayID',
   'pricing.ways.payid.body':
     'โอนธนาคารในออสเตรเลียแบบทันที ไม่มีค่าธรรมเนียมจากเรา — รายละเอียดอยู่ที่ส่วน PayID ด้านล่าง',
@@ -1712,7 +1731,7 @@ const th: Map = {
   'account.guestSub': 'จองแบบแขก — ไม่ต้องล็อกอิน',
   'account.language': 'ภาษา',
   'about.positioning': 'เราคือใคร',
-  'about.page.eyebrow': 'เกี่ยวกับ Trip2Talk',
+  'about.page.eyebrow': 'เรื่องราวของเรา',
   'about.page.title': 'เกี่ยวกับ Trip2Talk',
   'about.hero.heading': 'เราคือช่างภาพ — คุณคือนางเอกของเฟรม',
   'about.hero.story':
@@ -1721,9 +1740,9 @@ const th: Map = {
   'about.hero.stat.photographers': 'ช่างภาพ',
   'about.hero.stat.travelers': 'นักเดินทาง',
   'about.saen.bio':
-    'สวัสดีครับ ผม Saen ช่างภาพผู้หลงใหลในความงามของธรรมชาติและแสงสี ผมเริ่มต้นการเดินทางบนเส้นทางสายการถ่ายภาพด้วยการเรียนรู้ด้วยตนเอง และด้วยความรักในการถ่ายภาพ ผมได้พบกับกลุ่มคนไทยในซิดนีย์ที่มีความสนใจในสิ่งเดียวกัน\n\nตลอด 10 ปีที่ผ่านมา ผมได้พัฒนาทักษะการถ่ายภาพทิวทัศน์อย่างต่อเนื่อง — ผมเชื่อว่าการถ่ายภาพไม่ใช่แค่การบันทึกภาพ แต่เป็นการบันทึกเรื่องราว ความรู้สึก และประสบการณ์',
+    'สวัสดีครับ ผม \'แสน\' จุดเริ่มต้นของผมมาจากการหลงใหลและฝึกฝนการถ่ายภาพแลนด์สเคปด้วยตัวเองในซิดนีย์ จนได้มารวมตัวกับน้องๆ ที่รักการถ่ายภาพเหมือนกันและเปิดเพจ Trip2Talk ขึ้นมา\n\nตั้งแต่ปี 2019 เป็นต้นมา ผมได้ก้าวเข้าสู่วงการถ่ายภาพพอร์ตเทรตและพรีเวดดิ้งอย่างเต็มตัว สั่งสมประสบการณ์และความมั่นใจผ่านการรับงานถ่ายภาพระดับไฮเอนด์ โดยได้เก็บบันทึกรอยยิ้มของบ่าวสาวมาแล้วกว่า 100 คู่ ท่ามกลางวิวทิวทัศน์ที่สวยงามที่สุดของออสเตรเลียและซิดนีย์\n\nมาวันนี้ ผมได้ผสมผสานทักษะทั้งสองโลกเข้าด้วยกัน—ทั้งการดึงเสน่ห์ของตัวบุคคลแบบงานเวดดิ้ง และความอลังการของงานแลนด์สเคป สำหรับผม **ธรรมชาติคือสตูดิโอที่กว้างและว้าวที่สุดในโลก** ผมจึงตั้งใจสร้างแอปพลิเคชันและแพ็กเกจทริปส่วนตัวนี้ขึ้นมา เพื่อพาทั้งคนไทยในออสเตรเลียและจากเมืองไทย ออกไปท่องโลกและเก็บภาพความทรงจำระดับมาสเตอร์พีซกลับไปครับ',
   'about.ploy.bio':
-    'Monsicha Chayakorn (พลอย) — Admin & Trip Staff ดูแลการประสานงานคิวจอง และดูแลลูกทริปให้พร้อมก่อนออกเดินทาง',
+    'สวัสดีค่ะ พลอยนะคะ จุดเริ่มต้นของพลอยกับ Trip2Talk ต้องบอกว่าเริ่มมาจากการเป็น "ลูกทริป" ของพี่แสนมาก่อนค่ะ\n\nพลอยเป็นคนที่รักการเดินทางมากๆ แต่สิ่งที่ทำให้ประทับใจจนถอนตัวไม่ขึ้น คือความใส่ใจในการเฟ้นหาโลเคชันสวยๆ มุมมองแปลกใหม่แบบ Unseen และการจัดสรรเวลาแสงที่ทำให้ภาพออกมาสมบูรณ์แบบที่สุด จากความหลงใหลในการท่องเที่ยวและการถ่ายภาพในวันนั้น ทำให้พลอยตัดสินใจก้าวเข้ามาเป็นคู่หูร่วมทีม Trip2Talk อย่างเต็มตัว\n\nมาวันนี้ในฐานะแอดมินและผู้ประสานงานทริป พลอยจะคอยดูแลอยู่เบื้องหลัง ตั้งแต่การจัดการคิวจอง ไปจนถึงการบรีฟเตรียมความพร้อมให้กับลูกทริปทุกคนก่อนออกเดินทาง พลอยพร้อมดูแลทุกรายละเอียด เพื่อให้ทุกคนมั่นใจว่าจะได้รับประสบการณ์การเดินทางที่ราบรื่น สนุก และน่าประทับใจ... เหมือนกับทริปแรกที่พลอยเคยได้รับค่ะ',
   'about.whatToKnow.title': 'สิ่งที่ควรรู้',
   'about.whatToKnow.body':
     'เราไม่ใช่บริษัททัวร์ บริการของเราคือ Photo Trip — เน้นการเดินทางเพื่อถ่ายภาพเป็นหลัก ที่พักเป็นแบบ Hostel/Backpacker/Motel เน้นสะอาดปลอดภัย หากต้องการอัปเกรดห้องพักส่วนตัวสามารถแจ้งและจ่ายเพิ่มได้ อาหารไม่รวมในแพ็กเกจ',
@@ -1886,7 +1905,10 @@ const th: Map = {
   'nav.appTabs': 'แท็บแอป',
   'discover.hello': 'สวัสดีนักเดินทาง,',
   'discover.helloNamed': 'สวัสดี {name},',
-  'discover.headline': 'วันนี้อยากเห็นมุมไหน?',
+  'discover.headline': '101 มุมกล้อง',
+  'discover.tagline': 'แสงที่เราเก็บมาแล้ว',
+  'discover.credit': 'โดยพี่แสน · ช่างภาพเดินทาง 10 ปี',
+  'discover.spotCount': 'จุด {x}/101',
   'discover.search': 'ค้นหาพิกัด / สไตล์ภาพ',
   'discover.filter': 'กรองมุมถ่าย',
   'discover.chip.all': 'ทั้งหมด',
@@ -1947,6 +1969,7 @@ const th: Map = {
   'spots.tripCta': 'ไปกับ Trip2Talk',
   'spots.tips': 'เคล็ดลับ',
   'spots.cameraSettings': 'ค่ากล้อง',
+  'spot.exampleShot': 'ภาพตัวอย่าง',
   'experience.badge': 'ประสบการณ์',
   'experience.title': 'เรื่องราวจากทริปถ่ายภาพ',
   'experience.body': 'เร็วๆ นี้ — รีลทริป ไฮไลท์รายวัน และโมเมนต์จากทริปจริง',

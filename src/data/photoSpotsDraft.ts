@@ -17,6 +17,19 @@ export type CameraSettings = {
   portrait?: CameraModeSettings | null
 }
 
+export type ExampleShotOrientation = 'landscape' | 'portrait'
+
+export type PhotoSpotExampleShot = {
+  id: string
+  spot_id?: string
+  orientation: ExampleShotOrientation
+  image_url: string
+  sort_order: number
+  created_at?: string
+}
+
+export const PHOTO_SPOT_MAX_EXAMPLE_PER_ORIENTATION = 6
+
 export type PhotoSpotRow = {
   id: string
   slug: string
@@ -55,9 +68,15 @@ export type PhotoSpotRow = {
   thumbnail_url: string | null
   /** Up to 4 extra public image URLs (hero is separate). */
   gallery_image_urls: string[]
+  /** Camera-settings samples — not the hero carousel gallery. */
+  example_shots?: PhotoSpotExampleShot[]
   rating: number
   sort_order: number
   is_featured: boolean
+  /** Curated 101 Frames set on /discover. Absent on older rows → treat as false. */
+  collection_101_frames?: boolean
+  /** #N of 101 badge. Null when not in the set. */
+  collection_rank?: number | null
   review_notes: string | null
   created_at?: string
   updated_at?: string
@@ -77,6 +96,8 @@ export const PHOTO_SPOT_EDIT_CATEGORIES = [
 ] as const
 
 export const PHOTO_SPOT_CATEGORIES = ['All', ...PHOTO_SPOT_EDIT_CATEGORIES] as const
+
+export const PHOTO_SPOT_COLLECTION_101_TOTAL = 101
 
 export const PHOTO_SPOT_MAX_GALLERY = 4
 export const PHOTO_SPOT_MAX_IMAGES = 5 // 1 hero + 4 gallery
