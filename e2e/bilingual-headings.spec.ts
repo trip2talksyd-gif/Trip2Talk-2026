@@ -80,17 +80,11 @@ test.describe('bilingual headings', () => {
     await assertBiDisplayHeading(page, COPY.discover.en, COPY.discover.th)
   })
 
-  test('homepage keeps Capture Moments video section fonts', async ({ page }) => {
+  test('homepage no longer renders Capture Moments video intro', async ({ page }) => {
     await page.goto('/')
-    const root = biHeading(page, COPY.home.en, COPY.home.th)
-    await root.scrollIntoViewIfNeeded()
-    await assertBiDisplayHeading(page, COPY.home.en, COPY.home.th)
-
-    const thLine = root.locator('[lang="th"]')
-    const thText = (await thLine.innerText()).trim()
-    expect(thText, 'preceding vowel ไ').toContain('\u0E44')
-    expect(thText, 'mai han-akat ็').toContain('\u0E47')
-    expect(thText, 'sara ii + mai ek ี่').toContain('\u0E35\u0E48')
+    await expect(page.getByRole('heading', { name: COPY.discover.en })).toBeVisible()
+    await expect(page.getByText("We're Not a")).toBeVisible()
+    await expect(page.locator('[data-bi-heading]').filter({ hasText: COPY.home.en })).toHaveCount(0)
   })
 
   test('home hero Thai stays Noto Serif Thai when TH is primary', async ({ page }) => {
@@ -98,8 +92,7 @@ test.describe('bilingual headings', () => {
       localStorage.setItem('trip2talk_lang', 'th')
     })
     await page.goto('/')
-    const root = biHeading(page, COPY.home.en, COPY.home.th)
-    await root.scrollIntoViewIfNeeded()
+    const root = biHeading(page, COPY.discover.en, COPY.discover.th)
     await expect(root).toBeVisible()
 
     async function order(): Promise<string[]> {

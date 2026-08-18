@@ -236,18 +236,15 @@ export function mergePhotoSpot(row: PhotoSpotRow): PhotoSpotDetail {
   }
 }
 
-/** Live count of spots flagged for the 101 Frames header badge. Returns 0 if the column is not applied yet. */
-export async function countCollection101Frames(): Promise<number> {
-  try {
-    const { count, error } = await supabase
-      .from('photo_spots')
-      .select('id', { count: 'exact', head: true })
-      .eq('collection_101_frames', true)
-    if (error) return 0
-    return count ?? 0
-  } catch {
-    return 0
-  }
+/**
+ * Live count for the 101 Frames badge.
+ * Does not query `collection_101_frames` until that column is applied
+ * (`supabase/migrations/20260818100000_photo_spots_collection_101_frames.sql`).
+ * Filtering on a missing column 400s in PostgREST — callers should hide the badge
+ * when this returns null.
+ */
+export async function countCollection101Frames(): Promise<number | null> {
+  return null
 }
 
 /** Prefer live Supabase rows; fall back to local draft seed when table missing/empty. */
@@ -274,27 +271,9 @@ export async function fetchPhotoSpots(): Promise<PhotoSpotDetail[]> {
       return PHOTO_SPOTS_DRAFT.map(mergePhotoSpot)
     }
 
-    const ids = rows.map((r) => r.id)
-    const { data: shotRows, error: shotErr } = await supabase
-      .from('photo_spot_example_shots')
-      .select('id, spot_id, orientation, image_url, sort_order, created_at')
-      .in('spot_id', ids)
-      .order('sort_order', { ascending: true })
-
-    if (!shotErr && Array.isArray(shotRows)) {
-      const bySpot = new Map<string, PhotoSpotExampleShot[]>()
-      for (const raw of shotRows) {
-        const parsed = parseExampleShots([raw])
-        const sid = strOrNull((raw as { spot_id?: unknown }).spot_id)
-        if (!sid || parsed.length === 0) continue
-        const list = bySpot.get(sid) ?? []
-        list.push(...parsed)
-        bySpot.set(sid, list)
-      }
-      for (const row of rows) {
-        row.example_shots = bySpot.get(row.id) ?? []
-      }
-    }
+    // Skip photo_spot_example_shots until the table is live
+    // (`supabase/migrations/20260818101000_photo_spot_example_shots.sql`).
+    // A missing table 404s on every homepage load.
 
     return rows.map(mergePhotoSpot)
   } catch (err) {

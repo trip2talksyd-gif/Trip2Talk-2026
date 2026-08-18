@@ -2,8 +2,8 @@ import { Navigate } from 'react-router-dom'
 
 /**
  * Retired from `/`. Discover is the homepage.
- * Unique video + “We're Not a Tour Company” live on Discover via
- * HomeVideoIntro and HomePositioningSection.
+ * Positioning copy lives on Discover via HomePositioningSection.
+ * HomeVideoIntro is kept for reuse off the homepage.
  */
 export default function HomePage() {
   return <Navigate to="/" replace />
