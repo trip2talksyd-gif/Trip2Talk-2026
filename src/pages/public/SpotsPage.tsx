@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { List, Map as MapIcon, X } from 'lucide-react'
+import { ChevronRight, List, Map as MapIcon, X } from 'lucide-react'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import SpotMedia from '../../components/spots/SpotMedia'
 import SpotListCard from '../../components/spots/SpotListCard'
