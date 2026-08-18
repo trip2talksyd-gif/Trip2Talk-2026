@@ -29,7 +29,7 @@ export default function ExperiencePage() {
         <span className="mt-1 block font-thai">{body.th}</span>
       </p>
       <Link
-        to="/discover"
+        to="/"
         className="mt-8 inline-flex rounded-full bg-teal-dark px-5 py-3 text-sm font-semibold text-white"
       >
         {back.en}

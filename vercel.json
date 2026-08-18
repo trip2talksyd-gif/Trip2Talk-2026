@@ -5,6 +5,13 @@
       "schedule": "0 22 * * *"
     }
   ],
+  "redirects": [
+    {
+      "source": "/discover",
+      "destination": "/",
+      "permanent": true
+    }
+  ],
   "headers": [
     {
       "source": "/hero/(.*)",

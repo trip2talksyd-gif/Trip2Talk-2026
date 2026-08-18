@@ -1,4 +1,4 @@
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { Menu, User, X } from 'lucide-react'
 import { useState } from 'react'
 import { useLang } from '../../hooks/useLang'
@@ -10,7 +10,7 @@ import BrandLogo from '../brand/BrandLogo'
 import ShareButton from '../ui/ShareButton'
 
 const menuLinks = [
-  { to: '/discover', key: 'nav.discover' as const },
+  { to: '/', key: 'nav.discover' as const },
   { to: '/photo-guide', key: 'nav.photoGuide' as const },
   { to: '/trips', key: 'nav.trips' as const },
   { to: '/calendar', key: 'nav.calendar' as const },
@@ -24,7 +24,7 @@ const menuLinks = [
 ]
 
 const desktopNavOrder = [
-  '/discover',
+  '/',
   '/photo-guide',
   '/trips',
   '/calendar',
@@ -35,18 +35,11 @@ const desktopNavOrder = [
 export default function PublicLayout() {
   const { t, setLang, lang } = useLang()
   const [menuOpen, setMenuOpen] = useState(false)
-  const location = useLocation()
-  const isHome = location.pathname === '/'
 
   return (
-    <div
-      className={`flex h-full max-h-full flex-col overflow-hidden ${
-        isHome ? 'bg-[#0a1214]' : 'bg-cream'
-      }`}
-    >
+    <div className="flex h-full max-h-full flex-col overflow-hidden bg-cream">
       <OfflineBanner />
 
-      {!isHome && (
       <header
         className="z-50 shrink-0 border-b border-line bg-card/95 pt-[env(safe-area-inset-top)] backdrop-blur"
       >
@@ -72,6 +65,7 @@ export default function PublicLayout() {
                 <NavLink
                   key={to}
                   to={to}
+                  end={to === '/'}
                   className={({ isActive }) =>
                     `text-[12.5px] font-semibold leading-snug transition-colors ${
                       isActive ? 'text-teal-700' : 'text-ink-soft hover:text-ink'
@@ -153,6 +147,7 @@ export default function PublicLayout() {
                 <li key={to}>
                   <NavLink
                     to={to}
+                    end={to === '/'}
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
                       `block rounded-editorial px-3 py-2 text-sm ${
@@ -168,27 +163,16 @@ export default function PublicLayout() {
           </nav>
         )}
       </header>
-      )}
 
-      {isHome ? (
-        <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <div className="app-scroll min-h-0 flex-1" data-app-scroll>
-            <Outlet />
-          </div>
-        </div>
-      ) : (
-        <>
-          <div className="app-scroll" data-app-scroll>
-            <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-24 pt-4 text-ink sm:px-6 lg:px-10">
-              <Outlet />
-            </main>
+      <div className="app-scroll" data-app-scroll>
+        <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-24 pt-4 text-ink sm:px-6 lg:px-10">
+          <Outlet />
+        </main>
 
-            <PublicFooter />
-          </div>
+        <PublicFooter />
+      </div>
 
-          <AppTabBar />
-        </>
-      )}
+      <AppTabBar />
 
       <InstallPrompt />
     </div>
