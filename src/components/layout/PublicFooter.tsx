@@ -44,7 +44,7 @@ export default function PublicFooter() {
   const socials = enabledSocialProfiles()
 
   return (
-    <footer className="site-footer bg-teal-900 px-6 pb-6 pt-10 text-[#cfe4de] sm:px-10">
+    <footer className="site-footer bg-teal-900 px-6 pb-24 pt-8 text-[#cfe4de] sm:px-10">
       <div className="mx-auto max-w-[1150px]">
         <div className="grid gap-8 md:grid-cols-[1.4fr_1fr_1fr_1fr] md:gap-8">
           <div>

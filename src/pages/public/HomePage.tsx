@@ -2,7 +2,8 @@ import { Navigate } from 'react-router-dom'
 
 /**
  * Retired from `/`. Discover is the homepage.
- * Positioning copy lives on Discover via HomePositioningSection.
+ * Condensed positioning (v2) sits after Saen's latest work on Discover.
+ * Full positioning copy lives on /about.
  * HomeVideoIntro is kept for reuse off the homepage.
  */
 export default function HomePage() {
