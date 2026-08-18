@@ -20,7 +20,7 @@ export default defineConfig({
         'brand/trip2talk-og.jpg',
       ],
       manifest: {
-        name: 'Trip2Talk - Thai Photo Tours Australia',
+        name: 'Trip2Talk',
         short_name: 'Trip2Talk',
         description: 'Private photo journeys for Thai travelers in Australia',
         theme_color: '#16262b',
