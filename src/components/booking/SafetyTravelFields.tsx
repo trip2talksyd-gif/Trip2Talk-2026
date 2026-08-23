@@ -7,6 +7,9 @@ const OSHC_RISK_EN =
 const OSHC_RISK_TH =
   'ฉันรับทราบว่าประกันนักเรียน (OSHC) ไม่คุ้มครองการส่งร่างกลับประเทศ และยินดีรับความเสี่ยงเอง'
 
+export const TRAVEL_INSURANCE_LINK = 'https://www.covermore.com.au/travel-insurance'
+export const WORLD_NOMADS_LINK = 'https://www.worldnomads.com/'
+
 export type SafetyTravelValue = WaiverSafetyInfo & {
   flight: WaiverFlightInfo
 }
@@ -193,6 +196,21 @@ export default function SafetyTravelFields({ tripCode, value, onChange, touched 
         </div>
 
         <div className="mt-3 border-t border-line/60 pt-3">
+          {needsFlightPassport && (
+            <div className="mb-3 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2">
+              <p className="text-[11px] leading-snug text-ink">
+                Travel insurance is mandatory for all New Zealand trips. If you&apos;d like us to
+                book your flights on your behalf, the insurance cost will be included in your
+                flight price — priced according to Jetstar&apos;s current travel insurance rate at
+                time of booking.
+                <span className="mt-1 block font-thai text-[10px] text-ink-soft">
+                  ทริปนิวซีแลนด์ทุกทริปบังคับต้องมีประกันการเดินทาง หากให้ Trip2Talk
+                  ช่วยจองตั๋วเครื่องบินให้ ค่าประกันจะถูกรวมไปในราคาตั๋วเครื่องบิน
+                  ตามเรทประกันเดินทางของสายการบิน Jetstar ณ วันที่จอง
+                </span>
+              </p>
+            </div>
+          )}
           <p className="text-[10px] font-semibold text-ink">
             {insTypeBi.en}
             <span className="mt-px block font-thai font-medium text-ink-soft">{insTypeBi.th}</span>
@@ -265,6 +283,39 @@ export default function SafetyTravelFields({ tripCode, value, onChange, touched 
 
           {value.insurance_type === 'travel_insurance' && (
             <div className="mt-2.5 grid gap-2.5 sm:grid-cols-2">
+              <div className="rounded-xl border border-line bg-card px-3 py-2 sm:col-span-2">
+                <p className="text-[10.5px] text-ink">
+                  Don&apos;t have travel insurance yet? Compare quotes:
+                  <span className="mt-0.5 block font-thai text-[10px] text-ink-soft">
+                    ยังไม่มีประกันเดินทาง? เทียบราคาได้ที่นี่:
+                  </span>
+                </p>
+                <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
+                  <a
+                    href={TRAVEL_INSURANCE_LINK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10.5px] font-semibold text-teal-700"
+                  >
+                    Cover-More
+                  </a>
+                  <a
+                    href={WORLD_NOMADS_LINK}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10.5px] font-semibold text-teal-700"
+                  >
+                    World Nomads
+                  </a>
+                </div>
+                <p className="mt-1.5 text-[10px] text-ink-soft">
+                  Trip2Talk is not an insurance provider — this link is provided for convenience
+                  only.
+                  <span className="mt-0.5 block font-thai text-[10px] text-ink-soft/85">
+                    Trip2Talk ไม่ใช่ผู้ให้บริการประกัน ลิงก์นี้ให้ไว้เพื่อความสะดวกเท่านั้น
+                  </span>
+                </p>
+              </div>
               <label className="block">
                 <span className="text-[10px] font-semibold text-ink">
                   {travelProvBi.en}
