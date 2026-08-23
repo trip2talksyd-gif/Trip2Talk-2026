@@ -133,12 +133,12 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
       th: 'ทริปไฮไลท์ South Island 6 วัน — จัดทุกอย่างครบ ตั๋วเที่ยวบิน ที่พัก Milford Sound ถึงแล้วถ่ายรูปได้เลย',
     },
     highlights: {
-      en: ['Lake Tekapo & Church of the Good Shepherd', 'Milford Sound fiord cruise', 'Queenstown & Southern Alps'],
-      th: ['Lake Tekapo & Church of the Good Shepherd', 'ล่องเรือ Milford Sound', 'Queenstown & Southern Alps'],
+      en: ['Lake Tekapo & Church of the Good Shepherd', 'Milford Sound fiord (cruise optional)', 'Queenstown & Southern Alps'],
+      th: ['Lake Tekapo & Church of the Good Shepherd', 'ฟยอร์ด Milford Sound (ล่องเรือเพิ่มเติม)', 'Queenstown & Southern Alps'],
     },
     includes: {
-      en: ['SUV & driver 6 days', '5 nights accommodation (we coordinate booking)', 'Milford Sound cruise', 'Pro photographer', 'Flight booking assistance'],
-      th: ['รถ SUV & คนขับ 6 วัน', 'ที่พัก 5 คืน (เราช่วยจอง)', 'Milford Sound cruise', 'ช่างภาพมืออาชีพ', 'ช่วยจองตั๋วเครื่องบิน'],
+      en: ['SUV & driver 6 days', '5 nights accommodation (we coordinate booking)', 'Pro photographer', 'Flight booking assistance', 'National park entry fees', 'Drinking water throughout the trip'],
+      th: ['รถ SUV & คนขับ 6 วัน', 'ที่พัก 5 คืน (เราช่วยจอง)', 'ช่างภาพมืออาชีพ', 'ช่วยจองตั๋วเครื่องบิน', 'ค่าเข้าอุทยานแห่งชาติ', 'น้ำดื่มตลอดการเดินทาง'],
     },
     excludes: {
       en: [
@@ -146,12 +146,16 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
         'Meals',
         'Travel insurance',
         'NZ visa / NZeTA for non-Australian PR/citizens (optional $100 AUD apply-on-behalf + visa cost)',
+        'Milford Sound cruise (approx $120-130 AUD)',
+        'Skyline Queenstown gondola',
       ],
       th: [
         'ตั๋วเครื่องบิน (เราช่วยจอง)',
         'ค่าอาหาร',
         'ประกันการเดินทาง',
         'วีซ่านิวซีแลนด์ (NZeTA) สำหรับผู้ที่ไม่มี PR/สัญชาติออสเตรเลีย (บริการช่วยขอออนไลน์ $100 AUD + ค่าวีซ่าจริง — ไม่บังคับ)',
+        'ค่าล่องเรือ Milford Sound (ประมาณ $120-130 AUD)',
+        'ค่าขึ้นกระเช้า Skyline Queenstown',
       ],
     },
     accommodationNote: {
