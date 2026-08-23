@@ -20,6 +20,8 @@ import {
   staffShellClass,
 } from '../../components/app/staffUi'
 import { currentAuTaxYearEnding } from '../../lib/auTaxYear'
+import { categoryTotals, monthExpenseTotal } from '../../lib/expenseRecurrence'
+import { BarLine, Donut } from '../../components/app/TaxCharts'
 
 const DEFAULT_TY_ENDING = currentAuTaxYearEnding()
 const YEAR_OPTIONS = [DEFAULT_TY_ENDING, DEFAULT_TY_ENDING - 1, DEFAULT_TY_ENDING - 2]
@@ -48,7 +50,7 @@ export default function TaxSummaryPage() {
     fetchYearSummary(taxYearEnding, { mode: 'tax_year' })
       .then((summary) => {
         setSummary(summary)
-        setRows(summarizeByTrip(summary))
+        setRows(summarizeByTrip(summary, taxYearEnding))
       })
       .catch((err) => {
         if (err instanceof StaffSessionExpiredError) {
@@ -96,6 +98,32 @@ export default function TaxSummaryPage() {
       .sort((a, b) => b.count - a.count)
   }, [summary])
   const sourceTotal = sourceBreakdown.reduce((sum, s) => sum + s.count, 0)
+
+  const monthBars = useMemo(() => {
+    if (!summary) return []
+    return Array.from({ length: 12 }, (_, i) => {
+      const d = new Date(taxYearEnding - 1, 6 + i, 1)
+      const calMonth = d.getMonth()
+      const calYear = d.getFullYear()
+      const income = summary.bookings.reduce((s, b) => {
+        if (b.cancelled_at || b.booking_status === 'cancelled') return s
+        const booked = new Date(b.booked_at)
+        if (booked.getFullYear() !== calYear || booked.getMonth() !== calMonth) return s
+        return s + (b.amount_paid_aud ?? 0)
+      }, 0)
+      return {
+        label: d.toLocaleString('en-AU', { month: 'short' }),
+        income,
+        expense: monthExpenseTotal(summary.expenses, taxYearEnding, calMonth),
+      }
+    })
+  }, [summary, taxYearEnding])
+
+  const byCategory = useMemo(
+    () => (summary ? categoryTotals(summary.expenses, taxYearEnding) : []),
+    [summary, taxYearEnding],
+  )
+  const hasChartData = monthBars.some((m) => m.income || m.expense)
 
   function exportCsv() {
     const csv = tripFinancialsToCsv(rows)
@@ -194,6 +222,39 @@ export default function TaxSummaryPage() {
                     )
                   })}
                 </ul>
+              </section>
+            )}
+
+            {(hasChartData || byCategory.length > 0) && (
+              <section className="grid gap-4 lg:grid-cols-2">
+                <StaffCard>
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-cream-muted">
+                    Income vs expense
+                  </h2>
+                  <p className="mt-0.5 text-[10px] text-cream-muted">
+                    แท่งทอง = รายรับ · แท่งปะการัง = รายจ่าย · เส้น = รายรับรายเดือน
+                  </p>
+                  {hasChartData ? (
+                    <div className="mt-3">
+                      <BarLine months={monthBars} />
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-cream-muted">ยังไม่มีข้อมูลสำหรับกราฟปีนี้</p>
+                  )}
+                </StaffCard>
+                <StaffCard>
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-cream-muted">
+                    Expense by category
+                  </h2>
+                  <p className="mt-0.5 text-[10px] text-cream-muted">ตามหมวด ATO ในปีภาษีนี้</p>
+                  {byCategory.length > 0 ? (
+                    <div className="mt-3">
+                      <Donut parts={byCategory} />
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm text-cream-muted">ยังไม่มีรายจ่ายในปีนี้</p>
+                  )}
+                </StaffCard>
               </section>
             )}
 

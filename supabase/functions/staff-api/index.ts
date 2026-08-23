@@ -855,7 +855,33 @@ Deno.serve(async (req) => {
 
       case 'insert_expense': {
         const expense = params as Record<string, unknown>
-        const { data, error } = await admin.from('expenses').insert(expense).select().single()
+        const frequency =
+          expense.frequency === 'monthly' || expense.frequency === 'yearly'
+            ? expense.frequency
+            : 'once'
+        const endedIso =
+          typeof expense.ended_iso === 'string' && expense.ended_iso.trim()
+            ? expense.ended_iso.trim().slice(0, 10)
+            : null
+        const row: Record<string, unknown> = {
+          description: expense.description,
+          amount_aud: expense.amount_aud,
+          gst_amount_aud: expense.gst_amount_aud ?? 0,
+          ato_category: expense.ato_category,
+          expense_date: expense.expense_date,
+          receipt_url: expense.receipt_url ?? null,
+          created_by: expense.created_by ?? null,
+          trip_code: expense.trip_code ?? null,
+          frequency,
+          ended_iso: frequency === 'once' ? null : endedIso,
+        }
+        let { data, error } = await admin.from('expenses').insert(row).select().single()
+        if (error && /frequency|ended_iso/i.test(error.message ?? '')) {
+          const { frequency: _freq, ended_iso: _ended, ...legacy } = row
+          const retry = await admin.from('expenses').insert(legacy).select().single()
+          data = retry.data
+          error = retry.error
+        }
         if (error) throw error
         return json({ data })
       }
@@ -3032,7 +3058,7 @@ Deno.serve(async (req) => {
         const expenseStart = start.slice(0, 10)
         const expenseEnd = end.slice(0, 10)
 
-        const [bookingsRes, expensesRes] = await Promise.all([
+        const [bookingsRes, inWindowRes] = await Promise.all([
           admin
             .from('tour_bookings')
             .select('*')
@@ -3045,12 +3071,28 @@ Deno.serve(async (req) => {
             .lt('expense_date', expenseEnd),
         ])
         if (bookingsRes.error) throw bookingsRes.error
-        if (expensesRes.error) throw expensesRes.error
+        if (inWindowRes.error) throw inWindowRes.error
+
+        const priorRecurring = await admin
+          .from('expenses')
+          .select('*')
+          .in('frequency', ['monthly', 'yearly'])
+          .lt('expense_date', expenseStart)
+          .or(`ended_iso.is.null,ended_iso.gte.${expenseStart}`)
+        const byId = new Map<string, Record<string, unknown>>()
+        for (const row of inWindowRes.data ?? []) {
+          byId.set(String((row as { id: string }).id), row as Record<string, unknown>)
+        }
+        if (!priorRecurring.error) {
+          for (const row of priorRecurring.data ?? []) {
+            byId.set(String((row as { id: string }).id), row as Record<string, unknown>)
+          }
+        }
 
         return json({
           data: {
             bookings: bookingsRes.data,
-            expenses: expensesRes.data,
+            expenses: [...byId.values()],
             range: { start, end, mode: useTaxYear ? 'tax_year' : 'calendar', year: y },
           },
         })

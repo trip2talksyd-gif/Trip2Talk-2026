@@ -189,6 +189,8 @@ export interface StaffProfile {
   created_at: string
 }
 
+export type ExpenseFrequency = 'once' | 'monthly' | 'yearly'
+
 export interface Expense {
   id: string
   description: string
@@ -201,6 +203,10 @@ export interface Expense {
   created_at: string
   /** Optional — which trip this was spent on. null/empty = general business expense. */
   trip_code?: string | null
+  /** once (default) | monthly | yearly — expanded in tax-year totals. */
+  frequency?: ExpenseFrequency
+  /** Inclusive last occurrence for monthly/yearly; null = still recurring. */
+  ended_iso?: string | null
 }
 
 export interface ComplianceItem {

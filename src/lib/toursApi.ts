@@ -1,3 +1,4 @@
+import { occurrencesInYear } from './expenseRecurrence'
 import { compressUploadImage } from './compressUploadImage'
 import { supabase, supabaseConfig } from './supabase'
 import { callStaffApi, clearStaffSession, StaffSessionExpiredError } from './supabaseStaff'
@@ -1449,6 +1450,7 @@ export async function setAiContentGenerationEnabled(enabled: boolean): Promise<A
 export type YearSummary = {
   bookings: TourBooking[]
   expenses: Expense[]
+  range?: { start: string; end: string; mode: string; year: number }
 }
 
 export async function fetchYearSummary(
@@ -1470,8 +1472,9 @@ export type TripFinancialRow = {
   bookings_count: number
 }
 
-export function summarizeByTrip(summary: YearSummary): TripFinancialRow[] {
+export function summarizeByTrip(summary: YearSummary, taxYearEnding?: number): TripFinancialRow[] {
   const rows = new Map<string, TripFinancialRow>()
+  const year = taxYearEnding ?? summary.range?.year ?? new Date().getFullYear()
 
   function ensure(tripCode: string): TripFinancialRow {
     let row = rows.get(tripCode)
@@ -1490,7 +1493,7 @@ export function summarizeByTrip(summary: YearSummary): TripFinancialRow[] {
   }
   for (const e of summary.expenses) {
     const row = ensure(e.trip_code || '(General / non-trip)')
-    row.expense_aud += e.amount_aud ?? 0
+    row.expense_aud += occurrencesInYear(e, year).reduce((s, o) => s + o.amount, 0)
   }
   for (const row of rows.values()) {
     row.profit_aud = row.revenue_aud - row.expense_aud
