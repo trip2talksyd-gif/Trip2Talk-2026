@@ -71,7 +71,7 @@ export default function TripBookButton({
 
   const to = detailOnly
     ? `/trips/${tour.trip_code}`
-    : `/waiver?trip=${tour.trip_code}${squarePayQuerySuffix()}`
+    : `/booking?trip=${tour.trip_code}${squarePayQuerySuffix()}`
   const labelEn = detailOnly ? t('btn.viewTrip') : t('btn.bookNow')
   const labelTh = detailOnly ? 'ดูทริป' : 'จองเลย'
 

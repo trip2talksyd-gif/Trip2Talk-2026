@@ -13,7 +13,7 @@ type Props = {
 export default function TripStickyBookBar({ tour }: Props) {
   const { tt } = useLang()
   const bookable = isTourBookable(tour)
-  const to = bookable ? `/waiver?trip=${tour.trip_code}${squarePayQuerySuffix()}` : undefined
+  const to = bookable ? `/booking?trip=${tour.trip_code}${squarePayQuerySuffix()}` : undefined
   const book = tt('btn.bookNow')
   const soon = tt('btn.comingSoon')
   const from = tt('detail.fromPrice')
