@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import { fetchToursAdmin, formatAud, insertExpense } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
-import type { Tour } from '../../types/tour'
+import type { ExpenseFrequency, Tour } from '../../types/tour'
+import { FREQ_LABEL } from '../../lib/expenseRecurrence'
 import { useToast } from '../../components/ui/Toast'
 import {
   staffShellClass,
@@ -75,6 +76,8 @@ export default function ExpenseEntryPage() {
   const [hasGst, setHasGst] = useState(true)
   const [gstAmount, setGstAmount] = useState('')
   const [tripCode, setTripCode] = useState('')
+  const [frequency, setFrequency] = useState<ExpenseFrequency>('once')
+  const [endedIso, setEndedIso] = useState('')
   const [tours, setTours] = useState<Tour[]>([])
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -135,6 +138,8 @@ export default function ExpenseEntryPage() {
         receipt_url: null,
         created_by: null,
         trip_code: tripCode || null,
+        frequency,
+        ended_iso: frequency === 'once' ? null : endedIso || null,
       })
       toast('Expense saved', 'success')
       navigate('/app/owner')
@@ -286,6 +291,39 @@ export default function ExpenseEntryPage() {
               ))}
             </StaffSelect>
           </StaffField>
+
+          <StaffField label="Frequency / ความถี่">
+            <StaffSelect
+              value={frequency}
+              onChange={(e) => setFrequency(e.target.value as ExpenseFrequency)}
+            >
+              {(['once', 'monthly', 'yearly'] as const).map((freq) => (
+                <option key={freq} value={freq}>
+                  {FREQ_LABEL[freq].en} / {FREQ_LABEL[freq].th}
+                </option>
+              ))}
+            </StaffSelect>
+            <span className="mt-1 block text-xs text-cream-muted">
+              Monthly / yearly is saved once — tax totals repeat until the ended date.
+              <span className="mt-0.5 block font-thai">
+                รายเดือน / รายปี บันทึกครั้งเดียว สรุปภาษีจะนับซ้ำจนกว่าจะใส่วันสิ้นสุด
+              </span>
+            </span>
+          </StaffField>
+
+          {frequency !== 'once' && (
+            <StaffField label="Ended date / วันสิ้นสุด (optional)">
+              <StaffInput
+                type="date"
+                value={endedIso}
+                onChange={(e) => setEndedIso(e.target.value)}
+              />
+              <span className="mt-1 block text-xs text-cream-muted">
+                Leave empty if this cost is still running
+                <span className="mt-0.5 block font-thai">เว้นว่างถ้ายังจ่ายต่อเนื่อง</span>
+              </span>
+            </StaffField>
+          )}
 
           <StaffField label="ATO category">
             <StaffSelect
