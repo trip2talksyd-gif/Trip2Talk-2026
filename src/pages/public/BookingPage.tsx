@@ -1,14 +1,16 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { ArrowLeft, Check } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
-import BookingJourneyTimeline from '../../components/booking/BookingJourneyTimeline'
 import BookingPaymentMethodPicker, {
   type CustomerPaymentChoice,
 } from '../../components/booking/BookingPaymentMethodPicker'
 import PayIdDepositPanel from '../../components/booking/PayIdDepositPanel'
+import SafetyTravelFields, {
+  validateSafetyTravel,
+  type SafetyTravelValue,
+} from '../../components/booking/SafetyTravelFields'
 import SquareCardElement from '../../components/booking/SquareCardElement'
-import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import {
   fetchTourByCode,
   formatAud,
@@ -19,12 +21,7 @@ import {
 } from '../../lib/toursApi'
 import { SeatsFullError } from '../../types/errors'
 import { tourDurationLabel, isOneDayTrip } from '../../lib/tourDisplay'
-import {
-  isWaiverSigned,
-  getWaiverSession,
-  setConfirmationSummary,
-  markConfirmationDepositPaid,
-} from '../../lib/waiverSession'
+import { setConfirmationSummary, markConfirmationDepositPaid } from '../../lib/waiverSession'
 import { readPreferredCustomerPayment } from '../../lib/preferredPayment'
 import {
   getSupabaseErrorMessage,
@@ -97,7 +94,6 @@ export default function BookingPage() {
   const [loadError, setLoadError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [touched, setTouched] = useState(false)
-  const [reference, setReference] = useState('')
   const [slipFile, setSlipFile] = useState<File | null>(null)
   const [paymentChoice, setPaymentChoice] = useState<CustomerPaymentChoice>(() =>
     readPreferredCustomerPayment(params.get('pay')),
@@ -108,51 +104,40 @@ export default function BookingPage() {
   const [payIdAmountKind, setPayIdAmountKind] = useState<'deposit' | 'custom'>('deposit')
   const [payIdCustomRaw, setPayIdCustomRaw] = useState('')
 
-  const [form, setForm] = useState<FormState>(() => {
-    const session = tripCode ? getWaiverSession(tripCode) : null
-    const safety = session?.safety
-    const flight = session?.flight
-    return {
-      first_name_en: '',
-      last_name_en: '',
-      passport_number: '',
-      date_of_birth: '',
-      email: '',
-      phone: '',
-      emergency_contact_name: safety?.emergency_contact_name ?? '',
-      emergency_contact_phone: safety?.emergency_contact_phone ?? '',
-      dietary_requirements: '',
-      medical_conditions: safety?.medical_conditions ?? '',
-      allergies: safety?.allergies ?? '',
-      insurance_type: safety?.insurance_type ?? 'oshc',
-      oshc_membership_number: safety?.oshc_membership_number ?? '',
-      oshc_risk_acknowledged: safety?.oshc_risk_acknowledged ?? false,
-      insurance_provider:
-        safety?.travel_insurance_provider ?? safety?.insurance_provider ?? '',
-      insurance_policy_number:
-        safety?.travel_insurance_policy_number ?? safety?.insurance_policy_number ?? '',
-      travel_insurance_provider: safety?.travel_insurance_provider ?? '',
-      travel_insurance_policy_number: safety?.travel_insurance_policy_number ?? '',
-      other_notes: safety?.other_notes ?? '',
-      oshc_provider: '',
-      oshc_expiry: '',
-      flight_booking_requested: flight?.requested ?? false,
-      flight_legal_first_name: flight?.flight_legal_first_name ?? '',
-      flight_legal_last_name: flight?.flight_legal_last_name ?? '',
-      flight_date_of_birth: flight?.flight_date_of_birth ?? '',
-      flight_passport_number: flight?.flight_passport_number ?? '',
-      flight_nationality: flight?.flight_nationality ?? '',
-      flight_frequent_flyer_number: flight?.flight_frequent_flyer_number ?? '',
-    }
+  const [form, setForm] = useState<FormState>({
+    first_name_en: '',
+    last_name_en: '',
+    passport_number: '',
+    date_of_birth: '',
+    email: '',
+    phone: '',
+    emergency_contact_name: '',
+    emergency_contact_phone: '',
+    dietary_requirements: '',
+    medical_conditions: '',
+    allergies: '',
+    insurance_type: 'oshc',
+    oshc_membership_number: '',
+    oshc_risk_acknowledged: false,
+    insurance_provider: '',
+    insurance_policy_number: '',
+    travel_insurance_provider: '',
+    travel_insurance_policy_number: '',
+    other_notes: '',
+    oshc_provider: '',
+    oshc_expiry: '',
+    flight_booking_requested: false,
+    flight_legal_first_name: '',
+    flight_legal_last_name: '',
+    flight_date_of_birth: '',
+    flight_passport_number: '',
+    flight_nationality: '',
+    flight_frequent_flyer_number: '',
   })
 
   useEffect(() => {
     if (!tripCode) {
       setLoading(false)
-      return
-    }
-    if (!isWaiverSigned(tripCode)) {
-      navigate(`/waiver?trip=${tripCode}`, { replace: true })
       return
     }
     fetchTourByCode(tripCode)
@@ -185,10 +170,42 @@ export default function BookingPage() {
     return e
   }, [form, touched, t])
 
+  const safetyValue: SafetyTravelValue = {
+    emergency_contact_name: form.emergency_contact_name,
+    emergency_contact_phone: form.emergency_contact_phone,
+    allergies: form.allergies,
+    medical_conditions: form.medical_conditions,
+    other_notes: form.other_notes,
+    insurance_type: form.insurance_type,
+    oshc_membership_number: form.oshc_membership_number,
+    oshc_risk_acknowledged: form.oshc_risk_acknowledged,
+    travel_insurance_provider: form.travel_insurance_provider,
+    travel_insurance_policy_number: form.travel_insurance_policy_number,
+    insurance_provider: form.insurance_provider,
+    insurance_policy_number: form.insurance_policy_number,
+    flight: {
+      requested: form.flight_booking_requested,
+      flight_legal_first_name: form.flight_legal_first_name,
+      flight_legal_last_name: form.flight_legal_last_name,
+      flight_date_of_birth: form.flight_date_of_birth,
+      flight_passport_number: form.flight_passport_number,
+      flight_nationality: form.flight_nationality,
+      flight_frequent_flyer_number: form.flight_frequent_flyer_number,
+    },
+  }
+
+  const safetyErrors = validateSafetyTravel(tripCode, safetyValue)
+
   const isValid =
     REQUIRED.every((k) => form[k].trim()) &&
     isValidEmail(form.email) &&
-    isValidAuMobile(form.phone)
+    isValidAuMobile(form.phone) &&
+    Object.keys(safetyErrors).length === 0
+
+  function goToConfirmation(bookingRef: string, paid = false) {
+    const paidQ = paid ? '&paid=1' : ''
+    navigate(`/booking/confirmation?ref=${encodeURIComponent(bookingRef)}${paidQ}`)
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -206,7 +223,6 @@ export default function BookingPage() {
     setSubmitting(true)
 
     const bookingRef = `T2T-${tour.trip_code}-${Date.now().toString(36).toUpperCase()}`
-    const waiver = getWaiverSession(tripCode)
 
     try {
       let slipUrl: string | null = null
@@ -267,8 +283,8 @@ export default function BookingPage() {
         flight_frequent_flyer_number: form.flight_booking_requested
           ? form.flight_frequent_flyer_number.trim() || null
           : null,
-        waiver_signed: true,
-        waiver_signed_at: waiver?.signedAt ?? new Date().toISOString(),
+        waiver_signed: false,
+        waiver_signed_at: null,
         booking_status: 'pending_payment',
         amount_paid_aud: 0,
         payment_method: paymentChoice === 'square' ? 'square' : 'payid',
@@ -286,7 +302,7 @@ export default function BookingPage() {
         coverImageUrl: tour.cover_image_url,
         departureDate: tour.departure_date,
         durationLabel: tourDurationLabel(tour, 'en'),
-        waiverSigned: true,
+        waiverSigned: false,
         safetyInfoOnFile: Boolean(
           form.emergency_contact_name.trim() && form.emergency_contact_phone.trim(),
         ),
@@ -313,8 +329,8 @@ export default function BookingPage() {
         return
       }
 
-      setReference(bookingRef)
       toast(t('toast.bookingSuccess'), 'success')
+      goToConfirmation(bookingRef)
     } catch (err) {
       if (err instanceof SeatsFullError) {
         toast('ที่นั่งเต็มแล้วครับ กรุณาเลือกทริปอื่น', 'error')
@@ -353,91 +369,6 @@ export default function BookingPage() {
     )
   }
 
-  if (reference) {
-    return (
-      <div className="success-screen -mx-4 sm:-mx-6 lg:mx-0 lg:rounded-2xl">
-        <div className="success-check" aria-hidden>
-          <Check className="h-7 w-7" strokeWidth={2.5} />
-        </div>
-        <BiDisplayHeading
-          en="Booking Confirmed!"
-          th="จองสำเร็จแล้ว!"
-          as="h2"
-          thAs="p"
-          enClassName=""
-          thClassName="th-sub font-thai"
-        />
-        <div className="success-ref">{reference}</div>
-
-        {/* .mini-trip — booked trip recap card */}
-        {tour && (
-          <div className="mini-trip w-full">
-            <TripCoverImage src={tour.cover_image_url} alt="" className="mini-trip-fallback" compact />
-            <div className="min-w-0">
-              <b className="truncate">{lang === 'th' ? tour.name_th : tour.name_en}</b>
-              <span>
-                {tourDurationLabel(tour, lang)}
-                {tour.departure_date ? ` · ${formatDate(tour.departure_date, lang)}` : ''}
-                {` · ${lang === 'th' ? '1 คน' : '1 traveler'}`}
-              </span>
-            </div>
-          </div>
-        )}
-
-        <a
-          href={FACEBOOK_PAGE_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="fb-next-card"
-        >
-          <span className="fb-ic" aria-hidden>
-            ✉
-          </span>
-          <div>
-            <b>
-              {lang === 'th'
-                ? 'ขั้นต่อไป: Inbox หาเราทาง Facebook'
-                : 'Next: message us on Facebook'}
-              <span className="th" style={{ display: 'block', fontWeight: 500 }}>
-                {lang === 'th'
-                  ? 'Next: message us on Facebook'
-                  : 'ขั้นต่อไป: Inbox หาเราทาง Facebook'}
-              </span>
-            </b>
-            <span>
-              Screenshot this confirmation and send it to our Facebook Page inbox — we&apos;ll
-              create your trip group chat there.
-            </span>
-            <span className="th">
-              แคปหน้าจอนี้ส่งเข้า Inbox เพจ Facebook ของเรา ทีมงานจะสร้างกลุ่มแชททริปให้ในนั้น
-            </span>
-          </div>
-        </a>
-
-        <BookingJourneyTimeline bookingStatus="pending_payment" tripCode={tripCode} />
-
-        <Link
-          to={`/booking/confirmation?ref=${encodeURIComponent(reference)}`}
-          className="book-btn flip-cta mt-[18px] block w-full"
-        >
-          {lang === 'th' ? 'เปิดสรุปการยืนยัน' : 'Open confirmation summary'}
-          <span className="mt-0.5 block font-thai text-[10px] font-medium opacity-85">
-            {lang === 'th' ? 'Open confirmation summary' : 'เปิดสรุปการยืนยัน'}
-          </span>
-        </Link>
-        <Link to="/my-trip" className="ghost-link mt-2 block">
-          {lang === 'th' ? 'ดูการจองของฉัน' : 'View My Booking'}
-        </Link>
-        <Link to="/trips" className="ghost-link">
-          {lang === 'th' ? 'กลับไปหน้าสำรวจ' : 'Back to Explore'}
-          <span className="th" style={{ display: 'block', fontFamily: 'var(--font-th)' }}>
-            {lang === 'th' ? 'Back to Explore' : 'กลับไปหน้าสำรวจ'}
-          </span>
-        </Link>
-      </div>
-    )
-  }
-
   if (loadError || !tour) {
     return <PageError message={loadError || t('common.error')} />
   }
@@ -451,10 +382,7 @@ export default function BookingPage() {
     { key: 'date_of_birth', label: t('form.dob'), type: 'date', required: true },
     { key: 'email', label: t('form.email'), type: 'email', required: true },
     { key: 'phone', label: t('form.phone'), required: true },
-    { key: 'emergency_contact_name', label: t('form.emergencyName'), required: true },
-    { key: 'emergency_contact_phone', label: t('form.emergencyPhone'), required: true },
     { key: 'dietary_requirements', label: t('form.dietary') },
-    { key: 'medical_conditions', label: t('form.medical') },
     { key: 'oshc_provider', label: t('form.oshcProvider') },
   ]
 
@@ -537,64 +465,93 @@ export default function BookingPage() {
         </label>
       </div>
 
-      <div className="rounded-[14px] border border-dashed border-line px-3 py-2.5">
-        <div className="flex items-center justify-between gap-2 text-[11px] text-ink-soft">
-          <span>
-            {lang === 'th' ? 'ราคาทริปโดยประมาณ' : 'Trip total (est.)'}
-          </span>
-          <SplitFlapPrice
-            amountAud={tour.price_aud}
-            board
-            className="text-[12px] font-extrabold leading-none text-ink"
-          />
-        </div>
-      </div>
+      <SafetyTravelFields
+        tripCode={tripCode}
+        touched={touched}
+        value={safetyValue}
+        onChange={(next) =>
+          setForm((f) => ({
+            ...f,
+            emergency_contact_name: next.emergency_contact_name,
+            emergency_contact_phone: next.emergency_contact_phone,
+            allergies: next.allergies,
+            medical_conditions: next.medical_conditions,
+            other_notes: next.other_notes,
+            insurance_type: next.insurance_type,
+            oshc_membership_number: next.oshc_membership_number,
+            oshc_risk_acknowledged: next.oshc_risk_acknowledged,
+            travel_insurance_provider: next.travel_insurance_provider,
+            travel_insurance_policy_number: next.travel_insurance_policy_number,
+            insurance_provider: next.insurance_provider ?? '',
+            insurance_policy_number: next.insurance_policy_number ?? '',
+            flight_booking_requested: next.flight.requested,
+            flight_legal_first_name: next.flight.flight_legal_first_name,
+            flight_legal_last_name: next.flight.flight_legal_last_name,
+            flight_date_of_birth: next.flight.flight_date_of_birth,
+            flight_passport_number: next.flight.flight_passport_number,
+            flight_nationality: next.flight.flight_nationality,
+            flight_frequent_flyer_number: next.flight.flight_frequent_flyer_number,
+          }))
+        }
+      />
 
-      <div className="rounded-[14px] bg-mint-100 px-3.5 py-3">
-        <div className="flex items-center justify-between gap-2 py-0.5 text-[11px] text-ink-soft">
-          <span>
-            {lang === 'th' ? 'ยอดรวมทริปโดยประมาณ' : 'Trip total (est.)'}
-          </span>
-          <SplitFlapPrice
-            amountAud={tour.price_aud}
-            board
-            className="text-[12px] font-extrabold leading-none text-ink"
-          />
+      <section className="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_1px_0_rgba(15,28,30,0.04)]">
+        <div className="border-b border-line bg-mint-100/70 px-4 py-3">
+          <p className="text-[11px] font-extrabold uppercase tracking-wide text-teal-800">
+            {lang === 'th' ? 'สรุปการชำระมัดจำ' : 'Deposit checkout'}
+          </p>
+          <p className="mt-1 truncate text-[13px] font-bold text-ink">{name}</p>
+          <p className="text-[11px] text-ink-soft">
+            {tour.departure_date ? formatDate(tour.departure_date, lang) : tourDurationLabel(tour, lang)}
+            {` · ${lang === 'th' ? '1 คน' : '1 traveler'}`}
+          </p>
         </div>
-        <div className="flex items-center justify-between gap-2 py-0.5 text-[11px] text-ink-soft">
-          <span>
-            {lang === 'th' ? `มัดจำ ${formatAud(tour.deposit_aud)}/คน` : `Deposit — ${formatAud(tour.deposit_aud)}`}
-          </span>
-          <SplitFlapPrice
-            amountAud={depositDue}
-            board
-            className="text-[12px] font-extrabold leading-none text-ink"
-          />
-        </div>
-        <div className="mt-1.5 flex items-center justify-between gap-2 border-t border-dashed border-[#c9d8d1] pt-2 text-sm font-extrabold text-teal-800">
-          <span>
-            {lang === 'th' ? 'ชำระตอนนี้' : 'Due now'}
-            <span className="mt-0.5 block font-thai text-[9.5px] font-medium text-teal-700">
-              ชำระตอนนี้
+        <div className="space-y-2 px-4 py-3">
+          <div className="flex items-center justify-between text-[12px] text-ink-soft">
+            <span>{lang === 'th' ? 'ราคารวมทริป' : 'Trip total'}</span>
+            <SplitFlapPrice
+              amountAud={tour.price_aud}
+              board
+              className="text-[13px] font-extrabold leading-none text-ink"
+            />
+          </div>
+          <div className="flex items-center justify-between text-[12px] text-ink-soft">
+            <span>
+              {lang === 'th'
+                ? `มัดจำ ${formatAud(tour.deposit_aud)}/คน`
+                : `Deposit — ${formatAud(tour.deposit_aud)}`}
             </span>
-          </span>
-          <span className="inline-flex items-baseline gap-1">
             <SplitFlapPrice
               amountAud={depositDue}
               board
-              className="text-[15px] font-extrabold leading-none"
+              className="text-[13px] font-extrabold leading-none text-ink"
             />
-            <span className="text-[10px] font-semibold">AUD</span>
-          </span>
+          </div>
+          <div className="flex items-center justify-between border-t border-dashed border-[#c9d8d1] pt-2 text-sm font-extrabold text-teal-800">
+            <span>
+              {lang === 'th' ? 'ชำระตอนนี้' : 'Due today'}
+              <span className="mt-0.5 block font-thai text-[9.5px] font-medium text-teal-700">
+                ชำระตอนนี้
+              </span>
+            </span>
+            <span className="inline-flex items-baseline gap-1">
+              <SplitFlapPrice
+                amountAud={depositDue}
+                board
+                className="text-[16px] font-extrabold leading-none"
+              />
+              <span className="text-[10px] font-semibold">AUD</span>
+            </span>
+          </div>
+          <p className="text-[9.5px] leading-relaxed text-ink-soft">
+            We only collect a {formatAud(tour.deposit_aud)}/person deposit to secure your seat. The
+            remaining balance is arranged directly with Saen & the Trip2Talk team.
+            <span className="mt-0.5 block font-thai">
+              เราเก็บมัดจำเพื่อจองที่นั่ง ส่วนที่เหลือพี่แสนและทีมจะติดต่อจัดการเองโดยตรง
+            </span>
+          </p>
         </div>
-        <p className="mt-2 text-[9px] leading-relaxed text-ink-soft">
-          We only collect a {formatAud(tour.deposit_aud)}/person deposit to secure your seat. The
-          remaining balance is arranged directly with Saen & the Trip2Talk team.
-          <span className="mt-0.5 block font-thai">
-            เราเก็บมัดจำเพื่อจองที่นั่ง ส่วนที่เหลือพี่แสนและทีมจะติดต่อจัดการเองโดยตรง
-          </span>
-        </p>
-      </div>
+      </section>
 
       <div className="flex flex-col gap-2 rounded-[12px] border border-line bg-white px-[11px] py-[9px]">
         <div className="flex gap-2">
@@ -811,10 +768,7 @@ export default function BookingPage() {
           familyName={form.last_name_en.trim()}
           onPaid={() => {
             markConfirmationDepositPaid(squareBookingRef)
-            setReference(squareBookingRef)
-            navigate(
-              `/booking/confirmation?ref=${encodeURIComponent(squareBookingRef)}&paid=1`,
-            )
+            goToConfirmation(squareBookingRef, true)
           }}
         />
       )}

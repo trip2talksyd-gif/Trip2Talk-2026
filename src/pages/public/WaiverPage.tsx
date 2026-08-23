@@ -1,7 +1,6 @@
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
-import { setWaiverSigned } from '../../lib/waiverSession'
-import { squarePayQuerySuffix } from '../../lib/preferredPayment'
+import { patchConfirmationSummary, setWaiverSigned } from '../../lib/waiverSession'
 import { insertWaiverSignature } from '../../lib/toursApi'
 import { useToast } from '../../components/ui/Toast'
 import BiText from '../../components/ui/BiText'
@@ -13,6 +12,7 @@ export default function WaiverPage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const tripCode = params.get('trip') ?? ''
+  const bookingRef = params.get('ref')?.trim() ?? ''
   const tripsBi = tt('nav.trips')
   const successBi = tt('common.success')
 
@@ -34,15 +34,25 @@ export default function WaiverPage() {
   return (
     <WaiverForm
       tripCode={tripCode}
-      backTo={`/trips/${tripCode}`}
+      backTo={
+        bookingRef
+          ? `/booking/confirmation?ref=${encodeURIComponent(bookingRef)}`
+          : `/trips/${tripCode}`
+      }
+      headingNote={
+        bookingRef
+          ? `Booking ${bookingRef} — sign after your deposit to finish the legal step.`
+          : undefined
+      }
+      headingNoteTh={
+        bookingRef ? `การจอง ${bookingRef} — ลงนามเอกสารทางกฎหมายหลังชำระมัดจำ` : undefined
+      }
       onSubmit={async (payload) => {
         setWaiverSigned(tripCode, {
           tripCode,
           signedName: payload.signedName,
           signedAt: payload.signedAt,
           clauses: payload.clauses,
-          safety: payload.safety,
-          flight: payload.flight,
         })
         try {
           await insertWaiverSignature({
@@ -51,12 +61,21 @@ export default function WaiverPage() {
             signed_at: payload.signedAt,
             clauses: payload.clauses,
             locale: lang,
+            // booking_id UUID is not returned from public insertBooking (RLS return=minimal).
+            booking_id: null,
           })
         } catch (err) {
           console.error('[WaiverPage] failed to persist waiver signature:', err)
         }
+        if (bookingRef) {
+          patchConfirmationSummary(bookingRef, { waiverSigned: true })
+        }
         toast(successBi.en, 'success')
-        navigate(`/booking?trip=${tripCode}${squarePayQuerySuffix()}`)
+        navigate(
+          bookingRef
+            ? `/booking/confirmation?ref=${encodeURIComponent(bookingRef)}`
+            : `/trips/${tripCode}`,
+        )
       }}
     />
   )

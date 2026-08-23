@@ -9,6 +9,11 @@ import {
 import { useToast } from '../../components/ui/Toast'
 import BiText from '../../components/ui/BiText'
 import WaiverForm from '../../components/waiver/WaiverForm'
+import SafetyTravelFields, {
+  emptySafetyTravel,
+  validateSafetyTravel,
+  type SafetyTravelValue,
+} from '../../components/booking/SafetyTravelFields'
 import { WAIVER_CLAUSES } from '../../data/risks'
 
 function clauseIds(clauses: PublicWaiverLookup['clauses']): string[] {
@@ -24,6 +29,8 @@ export default function CustomerWaiverPage() {
   const [state, setState] = useState<'loading' | 'open' | 'completed' | 'error'>('loading')
   const [lookup, setLookup] = useState<PublicWaiverLookup | null>(null)
   const [errorKind, setErrorKind] = useState<'not_found' | 'cancelled' | 'other'>('other')
+  const [safety, setSafety] = useState<SafetyTravelValue>(emptySafetyTravel)
+  const [safetyTouched, setSafetyTouched] = useState(false)
   const successBi = tt('common.success')
 
   useEffect(() => {
@@ -125,17 +132,37 @@ export default function CustomerWaiverPage() {
   const defaultName = `${lookup.first_name_en} ${lookup.last_name_en}`.trim()
 
   return (
+    <div className="space-y-4">
+    <SafetyTravelFields
+      tripCode={lookup.trip_code}
+      value={safety}
+      onChange={(next) => {
+        setSafetyTouched(true)
+        setSafety(next)
+      }}
+      touched={safetyTouched}
+    />
     <WaiverForm
       tripCode={lookup.trip_code}
       defaultSignedName={defaultName}
       onSubmit={async (payload) => {
+        setSafetyTouched(true)
+        if (Object.keys(validateSafetyTravel(lookup.trip_code, safety)).length > 0) {
+          toast(
+            lang === 'th'
+              ? 'กรุณากรอกข้อมูลฉุกเฉินและประกันให้ครบ'
+              : 'Please complete the safety and insurance fields first.',
+            'error',
+          )
+          return
+        }
         await submitPublicWaiver({
           token,
           signed_name: payload.signedName,
           clauses: payload.clauses,
           locale: lang,
-          safety: payload.safety,
-          flight: payload.flight,
+          safety,
+          flight: safety.flight,
         })
         toast(successBi.en, 'success')
         setLookup({
@@ -148,5 +175,6 @@ export default function CustomerWaiverPage() {
         setState('completed')
       }}
     />
+    </div>
   )
 }

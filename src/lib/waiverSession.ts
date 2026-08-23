@@ -116,3 +116,7 @@ export function patchConfirmationSummary(
 export function markConfirmationDepositPaid(ref?: string): ConfirmationSummaryData | null {
   return patchConfirmationSummary(ref, { depositPaid: true })
 }
+
+export function markConfirmationWaiverSigned(ref?: string): ConfirmationSummaryData | null {
+  return patchConfirmationSummary(ref, { waiverSigned: true })
+}
