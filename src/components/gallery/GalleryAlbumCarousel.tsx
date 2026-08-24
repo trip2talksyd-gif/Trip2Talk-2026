@@ -11,7 +11,8 @@ type Props = {
   onSelectAlbum?: (album: GalleryAlbum) => void
 }
 
-const AUTOPLAY_MS = 5000
+/** Dwell per album before auto-advance. Was 5000ms; 7000ms keeps each frame readable. */
+const AUTOPLAY_MS = 7000
 const SWIPE_PX = 48
 
 function wrapIndex(i: number, len: number): number {
@@ -134,7 +135,7 @@ export default function GalleryAlbumCarousel({
             return (
               <article
                 key={album.id}
-                className={`absolute left-1/2 top-0 aspect-[4/5] w-[min(88vw,400px)] -translate-x-1/2 transition-[transform,opacity,filter] duration-500 ease-out md:w-[min(48vw,420px)] ${visibilityClass}`}
+                className={`absolute left-1/2 top-0 aspect-[4/5] w-[min(88vw,400px)] -translate-x-1/2 transition-[transform,opacity,filter] duration-[1200ms] ease-out md:w-[min(48vw,420px)] ${visibilityClass}`}
                 style={{
                   zIndex: 20 - abs,
                   transform: `translateX(calc(-50% + ${offset * 58}%)) scale(${

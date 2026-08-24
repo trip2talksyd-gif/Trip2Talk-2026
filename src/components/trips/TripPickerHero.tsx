@@ -19,6 +19,15 @@ type Props = {
 }
 
 const LOW_SEATS_MAX = 3
+/** Same dwell as GalleryAlbumCarousel. */
+const AUTOPLAY_MS = 7000
+/** Resume after touch / list selection — same delay as GalleryAlbumCarousel onTouchEnd. */
+const RESUME_MS = 1200
+
+function wrapIndex(i: number, len: number): number {
+  if (len <= 0) return 0
+  return ((i % len) + len) % len
+}
 
 function tripBgSrc(tour: Tour): string {
   const preview = getPreviewPhotoForTrip(tour.trip_code)
@@ -38,28 +47,61 @@ function tripThumbSrc(tour: Tour): string {
 
 /**
  * Full-bleed trip picker: stacked WebP backgrounds, avatar row, price-led meta,
- * Book Now → `/trips/:tripCode`. Manual selection only.
+ * Book Now → `/trips/:tripCode`. Autoplay + pause-on-hover/touch (gallery pattern).
  */
 export default function TripPickerHero({ tours }: Props) {
   const { tt } = useLang()
   const [activeIndex, setActiveIndex] = useState(0)
+  const [paused, setPaused] = useState(false)
   const activeCodeRef = useRef<string | null>(null)
   const pickerRef = useRef<HTMLElement | null>(null)
+  const resumeTimerRef = useRef<number | null>(null)
+  const len = tours.length
 
   useEffect(() => {
-    if (tours.length === 0) {
+    if (len === 0) {
       setActiveIndex(0)
       return
     }
     const keep = activeCodeRef.current
     const idx = keep ? tours.findIndex((t) => t.trip_code === keep) : -1
     setActiveIndex(idx >= 0 ? idx : 0)
-  }, [tours])
+  }, [tours, len])
 
   useEffect(() => {
     const tour = tours[activeIndex]
     if (tour) activeCodeRef.current = tour.trip_code
   }, [tours, activeIndex])
+
+  useEffect(() => {
+    if (len <= 1 || paused) return
+    const id = window.setInterval(() => {
+      setActiveIndex((i) => wrapIndex(i + 1, len))
+    }, AUTOPLAY_MS)
+    return () => window.clearInterval(id)
+  }, [len, paused])
+
+  useEffect(() => {
+    return () => {
+      if (resumeTimerRef.current != null) window.clearTimeout(resumeTimerRef.current)
+    }
+  }, [])
+
+  function clearResumeTimer() {
+    if (resumeTimerRef.current != null) {
+      window.clearTimeout(resumeTimerRef.current)
+      resumeTimerRef.current = null
+    }
+  }
+
+  function pauseThenResume() {
+    setPaused(true)
+    clearResumeTimer()
+    resumeTimerRef.current = window.setTimeout(() => {
+      resumeTimerRef.current = null
+      setPaused(false)
+    }, RESUME_MS)
+  }
 
   function scrollHeroIntoView() {
     const el = pickerRef.current
@@ -76,7 +118,19 @@ export default function TripPickerHero({ tours }: Props) {
 
   function selectTrip(i: number, scrollToHero = false) {
     setActiveIndex(i)
-    if (scrollToHero) scrollHeroIntoView()
+    if (scrollToHero) {
+      pauseThenResume()
+      scrollHeroIntoView()
+    }
+  }
+
+  function onHeroTouchStart() {
+    clearResumeTimer()
+    setPaused(true)
+  }
+
+  function onHeroTouchEnd() {
+    pauseThenResume()
   }
 
   if (tours.length === 0) return null
@@ -106,6 +160,14 @@ export default function TripPickerHero({ tours }: Props) {
       style={{ minHeight: 'min(68dvh, 640px)', height: 'calc(100dvh - 17.5rem)' }}
       aria-roledescription="trip picker"
       aria-label={`${active.name_en} / ${active.name_th}`}
+      onMouseEnter={() => {
+        clearResumeTimer()
+        setPaused(true)
+      }}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={onHeroTouchStart}
+      onTouchEnd={onHeroTouchEnd}
+      onTouchCancel={onHeroTouchEnd}
     >
       {/* Stacked backgrounds — 700ms crossfade */}
       {tours.map((tour, i) => {

@@ -75,3 +75,7 @@ createRoot(document.getElementById('root')!).render(
     </RootErrorBoundary>
   </StrictMode>,
 )
+
+requestAnimationFrame(() => {
+  document.getElementById('pwa-boot')?.classList.add('is-done')
+})

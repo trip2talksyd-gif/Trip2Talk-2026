@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#16262b" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Offline — Trip2Talk</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        height: 100dvh;
+        background: #16262b;
+        color: #f7f5f0;
+        font-family: Inter, Sarabun, system-ui, sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        overscroll-behavior: none;
+      }
+      .wrap {
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        padding: max(1.5rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right))
+          max(1.5rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
+        text-align: center;
+      }
+      img {
+        width: 88px;
+        height: 88px;
+        border-radius: 20px;
+      }
+      h1 {
+        margin: 1.25rem 0 0.4rem;
+        font-size: 1.35rem;
+        font-weight: 650;
+      }
+      p {
+        margin: 0;
+        font-size: 0.9rem;
+        opacity: 0.75;
+        line-height: 1.45;
+      }
+      .th {
+        display: block;
+        margin-top: 0.35rem;
+        font-size: 0.8rem;
+      }
+      a {
+        display: inline-block;
+        margin-top: 1.5rem;
+        padding: 0.7rem 1.25rem;
+        border-radius: 999px;
+        background: #efa565;
+        color: #1b2a2c;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-decoration: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div>
+        <img src="/brand/trip2talk-badge.png" alt="Trip2Talk" width="88" height="88" />
+        <h1>You’re offline</h1>
+        <p>
+          Trip2Talk needs a connection for this page.
+          <span class="th" lang="th">ต้องเชื่อมต่ออินเทอร์เน็ตเพื่อเปิดหน้านี้</span>
+        </p>
+        <a href="/">Try again / ลองอีกครั้ง</a>
+      </div>
+    </div>
+  </body>
+</html>

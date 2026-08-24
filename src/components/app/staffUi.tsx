@@ -136,7 +136,7 @@ export function StaffPageHeader({
 export function StaffMain({ children, className = '' }: { children: ReactNode; className?: string }) {
   return (
     <main
-      className={`app-scroll relative mx-auto w-full max-w-2xl space-y-7 px-4 py-7 ${className}`.trim()}
+      className={`app-scroll relative mx-auto w-full max-w-2xl space-y-7 px-4 py-7 pb-[max(1.75rem,env(safe-area-inset-bottom))] ${className}`.trim()}
       data-app-scroll
     >
       {children}
