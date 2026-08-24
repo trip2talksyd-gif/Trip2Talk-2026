@@ -72,7 +72,7 @@ export default function AppTabBar() {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-teal-dark/10 bg-white pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-3 md:hidden"
+      className="fixed inset-x-0 bottom-0 z-50 border-t border-teal-dark/10 bg-white pb-[max(0.5rem,env(safe-area-inset-bottom))] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] pt-3 md:hidden"
       aria-label={`${tabsLabel.en} / ${tabsLabel.th}`}
     >
       <ul className="mx-auto flex max-w-lg items-start justify-around px-1">

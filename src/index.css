@@ -109,6 +109,8 @@
     height: 100%;
     height: 100dvh;
     overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   html,
@@ -126,9 +128,34 @@
     height: 100dvh;
     overflow: hidden;
     overscroll-behavior: none;
+    overscroll-behavior-y: none;
     touch-action: manipulation;
     background: var(--cream);
     color: var(--ink);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Chrome (header, tabs, buttons): no long-press callout / text select.
+     Forms, articles, and selectable copy stay default. */
+  header,
+  nav,
+  button,
+  [role='button'],
+  .nav-cta,
+  .btn-embossed,
+  .btn-primary {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  input,
+  textarea,
+  select,
+  [contenteditable='true'] {
+    -webkit-user-select: text;
+    user-select: text;
+    -webkit-touch-callout: default;
   }
 
   #root {
@@ -1867,6 +1894,8 @@
     radial-gradient(ellipse 80% 50% at 0% -10%, rgba(46, 77, 83, 0.55), transparent 55%),
     radial-gradient(ellipse 60% 40% at 100% 0%, rgba(233, 147, 90, 0.12), transparent 50%),
     radial-gradient(ellipse 50% 35% at 50% 100%, rgba(32, 54, 60, 0.8), transparent 60%);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 .staff-shell .staff-card::before {

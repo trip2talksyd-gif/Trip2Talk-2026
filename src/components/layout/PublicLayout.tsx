@@ -37,7 +37,7 @@ export default function PublicLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <div className="flex h-full max-h-full flex-col overflow-hidden bg-cream">
+    <div className="flex h-full max-h-full flex-col overflow-hidden bg-cream pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       <OfflineBanner />
 
       <header
