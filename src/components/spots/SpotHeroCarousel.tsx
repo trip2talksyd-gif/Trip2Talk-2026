@@ -8,7 +8,6 @@ import { storageImageAttrs, STORAGE_SIZES } from '../../lib/storageImage'
 
 type HeroSlide = { kind: 'video'; src: string } | { kind: 'image'; src: string }
 
-const STORY_MS = 3200
 /** Matches the slide CSS duration — user nav cannot stack while a slide is moving. */
 const TRANSITION_MS = 450
 const FAV_KEY = 't2t_spot_favorites'
@@ -93,15 +92,7 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
   const slides = useMemo(() => spotHeroSlides(spot), [spot])
   const multi = slides.length > 1
   const [index, setIndex] = useState(0)
-  const [progress, setProgress] = useState(0)
-  const [paused, setPaused] = useState(false)
   const [fav, setFav] = useState(false)
-  const [cycle, setCycle] = useState(0)
-
-  const remainingRef = useRef(STORY_MS)
-  const holdTimerRef = useRef<number | null>(null)
-  const holdingRef = useRef(false)
-  const suppressClickRef = useRef(false)
   const lastNavAtRef = useRef(0)
 
   useEffect(() => {
@@ -110,9 +101,6 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
 
   useEffect(() => {
     setIndex(0)
-    setProgress(0)
-    remainingRef.current = STORY_MS
-    setCycle((c) => c + 1)
   }, [spot.id, slides.length])
 
   const go = useCallback(
@@ -122,39 +110,9 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
       if (fromUser && now - lastNavAtRef.current < TRANSITION_MS) return
       lastNavAtRef.current = now
       setIndex((i) => (i + dir + slides.length) % slides.length)
-      setProgress(0)
-      remainingRef.current = STORY_MS
-      setCycle((c) => c + 1)
     },
     [slides.length, multi],
   )
-
-  // Auto-advance with pause support (rAF drives the active bar fill).
-  useEffect(() => {
-    if (!multi || paused) return
-
-    let raf = 0
-    const budget = remainingRef.current
-    const start = performance.now()
-
-    const tick = (now: number) => {
-      const elapsed = now - start
-      const p = Math.min(1, elapsed / budget)
-      setProgress(p)
-      if (p >= 1) {
-        remainingRef.current = STORY_MS
-        go(1)
-        return
-      }
-      raf = requestAnimationFrame(tick)
-    }
-    raf = requestAnimationFrame(tick)
-    return () => {
-      cancelAnimationFrame(raf)
-      const elapsed = performance.now() - start
-      remainingRef.current = Math.max(TRANSITION_MS, budget - elapsed)
-    }
-  }, [multi, paused, cycle, go])
 
   const toggleFav = () => {
     const next = !fav
@@ -170,46 +128,13 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
     writeFavorites(set)
   }
 
-  /** Touch press-and-hold pauses; mouse uses container hover. Long-press must not advance. */
-  const onPointerDownHold = (e: React.PointerEvent) => {
-    if (!multi || e.pointerType === 'mouse') return
-    holdTimerRef.current = window.setTimeout(() => {
-      holdingRef.current = true
-      suppressClickRef.current = true
-      setPaused(true)
-    }, 150)
-  }
-  const onPointerUpHold = () => {
-    if (holdTimerRef.current) {
-      clearTimeout(holdTimerRef.current)
-      holdTimerRef.current = null
-    }
-    if (holdingRef.current) {
-      holdingRef.current = false
-      setPaused(false)
-    }
-  }
   const onTapZone = (dir: -1 | 1) => {
     if (isFinePointerHover()) return
-    if (suppressClickRef.current) {
-      suppressClickRef.current = false
-      return
-    }
     go(dir, true)
   }
 
-  const barFill = (i: number) => {
-    if (i < index) return 100
-    if (i > index) return 0
-    return progress * 100
-  }
-
   return (
-    <div
-      className="relative h-[min(52vh,440px)] min-h-[260px] overflow-hidden bg-teal-darker sm:h-[min(48vh,480px)]"
-      onMouseEnter={() => multi && setPaused(true)}
-      onMouseLeave={() => multi && setPaused(false)}
-    >
+    <div className="relative h-[min(52vh,440px)] min-h-[260px] overflow-hidden bg-teal-darker sm:h-[min(48vh,480px)]">
       {/* Slides */}
       <div
         className="flex h-full transition-transform duration-[450ms] ease-[cubic-bezier(0.22,0.8,0.3,1)]"
@@ -221,7 +146,7 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
               slide.kind === 'image'
                 ? storageImageAttrs(slide.src, 'hero', STORAGE_SIZES.fullBleed)
                 : null
-            const videoActive = slide.kind === 'video' && i === index && !(multi && paused)
+            const videoActive = slide.kind === 'video' && i === index
             return (
             <div key={`${slide.kind}-${slide.src}`} className="relative h-full min-w-full shrink-0">
               {slide.kind === 'video' ? (
@@ -256,23 +181,6 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[48%] bg-gradient-to-t from-[rgba(12,33,29,0.94)] via-[rgba(12,33,29,0.35)] to-transparent"
         aria-hidden
       />
-
-      {/* Story progress bars — multi only */}
-      {multi ? (
-        <div className="absolute left-3.5 right-3.5 top-3 z-[6] flex gap-1" aria-hidden>
-          {slides.map((slide, i) => (
-            <div
-              key={`${spot.id}-bar-${slide.kind}-${i}`}
-              className="h-[2.5px] flex-1 overflow-hidden rounded-sm bg-white/30"
-            >
-              <div
-                className="h-full rounded-sm bg-white"
-                style={{ width: `${barFill(i)}%` }}
-              />
-            </div>
-          ))}
-        </div>
-      ) : null}
 
       {/* Image counter */}
       {multi ? (
@@ -314,18 +222,12 @@ export default function SpotHeroCarousel({ spot, onBack, backLabel }: Props) {
             className="absolute bottom-14 left-0 top-0 z-[8] w-[34%] bg-transparent [@media(hover:hover)_and_(pointer:fine)]:pointer-events-none"
             aria-label="Previous photo"
             onClick={() => onTapZone(-1)}
-            onPointerDown={onPointerDownHold}
-            onPointerUp={onPointerUpHold}
-            onPointerCancel={onPointerUpHold}
           />
           <button
             type="button"
             className="absolute bottom-14 right-0 top-0 z-[8] w-[34%] bg-transparent [@media(hover:hover)_and_(pointer:fine)]:pointer-events-none"
             aria-label="Next photo"
             onClick={() => onTapZone(1)}
-            onPointerDown={onPointerDownHold}
-            onPointerUp={onPointerUpHold}
-            onPointerCancel={onPointerUpHold}
           />
           <button
             type="button"
