@@ -21,6 +21,10 @@ export type PressCredit = {
     | 'about.awards.press.1.context'
     | 'about.awards.press.2.context'
     | 'about.awards.press.3.context'
+  /** public-media. Photos/press-*.webp is not public (400); files are Photos/award/press-*.webp. */
+  src: string
+  altEn: string
+  altTh: string
 }
 
 export const FOCUS_AWARD_PHOTOS: FocusAwardPhoto[] = [
@@ -66,15 +70,24 @@ export const PRESS_CREDITS: PressCredit[] = [
     id: 'fotoinfo-2014',
     nameKey: 'about.awards.press.1.name',
     contextKey: 'about.awards.press.1.context',
+    src: publicMediaUrl('Photos/award/press-fotoinfo.webp'),
+    altEn: 'FOTOINFO Magazine October 2014 feature',
+    altTh: 'ฟีเจอร์นิตยสาร FOTOINFO ตุลาคม 2014',
   },
   {
     id: 'photo-news-china',
     nameKey: 'about.awards.press.2.name',
     contextKey: 'about.awards.press.2.context',
+    src: publicMediaUrl('Photos/award/press-photonews-china.webp'),
+    altEn: 'Photo News China night-sky and star-trail photography feature',
+    altTh: 'ฟีเจอร์ Photo News จีน ภาพท้องฟ้ายามค่ำคืนและ star trail',
   },
   {
     id: 'thai-sawasdee-2023',
     nameKey: 'about.awards.press.3.name',
     contextKey: 'about.awards.press.3.context',
+    src: publicMediaUrl('Photos/award/press-thai-sawasdee.webp'),
+    altEn: 'Thai Sawasdee Sydney Opera House Vivid Festival feature, January 2023',
+    altTh: 'ฟีเจอร์ไทยสวัสดี เทศกาล Vivid ซิดนีย์โอเปร่าเฮาส์ มกราคม 2023',
   },
 ]

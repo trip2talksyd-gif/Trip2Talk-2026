@@ -2073,3 +2073,137 @@
     animation: none;
   }
 }
+
+/* About Awards & Press — photographer's wall (subtle, physical) */
+@keyframes award-bronze-gleam {
+  from {
+    transform: translateX(-130%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(220%) skewX(-18deg);
+  }
+}
+
+.award-photo-card {
+  transition:
+    transform 220ms ease-out,
+    box-shadow 220ms ease-out,
+    border-color 220ms ease-out;
+  box-shadow: 0 4px 12px -10px rgba(18, 47, 42, 0.28);
+}
+
+.award-photo-card:hover,
+.award-photo-card:focus-within {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 22px -12px rgba(18, 47, 42, 0.38);
+}
+
+/* Gleam only — on-photo BRONZE AWARD is in the WebP itself. */
+.award-bronze-gleam {
+  pointer-events: none;
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 28%;
+  overflow: hidden;
+}
+
+.award-bronze-gleam::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 42%;
+  background: linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(248, 245, 238, 0.08) 35%,
+    rgba(248, 245, 238, 0.42) 50%,
+    rgba(248, 245, 238, 0.08) 65%,
+    transparent 100%
+  );
+  transform: translateX(-130%) skewX(-18deg);
+  opacity: 0;
+}
+
+.award-photo-card:hover .award-bronze-gleam::after,
+.award-photo-card:focus-within .award-bronze-gleam::after {
+  opacity: 1;
+  animation: award-bronze-gleam 0.55s ease-out;
+}
+
+.press-clip {
+  transform-origin: center center;
+  overflow: visible;
+  transition:
+    transform 220ms ease-out,
+    box-shadow 220ms ease-out,
+    border-color 220ms ease-out;
+  box-shadow: 0 6px 14px -12px rgba(18, 47, 42, 0.3);
+}
+
+.press-clip:nth-child(1) {
+  transform: rotate(-2deg);
+}
+
+.press-clip:nth-child(2) {
+  transform: rotate(1.5deg);
+}
+
+.press-clip:nth-child(3) {
+  transform: rotate(-1deg);
+}
+
+.press-clip:hover,
+.press-clip:focus-within {
+  transform: rotate(0deg) translateY(-5px);
+  box-shadow: 0 14px 24px -12px rgba(18, 47, 42, 0.36);
+}
+
+.press-clip-tape {
+  position: absolute;
+  top: 7px;
+  left: 10px;
+  z-index: 2;
+  width: 28px;
+  height: 10px;
+  border-radius: 1px;
+  background: rgba(230, 147, 90, 0.38);
+  transform: rotate(-8deg);
+  box-shadow: 0 1px 2px rgba(18, 47, 42, 0.12);
+}
+
+.press-clip:nth-child(2) .press-clip-tape {
+  left: auto;
+  right: 10px;
+  transform: rotate(7deg);
+}
+
+.press-clip:nth-child(3) .press-clip-tape {
+  left: 10px;
+  right: auto;
+  transform: rotate(-4deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .award-photo-card,
+  .press-clip {
+    transition: border-color 160ms ease-out, opacity 160ms ease-out;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .award-photo-card:hover,
+  .award-photo-card:focus-within,
+  .press-clip:hover,
+  .press-clip:focus-within {
+    transform: none;
+    opacity: 0.92;
+  }
+
+  .award-bronze-gleam::after {
+    content: none;
+    animation: none;
+  }
+}
+
