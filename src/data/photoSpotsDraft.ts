@@ -623,3 +623,21 @@ export function tripCtaHref(spot: Pick<PhotoSpotRow, 'related_trip_code' | 'link
   const code = spot.related_trip_code ?? spot.linked_trip_code
   return code ? `/trips/${encodeURIComponent(code)}` : '/trips'
 }
+
+const STYLE_TAG_ORDER = [...PHOTO_SPOT_EDIT_CATEGORIES]
+
+/** Photography style tags already on linked photo spots — no new taxonomy. */
+export function photoStyleTagsForTrip(tripCode: string): string[] {
+  const code = tripCode.trim().toUpperCase()
+  if (!code) return []
+  const seen = new Set<string>()
+  for (const spot of PHOTO_SPOTS_DRAFT) {
+    const linked = (spot.related_trip_code ?? spot.linked_trip_code ?? '').toUpperCase()
+    if (!linked) continue
+    if (code !== linked && !code.startsWith(`${linked}-`)) continue
+    for (const cat of spot.categories) {
+      if ((PHOTO_SPOT_EDIT_CATEGORIES as readonly string[]).includes(cat)) seen.add(cat)
+    }
+  }
+  return STYLE_TAG_ORDER.filter((c) => seen.has(c)).slice(0, 4)
+}

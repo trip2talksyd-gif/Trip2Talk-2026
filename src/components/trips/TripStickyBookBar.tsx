@@ -7,10 +7,11 @@ import SplitFlapPrice from '../ui/SplitFlapPrice'
 
 type Props = {
   tour: Tour
+  displayPriceAud?: number
 }
 
 /** Fixed bottom book bar (mobile) — always visible above BottomNav. */
-export default function TripStickyBookBar({ tour }: Props) {
+export default function TripStickyBookBar({ tour, displayPriceAud }: Props) {
   const { tt } = useLang()
   const bookable = isTourBookable(tour)
   const to = bookable ? `/booking?trip=${tour.trip_code}${squarePayQuerySuffix()}` : undefined
@@ -36,7 +37,7 @@ export default function TripStickyBookBar({ tour }: Props) {
               <>
                 <span className="text-[9px] font-medium text-cream/70">{from.en}</span>
                 <SplitFlapPrice
-                  amountAud={tour.price_aud}
+                  amountAud={displayPriceAud ?? tour.price_aud}
                   board
                   className="text-[13px] font-extrabold leading-none"
                 />
