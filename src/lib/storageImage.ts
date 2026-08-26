@@ -1,3 +1,5 @@
+import { supabaseConfig } from './supabase'
+
 /**
  * Public Supabase Storage image URLs.
  *
@@ -43,6 +45,28 @@ export type StorageSizesKind = keyof typeof STORAGE_SIZES
 
 const OBJECT_PUBLIC = '/storage/v1/object/public/'
 const RENDER_PUBLIC = '/storage/v1/render/image/public/'
+
+export const PUBLIC_MEDIA_BUCKET = 'public-media'
+
+/**
+ * Public object URL for a Storage bucket path.
+ * Same `/storage/v1/object/public/{bucket}/{path}` shape as
+ * `supabase.storage.from(bucket).getPublicUrl(path)` in toursApi.
+ */
+export function publicStorageObjectUrl(bucket: string, objectPath: string): string {
+  const origin = supabaseConfig.url.replace(/\/$/, '')
+  const encoded = objectPath
+    .replace(/^\/+/, '')
+    .split('/')
+    .filter(Boolean)
+    .map((seg) => encodeURIComponent(seg))
+    .join('/')
+  return `${origin}${OBJECT_PUBLIC}${bucket}/${encoded}`
+}
+
+export function publicMediaUrl(objectPath: string): string {
+  return publicStorageObjectUrl(PUBLIC_MEDIA_BUCKET, objectPath)
+}
 
 function publicStoragePath(src: string): { origin: string; path: string } | null {
   for (const marker of [OBJECT_PUBLIC, RENDER_PUBLIC] as const) {
