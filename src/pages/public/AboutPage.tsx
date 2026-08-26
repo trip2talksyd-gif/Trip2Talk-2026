@@ -7,6 +7,7 @@ import BiText from '../../components/ui/BiText'
 import CountUpStat from '../../components/ui/CountUpStat'
 import TeamAvatar from '../../components/about/TeamAvatar'
 import AboutPositioningSection from '../../components/about/AboutPositioningSection'
+import AwardsPress from '../../components/about/AwardsPress'
 
 /** Bio copy uses \\n\\n for paragraphs; optional **phrase** renders as <strong>. */
 function BioCopy({ text, className }: { text: string; className: string }) {
@@ -153,6 +154,8 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      <AwardsPress />
 
       <section className="rounded-2xl border border-line bg-cream p-5">
         <div className="flex gap-4">
