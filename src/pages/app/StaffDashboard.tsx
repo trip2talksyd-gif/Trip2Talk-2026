@@ -583,6 +583,11 @@ export default function StaffDashboard() {
                         ) : (
                           <span className="text-cream-muted"> · {b.booking_status}</span>
                         )}
+                        {b.selected_tier === 'luxury' && (
+                          <span className="ml-2 inline-block rounded-full bg-orange/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange">
+                            Luxury
+                          </span>
+                        )}
                         {(() => {
                           const sw = staffWaiverForBooking(b)
                           return sw ? (

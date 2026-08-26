@@ -19,8 +19,8 @@ const STAY_COPY: Record<string, StayCopy> = {
       th: 'พรีเมียม: ห้องส่วนตัวพร้อมห้องน้ำในตัว 3 คืน (ตามห้องว่างของโรงแรม)',
     },
     luxuryUpgradeNote: {
-      en: '+$1,350 vs Standard listed price for private ensuite, 3 nights (display only in Phase 1).',
-      th: 'แพงกว่าเรทมาตรฐาน $1,350 สำหรับห้องส่วนตัวพร้อมห้องน้ำ 3 คืน (เฟส 1 แสดงราคาอย่างเดียว ยังไม่คิดเงินส่วนนี้ตอนจอง)',
+      en: 'Fixed Luxury total includes private ensuite for 3 nights (pay in full at this price).',
+      th: 'เรทพรีเมียมคงที่ รวมห้องส่วนตัวพร้อมห้องน้ำในตัว 3 คืน (จ่ายเต็มตามราคานี้)',
     },
   },
   'ULU-4D3N': {
@@ -33,8 +33,8 @@ const STAY_COPY: Record<string, StayCopy> = {
       th: 'พรีเมียม: ห้องส่วนตัวพร้อมห้องน้ำในตัว (หรือห้องส่วนตัว) 3 คืน — ยังต้องแจ้งก่อนออกเดินทาง',
     },
     luxuryUpgradeNote: {
-      en: '+$1,350 vs Standard listed price for private ensuite, 3 nights (display only in Phase 1).',
-      th: 'แพงกว่าเรทมาตรฐาน $1,350 สำหรับห้องส่วนตัว 3 คืน (เฟส 1 แสดงราคาอย่างเดียว ยังไม่คิดเงินส่วนนี้ตอนจอง)',
+      en: 'Fixed Luxury total includes private ensuite (or private room) for 3 nights.',
+      th: 'เรทพรีเมียมคงที่ รวมห้องส่วนตัวพร้อมห้องน้ำในตัว (หรือห้องส่วนตัว) 3 คืน',
     },
   },
   'NZ-6D5N': {
@@ -47,8 +47,8 @@ const STAY_COPY: Record<string, StayCopy> = {
       th: 'พรีเมียม: ห้องส่วนตัวพร้อมห้องน้ำในตัว 5 คืน ตามที่มี',
     },
     luxuryUpgradeNote: {
-      en: '+$1,250 vs the Nov listed Standard price for private ensuite (display only in Phase 1).',
-      th: 'แพงกว่าเรทมาตรฐานรอบ พ.ย. $1,250 สำหรับห้องส่วนตัว (เฟส 1 แสดงราคาอย่างเดียว ยังไม่คิดเงินส่วนนี้ตอนจอง)',
+      en: 'Fixed Luxury total includes private ensuite where available for the 5 nights.',
+      th: 'เรทพรีเมียมคงที่ รวมห้องส่วนตัวพร้อมห้องน้ำในตัว 5 คืน ตามที่มี',
     },
   },
   'TAS-3D2N': {
@@ -61,8 +61,22 @@ const STAY_COPY: Record<string, StayCopy> = {
       th: 'พรีเมียม: ห้องส่วนตัวพร้อมห้องน้ำในตัว 2 คืน (ตามห้องว่าง)',
     },
     luxuryUpgradeNote: {
-      en: '+$900 vs Standard listed price for private ensuite, 2 nights (display only in Phase 1).',
-      th: 'แพงกว่าเรทมาตรฐาน $900 สำหรับห้องส่วนตัว 2 คืน (เฟส 1 แสดงราคาอย่างเดียว ยังไม่คิดเงินส่วนนี้ตอนจอง)',
+      en: 'Fixed Luxury total includes private ensuite for 2 nights.',
+      th: 'เรทพรีเมียมคงที่ รวมห้องส่วนตัวพร้อมห้องน้ำในตัว 2 คืน',
+    },
+  },
+  'CAN-2D1N': {
+    standard: {
+      en: '1 night shared dorm / backpacker-motel (clean & safe).',
+      th: 'ที่พัก 1 คืน ห้องรวม Backpackers/Motel สะอาดปลอดภัย',
+    },
+    luxury: {
+      en: 'Luxury: private ensuite for 1 night.',
+      th: 'พรีเมียม: ห้องส่วนตัวพร้อมห้องน้ำในตัว 1 คืน',
+    },
+    luxuryUpgradeNote: {
+      en: 'Fixed Luxury total includes private ensuite for 1 night.',
+      th: 'เรทพรีเมียมคงที่ รวมห้องส่วนตัวพร้อมห้องน้ำในตัว 1 คืน',
     },
   },
   'TAS-LH-4D3N': {

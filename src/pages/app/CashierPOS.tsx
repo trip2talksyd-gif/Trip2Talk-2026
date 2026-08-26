@@ -28,6 +28,7 @@ import {
   resolveBookingTravelDate,
   signPaymentSlip,
   flagPendingBooking,
+  tourTotalForTier,
 } from '../../lib/toursApi'
 import { isSelectableBookableTour } from '../../lib/tourSelectability'
 import { isInPersonCardMethod, isSquareGatewayMethod, paymentMethodBadge, remainingTripBalanceAud } from '../../lib/paymentCredit'
@@ -38,6 +39,11 @@ import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
 import { useLang } from '../../hooks/useLang'
 import CancelBookingDialog from '../../components/app/CancelBookingDialog'
+
+function cashierTripTotal(tour: Tour | undefined, booking: TourBooking) {
+  if (!tour) return 0
+  return tourTotalForTier(tour, booking.selected_tier)
+}
 import PaymentReconciliationBanner from '../../components/app/PaymentReconciliationBanner'
 import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import StaffWaiverRecordButton from '../../components/app/StaffWaiverRecordButton'
@@ -269,8 +275,8 @@ export default function CashierPOS() {
           source,
           installmentNo: 1,
           installmentPlan: Number(installmentPlan),
-          priceAud: tour?.price_aud ?? null,
-          balanceRemaining: tour ? Math.max(0, tour.price_aud - paidAmount) : null,
+          priceAud: tour ? cashierTripTotal(tour, booking) : null,
+          balanceRemaining: tour ? Math.max(0, cashierTripTotal(tour, booking) - paidAmount) : null,
         })
       }
     } catch (err) {
@@ -307,7 +313,7 @@ export default function CashierPOS() {
     const tour = tours.find((tr) => tr.trip_code === booking.trip_code)
     const remaining = tour
       ? remainingTripBalanceAud({
-          priceAud: tour.price_aud,
+          priceAud: cashierTripTotal(tour, booking),
           depositAud: tour.deposit_aud,
           amountPaidAud: booking.amount_paid_aud,
           paymentMethod: booking.payment_method,
@@ -315,7 +321,7 @@ export default function CashierPOS() {
         }) ?? 0
       : 0
     const plan = booking.payment_plan_installments ?? 1
-    const perInstallment = tour && plan > 1 ? Math.min(remaining, tour.price_aud / plan) : remaining
+    const perInstallment = tour && plan > 1 ? Math.min(remaining, cashierTripTotal(tour, booking) / plan) : remaining
     setPayingId(booking.id)
     setPayAmount(perInstallment > 0 ? String(Math.round(perInstallment * 100) / 100) : '')
     setPayMethod(booking.payment_method ?? 'cash')
@@ -424,7 +430,7 @@ export default function CashierPOS() {
     const deposit = Number(tour?.deposit_aud ?? 0)
     const remaining = tour
       ? remainingTripBalanceAud({
-          priceAud: tour.price_aud,
+          priceAud: cashierTripTotal(tour, booking),
           depositAud: tour.deposit_aud,
           amountPaidAud: booking.amount_paid_aud,
           paymentMethod: booking.payment_method,
@@ -563,7 +569,7 @@ export default function CashierPOS() {
     : undefined
   const payingRemaining = payingBooking && payingTour
     ? remainingTripBalanceAud({
-        priceAud: payingTour.price_aud,
+        priceAud: cashierTripTotal(payingTour, payingBooking),
         depositAud: payingTour.deposit_aud,
         amountPaidAud: payingBooking.amount_paid_aud,
         paymentMethod: payingBooking.payment_method,
@@ -582,7 +588,7 @@ export default function CashierPOS() {
     : undefined
   const readerRemaining = readerBooking && readerTour
     ? remainingTripBalanceAud({
-        priceAud: readerTour.price_aud,
+        priceAud: cashierTripTotal(readerTour, readerBooking),
         depositAud: readerTour.deposit_aud,
         amountPaidAud: readerBooking.amount_paid_aud,
         paymentMethod: readerBooking.payment_method,
@@ -751,7 +757,7 @@ export default function CashierPOS() {
               const tour = tours.find((tr) => tr.trip_code === b.trip_code)
               const remaining = tour
                 ? remainingTripBalanceAud({
-                    priceAud: tour.price_aud,
+                    priceAud: cashierTripTotal(tour, b),
                     depositAud: tour.deposit_aud,
                     amountPaidAud: b.amount_paid_aud,
                     paymentMethod: b.payment_method,
@@ -766,6 +772,7 @@ export default function CashierPOS() {
                     paymentMethod={b.payment_method}
                     remainingAud={remaining}
                     cancelled={isBookingCancelled(b)}
+                    selectedTier={b.selected_tier}
                     onOpen={() => setSelectedBookingId(b.id)}
                   />
                 </li>
@@ -780,7 +787,7 @@ export default function CashierPOS() {
               const plan = b.payment_plan_installments ?? 1
               const remaining = tour
                 ? remainingTripBalanceAud({
-                    priceAud: tour.price_aud,
+                    priceAud: cashierTripTotal(tour, b),
                     depositAud: tour.deposit_aud,
                     amountPaidAud: b.amount_paid_aud,
                     paymentMethod: b.payment_method,
@@ -813,6 +820,11 @@ export default function CashierPOS() {
                       <span className="ml-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-teal-400">
                         {paymentMethodBadge(b.payment_method)}
                       </span>
+                      {b.selected_tier === 'luxury' && (
+                        <span className="ml-2 inline-block rounded-full bg-orange/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange">
+                          Luxury
+                        </span>
+                      )}
                       {cancelled && (
                         <span className="ml-2 inline-block rounded-full bg-white/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-cream-muted">
                           Cancelled
@@ -824,7 +836,7 @@ export default function CashierPOS() {
                     </p>
                     <p className="mt-1 text-xs text-cream-muted">
                       จ่ายแล้ว {b.amount_paid_aud.toLocaleString()} AUD
-                      {tour ? ` / ${tour.price_aud.toLocaleString()} AUD` : ''}
+                      {tour ? ` / ${cashierTripTotal(tour, b).toLocaleString()} AUD` : ''}
                       {plan > 1 ? ` · แบ่งจ่าย ${plan} งวด` : ''}
                       {remaining !== null && remaining > 0 ? ` · เหลือ ${remaining.toLocaleString()} AUD` : ''}
                     </p>

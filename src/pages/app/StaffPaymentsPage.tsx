@@ -296,6 +296,11 @@ export default function StaffPaymentsPage() {
                   >
                     <p className="text-sm font-semibold text-cream">
                       {booking.first_name_en} {booking.last_name_en}
+                      {booking.selected_tier === 'luxury' && (
+                        <span className="ml-2 inline-block rounded-full bg-orange/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange">
+                          Luxury
+                        </span>
+                      )}
                     </p>
                     <p className="text-[11px] text-cream-muted">
                       {booking.trip_code} · {booking.booking_reference ?? booking.id.slice(0, 8)} ·{' '}

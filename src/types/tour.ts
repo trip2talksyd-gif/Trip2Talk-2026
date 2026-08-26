@@ -37,8 +37,10 @@ export interface Tour {
   duration_label?: string | null
   departure_date: string | null
   price_aud: number
-  /** Optional Luxury list price. Null/undefined = no Luxury tier. Phase 1 display only. */
+  /** Optional Luxury list price. Null = no Luxury option. */
   luxury_price_aud?: number | null
+  /** Integer Luxury total (same meaning as luxury_price_aud when set). */
+  price_luxury_aud?: number | null
   deposit_aud: number
   max_seats: number
   booked_seats: number
@@ -98,6 +100,8 @@ export interface TourBooking {
   source?: string | null
   /** Installment plan the customer picked (1 = pay in full, 2 or 4 = split). Informational — payments are still manual PayID transfers recorded one at a time. */
   payment_plan_installments?: number | null
+  /** standard | luxury. Null on older rows = standard. */
+  selected_tier?: 'standard' | 'luxury' | null
   booking_status: BookingStatus
   amount_paid_aud: number
   payment_method: string | null

@@ -7,6 +7,7 @@ import {
   fetchReceiptByReference,
   formatTravelDateLabel,
   resolveBookingTravelDate,
+  tourTotalForTier,
   type BookingReceiptLookup,
 } from '../../lib/toursApi'
 import { paymentMethodLabelEn, remainingTripBalanceAud } from '../../lib/paymentCredit'
@@ -17,7 +18,7 @@ import {
 } from '../../components/app/staffUi'
 import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import BookingExtensionQuotes from '../../components/app/BookingExtensionQuotes'
-import type { BookingPayment } from '../../types/tour'
+import type { BookingPayment, Tour } from '../../types/tour'
 
 /** Staff receipt URL — booking ref lives in the path so refresh/direct open still work. */
 export function staffReceiptPath(
@@ -53,6 +54,8 @@ export type ReceiptData = {
   priceAud?: number | null
   /** Trip price minus everything paid so far, after this payment. */
   balanceRemaining?: number | null
+  /** Staff-only: standard vs luxury. Not printed on the tax invoice body. */
+  selectedTier?: string | null
 }
 
 // Tax invoice is an AU legal/customer-facing document — English + AUD only,
@@ -127,7 +130,7 @@ function receiptFromLookup(
   const payment = pickReceiptPayment(payments, installmentNo)
   const method = payment?.payment_method ?? booking.payment_method ?? null
   const amountPaid = Number(payment?.amount_aud ?? booking.amount_paid_aud ?? 0)
-  const priceAud = tour?.price_aud ?? null
+  const priceAud = tour ? tourTotalForTier(tour as Tour, booking.selected_tier) : null
   const remaining =
     priceAud != null
       ? remainingTripBalanceAud({
@@ -154,6 +157,7 @@ function receiptFromLookup(
     installmentPlan: booking.payment_plan_installments,
     priceAud,
     balanceRemaining: remaining,
+    selectedTier: booking.selected_tier ?? null,
   }
 }
 
@@ -376,6 +380,11 @@ export default function ReceiptPage() {
             onSessionExpired={() => navigate('/app')}
           />
         ) : null}
+        {data.selectedTier === 'luxury' && (
+          <p className="rounded-lg border border-orange/30 bg-orange/10 px-3 py-2 text-center text-xs font-semibold uppercase tracking-wider text-orange">
+            Stay tier: Luxury
+          </p>
+        )}
         {data.bookingId ? (
           <div className="w-full">
             <BookingExtensionQuotes

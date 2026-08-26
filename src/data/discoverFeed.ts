@@ -31,7 +31,7 @@ const CATEGORY_TRIP: Partial<Record<GalleryCategory, string>> = {
   outback: 'ULU-4D3N',
   sydney: 'SYD-1DAY',
   melbourne: 'MEL-4D3N',
-  bermagui: 'BER-3D2N',
+  bermagui: 'CAN-2D1N',
   nsw: 'CAN-2D1N',
 }
 
