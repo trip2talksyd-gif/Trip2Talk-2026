@@ -7,6 +7,7 @@ import {
   type FocusAwardPhoto,
 } from '../../data/awardsPress'
 import { useLang } from '../../hooks/useLang'
+import { storageImageSrc } from '../../lib/storageImage'
 import BiDisplayHeading from '../ui/BiDisplayHeading'
 import BiText from '../ui/BiText'
 
@@ -37,7 +38,7 @@ function AwardThumb({ photo, lang }: { photo: FocusAwardPhoto; lang: 'en' | 'th'
           </div>
         ) : (
           <img
-            src={photo.src}
+            src={storageImageSrc(photo.src)}
             alt={alt}
             width={800}
             height={600}

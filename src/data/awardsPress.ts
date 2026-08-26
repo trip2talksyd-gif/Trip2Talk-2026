@@ -1,6 +1,8 @@
+import { publicMediaUrl } from '../lib/storageImage'
+
 /**
- * Focus Awards 2016 bronzes + press credits for the About page.
- * Award photos: drop 800px-wide WebP (quality 70–75%) at these public paths.
+ * Focus Awards 2016 bronzes + press credits.
+ * Photos live in the public-media bucket (800px WebP, already processed).
  */
 export type FocusAwardCategory = 'seascape' | 'bw' | 'creative'
 
@@ -24,35 +26,35 @@ export type PressCredit = {
 export const FOCUS_AWARD_PHOTOS: FocusAwardPhoto[] = [
   {
     id: 'seascape-1',
-    src: '/images/awards/focus-2016-seascape-1.webp',
+    src: publicMediaUrl('Photos/award/focus-2016-seascape-1.webp'),
     category: 'seascape',
     altEn: 'Focus Awards 2016 Bronze — Seascape',
     altTh: 'รางวัลบรอนซ์ Focus Awards 2016 — ทิวทัศน์ทะเล',
   },
   {
     id: 'seascape-2',
-    src: '/images/awards/focus-2016-seascape-2.webp',
+    src: publicMediaUrl('Photos/award/focus-2016-seascape-2.webp'),
     category: 'seascape',
     altEn: 'Focus Awards 2016 Bronze — Seascape',
     altTh: 'รางวัลบรอนซ์ Focus Awards 2016 — ทิวทัศน์ทะเล',
   },
   {
     id: 'black-and-white',
-    src: '/images/awards/focus-2016-black-and-white.webp',
+    src: publicMediaUrl('Photos/award/focus-2016-blackwhite.webp'),
     category: 'bw',
     altEn: 'Focus Awards 2016 Bronze — Black & White',
     altTh: 'รางวัลบรอนซ์ Focus Awards 2016 — ขาวดำ',
   },
   {
     id: 'creative-1',
-    src: '/images/awards/focus-2016-creative-1.webp',
+    src: publicMediaUrl('Photos/award/focus-2016-creative-1.webp'),
     category: 'creative',
     altEn: 'Focus Awards 2016 Bronze — Creative',
     altTh: 'รางวัลบรอนซ์ Focus Awards 2016 — Creative',
   },
   {
     id: 'creative-2',
-    src: '/images/awards/focus-2016-creative-2.webp',
+    src: publicMediaUrl('Photos/award/focus-2016-creative-2.webp'),
     category: 'creative',
     altEn: 'Focus Awards 2016 Bronze — Creative',
     altTh: 'รางวัลบรอนซ์ Focus Awards 2016 — Creative',
