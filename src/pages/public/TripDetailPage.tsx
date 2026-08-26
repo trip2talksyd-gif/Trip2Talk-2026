@@ -24,6 +24,8 @@ import {
   isListedPriceHidden,
   isTourBookable,
   seatsRemaining,
+  displayStayListPriceAud,
+  listedLuxuryPriceAud,
 } from '../../lib/toursApi'
 import {
   isAuroraTrip,
@@ -47,11 +49,13 @@ import { getTripCoverVideoUrl } from '../../data/tripVideos'
 import { getTestimonialsForTrip } from '../../data/testimonials'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import type { Tour } from '../../types/tour'
+import type { StayTier } from '../../data/luxuryStay'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import BiText from '../../components/ui/BiText'
 import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
 import TripPhotoHero from '../../components/trips/TripPhotoHero'
+import TripQuickFacts from '../../components/trips/TripQuickFacts'
 import TripPricingCard from '../../components/trips/TripPricingCard'
 import TripBookButton from '../../components/trips/TripBookButton'
 import TripStickyBookBar from '../../components/trips/TripStickyBookBar'
@@ -81,6 +85,7 @@ export default function TripDetailPage() {
   const [previewPhoto, setPreviewPhoto] = useState<GalleryPhoto | null>(null)
   const [tab, setTab] = useState<DetailTab>('details')
   const [moreTrips, setMoreTrips] = useState<Tour[]>([])
+  const [stayTier, setStayTier] = useState<StayTier>('standard')
 
   const errorBi = tt('common.error')
 
@@ -99,6 +104,7 @@ export default function TripDetailPage() {
   useEffect(() => {
     setPreviewPhoto(null)
     setTab('details')
+    setStayTier('standard')
   }, [tripCode])
 
   useEffect(() => {
@@ -146,6 +152,9 @@ export default function TripDetailPage() {
   const bookable = isTourBookable(tour)
   const priceHidden = isListedPriceHidden(tour)
   const remaining = seatsRemaining(tour)
+  const luxuryAud = listedLuxuryPriceAud(tour)
+  const effectiveStayTier: StayTier = luxuryAud ? stayTier : 'standard'
+  const displayPriceAud = displayStayListPriceAud(tour, effectiveStayTier)
   const testimonials = getTestimonialsForTrip(tour.trip_code)
   const lowSeats =
     bookable && tour.max_seats > 0 && remaining <= Math.max(2, Math.ceil(tour.max_seats * 0.34))
@@ -168,25 +177,6 @@ export default function TripDetailPage() {
   const auroraBi = tt('common.aurora')
   const fromBi = tt('detail.fromPrice')
   const priceTba = tt('trips.priceTba')
-
-  const seatsValue = bookable
-    ? { en: `${remaining} left`, th: `เหลือ ${remaining}` }
-    : { en: `Max ${tour.max_seats}`, th: `สูงสุด ${tour.max_seats}` }
-
-  const statChips = [
-    {
-      value: durationEn,
-      label: tt('detail.stat.duration'),
-    },
-    {
-      value: seatsValue.en,
-      label: tt('detail.stat.seats'),
-    },
-    {
-      value: priceHidden ? priceTba.en : formatAud(tour.price_aud),
-      label: tt('detail.stat.perPerson'),
-    },
-  ]
 
   return (
     <div className="space-y-6 pb-28 md:pb-4">
@@ -287,21 +277,9 @@ export default function TripDetailPage() {
           {tour.name_en}
           <span className="mt-px block text-[11.5px] font-medium text-ink-soft">{tour.name_th}</span>
         </h1>
-
-        <div className="mt-2.5 flex gap-2">
-          {statChips.map((chip) => (
-            <div key={chip.label.en} className="flex-1 rounded-xl bg-mint-100 px-1 py-[7px] text-center">
-              <b className="block text-[11.5px] text-teal-800">{chip.value}</b>
-              <span className="text-[8.5px] uppercase leading-[1.4] text-ink-soft">
-                {chip.label.en}
-                <span className="block font-thai text-[7.5px] normal-case opacity-85">
-                  {chip.label.th}
-                </span>
-              </span>
-            </div>
-          ))}
-        </div>
       </div>
+
+      <TripQuickFacts tour={tour} stayTier={effectiveStayTier} displayPriceAud={displayPriceAud} />
 
       <div
         className="-mt-2 flex gap-3.5 border-b border-line md:hidden"
@@ -338,7 +316,7 @@ export default function TripDetailPage() {
               <>
                 <span className="text-[10px] font-semibold text-ink-soft">{fromBi.en}</span>
                 <SplitFlapPrice
-                  amountAud={tour.price_aud}
+                  amountAud={displayPriceAud}
                   board
                   className="text-[15px] font-extrabold leading-none"
                 />
@@ -688,7 +666,13 @@ export default function TripDetailPage() {
         </div>
 
         <div className={`order-1 lg:order-2 ${pane('details')}`}>
-          <TripPricingCard tour={tour} includes={details?.includes.en ?? []} />
+          <TripPricingCard
+            tour={tour}
+            includes={details?.includes.en ?? []}
+            stayTier={effectiveStayTier}
+            onStayTierChange={setStayTier}
+            displayPriceAud={displayPriceAud}
+          />
         </div>
       </div>
 
@@ -750,7 +734,7 @@ export default function TripDetailPage() {
         </section>
       )}
 
-      <TripStickyBookBar tour={tour} />
+      <TripStickyBookBar tour={tour} displayPriceAud={displayPriceAud} />
     </div>
   )
 }

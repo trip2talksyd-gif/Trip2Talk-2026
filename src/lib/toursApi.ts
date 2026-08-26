@@ -110,6 +110,14 @@ function parseTourItinerary(value: unknown): Tour['itinerary'] {
   return days.length > 0 ? days.sort((a, b) => a.day - b.day) : null
 }
 
+function listedLuxuryFromRow(row: TourRow): number | null {
+  if (!('luxury_price_aud' in row) || row.luxury_price_aud == null || row.luxury_price_aud === '') {
+    return null
+  }
+  const n = num(row.luxury_price_aud)
+  return Number.isFinite(n) && n > 0 ? n : null
+}
+
 export function normalizeTour(row: TourRow): Tour {
   const departure =
     strOrNull(row.departure_date) ?? strOrNull(row.next_date) ?? null
@@ -134,6 +142,7 @@ export function normalizeTour(row: TourRow): Tour {
     duration_label: durationLabel,
     departure_date: departure,
     price_aud: num(row.price_aud ?? row.price_standard),
+    luxury_price_aud: listedLuxuryFromRow(row),
     deposit_aud: num(row.deposit_aud ?? row.deposit_amount, 100),
     max_seats: num(row.max_seats ?? row.max_pax, 6),
     booked_seats: num(row.booked_seats ?? row.current_pax),
@@ -933,6 +942,25 @@ export function getUnbookableReason(tour: Tour): UnbookableReason {
 export function isListedPriceHidden(tour: Tour): boolean {
   const reason = getUnbookableReason(tour)
   return reason === 'no_date' || reason === 'template' || reason === 'draft'
+}
+
+/** Positive Luxury list price, if the column is present and set. */
+export function listedLuxuryPriceAud(tour: Tour): number | null {
+  const n = Number(tour.luxury_price_aud)
+  if (!Number.isFinite(n) || n <= 0) return null
+  return n
+}
+
+/** Display amount for the stay-tier toggle. Checkout still uses tour.price_aud. */
+export function displayStayListPriceAud(
+  tour: Tour,
+  stayTier: 'standard' | 'luxury',
+): number {
+  if (stayTier === 'luxury') {
+    const luxury = listedLuxuryPriceAud(tour)
+    if (luxury != null) return luxury
+  }
+  return tour.price_aud
 }
 
 // ---------------------------------------------------------------------------

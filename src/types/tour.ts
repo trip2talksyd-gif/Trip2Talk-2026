@@ -37,6 +37,8 @@ export interface Tour {
   duration_label?: string | null
   departure_date: string | null
   price_aud: number
+  /** Optional Luxury list price. Null/undefined = no Luxury tier. Phase 1 display only. */
+  luxury_price_aud?: number | null
   deposit_aud: number
   max_seats: number
   booked_seats: number

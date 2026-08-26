@@ -7,10 +7,15 @@ import { isPremiumTrip } from '../../data/tripTiers'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 import TripBookButton from './TripBookButton'
 import AfterpayAcceptedBadge from './AfterpayAcceptedBadge'
+import StandardLuxuryToggle from './StandardLuxuryToggle'
+import type { StayTier } from '../../data/luxuryStay'
 
 type Props = {
   tour: Tour
   includes: string[]
+  stayTier: StayTier
+  onStayTierChange: (tier: StayTier) => void
+  displayPriceAud: number
 }
 
 const AVATAR_COLORS = ['bg-teal-600', 'bg-teal-700', 'bg-coral', 'bg-teal-800']
@@ -27,7 +32,13 @@ const TRAVEL_FEATURE_ICONS = [
   { icon: Camera, en: 'Photographer', th: 'ช่างภาพ' },
 ] as const
 
-export default function TripPricingCard({ tour, includes }: Props) {
+export default function TripPricingCard({
+  tour,
+  includes,
+  stayTier,
+  onStayTierChange,
+  displayPriceAud,
+}: Props) {
   const { lang } = useLang()
   const seats = seatsRemaining(tour)
   const oneDay = isOneDayTrip(tour.trip_code)
@@ -72,6 +83,10 @@ export default function TripPricingCard({ tour, includes }: Props) {
         {tourDestination(tour.trip_code)} · {tour.trip_code}
       </p>
 
+      <div className="mt-3">
+        <StandardLuxuryToggle tour={tour} value={stayTier} onChange={onStayTierChange} />
+      </div>
+
       <div className="group mt-3">
         {priceHidden ? (
           <>
@@ -86,7 +101,7 @@ export default function TripPricingCard({ tour, includes }: Props) {
           </>
         ) : (
           <>
-            <SplitFlapPrice amountAud={tour.price_aud} className="text-[28px] font-extrabold text-ink" board />
+            <SplitFlapPrice amountAud={displayPriceAud} className="text-[28px] font-extrabold text-ink" board />
             <span className="ml-1 text-xs font-semibold text-ink-soft">
               {lang === 'th' ? 'AUD / คน' : 'AUD / person'}
             </span>
