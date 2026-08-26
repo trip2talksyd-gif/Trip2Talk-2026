@@ -12,7 +12,8 @@
 // Request: POST { token: string, action: string, params?: object }
 // Required secrets: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY (auto-provided)
 
-import { createClient } from 'npm:@supabase/supabase-js@2'
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2'
+import type { Database } from '../_shared/database.types.ts'
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -101,7 +102,7 @@ function isPopulatedHealthValue(value: unknown): boolean {
  * SELECT-only dry-run. Keep in sync with cron-daily `health_retention_dry_run`.
  * Trip end = departure_date + max(1, duration_days) - 1 (UTC).
  */
-async function runHealthRetentionDryRun(admin: ReturnType<typeof createClient>) {
+async function runHealthRetentionDryRun(admin: SupabaseClient<Database>) {
   const todayStr = new Date().toISOString().slice(0, 10)
   const { data: tours, error: tourErr } = await admin
     .from('tours')
@@ -136,13 +137,8 @@ async function runHealthRetentionDryRun(admin: ReturnType<typeof createClient>) 
   let eligibleAlsoOptedOut = 0
   let eligibleCancelled = 0
 
-  const selectCols = [
-    'booking_reference',
-    'trip_code',
-    'cancelled_at',
-    'marketing_photo_opt_out',
-    ...HEALTH_RETENTION_FIELDS,
-  ].join(', ')
+  const selectCols =
+    'booking_reference, trip_code, cancelled_at, marketing_photo_opt_out, medical_conditions, allergies, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship, medications, dietary_requirements, oshc_provider, oshc_expiry, oshc_membership_number, travel_insurance_provider, travel_insurance_policy_number'
 
   for (let i = 0; i < codes.length; i += 80) {
     const chunk = codes.slice(i, i + 80)
@@ -1722,7 +1718,9 @@ Deno.serve(async (req) => {
       }
 
       case 'health_retention_dry_run': {
-        return json({ data: await runHealthRetentionDryRun(admin) })
+        return json({
+          data: await runHealthRetentionDryRun(admin as unknown as SupabaseClient<Database>),
+        })
       }
 
       case 'list_photos_pending': {
