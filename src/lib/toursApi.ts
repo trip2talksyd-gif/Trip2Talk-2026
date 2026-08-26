@@ -111,10 +111,10 @@ function parseTourItinerary(value: unknown): Tour['itinerary'] {
 }
 
 function listedLuxuryFromRow(row: TourRow): number | null {
-  if (!('luxury_price_aud' in row) || row.luxury_price_aud == null || row.luxury_price_aud === '') {
+  if (!('price_luxury_aud' in row) || row.price_luxury_aud == null || row.price_luxury_aud === '') {
     return null
   }
-  const n = num(row.luxury_price_aud)
+  const n = num(row.price_luxury_aud)
   return Number.isFinite(n) && n > 0 ? n : null
 }
 
@@ -143,6 +143,7 @@ export function normalizeTour(row: TourRow): Tour {
     departure_date: departure,
     price_aud: num(row.price_aud ?? row.price_standard),
     luxury_price_aud: listedLuxuryFromRow(row),
+    price_luxury_aud: listedLuxuryFromRow(row),
     deposit_aud: num(row.deposit_aud ?? row.deposit_amount, 100),
     max_seats: num(row.max_seats ?? row.max_pax, 6),
     booked_seats: num(row.booked_seats ?? row.current_pax),
@@ -946,17 +947,24 @@ export function isListedPriceHidden(tour: Tour): boolean {
 
 /** Positive Luxury list price, if the column is present and set. */
 export function listedLuxuryPriceAud(tour: Tour): number | null {
-  const n = Number(tour.luxury_price_aud)
+  const n = Number(tour.price_luxury_aud)
   if (!Number.isFinite(n) || n <= 0) return null
   return n
 }
 
-/** Display amount for the stay-tier toggle. Checkout still uses tour.price_aud. */
 export function displayStayListPriceAud(
   tour: Tour,
   stayTier: 'standard' | 'luxury',
 ): number {
-  if (stayTier === 'luxury') {
+  return tourTotalForTier(tour, stayTier)
+}
+
+/** Trip total for remaining / Square / POS. Luxury only if listed and selected. */
+export function tourTotalForTier(
+  tour: Tour,
+  selectedTier?: string | null,
+): number {
+  if (selectedTier === 'luxury') {
     const luxury = listedLuxuryPriceAud(tour)
     if (luxury != null) return luxury
   }
@@ -1070,6 +1078,8 @@ export type BookingReceiptLookup = {
     departure_date: string | null
     price_aud: number
     deposit_aud: number
+    luxury_price_aud?: number | null
+    price_luxury_aud?: number | null
   } | null
 }
 

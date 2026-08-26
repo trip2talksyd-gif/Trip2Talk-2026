@@ -95,18 +95,6 @@ export const AURORA_DISCLAIMER = {
 }
 
 export const SAFETY_WARNINGS: Record<string, { en: string[]; th: string[] }> = {
-  'BER-3D2N': {
-    en: [
-      'Watch for rogue waves at Horse Head Rock — never turn your back to the ocean',
-      'Low tide access only to Horse Head Rock — tides can cut off the path',
-      'Wear proper rock shoes — no thongs/sandals on coastal rocks',
-    ],
-    th: [
-      'ระวังคลื่นใหญ่ที่ Horse Head Rock — ห้ามหันหลังให้ทะเล',
-      'เข้าถึง Horse Head Rock ได้เฉพาะน้ำลง — น้ำขึ้นอาจตัดทางกลับ',
-      'ใส่รองเท้าปีนเขาที่เหมาะสม — ห้ามใส่แตะบนหินริมชายฝั่ง',
-    ],
-  },
   'ULU-4D3N': {
     en: [
       'Desert temperatures drop below 0°C at night — thermal layers mandatory',
@@ -146,15 +134,12 @@ export const MIN_PAX_RULES: Record<string, number> = {
   'NZ-10D9N': 4,
   'TAS-3D2N': 3,
   'TAS-LH-4D3N': 3,
-  'TAS-SU-4D3N': 3,
   'TAS-SP-3D2N': 3,
   'ULU-4D3N': 3,
   'MEL-4D3N': 3,
-  'BER-3D2N': 2,
   'CAN-2D1N': 2,
   'KIA-1DAY': 2,
   'PSP-1DAY': 2,
-  'LAV-ANB-1D': 2,
   'SYD-MW-WIN': 2,
   'SYD-1DAY': 1,
 }

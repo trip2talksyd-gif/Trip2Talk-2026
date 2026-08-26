@@ -7,14 +7,11 @@ import { isPremiumTrip } from '../../data/tripTiers'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 import TripBookButton from './TripBookButton'
 import AfterpayAcceptedBadge from './AfterpayAcceptedBadge'
-import StandardLuxuryToggle from './StandardLuxuryToggle'
-import type { StayTier } from '../../data/luxuryStay'
+import LuxuryUpgradeCard from './LuxuryUpgradeCard'
 
 type Props = {
   tour: Tour
   includes: string[]
-  stayTier: StayTier
-  onStayTierChange: (tier: StayTier) => void
   displayPriceAud: number
 }
 
@@ -35,8 +32,6 @@ const TRAVEL_FEATURE_ICONS = [
 export default function TripPricingCard({
   tour,
   includes,
-  stayTier,
-  onStayTierChange,
   displayPriceAud,
 }: Props) {
   const { lang } = useLang()
@@ -84,10 +79,6 @@ export default function TripPricingCard({
       </p>
 
       <div className="mt-3">
-        <StandardLuxuryToggle tour={tour} value={stayTier} onChange={onStayTierChange} />
-      </div>
-
-      <div className="group mt-3">
         {priceHidden ? (
           <>
             <p className="text-[22px] font-extrabold text-ink">
@@ -105,6 +96,7 @@ export default function TripPricingCard({
             <span className="ml-1 text-xs font-semibold text-ink-soft">
               {lang === 'th' ? 'AUD / คน' : 'AUD / person'}
             </span>
+            <LuxuryUpgradeCard tour={tour} />
           </>
         )}
       </div>

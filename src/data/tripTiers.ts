@@ -6,16 +6,13 @@ export const BUDGET_TRIP_CODES = [
   'KIA-1DAY',
   'SYD-1DAY',
   'PSP-1DAY',
-  'LAV-ANB-1D',
   'CAN-2D1N',
-  'BER-3D2N',
 ] as const
 
 /** Premium trips: polished, fully-handled tone (price_standard >= $1,350) */
 export const PREMIUM_TRIP_CODES = [
   'TAS-3D2N',
   'TAS-LH-4D3N',
-  'TAS-SU-4D3N',
   'TAS-SP-3D2N',
   'MEL-4D3N',
   'ULU-4D3N',

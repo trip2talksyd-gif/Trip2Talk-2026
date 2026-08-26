@@ -11,12 +11,16 @@ import SafetyTravelFields, {
   type SafetyTravelValue,
 } from '../../components/booking/SafetyTravelFields'
 import SquareCardElement from '../../components/booking/SquareCardElement'
+import StandardLuxuryToggle from '../../components/trips/StandardLuxuryToggle'
+import type { StayTier } from '../../data/luxuryStay'
 import {
   fetchTourByCode,
   formatAud,
   formatDate,
   getUnbookableReason,
   insertBooking,
+  listedLuxuryPriceAud,
+  tourTotalForTier,
   uploadPaymentSlip,
 } from '../../lib/toursApi'
 import { SeatsFullError } from '../../types/errors'
@@ -103,6 +107,7 @@ export default function BookingPage() {
   const [installmentPlan, setInstallmentPlan] = useState<1 | 2 | 4>(1)
   const [payIdAmountKind, setPayIdAmountKind] = useState<'deposit' | 'custom'>('deposit')
   const [payIdCustomRaw, setPayIdCustomRaw] = useState('')
+  const [stayTier, setStayTier] = useState<StayTier>('standard')
 
   const [form, setForm] = useState<FormState>({
     first_name_en: '',
@@ -154,6 +159,7 @@ export default function BookingPage() {
           return
         }
         setTour(row)
+        setStayTier('standard')
       })
       .catch(() => setLoadError(t('common.error')))
       .finally(() => setLoading(false))
@@ -292,6 +298,7 @@ export default function BookingPage() {
         slip_url: slipUrl,
         booking_reference: bookingRef,
         payment_plan_installments: installmentPlan,
+        selected_tier: listedLuxuryPriceAud(tour) ? stayTier : 'standard',
       })
 
       setConfirmationSummary({
@@ -308,7 +315,7 @@ export default function BookingPage() {
         ),
         depositPaid: false,
         paymentMethod: paymentChoice === 'square' ? 'square' : 'payid',
-        priceAud: tour.price_aud,
+        priceAud: tourTotalForTier(tour, stayTier),
         depositAud: tour.deposit_aud,
         amountPaidAud: 0,
         bookingStatus: 'pending_payment',
@@ -387,6 +394,7 @@ export default function BookingPage() {
   ]
 
   const depositDue = tour.deposit_aud
+  const listedTotal = tourTotalForTier(tour, stayTier)
   const payIdCustomParsed = (() => {
     const trimmed = payIdCustomRaw.trim()
     if (!trimmed) return null
@@ -495,6 +503,10 @@ export default function BookingPage() {
         }
       />
 
+      {listedLuxuryPriceAud(tour) != null && (
+        <StandardLuxuryToggle tour={tour} value={stayTier} onChange={setStayTier} />
+      )}
+
       <section className="overflow-hidden rounded-2xl border border-line bg-white shadow-[0_1px_0_rgba(15,28,30,0.04)]">
         <div className="border-b border-line bg-mint-100/70 px-4 py-3">
           <p className="text-[11px] font-extrabold uppercase tracking-wide text-teal-800">
@@ -510,7 +522,7 @@ export default function BookingPage() {
           <div className="flex items-center justify-between text-[12px] text-ink-soft">
             <span>{lang === 'th' ? 'ราคารวมทริป' : 'Trip total'}</span>
             <SplitFlapPrice
-              amountAud={tour.price_aud}
+              amountAud={listedTotal}
               board
               className="text-[13px] font-extrabold leading-none text-ink"
             />
@@ -758,7 +770,7 @@ export default function BookingPage() {
         <SquareCardElement
           amountAud={depositDue}
           depositAud={tour.deposit_aud}
-          listedPriceAud={tour.price_aud}
+          listedPriceAud={listedTotal}
           alreadyPaidAud={0}
           showAmountOptions
           bookingReference={squareBookingRef}

@@ -30,6 +30,17 @@ function json(body: unknown, status = 200): Response {
   })
 }
 
+function bookingTripTotalAud(
+  tour: { price_aud?: unknown; luxury_price_aud?: unknown; price_luxury_aud?: unknown } | null,
+  booking: { selected_tier?: unknown } | null,
+): number {
+  const luxury = Number(tour?.price_luxury_aud ?? tour?.luxury_price_aud ?? 0)
+  if (String(booking?.selected_tier ?? '').toLowerCase() === 'luxury' && luxury > 0) {
+    return luxury
+  }
+  return Number(tour?.price_aud ?? 0)
+}
+
 /** Object path inside the private payment-slips bucket (never a public URL). */
 function paymentSlipObjectPath(slipUrl: string | null | undefined): string | null {
   if (typeof slipUrl !== 'string') return null
@@ -1080,8 +1091,6 @@ Deno.serve(async (req) => {
           'MEL-4D3N',
           'TAS-3D2N',
           'TAS-LH-4D3N',
-          'TAS-SU-4D3N',
-          'BER-3D2N',
           'CAN-2D1N',
           'TAS-SP-3D2N',
           'NZ-10D9N',
@@ -1984,7 +1993,7 @@ Deno.serve(async (req) => {
           .select('*')
           .eq('id', booking.tour_id)
           .maybeSingle()
-        const priceAud = tour ? Number(tour.price_aud ?? 0) : 0
+        const priceAud = tour ? bookingTripTotalAud(tour, booking) : 0
 
         const { count, error: countError } = await admin
           .from('booking_payments')
@@ -2068,10 +2077,10 @@ Deno.serve(async (req) => {
 
         const { data: tour } = await admin
           .from('tours')
-          .select('price_aud')
+          .select('price_aud, luxury_price_aud, price_luxury_aud')
           .eq('id', booking.tour_id)
           .maybeSingle()
-        const priceAud = tour ? Number(tour.price_aud ?? 0) : 0
+        const priceAud = tour ? bookingTripTotalAud(tour, booking) : 0
         const amountCents = Math.round(Number(amount) * 100)
         const paymentId = `in_person:${bookingRef}:${receipt}`
         const staffNote = typeof note === 'string' ? note.trim().slice(0, 500) : ''
@@ -2272,17 +2281,17 @@ Deno.serve(async (req) => {
 
           const { data: booking } = await admin
             .from('tour_bookings')
-            .select('id, tour_id, amount_paid_aud')
+            .select('id, tour_id, amount_paid_aud, selected_tier')
             .eq('id', existing.booking_id)
             .maybeSingle()
           let priceAud = 0
           if (booking?.tour_id) {
             const { data: tour } = await admin
               .from('tours')
-              .select('price_aud')
+              .select('price_aud, luxury_price_aud, price_luxury_aud')
               .eq('id', booking.tour_id)
               .maybeSingle()
-            priceAud = tour ? Number(tour.price_aud ?? 0) : 0
+            priceAud = tour ? bookingTripTotalAud(tour, booking) : 0
           }
           const newStatus =
             priceAud > 0 && paidTotal >= priceAud ? 'fully_paid' : paidTotal > 0 ? 'deposit_paid' : 'pending_payment'
@@ -2336,17 +2345,17 @@ Deno.serve(async (req) => {
 
         const { data: booking } = await admin
           .from('tour_bookings')
-          .select('id, tour_id, amount_paid_aud, booking_status')
+          .select('id, tour_id, amount_paid_aud, booking_status, selected_tier')
           .eq('id', bookingId)
           .maybeSingle()
         let priceAud = 0
         if (booking?.tour_id) {
           const { data: tour } = await admin
             .from('tours')
-            .select('price_aud')
+            .select('price_aud, luxury_price_aud, price_luxury_aud')
             .eq('id', booking.tour_id)
             .maybeSingle()
-          priceAud = tour ? Number(tour.price_aud ?? 0) : 0
+          priceAud = tour ? bookingTripTotalAud(tour, booking) : 0
         }
         const newStatus =
           paidTotal <= 0
@@ -2744,7 +2753,7 @@ Deno.serve(async (req) => {
         if (booking.tour_id) {
           const { data: tourRow, error: tourError } = await admin
             .from('tours')
-            .select('id, trip_code, name_en, departure_date, price_aud, deposit_aud')
+            .select('id, trip_code, name_en, departure_date, price_aud, deposit_aud, luxury_price_aud, price_luxury_aud')
             .eq('id', booking.tour_id)
             .maybeSingle()
           if (tourError) throw tourError

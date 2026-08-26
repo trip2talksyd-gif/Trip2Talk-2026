@@ -24,8 +24,6 @@ import {
   isListedPriceHidden,
   isTourBookable,
   seatsRemaining,
-  displayStayListPriceAud,
-  listedLuxuryPriceAud,
 } from '../../lib/toursApi'
 import {
   isAuroraTrip,
@@ -49,7 +47,6 @@ import { getTripCoverVideoUrl } from '../../data/tripVideos'
 import { getTestimonialsForTrip } from '../../data/testimonials'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import type { Tour } from '../../types/tour'
-import type { StayTier } from '../../data/luxuryStay'
 import { Skeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import BiText from '../../components/ui/BiText'
@@ -85,7 +82,6 @@ export default function TripDetailPage() {
   const [previewPhoto, setPreviewPhoto] = useState<GalleryPhoto | null>(null)
   const [tab, setTab] = useState<DetailTab>('details')
   const [moreTrips, setMoreTrips] = useState<Tour[]>([])
-  const [stayTier, setStayTier] = useState<StayTier>('standard')
 
   const errorBi = tt('common.error')
 
@@ -104,7 +100,6 @@ export default function TripDetailPage() {
   useEffect(() => {
     setPreviewPhoto(null)
     setTab('details')
-    setStayTier('standard')
   }, [tripCode])
 
   useEffect(() => {
@@ -152,9 +147,7 @@ export default function TripDetailPage() {
   const bookable = isTourBookable(tour)
   const priceHidden = isListedPriceHidden(tour)
   const remaining = seatsRemaining(tour)
-  const luxuryAud = listedLuxuryPriceAud(tour)
-  const effectiveStayTier: StayTier = luxuryAud ? stayTier : 'standard'
-  const displayPriceAud = displayStayListPriceAud(tour, effectiveStayTier)
+  const displayPriceAud = tour.price_aud
   const testimonials = getTestimonialsForTrip(tour.trip_code)
   const lowSeats =
     bookable && tour.max_seats > 0 && remaining <= Math.max(2, Math.ceil(tour.max_seats * 0.34))
@@ -279,7 +272,7 @@ export default function TripDetailPage() {
         </h1>
       </div>
 
-      <TripQuickFacts tour={tour} stayTier={effectiveStayTier} displayPriceAud={displayPriceAud} />
+      <TripQuickFacts tour={tour} stayTier="standard" displayPriceAud={displayPriceAud} />
 
       <div
         className="-mt-2 flex gap-3.5 border-b border-line md:hidden"
@@ -669,8 +662,6 @@ export default function TripDetailPage() {
           <TripPricingCard
             tour={tour}
             includes={details?.includes.en ?? []}
-            stayTier={effectiveStayTier}
-            onStayTierChange={setStayTier}
             displayPriceAud={displayPriceAud}
           />
         </div>

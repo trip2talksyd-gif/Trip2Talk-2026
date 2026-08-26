@@ -6,6 +6,7 @@ type Props = {
   paymentMethod?: string | null
   remainingAud: number | null
   cancelled?: boolean
+  selectedTier?: string | null
   onOpen: () => void
 }
 
@@ -16,6 +17,7 @@ export default function BookingSummaryCard({
   paymentMethod,
   remainingAud,
   cancelled,
+  selectedTier,
   onOpen,
 }: Props) {
   const accent = paymentMethodAccent(paymentMethod)
@@ -37,6 +39,11 @@ export default function BookingSummaryCard({
       >
         {paymentMethodBadge(paymentMethod)}
       </span>
+      {selectedTier === 'luxury' && (
+        <span className="ml-1 inline-block rounded-full bg-orange/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-orange">
+          Luxury
+        </span>
+      )}
       <p className="mt-1.5 font-thai text-xs text-cream-muted" lang="th">
         {remainingLabel}
       </p>

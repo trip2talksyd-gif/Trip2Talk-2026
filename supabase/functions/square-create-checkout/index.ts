@@ -226,7 +226,7 @@ Deno.serve(async (req) => {
     const { data: booking, error: bookingError } = await admin
       .from('tour_bookings')
       .select(
-        'id, booking_reference, booking_status, amount_paid_aud, email, phone, first_name_en, last_name_en, tour_id, payment_plan_installments',
+        'id, booking_reference, booking_status, amount_paid_aud, email, phone, first_name_en, last_name_en, tour_id, payment_plan_installments, selected_tier',
       )
       .ilike('booking_reference', bookingRef)
       .maybeSingle()
@@ -239,7 +239,7 @@ Deno.serve(async (req) => {
 
     const { data: tour, error: tourError } = await admin
       .from('tours')
-      .select('id, trip_code, name_en, deposit_aud, price_aud')
+      .select('id, trip_code, name_en, deposit_aud, price_aud, luxury_price_aud, price_luxury_aud')
       .eq('id', booking.tour_id)
       .maybeSingle()
     if (tourError) throw tourError
@@ -248,7 +248,12 @@ Deno.serve(async (req) => {
     const depositAud = Number(tour.deposit_aud ?? 0)
     if (!(depositAud > 0)) return json({ error: 'invalid_deposit' }, 400)
     const depositCents = audToCents(depositAud)
-    const priceAud = Number(tour.price_aud ?? 0)
+    const priceAud = Number(
+      String(booking.selected_tier ?? '').toLowerCase() === 'luxury' &&
+        Number(tour.price_luxury_aud ?? tour.luxury_price_aud ?? 0) > 0
+        ? tour.price_luxury_aud ?? tour.luxury_price_aud
+        : tour.price_aud ?? 0,
+    )
     const alreadyPaidAud = Number(booking.amount_paid_aud ?? 0)
     const remainingCents = Math.max(0, audToCents(priceAud) - audToCents(alreadyPaidAud))
     const amountKind = body.amount_kind === 'full' ? 'full' : 'deposit'

@@ -81,7 +81,7 @@ export function tourListGroup(tour: Tour): string {
 
   // Explicit codes the client asked to keep under ค้างคืน even if type drifts
   const code = tour.trip_code.toUpperCase()
-  if (code === 'BER-3D2N' || code === 'CAN-2D1N') return OVERNIGHT_GROUP
+  if (code === 'CAN-2D1N') return OVERNIGHT_GROUP
 
   return dest
 }

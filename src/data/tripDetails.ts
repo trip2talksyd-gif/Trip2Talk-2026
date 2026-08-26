@@ -265,24 +265,6 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
       th: ['ตั๋วเครื่องบิน (เราช่วยจอง)', 'ค่าอาหาร', 'ประกันการเดินทาง'],
     },
   },
-  'TAS-SU-4D3N': {
-    tagline: {
-      en: 'East coast Tasmania — Wineglass Bay to Bay of Fires. Flights & stays coordinated; you travel light.',
-      th: 'แทสฝั่งตะวันออก — Wineglass Bay ถึง Bay of Fires จองตั๋วและที่พักให้ คุณแค่เตรียมกระเป๋า',
-    },
-    highlights: {
-      en: ['Wineglass Bay lookout', 'Freycinet National Park', 'Bay of Fires orange rocks'],
-      th: ['Wineglass Bay', 'Freycinet National Park', 'Bay of Fires หินสีส้ม'],
-    },
-    includes: {
-      en: ['Vehicle & driver', 'Pro photographer', 'National park fees', 'Flight & accommodation booking assistance'],
-      th: ['รถและคนขับ', 'ช่างภาพมืออาชีพ', 'ค่าเข้าอุทยาน', 'ช่วยจองตั๋วเครื่องบินและที่พัก'],
-    },
-    excludes: {
-      en: ['Flights (we coordinate booking)', 'Meals', 'Travel insurance'],
-      th: ['ตั๋วเครื่องบิน (เราช่วยจอง)', 'ค่าอาหาร', 'ประกันการเดินทาง'],
-    },
-  },
   'TAS-SP-3D2N': {
     tagline: {
       en: 'Private spring tulip route — Table Cape blooms, Cradle Mountain, heritage bridges, then Hobart & Port Arthur. Max 5 guests.',
@@ -335,24 +317,6 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
     accommodationNote: {
       en: 'Night 1: Discovery Parks – Cradle Mountain (Standard Cabin). Night 2: Rydges Hobart (One-Bedroom Suite).',
       th: 'คืน 1: Discovery Parks – Cradle Mountain (Standard Cabin) คืน 2: Rydges Hobart (One-Bedroom Suite)',
-    },
-  },
-  'BER-3D2N': {
-    tagline: {
-      en: 'South coast with your crew — we handle transport & timing, you get the dramatic shots.',
-      th: 'ชายฝั่งใต้กับเพื่อนๆ — เราจัดรถและจังหวะเวลา คุณได้แต่รูปสวยอลังการ ไม่ต้องขับรถเอง',
-    },
-    highlights: {
-      en: ['Horse Head Rock (low tide)', 'Blue Pool Bermagui', 'Wallaga Lake sunsets'],
-      th: ['Horse Head Rock (น้ำลง)', 'Blue Pool Bermagui', 'พระอาทิตย์ตก Wallaga Lake'],
-    },
-    includes: {
-      en: ['Transport from Sydney Thai Town', 'Driver & photographer', 'Safety briefing'],
-      th: ['รถจาก Sydney Thai Town', 'คนขับและช่างภาพ', 'Safety briefing'],
-    },
-    excludes: {
-      en: ['Meals', 'Travel insurance', 'Rock shoes (bring your own)'],
-      th: ['ค่าอาหาร', 'ประกันการเดินทาง', 'รองเท้าปีนเขา (เตรียมเอง)'],
     },
   },
   'CAN-2D1N': {
@@ -412,24 +376,6 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
     excludes: {
       en: ['Meals', 'Scenic World tickets (optional)', 'Travel insurance'],
       th: ['ค่าอาหาร', 'ตั๋ว Scenic World (ทางเลือก)', 'ประกันการเดินทาง'],
-    },
-  },
-  'LAV-ANB-1D': {
-    tagline: {
-      en: 'Dunes & beach portraits — affordable half-day vibes with a pro behind the lens.',
-      th: 'เนินทราย & ถ่ายริมทะเล — ทริปครึ่งวันราคาดี มีช่างภาพมืออาชีพดูแล ไม่ต้องขับรถเอง',
-    },
-    highlights: {
-      en: ['Anna Bay sand dunes', 'Coastal portrait locations', 'Golden hour session'],
-      th: ['เนินทราย Anna Bay', 'มุมถ่ายภาพริมชายหาด', 'Golden hour'],
-    },
-    includes: {
-      en: ['Transport & driver', 'Pro photographer', 'Drone (where permitted)'],
-      th: ['รถและคนขับ', 'ช่างภาพมืออาชีพ', 'โดรน (ตามกฎหมาย)'],
-    },
-    excludes: {
-      en: ['Meals', 'Travel insurance'],
-      th: ['ค่าอาหาร', 'ประกันการเดินทาง'],
     },
   },
   'SYD-MW-WIN': {

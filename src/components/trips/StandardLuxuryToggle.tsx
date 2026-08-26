@@ -1,7 +1,7 @@
 import BiDisplayHeading from '../ui/BiDisplayHeading'
 import { useLang } from '../../hooks/useLang'
 import type { Tour } from '../../types/tour'
-import { formatAud, isListedPriceHidden, listedLuxuryPriceAud } from '../../lib/toursApi'
+import { isListedPriceHidden, listedLuxuryPriceAud } from '../../lib/toursApi'
 import { getStayCopy, type StayTier } from '../../data/luxuryStay'
 
 type Props = {
@@ -128,28 +128,6 @@ export default function StandardLuxuryToggle({ tour, value, onChange }: Props) {
             </p>
             <p lang="th" className="mt-0.5 overflow-visible font-serif text-[9px] leading-normal text-ink-soft">
               ทริปนี้ยังไม่เปิดจองออนไลน์ — ตัวเลขพรีเมียมเป็นเพียงเรทตั้งต้น ไม่ใช่ราคาที่คิดเงินตอนนี้
-            </p>
-          </>
-        )
-      )}
-
-      {!priceHidden && value === 'luxury' && (
-        thaiPrimary ? (
-          <>
-            <p lang="th" className="mt-2 overflow-visible font-serif text-[10px] leading-normal text-ink-soft">
-              จองออนไลน์ตอนนี้ยังคิดเรทมาตรฐาน {formatAud(tour.price_aud)} — อัปเกรดพรีเมียมแจ้งทีมงาน (เฟส 2 จะคิดเงินในระบบ)
-            </p>
-            <p lang="en" className="mt-0.5 font-display text-[9px] leading-snug text-ink-soft">
-              Online booking still charges Standard {formatAud(tour.price_aud)}. Ask the team for the ensuite upgrade until Phase 2.
-            </p>
-          </>
-        ) : (
-          <>
-            <p lang="en" className="mt-2 font-display text-[10px] leading-snug text-ink-soft">
-              Online booking still charges Standard {formatAud(tour.price_aud)}. Ask the team for the ensuite upgrade until Phase 2.
-            </p>
-            <p lang="th" className="mt-0.5 overflow-visible font-serif text-[9px] leading-normal text-ink-soft">
-              จองออนไลน์ตอนนี้ยังคิดเรทมาตรฐาน {formatAud(tour.price_aud)} — อัปเกรดพรีเมียมแจ้งทีมงาน (เฟส 2 จะคิดเงินในระบบ)
             </p>
           </>
         )
