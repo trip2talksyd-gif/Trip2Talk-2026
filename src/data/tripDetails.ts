@@ -454,6 +454,40 @@ export const TRIP_DETAILS: Record<string, TripDetailContent> = {
       th: ['ตั๋วเครื่องบิน', 'ที่พัก', 'ค่าอาหาร', 'ประกันการเดินทาง', 'ค่าใช้จ่ายแพ็ก Influencer เพิ่มเติม'],
     },
   },
+  'TUL-1DAY': {
+    tagline: {
+      en: 'Tulip Time and the coast in a Tesla Model Y — hop in from Thai Town, outfit photos in Bowral, golden hour at Sea Cliff Bridge.',
+      th: 'ทิวลิปและชายฝั่งวันเดียวกับ Tesla Model Y — นั่งรถจาก Thai Town ถ่ายชุดที่โบว์รัล ปิดด้วยแสงทองที่ Sea Cliff Bridge',
+    },
+    highlights: {
+      en: [
+        'Corbett Gardens (Bowral) — Tulip Time Festival, dedicated outfit-photo time among the tulips',
+        'Gerringong — coastal viewpoint, “prettiest street in NSW”',
+        'Sea Cliff Bridge — sunset & golden hour coastal drive',
+      ],
+      th: [
+        'Corbett Gardens (Bowral) — เทศกาลทิวลิป มีเวลาถ่ายชุดในทุ่งทิวลิป',
+        'Gerringong — จุดชมวิวชายฝั่ง “ถนนที่สวยที่สุดใน NSW”',
+        'Sea Cliff Bridge — ขับรถเลาะชายฝั่ง แสงทอง–พระอาทิตย์ตก',
+      ],
+    },
+    includes: {
+      en: [
+        'Return transport from Thai Town, Sydney in a Tesla Model Y',
+        'Personal photographer guiding poses throughout the day',
+        'All park/garden transit between stops',
+      ],
+      th: [
+        'รถไป–กลับจาก Thai Town ซิดนีย์ ด้วย Tesla Model Y',
+        'ช่างภาพส่วนตัวแนะนำโพสตลอดวัน',
+        'รถระหว่างจุดถ่ายทุกจุด (สวน–ชายฝั่ง)',
+      ],
+    },
+    excludes: {
+      en: ['Food and drinks', 'Tulip Time Festival entry fee (~$18.50 adult, paid on-site)'],
+      th: ['อาหารและเครื่องดื่ม', 'ค่าเข้างาน Tulip Time Festival (ผู้ใหญ่ประมาณ $18.50 จ่ายหน้างาน)'],
+    },
+  },
 }
 
 export function getTripDetails(tripCode: string): TripDetailContent | undefined {

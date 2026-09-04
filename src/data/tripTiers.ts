@@ -6,6 +6,7 @@ export const BUDGET_TRIP_CODES = [
   'KIA-1DAY',
   'SYD-1DAY',
   'PSP-1DAY',
+  'TUL-1DAY',
   'CAN-2D1N',
 ] as const
 
