@@ -139,6 +139,7 @@ export const MIN_PAX_RULES: Record<string, number> = {
   'MEL-4D3N': 3,
   'CAN-2D1N': 2,
   'KIA-1DAY': 2,
+  'TUL-1DAY': 2,
   'PSP-1DAY': 2,
   'SYD-MW-WIN': 2,
   'SYD-1DAY': 1,

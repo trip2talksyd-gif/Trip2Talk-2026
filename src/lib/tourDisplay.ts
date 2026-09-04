@@ -19,6 +19,7 @@ const DESTINATION_BY_PREFIX: Record<string, string> = {
   KIA: 'NSW Coast',
   PSP: 'NSW Coast',
   LAV: 'NSW Coast',
+  TUL: 'NSW Coast',
 }
 
 /** Destinations whose overnight trips roll into ทริปค้างคืน */

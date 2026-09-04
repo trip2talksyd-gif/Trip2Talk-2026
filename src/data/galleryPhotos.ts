@@ -1,4 +1,5 @@
 import { storageImageSrc, storageImageAttrs } from '../lib/storageImage'
+import { resolveTemplateTripCode } from '../lib/tripCode'
 
 export type GalleryCategory =
   | 'new-zealand'
@@ -528,6 +529,78 @@ export const GALLERY_PHOTOS: GalleryPhoto[] = [
     caption_th: 'กลุ่ม Trip2Talk ที่เมลเบิร์น',
     location: 'Melbourne, VIC',
   },
+  {
+    id: 'tul-001',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/tulip-trip/786344043_10243691502613237_7204989092912354276_n.jpg',
+    category: 'nsw',
+    caption_en: 'Tulip Time at Corbett Gardens',
+    caption_th: 'เทศกาลทิวลิปที่ Corbett Gardens',
+    location: 'Corbett Gardens, Bowral NSW',
+  },
+  {
+    id: 'tul-002',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/tulip-trip/790408520_10243691488252878_860061187201321536_n.jpg',
+    category: 'nsw',
+    caption_en: 'Outfit photos among the tulips',
+    caption_th: 'ถ่ายชุดในทุ่งทิวลิป',
+    location: 'Corbett Gardens, Bowral NSW',
+  },
+  {
+    id: 'tul-003',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/tulip-trip/790509771_10243691535214052_9197170798680115313_n.jpg',
+    category: 'nsw',
+    caption_en: 'Tulip beds at Bowral',
+    caption_th: 'แปลงทิวลิปที่โบว์รัล',
+    location: 'Corbett Gardens, Bowral NSW',
+  },
+  {
+    id: 'tul-004',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/tulip-trip/790591312_10243691486892844_7954693826059996722_n.jpg',
+    category: 'nsw',
+    caption_en: 'Gerringong coastal viewpoint',
+    caption_th: 'จุดชมวิวชายฝั่ง Gerringong',
+    location: 'Gerringong, NSW',
+  },
+  {
+    id: 'tul-005',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/tulip-trip/790970177_10243691487052848_3976909061435322349_n.jpg',
+    category: 'nsw',
+    caption_en: 'Prettiest street in NSW',
+    caption_th: 'ถนนที่สวยที่สุดใน NSW',
+    location: 'Gerringong, NSW',
+  },
+  {
+    id: 'tul-006',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/tulip-trip/791227713_10243691502653238_6942433183510372598_n.jpg',
+    category: 'nsw',
+    caption_en: 'Beach lookout at Gerringong',
+    caption_th: 'จุดมองทะเลที่ Gerringong',
+    location: 'Gerringong, NSW',
+  },
+  {
+    id: 'tul-007',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/tulip-trip/791943098_10243691487012847_4511858819561113745_n.jpg',
+    category: 'nsw',
+    caption_en: 'Sea Cliff Bridge coastal drive',
+    caption_th: 'ขับรถเลาะ Sea Cliff Bridge',
+    location: 'Sea Cliff Bridge, NSW',
+  },
+  {
+    id: 'tul-008',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/tulip-trip/792109313_10243691502573236_7412340464193481099_n.jpg',
+    category: 'nsw',
+    caption_en: 'Golden hour at Sea Cliff Bridge',
+    caption_th: 'แสงทองที่ Sea Cliff Bridge',
+    location: 'Sea Cliff Bridge, NSW',
+  },
+  {
+    id: 'tul-009',
+    url: 'https://bljhnelgmkulxwuhedbi.supabase.co/storage/v1/object/public/trip-photos/tulip-trip/793159052_10243691503653263_7676310485116837374_n.jpg',
+    category: 'nsw',
+    caption_en: 'Sunset on the NSW coast',
+    caption_th: 'พระอาทิตย์ตกชายฝั่ง NSW',
+    location: 'Sea Cliff Bridge, NSW',
+  },
 ]
 
 /** Map trip codes to gallery category for hero/thumbnail lookup */
@@ -543,6 +616,7 @@ export const TRIP_GALLERY_CATEGORY: Record<string, GalleryCategory> = {
   'CAN-2D1N': 'nsw',
   'KIA-1DAY': 'nsw',
   'PSP-1DAY': 'nsw',
+  'TUL-1DAY': 'nsw',
   'SYD-MW-WIN': 'sydney',
   'SYD-1DAY': 'sydney',
   'MEL-4D3N': 'melbourne',
@@ -572,13 +646,42 @@ const PREFIX_CATEGORY_FALLBACK: Array<[string, GalleryCategory]> = [
   ['CAN-', 'nsw'],
   ['KIA-', 'nsw'],
   ['PSP-', 'nsw'],
+  ['TUL-', 'nsw'],
   ['LAV-', 'nsw'],
 ]
+
+/** Trip-specific strip (order preserved). Dated codes resolve to the family key. */
+const TRIP_GALLERY_PHOTO_IDS: Record<string, readonly string[]> = {
+  'TUL-1DAY': [
+    'tul-001',
+    'tul-002',
+    'tul-003',
+    'tul-004',
+    'tul-005',
+    'tul-006',
+    'tul-007',
+    'tul-008',
+    'tul-009',
+  ],
+}
 
 function resolveCategory(tripCode: string): GalleryCategory | undefined {
   const code = tripCode.toUpperCase()
   if (TRIP_GALLERY_CATEGORY[code]) return TRIP_GALLERY_CATEGORY[code]
+  const template = resolveTemplateTripCode(tripCode, Object.keys(TRIP_GALLERY_CATEGORY))
+  if (template && TRIP_GALLERY_CATEGORY[template]) return TRIP_GALLERY_CATEGORY[template]
   return PREFIX_CATEGORY_FALLBACK.find(([prefix]) => code.startsWith(prefix))?.[1]
+}
+
+function photosForExplicitTrip(tripCode: string): GalleryPhoto[] {
+  const key =
+    resolveTemplateTripCode(tripCode, Object.keys(TRIP_GALLERY_PHOTO_IDS)) ??
+    (TRIP_GALLERY_PHOTO_IDS[tripCode.trim().toUpperCase()] ? tripCode.trim().toUpperCase() : null)
+  if (!key) return []
+  const byId = new Map(GALLERY_PHOTOS.map((p) => [p.id, p]))
+  return TRIP_GALLERY_PHOTO_IDS[key]
+    .map((id) => byId.get(id))
+    .filter((p): p is GalleryPhoto => p != null)
 }
 
 /** Stable (non-random) index into a photo pool, derived from the trip code —
@@ -600,6 +703,8 @@ function stableIndex(tripCode: string, poolSize: number, salt: number): number {
  * (e.g. an NSW beach on the Uluru trip) actively misleads customers.
  */
 export function getHeroPhotoForTrip(tripCode: string): GalleryPhoto | undefined {
+  const explicit = photosForExplicitTrip(tripCode)
+  if (explicit.length > 0) return explicit[0]
   const category = resolveCategory(tripCode)
   if (!category) return undefined
   const pool = GALLERY_PHOTOS.filter((p) => p.category === category)
@@ -609,6 +714,9 @@ export function getHeroPhotoForTrip(tripCode: string): GalleryPhoto | undefined 
 
 /** Alternate gallery photo for hover/long-press preview (differs from card hero when possible) */
 export function getPreviewPhotoForTrip(tripCode: string): GalleryPhoto | undefined {
+  const explicit = photosForExplicitTrip(tripCode)
+  if (explicit.length > 1) return explicit[1]
+  if (explicit.length === 1) return explicit[0]
   const category = resolveCategory(tripCode)
   if (!category) return undefined
   const pool = GALLERY_PHOTOS.filter((p) => p.category === category)
@@ -625,6 +733,8 @@ export function getPreviewPhotoForTrip(tripCode: string): GalleryPhoto | undefin
  * ended up in the Tasmania trip's thumbnail strip).
  */
 export function getGalleryPhotosForTrip(tripCode: string): GalleryPhoto[] {
+  const explicit = photosForExplicitTrip(tripCode)
+  if (explicit.length > 0) return explicit
   const category = resolveCategory(tripCode)
   if (!category) return []
   return GALLERY_PHOTOS.filter((p) => p.category === category)

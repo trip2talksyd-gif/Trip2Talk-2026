@@ -131,6 +131,7 @@ export const PACKING_GUIDES: Record<string, PackingGuide> = {
   'MEL-4D3N': { climate: 'coastal', groups: coastal },
   'CAN-2D1N': { climate: 'general', groups: general },
   'KIA-1DAY': { climate: 'coastal', groups: coastal },
+  'TUL-1DAY': { climate: 'coastal', groups: coastal },
   'PSP-1DAY': { climate: 'general', groups: general },
   'SYD-MW-WIN': { climate: 'cold', groups: coldWeather },
   'SYD-1DAY': { climate: 'general', groups: general },
