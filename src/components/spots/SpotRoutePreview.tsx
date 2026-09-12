@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import { addLightBasemap } from '../../lib/mapTiles'
 
 const TEAL = '#122f2a'
 const ORANGE = '#e6935a'
@@ -139,10 +140,7 @@ export default function SpotRoutePreview({
       keyboard: false,
     })
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      subdomains: 'abcd',
-      maxZoom: 18,
-    }).addTo(map)
+    addLightBasemap(map)
 
     const spotLatLng: [number, number] = [latitude, longitude]
     L.marker(spotLatLng, { icon: spotPinIcon(), title, interactive: false }).addTo(map)

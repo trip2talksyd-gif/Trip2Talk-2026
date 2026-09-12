@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
+import { addLightBasemap } from '../../lib/mapTiles'
 import 'leaflet/dist/leaflet.css'
 
 type Props = {
@@ -48,12 +49,7 @@ export default function SpotLocationPicker({
       scrollWheelZoom: true,
     }).setView(hasCoords ? [latitude, longitude] : DEFAULT_CENTER, hasCoords ? 11 : 6)
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 19,
-    }).addTo(map)
+    addLightBasemap(map)
 
     L.control.zoom({ position: 'bottomright' }).addTo(map)
 

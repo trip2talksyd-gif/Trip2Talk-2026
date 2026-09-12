@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import type { PhotoSpotDetail } from '../../lib/photoSpotsApi'
+import { addLightBasemap } from '../../lib/mapTiles'
 
 const TEAL = '#122f2a'
 const ORANGE = '#e6935a'
@@ -47,12 +48,7 @@ export default function SpotsMap({ spots, selectedId, onSelect, className }: Pro
       scrollWheelZoom: true,
     }).setView([-34.4, 150.9], 8)
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 19,
-    }).addTo(map)
+    addLightBasemap(map)
 
     L.control.zoom({ position: 'bottomright' }).addTo(map)
     mapRef.current = map
