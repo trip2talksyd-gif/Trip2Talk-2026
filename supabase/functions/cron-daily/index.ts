@@ -537,6 +537,18 @@ Deno.serve(async (req) => {
       stats.errors.push(`health_retention_wipe: ${String(wipeErr)}`)
     }
 
+    // Group check-ins hold emergency/health details too: same 60-day-after-trip rule.
+    try {
+      const checkinCutoff = ymd(addDays(new Date(todayStr + 'T00:00:00Z'), -60))
+      const { error: purgeErr } = await admin
+        .from('trip_checkins')
+        .delete()
+        .lte('trip_end_date', checkinCutoff)
+      if (purgeErr) stats.errors.push(`trip_checkins_purge: ${purgeErr.message}`)
+    } catch (purgeErr) {
+      stats.errors.push(`trip_checkins_purge: ${String(purgeErr)}`)
+    }
+
     return json({
       ok: true,
       today: todayStr,

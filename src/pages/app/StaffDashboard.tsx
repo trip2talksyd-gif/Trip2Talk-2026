@@ -36,6 +36,7 @@ import CancelBookingDialog from '../../components/app/CancelBookingDialog'
 import ArchiveTourDialog from '../../components/app/ArchiveTourDialog'
 import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
 import TripDaySafetyQuickView from '../../components/app/TripDaySafetyQuickView'
+import TripCheckinsPanel from '../../components/app/TripCheckinsPanel'
 import PaymentReconciliationBanner from '../../components/app/PaymentReconciliationBanner'
 import StaffOpsSummary from '../../components/app/StaffOpsSummary'
 import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
@@ -110,6 +111,7 @@ function SeatsProgress({ booked, max, left }: { booked: number; max: number; lef
 
 export default function StaffDashboard() {
   const navigate = useNavigate()
+  const goToPin = useCallback(() => navigate('/app'), [navigate])
   const { toast } = useToast()
   const [tours, setTours] = useState<Tour[]>([])
   const [selected, setSelected] = useState<Tour | null>(null)
@@ -500,6 +502,13 @@ export default function StaffDashboard() {
             </div>
             <div className="mt-4 rounded-2xl border border-amber/30 bg-amber/5 p-3">
               <TripDaySafetyQuickView bookings={manifest.filter((b) => !isBookingCancelled(b))} />
+            </div>
+            <div className="mt-3 rounded-2xl border border-gold/30 bg-gold/5 p-3">
+              <TripCheckinsPanel
+                key={selected.trip_code}
+                tripCode={selected.trip_code}
+                onSessionExpired={goToPin}
+              />
             </div>
             {filteredManifest.length === 0 ? (
               <p className="mt-3 text-sm text-cream-muted">
