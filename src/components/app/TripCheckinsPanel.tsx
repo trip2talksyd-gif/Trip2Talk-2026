@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Copy, Link2, Phone, RefreshCw } from 'lucide-react'
 import { listTripCheckins, type TripCheckin } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
+import { hasHealthInfo } from '../../lib/healthText'
 import { useToast } from '../ui/Toast'
 
 type Props = {
@@ -112,7 +113,7 @@ export default function TripCheckinsPanel({ tripCode, onSessionExpired }: Props)
       ) : (
         <ul className="space-y-2.5">
           {rows.map((c) => {
-            const hasAlert = Boolean(c.allergies?.trim() || c.medical_conditions?.trim())
+            const hasAlert = hasHealthInfo(c.allergies) || hasHealthInfo(c.medical_conditions)
             return (
               <li
                 key={c.id}
@@ -153,25 +154,25 @@ export default function TripCheckinsPanel({ tripCode, onSessionExpired }: Props)
                     </span>
                     <TelLink phone={c.emergency_contact_phone} />
                   </p>
-                  {c.allergies?.trim() && (
+                  {hasHealthInfo(c.allergies) && (
                     <p className="font-semibold text-coral">
                       <span className="text-cream-muted">Allergies · แพ้: </span>
                       {c.allergies}
                     </p>
                   )}
-                  {c.medical_conditions?.trim() && (
+                  {hasHealthInfo(c.medical_conditions) && (
                     <p className="font-semibold text-coral">
                       <span className="text-cream-muted">Medical · สุขภาพ: </span>
                       {c.medical_conditions}
                     </p>
                   )}
-                  {c.dietary_requirements?.trim() && (
+                  {hasHealthInfo(c.dietary_requirements) && (
                     <p>
                       <span className="text-cream-muted">Diet · อาหาร: </span>
                       {c.dietary_requirements}
                     </p>
                   )}
-                  {c.other_notes?.trim() && (
+                  {hasHealthInfo(c.other_notes) && (
                     <p>
                       <span className="text-cream-muted">Notes · หมายเหตุ: </span>
                       {c.other_notes}

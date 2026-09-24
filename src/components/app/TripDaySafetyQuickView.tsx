@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Phone } from 'lucide-react'
 import type { TourBooking } from '../../types/tour'
+import { hasHealthInfo } from '../../lib/healthText'
 import { useLang } from '../../hooks/useLang'
 
 type Props = {
@@ -98,13 +99,13 @@ export default function TripDaySafetyQuickView({
       ) : (
         <ul className="space-y-2.5">
           {active.map((b) => {
-            const hasAllergy = Boolean(b.allergies?.trim())
-            const hasMedical = Boolean(b.medical_conditions?.trim())
+            const hasAllergy = hasHealthInfo(b.allergies)
+            const hasMedical = hasHealthInfo(b.medical_conditions)
             const hasFlag =
               hasAllergy ||
               hasMedical ||
-              Boolean(b.other_notes?.trim()) ||
-              Boolean(b.dietary_requirements?.trim())
+              hasHealthInfo(b.other_notes) ||
+              hasHealthInfo(b.dietary_requirements)
             const phone = (b.emergency_contact_phone ?? '').trim()
 
             return (
@@ -160,13 +161,13 @@ export default function TripDaySafetyQuickView({
                     <span className="text-cream-muted">Insurance · ประกัน: </span>
                     {insuranceLine(b)}
                   </p>
-                  {b.dietary_requirements?.trim() && (
+                  {hasHealthInfo(b.dietary_requirements) && (
                     <p>
                       <span className="text-cream-muted">Diet · อาหาร: </span>
                       {b.dietary_requirements}
                     </p>
                   )}
-                  {b.other_notes?.trim() && (
+                  {hasHealthInfo(b.other_notes) && (
                     <p>
                       <span className="text-cream-muted">Notes · หมายเหตุ: </span>
                       {b.other_notes}
