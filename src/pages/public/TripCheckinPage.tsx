@@ -194,10 +194,23 @@ export default function TripCheckinPage() {
         <p className="text-sm text-ink-soft">
           {info?.trip_code} · {info?.departure_date}
         </p>
-        <p className="mt-2 text-[13px] text-ink-soft">
-          Fill in your own details only. Nobody else in the group can see what you submit.
+        <div className="mt-3 rounded-xl bg-teal-50 px-3 py-2.5 text-[13px] leading-relaxed text-ink">
+          <p lang="th" className="font-thai">
+            รบกวนสละเวลาสัก 2 นาทีนะคะ 🙏 ข้อมูลนี้ช่วยให้ทีมดูแลทุกคนได้ดีที่สุดระหว่างทริป
+            ถ้ามีเหตุไม่คาดฝัน เราจะติดต่อคนที่คุณไว้ใจได้ทันที และรู้เรื่องแพ้อาหารหรือยาที่ต้องระวังล่วงหน้า
+          </p>
+          <p className="mt-1.5 text-ink-soft">
+            It takes about 2 minutes. It helps us look after you on the trip: if anything unexpected
+            happens, we can reach someone you trust quickly and know about allergies or medication in
+            advance.
+          </p>
+        </div>
+        <p className="mt-2 text-[12px] text-ink-soft">
+          Fill in your own details only. Nobody else in the group can see what you submit. Only the
+          Trip2Talk team sees it, and health details are deleted 60 days after the trip.
           <span className="mt-0.5 block font-thai">
-            กรอกข้อมูลของตัวเองเท่านั้น คนอื่นในกลุ่มมองไม่เห็นข้อมูลที่คุณส่ง
+            กรอกเฉพาะข้อมูลของตัวเอง คนอื่นในกลุ่มมองไม่เห็น เฉพาะทีม Trip2Talk เท่านั้นที่เห็น
+            และข้อมูลสุขภาพจะถูกลบภายใน 60 วันหลังจบทริป
           </span>
         </p>
       </header>
