@@ -16,7 +16,6 @@ type Fields = {
   medical_conditions: string
   dietary_requirements: string
   other_notes: string
-  website: string
 }
 
 const EMPTY: Fields = {
@@ -30,7 +29,6 @@ const EMPTY: Fields = {
   medical_conditions: '',
   dietary_requirements: '',
   other_notes: '',
-  website: '',
 }
 
 const digits = (v: string) => v.replace(/\D/g, '').length
@@ -295,17 +293,6 @@ export default function TripCheckinPage() {
         </p>
       </section>
 
-      {/* Honeypot — hidden from people, bots fill it. */}
-      <input
-        type="text"
-        tabIndex={-1}
-        autoComplete="off"
-        aria-hidden
-        value={fields.website}
-        onChange={(e) => set('website')(e.target.value)}
-        className="absolute left-[-9999px] h-0 w-0 opacity-0"
-      />
-
       <WaiverForm
         tripCode={info?.trip_code ?? tripCode}
         defaultSignedName={fields.full_name}
@@ -322,6 +309,7 @@ export default function TripCheckinPage() {
           try {
             await submitTripCheckin({
               ...fields,
+              website: '',
               trip_code: info?.trip_code ?? tripCode,
               signed_name: payload.signedName,
               clauses: payload.clauses,
