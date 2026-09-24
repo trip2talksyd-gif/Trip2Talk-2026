@@ -480,6 +480,81 @@ export async function submitPublicWaiver(input: {
   return body as { status: 'completed'; signed_at: string; booking_reference: string | null }
 }
 
+export type TripCheckinInfo = {
+  trip_code: string
+  name_en: string | null
+  name_th: string | null
+  departure_date: string
+}
+
+export type TripCheckinSubmit = {
+  trip_code: string
+  full_name: string
+  phone: string
+  email: string
+  emergency_contact_name: string
+  emergency_contact_phone: string
+  emergency_contact_relationship: string
+  allergies: string
+  medical_conditions: string
+  dietary_requirements: string
+  other_notes: string
+  signed_name: string
+  clauses: string[]
+  locale: 'en' | 'th'
+  /** Honeypot — must stay empty. */
+  website: string
+}
+
+export type TripCheckin = {
+  id: string
+  trip_code: string
+  full_name: string
+  phone: string
+  email: string | null
+  emergency_contact_name: string
+  emergency_contact_phone: string
+  emergency_contact_relationship: string | null
+  allergies: string | null
+  medical_conditions: string | null
+  dietary_requirements: string | null
+  other_notes: string | null
+  waiver_signed_name: string
+  created_at: string
+}
+
+async function callPublicTripCheckin(body: Record<string, unknown>): Promise<Response> {
+  return fetch(`${supabaseConfig.url}/functions/v1/public-trip-checkin`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: supabaseConfig.anonKey,
+      Authorization: `Bearer ${supabaseConfig.anonKey}`,
+    },
+    body: JSON.stringify(body),
+  })
+}
+
+/** Public: trip name/date for the shared /checkin/:tripCode page. Throws not_found | trip_closed. */
+export async function getTripCheckinInfo(tripCode: string): Promise<TripCheckinInfo> {
+  const res = await callPublicTripCheckin({ action: 'info', trip_code: tripCode })
+  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>
+  if (!res.ok) throw new Error(typeof body.error === 'string' ? body.error : 'lookup_failed')
+  return body as TripCheckinInfo
+}
+
+/** Public: write-only group check-in. Throws rate_limited | invalid_contact | invalid_waiver | ... */
+export async function submitTripCheckin(input: TripCheckinSubmit): Promise<void> {
+  const res = await callPublicTripCheckin({ action: 'submit', ...input })
+  if (res.ok) return
+  const body = (await res.json().catch(() => ({}))) as Record<string, unknown>
+  throw new Error(typeof body.error === 'string' ? body.error : 'submit_failed')
+}
+
+export async function listTripCheckins(tripCode: string): Promise<TripCheckin[]> {
+  return callStaffApi<TripCheckin[]>('list_trip_checkins', { tripCode })
+}
+
 export async function issueWaiverLink(bookingId: string): Promise<{ token: string; path: string }> {
   return callStaffApi<{ token: string; path: string }>('issue_waiver_link', { bookingId })
 }

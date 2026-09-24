@@ -521,6 +521,7 @@ const ACTION_ROLES: Record<string, Role[]> = {
   cancel_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   create_waiver_staff_assisted: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   list_waivers_for_tour: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  list_trip_checkins: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   issue_waiver_link: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   reset_waiver: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   update_waiver_details: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
@@ -1614,6 +1615,21 @@ Deno.serve(async (req) => {
           .select('*')
           .eq('trip_code', tripCode)
           .order('signed_at', { ascending: false })
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'list_trip_checkins': {
+        // Group check-in submissions from /checkin/:tripCode (public-trip-checkin).
+        const { tripCode } = params as { tripCode?: string }
+        if (!tripCode) return json({ error: 'invalid_params' }, 400)
+        const { data, error } = await admin
+          .from('trip_checkins')
+          .select(
+            'id, trip_code, full_name, phone, email, emergency_contact_name, emergency_contact_phone, emergency_contact_relationship, allergies, medical_conditions, dietary_requirements, other_notes, waiver_signed_name, created_at',
+          )
+          .eq('trip_code', tripCode)
+          .order('created_at', { ascending: false })
         if (error) throw error
         return json({ data })
       }
