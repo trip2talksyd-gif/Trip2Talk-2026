@@ -2209,3 +2209,19 @@
   }
 }
 
+
+/* Homepage v7 buttons/chips (mobile-first: ≥48px tap targets). */
+@layer components {
+  .home-btn-primary {
+    @apply inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-full bg-orange px-6 text-[16px] font-medium text-deep-green shadow-[0_12px_28px_-14px_rgba(196,110,55,.65)] transition-colors hover:bg-orange-soft active:scale-[.98];
+  }
+  .home-btn-ghost {
+    @apply inline-flex min-h-12 items-center gap-2 rounded-full border border-ink/15 bg-white px-5 text-[15px] font-medium text-ink transition-colors hover:border-orange;
+  }
+  .home-btn-ghost-dark {
+    @apply inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-full border border-cream/35 bg-white/10 px-6 text-[16px] font-medium text-cream backdrop-blur transition-colors hover:border-orange-soft active:scale-[.98];
+  }
+  .home-chip {
+    @apply rounded-full bg-mint-100 px-2.5 py-1 text-[12.5px] text-ink-soft;
+  }
+}

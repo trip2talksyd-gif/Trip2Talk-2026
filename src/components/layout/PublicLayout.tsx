@@ -10,7 +10,8 @@ import BrandLogo from '../brand/BrandLogo'
 import ShareButton from '../ui/ShareButton'
 
 const menuLinks = [
-  { to: '/', key: 'nav.discover' as const },
+  { to: '/', key: 'nav.home' as const },
+  { to: '/discover', key: 'nav.discover' as const },
   { to: '/photo-guide', key: 'nav.photoGuide' as const },
   { to: '/trips', key: 'nav.trips' as const },
   { to: '/calendar', key: 'nav.calendar' as const },
@@ -24,7 +25,7 @@ const menuLinks = [
 ]
 
 const desktopNavOrder = [
-  '/',
+  '/discover',
   '/photo-guide',
   '/trips',
   '/calendar',

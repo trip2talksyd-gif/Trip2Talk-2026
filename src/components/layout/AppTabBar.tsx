@@ -52,7 +52,7 @@ const TABS: {
   labelKey: TranslationKey
   Icon: typeof CompassIcon
 }[] = [
-  { to: '/', end: true, labelKey: 'nav.discover', Icon: CompassIcon },
+  { to: '/', end: true, labelKey: 'nav.home', Icon: CompassIcon },
   { to: '/experience', end: false, labelKey: 'nav.experience', Icon: FilmIcon },
   { to: '/trips', end: false, labelKey: 'nav.packages', Icon: GemIcon },
   { to: '/about', end: false, labelKey: 'nav.thePro', Icon: UserIcon },
