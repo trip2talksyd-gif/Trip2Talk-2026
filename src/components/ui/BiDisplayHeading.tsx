@@ -37,7 +37,7 @@ function visualClasses(className: string, forThai = false) {
 
 /**
  * Bilingual display heading: English on Bricolage Grotesque (`font-display`), Thai on
- * Anuphan (`font-serif`) as a sibling — never the same font-family tree.
+ * Kanit (`font-serif`) as a sibling — never the same font-family tree.
  * Nesting Thai under the Latin display font breaks Thai vowel/tone shaping.
  *
  * Primary line follows `lang` (same order/emphasis as BiText). Both languages

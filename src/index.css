@@ -1,5 +1,5 @@
 /* Exact Google Fonts stack from Trip2Talk-Mockup-Teal.html (+ Caveat for hand accents) */
-@import url('https://fonts.googleapis.com/css2?family=Anuphan:wght@500;600;700&family=Prompt:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&family=Prompt:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Sarabun:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -22,7 +22,7 @@
   --line: #e6e4dc;
   --coral: #e2734a;
   --shadow: 0 20px 45px -20px rgba(15, 28, 30, 0.4);
-  --font-th: 'Prompt', Anuphan, sans-serif;
+  --font-th: 'Prompt', Kanit, sans-serif;
 }
 
 @property --t2t-x1 { syntax: '<percentage>'; inherits: false; initial-value: 10%; }
@@ -178,7 +178,7 @@
   h3,
   .font-serif-display,
   .serif {
-    font-family: Anuphan, Inter, sans-serif;
+    font-family: Kanit, Inter, sans-serif;
   }
 
   /* Latin display (Bricolage Grotesque) — no Thai fonts in the stack */
@@ -190,12 +190,12 @@
 
   /* Mockup --font-th (body/UI Thai). Always wins over inherited Bricolage/Geist. */
   .font-thai {
-    font-family: Sarabun, Prompt, Anuphan, sans-serif !important;
+    font-family: Sarabun, Prompt, Kanit, sans-serif !important;
   }
 
   /* Thai display headings — use on sibling nodes next to .font-display, not nested */
   .font-serif {
-    font-family: Anuphan, Sarabun, sans-serif !important;
+    font-family: Kanit, Sarabun, sans-serif !important;
   }
 }
 
@@ -205,11 +205,11 @@
  */
 [lang='th'].font-serif,
 [data-bi-heading] > [lang='th'] {
-  font-family: Anuphan, Sarabun, sans-serif !important;
+  font-family: Kanit, Sarabun, sans-serif !important;
 }
 
 [lang='th'].font-thai {
-  font-family: Sarabun, Prompt, Anuphan, sans-serif !important;
+  font-family: Sarabun, Prompt, Kanit, sans-serif !important;
 }
 
 @layer components {
@@ -312,7 +312,7 @@
 
   .font-instrument-italic {
     /* Was Instrument Serif — map to mockup serif italic accent */
-    font-family: Anuphan, Inter, sans-serif;
+    font-family: Kanit, Inter, sans-serif;
     font-style: italic;
     font-weight: 600;
   }
@@ -1467,7 +1467,7 @@
   font-size: 15.5px;
   margin: 0 0 3px;
   color: var(--ink);
-  font-family: Anuphan, 'Inter', sans-serif;
+  font-family: Kanit, 'Inter', sans-serif;
 }
 
 .guide-follow h3 .th {

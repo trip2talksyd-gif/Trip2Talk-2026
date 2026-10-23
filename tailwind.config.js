@@ -55,12 +55,12 @@ module.exports = {
         // Discover / app-mode display headings — LATIN ONLY.
         // Never put Thai fonts in this stack: Bricolage Grotesque has no Thai glyphs, and
         // per-character fallback mid-word breaks Thai vowel/tone shaping.
-        // Thai display lines must use `font-serif` (Anuphan) on a sibling node.
+        // Thai display lines must use `font-serif` (Kanit) on a sibling node.
         display: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
         // Thai display headings (sibling to font-display, never nested under it)
         // Body Thai UI lines use `thai` (Sarabun).
-        serif: ['Anuphan', 'Sarabun', 'sans-serif'],
-        thai: ['Sarabun', 'Prompt', 'Anuphan', 'sans-serif'],
+        serif: ['Kanit', 'Sarabun', 'sans-serif'],
+        thai: ['Sarabun', 'Prompt', 'Kanit', 'sans-serif'],
         hand: ['Caveat', 'cursive'],
         mono: ['Inter', 'ui-monospace', 'monospace'],
       },
