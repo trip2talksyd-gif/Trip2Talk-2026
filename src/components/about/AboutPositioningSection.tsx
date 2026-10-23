@@ -52,7 +52,7 @@ export default function AboutPositioningSection() {
         </p>
       </div>
 
-      <p className="mt-4 font-display text-[16px] font-medium italic leading-snug text-ink-soft sm:text-[18px]">
+      <p className="mt-4 font-display text-[16px] font-medium leading-snug text-ink-soft sm:text-[18px]">
         {subtitle.en}
       </p>
       <p lang="th" className="mt-1 font-serif text-[14px] font-medium leading-normal text-ink-soft/90">

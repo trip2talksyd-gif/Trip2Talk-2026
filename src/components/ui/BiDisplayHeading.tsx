@@ -8,7 +8,7 @@ type Props = {
   th: string
   /** English line element — default h1 */
   as?: HeadingTag
-  /** Thai line element — default p (never nest Thai under Fraunces) */
+  /** Thai line element — default p (never nest Thai under the Latin display font) */
   thAs?: HeadingTag
   id?: string
   className?: string
@@ -36,9 +36,9 @@ function visualClasses(className: string, forThai = false) {
 }
 
 /**
- * Bilingual display heading: English on Fraunces (`font-display`), Thai on
- * Noto Serif Thai (`font-serif`) as a sibling — never the same font-family tree.
- * Nesting Thai under Fraunces breaks Thai vowel/tone shaping.
+ * Bilingual display heading: English on Bricolage Grotesque (`font-display`), Thai on
+ * Anuphan (`font-serif`) as a sibling — never the same font-family tree.
+ * Nesting Thai under the Latin display font breaks Thai vowel/tone shaping.
  *
  * Primary line follows `lang` (same order/emphasis as BiText). Both languages
  * stay visible — this only swaps visual order and emphasis.
