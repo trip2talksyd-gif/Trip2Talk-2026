@@ -19,8 +19,9 @@ export type SocialProfile = {
 }
 
 /**
- * Social tiles shown in the footer. YouTube / Instagram handles are placeholders
- * until the real profiles are confirmed — tiles without an href are not rendered.
+ * Social tiles shown in the footer and mobile guide. Facebook + YouTube confirmed
+ * by Saen (2026-10-23). Instagram handle is still a placeholder
+ * until confirmed — tiles without an href are not rendered.
  */
 export const SOCIAL_PROFILES: SocialProfile[] = [
   { id: 'facebook', tile: 'fb', label: 'Facebook', href: FACEBOOK_PAGE_URL, icon: FacebookIcon },
@@ -28,7 +29,7 @@ export const SOCIAL_PROFILES: SocialProfile[] = [
     id: 'youtube',
     tile: 'yt',
     label: 'YouTube',
-    href: 'https://www.youtube.com/@trip2talk',
+    href: 'https://www.youtube.com/@trip2talksyd960',
     icon: YouTubeIcon,
   },
   {

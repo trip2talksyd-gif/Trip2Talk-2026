@@ -53,14 +53,14 @@ module.exports = {
         // body/UI — mockup body { font-family: Inter, Sarabun }
         sans: ['Inter', 'Sarabun', 'system-ui', 'sans-serif'],
         // Discover / app-mode display headings — LATIN ONLY.
-        // Never put Thai fonts in this stack: Fraunces has no Thai glyphs, and
+        // Never put Thai fonts in this stack: Bricolage Grotesque has no Thai glyphs, and
         // per-character fallback mid-word breaks Thai vowel/tone shaping.
-        // Thai display lines must use `font-serif` (Noto Serif Thai) on a sibling node.
-        display: ['Fraunces', 'Georgia', 'Times New Roman', 'serif'],
+        // Thai display lines must use `font-serif` (Kanit) on a sibling node.
+        display: ['"Bricolage Grotesque"', 'system-ui', 'sans-serif'],
         // Thai display headings (sibling to font-display, never nested under it)
         // Body Thai UI lines use `thai` (Sarabun).
-        serif: ['"Noto Serif Thai"', 'Sarabun', 'serif'],
-        thai: ['Sarabun', 'Prompt', 'Noto Serif Thai', 'sans-serif'],
+        serif: ['Kanit', 'Sarabun', 'sans-serif'],
+        thai: ['Sarabun', 'Prompt', 'Kanit', 'sans-serif'],
         hand: ['Caveat', 'cursive'],
         mono: ['Inter', 'ui-monospace', 'monospace'],
       },

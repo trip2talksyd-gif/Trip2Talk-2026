@@ -132,7 +132,7 @@ export default function HomePositioningSection({ spotCount }: Props) {
             </p>
           </div>
 
-          <p className="mt-4 max-w-xl font-display text-[16px] font-medium italic leading-snug text-cream/85 sm:text-[18px]">
+          <p className="mt-4 max-w-xl font-display text-[16px] font-medium leading-snug text-cream/85 sm:text-[18px]">
             {subtitle.en}
           </p>
           <p
