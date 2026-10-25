@@ -22,9 +22,9 @@ import {
   type HiHeading,
 } from '../../data/homeContent'
 import { FACEBOOK_MESSENGER_URL, FACEBOOK_PAGE_URL } from '../../data/contactChannels'
-import { YOUTUBE_URL, useBi } from './homeV7Hooks'
+import { YOUTUBE_URL, upcomingDate, useBi } from './homeV7Hooks'
 import { FacebookIcon, YouTubeIcon } from '../contact/contactIcons'
-import { GALLERY_PHOTOS, photoThumbSrc } from '../../data/galleryPhotos'
+import { GALLERY_PHOTOS, getGalleryPhotosForTrip, photoSrc, photoThumbSrc } from '../../data/galleryPhotos'
 import { isListedPriceHidden, seatsRemaining } from '../../lib/toursApi'
 import { tourDestinationLabel, tourDurationLabel } from '../../lib/tourDisplay'
 import TripCoverImage from '../trips/TripCoverImage'
@@ -371,6 +371,19 @@ export function TripsSection({ tours, failed }: { tours: Tour[] | null; failed: 
   const pick = useBi()
   const { lang } = useLang()
   const shown = useMemo(() => (tours ?? []).slice(0, 6), [tours])
+  /** Give every card a different photo: cover first, then that trip's own gallery photos. */
+  const covers = useMemo(() => {
+    const used = new Set<string>()
+    return shown.map((t) => {
+      const candidates = [
+        t.cover_image_url ?? '',
+        ...getGalleryPhotosForTrip(t.trip_code).map((p) => photoSrc(p)),
+      ].filter(Boolean)
+      const pick = candidates.find((c) => !used.has(c)) ?? candidates[0] ?? null
+      if (pick) used.add(pick)
+      return pick
+    })
+  }, [shown])
 
   return (
     <Bleed id="trips" className="bg-cream-app pb-16 sm:pb-24">
@@ -400,7 +413,8 @@ export function TripsSection({ tours, failed }: { tours: Tour[] | null; failed: 
       ) : (
         <>
           <SnapRow>
-            {shown.map((t) => {
+            {shown.map((t, i) => {
+              const date = upcomingDate(t)
               const seats = seatsRemaining(t)
               const hidePrice = isListedPriceHidden(t)
               const name = lang === 'th' ? t.name_th || t.name_en : t.name_en
@@ -412,7 +426,7 @@ export function TripsSection({ tours, failed }: { tours: Tour[] | null; failed: 
                   className="flex snap-start flex-col overflow-hidden rounded-[18px] border border-line bg-white shadow-[0_20px_45px_-28px_rgba(15,28,30,.35)]"
                 >
                   <div className="relative aspect-[4/3]">
-                    <TripCoverImage src={t.cover_image_url} alt={t.name_en} size="card" className="h-full w-full object-cover" />
+                    <TripCoverImage src={covers[i]} alt={t.name_en} size="card" className="h-full w-full object-cover" />
                     <span className="absolute left-3 top-3 rounded-full bg-teal-dark/75 px-3 py-1 font-mono text-[11px] text-orange-soft">
                       {tourDestinationLabel(t.trip_code, 'en')} · {tourDurationLabel(t, 'en')}
                     </span>
@@ -429,9 +443,9 @@ export function TripsSection({ tours, failed }: { tours: Tour[] | null; failed: 
                     <div className="mb-3.5 mt-2.5 flex flex-wrap gap-1.5">
                       <span className="home-chip">{tourDurationLabel(t, lang)}</span>
                       <span className="home-chip">
-                        {t.departure_date ? formatDate(t.departure_date, lang) : pick(HOME_TRIPS.dateTba)}
+                        {date ? formatDate(date, lang) : pick(HOME_TRIPS.dateTba)}
                       </span>
-                      {t.departure_date ? (
+                      {date ? (
                         <span className={`home-chip ${seats > 0 && seats <= 3 ? '!bg-coral/15 !text-coral' : ''}`}>
                           {seats === 0 ? pick(HOME_TRIPS.full) : pick(HOME_TRIPS.seatsLeft).replace('{n}', String(seats))}
                         </span>
