@@ -59,6 +59,9 @@ export default defineConfig({
         // NavigationRoute to offline.html (that would serve offline on every visit).
         // Navigations: NetworkFirst pages-cache; PrecacheFallbackPlugin → offline.html.
         globPatterns: ['**/*.{js,css,ico,png,svg,jpg,jpeg,webp}'],
+        // Main bundle is ~2.1 MB (inline gallery base64 + app). Workbox default is 2 MiB,
+        // which fails the build with "Assets exceeding the limit". Allow up to 3 MiB.
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
