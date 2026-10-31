@@ -36,6 +36,7 @@ import { getItinerary } from '../../data/itineraries'
 import { isPremiumTrip } from '../../data/tripTiers'
 import { AURORA_DISCLAIMER } from '../../data/risks'
 import { getTripMap, googleMapsEmbedUrl } from '../../data/tripMaps'
+import { getRouteMapUrl } from '../../data/tripRouteMaps'
 import {
   getGalleryPhotosForTrip,
   getPreviewPhotoForTrip,
@@ -143,6 +144,7 @@ export default function TripDetailPage() {
   const isMultiDay = (tour.duration_days ?? 0) > 1 || /[2-9]D|\d{2,}D/.test(tour.trip_code.toUpperCase())
   const showItineraryComingSoon = !itinerary && isMultiDay
   const mapCfg = getTripMap(tour.trip_code)
+  const routeMapUrl = getRouteMapUrl(tour.trip_code)
   const coverVideoUrl = getTripCoverVideoUrl(tour.trip_code)
   const bookable = isTourBookable(tour)
   const priceHidden = isListedPriceHidden(tour)
@@ -460,6 +462,17 @@ export default function TripDetailPage() {
             <div className={pane('itinerary')}>
               <TripTimeline itinerary={itinerary} nextDate={tour.departure_date} />
             </div>
+          )}
+
+          {routeMapUrl && (
+            <section className={pane('itinerary')}>
+              <iframe
+                src={routeMapUrl}
+                title={`Route map ${tour.trip_code}`}
+                loading="lazy"
+                className="h-[720px] w-full rounded-2xl border border-line bg-white"
+              />
+            </section>
           )}
 
           {showItineraryComingSoon && (

@@ -52,7 +52,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api/|assets/|hero/|trip-videos/|icons/|icon-|apple-touch|favicon|manifest|registerSW|sw\\.js|workbox|brand/|team/).*)",
+      "source": "/((?!api/|assets/|hero/|trip-videos/|icons/|icon-|apple-touch|favicon|manifest|registerSW|sw\\.js|workbox|brand/|team/|maps/).*)",
       "destination": "/index.html"
     }
   ]
