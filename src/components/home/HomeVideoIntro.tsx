@@ -102,7 +102,7 @@ export default function HomeVideoIntro() {
                 }`}
                 style={
                   lang === 'th'
-                    ? { fontFamily: "Sarabun, Prompt, 'Noto Serif Thai', sans-serif" }
+                    ? { fontFamily: "Sarabun, Prompt, Kanit, sans-serif" }
                     : undefined
                 }
               >

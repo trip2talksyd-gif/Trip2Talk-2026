@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import PublicLayout from './components/layout/PublicLayout'
 import ScrollToTop from './components/layout/ScrollToTop'
 import CanonicalPathRepair from './components/layout/CanonicalPathRepair'
@@ -10,6 +10,7 @@ import GalleryPage from './pages/public/GalleryPage'
 import PricingPage from './pages/public/PricingPage'
 import AboutPage from './pages/public/AboutPage'
 import DiscoverPage from './pages/public/DiscoverPage'
+import HomePage from './pages/public/HomePage'
 import SpotsPage from './pages/public/SpotsPage'
 import SpotDetailPage from './pages/public/SpotDetailPage'
 import ExperiencePage from './pages/public/ExperiencePage'
@@ -58,11 +59,6 @@ import ConfirmationSummaryPage from './pages/public/ConfirmationSummaryPage'
 import ContentReview from './pages/admin/ContentReview'
 import RequireStaffRole from './components/app/RequireStaffRole'
 
-function RedirectToHome() {
-  const { search } = useLocation()
-  return <Navigate to={{ pathname: '/', search }} replace />
-}
-
 export default function App() {
   return (
     <BrowserRouter>
@@ -70,12 +66,12 @@ export default function App() {
       <ScrollToTop />
       <Routes>
         <Route element={<PublicLayout />}>
-          <Route index element={<DiscoverPage />} />
-          <Route path="discover" element={<RedirectToHome />} />
+          <Route index element={<HomePage />} />
+          <Route path="discover" element={<DiscoverPage />} />
           <Route path="discover/spot/:id" element={<SpotDetailPage />} />
           <Route path="spots" element={<SpotsPage />} />
           <Route path="spots/:slug" element={<SpotDetailPage />} />
-          <Route path="photo-spots" element={<RedirectToHome />} />
+          <Route path="photo-spots" element={<Navigate to="/discover" replace />} />
           <Route path="experience" element={<ExperiencePage />} />
           <Route path="trips" element={<TripsPage />} />
           <Route path="trips/:tripCode" element={<TripDetailPage />} />

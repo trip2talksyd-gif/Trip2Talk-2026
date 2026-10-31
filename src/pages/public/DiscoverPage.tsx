@@ -300,7 +300,7 @@ export default function DiscoverPage() {
                 th={taglineBi.th}
                 as="p"
                 className="mt-2"
-                enClassName="font-display text-[14px] font-medium italic text-cream/90 sm:text-[16px]"
+                enClassName="font-display text-[14px] font-medium text-cream/90 sm:text-[16px]"
                 thClassName="mt-0.5 font-serif text-[12px] text-cream/70 sm:text-[13px]"
               />
               <p className="mt-2 flex items-start gap-1.5 text-cream/75">

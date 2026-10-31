@@ -1,0 +1,456 @@
+<title>Trip2Talk Cinematic Mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Kanit:wght@200;300;400;500;600&family=Sarabun:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Mobile-first, single dark "after-sunset" look: full-bleed real footage, warm amber light, thumb-reach CTAs */
+  :root{
+    /* light cream + deep green, matching the live site's tokens */
+    color-scheme:light;
+    --ink:#f7f5f0;
+    --ink-2:#ffffff;
+    --ink-3:#efece4;
+    --paper:#1b2a2c;
+    --paper-dim:#3f5250;
+    --muted:#5a6c6a;
+    --amber:#e6935a;
+    --amber-soft:#c46e37;
+    --line:#e6e4dc;
+    --line-strong:rgba(27,42,44,.18);
+    --green:#16262b;
+    --green-2:#122f2a;
+    --font-en:'Bricolage Grotesque',system-ui,sans-serif;
+    --font-th:'Kanit',system-ui,sans-serif;
+    --font-body:'Sarabun','Kanit',system-ui,sans-serif;
+    --font-mono:'IBM Plex Mono',ui-monospace,monospace;
+    --gl:max(20px,env(safe-area-inset-left,0px));
+    --gr:max(20px,env(safe-area-inset-right,0px));
+    --radius:18px;
+    --bar-h:72px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+  body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--font-body);font-size:16px;line-height:1.7;-webkit-font-smoothing:antialiased;overflow-x:hidden;padding-bottom:calc(var(--bar-h) + env(safe-area-inset-bottom,0px));}
+  body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--ink);}
+  img,video{max-width:100%;}
+  a{color:inherit;}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--amber-soft);outline-offset:3px;border-radius:6px;}
+  ::selection{background:var(--amber);color:var(--ink);}
+  .wrap{max-width:1180px;margin:0 auto;padding-left:var(--gl);padding-right:var(--gr);}
+  .kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-th);font-weight:600;font-size:13px;letter-spacing:.02em;color:var(--amber-soft);}
+  .kicker::before{content:"";width:18px;height:2px;border-radius:2px;background:var(--amber);}
+  h2.sec{font-family:var(--font-th);font-weight:700;font-size:clamp(28px,7.4vw,46px);line-height:1.2;margin:10px 0 4px;text-wrap:balance;}
+  .sec-en{font-family:var(--font-en);font-weight:600;font-size:clamp(15px,3.6vw,19px);letter-spacing:-.01em;color:var(--muted);margin:0 0 16px;}
+  .lead{color:var(--paper-dim);max-width:58ch;margin:0;}
+  section{padding-block:72px;}
+  @media(min-width:900px){section{padding-block:110px;}}
+
+  /* ---------- header ---------- */
+  .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:rgba(15,17,13,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);}
+  .top-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px;}
+  .logo{display:flex;align-items:center;gap:9px;font-family:var(--font-en);font-weight:800;font-size:19px;letter-spacing:-.03em;text-decoration:none;}
+  .logo .mark{width:30px;height:30px;border-radius:50%;background:var(--amber);color:var(--ink);display:grid;place-items:center;font-size:11px;font-weight:800;letter-spacing:0;}
+  .logo em{font-style:normal;color:var(--amber-soft);}
+  .top-actions{display:flex;align-items:center;gap:8px;}
+  .icon-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--line-strong);text-decoration:none;color:var(--paper);transition:border-color .2s,color .2s;}
+  .icon-btn:hover{border-color:var(--amber-soft);color:var(--amber-soft);}
+  .icon-btn svg{width:18px;height:18px;fill:currentColor;}
+  .top-cta{display:none!important;}
+  @media(min-width:760px){.top-cta{display:inline-flex!important;}}
+
+  /* ---------- buttons ---------- */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 24px;border-radius:999px;font-family:var(--font-th);font-weight:600;font-size:16px;text-decoration:none;border:1px solid transparent;transition:transform .18s ease,background .2s,border-color .2s;}
+  .btn:active{transform:scale(.98);}
+  .btn-primary{background:var(--amber);color:var(--ink);box-shadow:0 14px 34px -14px rgba(224,154,82,.7);}
+  .btn-primary:hover{background:var(--amber-soft);}
+  .btn-ghost{background:rgba(245,240,228,.08);border-color:var(--line-strong);color:var(--paper);backdrop-filter:blur(8px);}
+  .btn-ghost:hover{border-color:var(--amber-soft);}
+  .btn svg{width:18px;height:18px;fill:currentColor;flex:none;}
+
+  /* ---------- hero ---------- */
+  .hero{position:relative;padding:0;min-height:min(90svh,820px);display:flex;align-items:flex-end;overflow:hidden;}
+  .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .hero-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,17,13,.2) 0%,rgba(15,17,13,.25) 35%,rgba(15,17,13,.82) 72%,var(--ink) 100%);}
+  .hero-inner{position:relative;z-index:2;width:100%;padding-top:120px;padding-bottom:36px;}
+  .hero-pill{display:inline-flex;align-items:center;gap:8px;padding:7px 14px;border-radius:999px;background:rgba(15,17,13,.55);border:1px solid var(--line-strong);font-family:var(--font-th);font-weight:500;font-size:13px;backdrop-filter:blur(8px);}
+  .hero-pill .rec{width:8px;height:8px;border-radius:50%;background:#ff4d3d;box-shadow:0 0 0 4px rgba(255,77,61,.2);}
+  .hero h1{font-family:var(--font-th);font-weight:700;font-size:clamp(38px,10.5vw,76px);line-height:1.12;margin:18px 0 6px;text-wrap:balance;max-width:14ch;}
+  .hero h1 span{color:var(--amber-soft);}
+  .hero .h1-en{font-family:var(--font-en);font-weight:600;font-size:clamp(17px,4.4vw,24px);letter-spacing:-.02em;color:var(--paper-dim);margin:0 0 14px;}
+  .hero .sub{font-size:17px;color:rgba(245,240,228,.86);max-width:44ch;margin:0 0 24px;}
+  .hero-ctas{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;max-width:520px;}
+  @media(min-width:520px){.hero-ctas{grid-template-columns:repeat(2,minmax(0,1fr));}}
+  .pillars{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px;}
+  .pillars span{font-family:var(--font-th);font-size:13.5px;font-weight:500;padding:6px 12px;border-radius:999px;border:1px solid var(--line-strong);color:var(--paper-dim);background:rgba(15,17,13,.35);}
+  .pillars b{color:var(--amber-soft);font-weight:600;}
+
+  /* ---------- horizontal snap rows (mobile) ---------- */
+  .snap{display:grid;grid-auto-flow:column;grid-auto-columns:84%;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin-left:calc(-1 * var(--gl));margin-right:calc(-1 * var(--gr));padding-left:var(--gl);padding-right:var(--gr);scroll-padding-left:var(--gl);padding-bottom:6px;}
+  .snap::-webkit-scrollbar{display:none;}
+  .snap > *{scroll-snap-align:start;min-width:0;}
+  .swipe-hint{font-family:var(--font-th);font-size:13px;color:var(--muted);margin:12px 0 0;}
+  @media(min-width:900px){
+    .snap{grid-auto-flow:row;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-columns:auto;overflow:visible;margin-left:0;margin-right:0;padding-left:0;padding-right:0;}
+    .swipe-hint{display:none;}
+  }
+
+  /* ---------- promise cards ---------- */
+  .promise{position:relative;border-radius:var(--radius);overflow:hidden;aspect-ratio:4/5;background:var(--ink-2);margin:0;}
+  .promise img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .promise::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(10,11,8,.94) 100%);}
+  .promise-body{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:22px;}
+  .promise-num{font-family:var(--font-mono);font-size:11px;color:var(--amber-soft);letter-spacing:.08em;}
+  .promise h3{font-family:var(--font-th);font-weight:700;font-size:23px;line-height:1.3;margin:6px 0 2px;}
+  .promise .p-en{font-family:var(--font-en);font-weight:600;font-size:14px;color:var(--amber-soft);margin:0 0 6px;}
+  .promise p{margin:0;font-size:15px;color:var(--paper-dim);line-height:1.6;}
+
+  /* ---------- a day on a trip (timeline) ---------- */
+  .day{background:var(--ink-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .timeline{list-style:none;margin:28px 0 0;padding:0;display:grid;gap:12px;}
+  .stop{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;align-items:center;background:var(--ink);border:1px solid var(--line);border-radius:var(--radius);padding:10px;}
+  .stop img{width:96px;height:96px;border-radius:12px;object-fit:cover;display:block;}
+  .stop time{font-family:var(--font-mono);font-size:12px;color:var(--amber-soft);letter-spacing:.04em;}
+  .stop h3{font-family:var(--font-th);font-weight:700;font-size:18px;line-height:1.35;margin:2px 0 2px;}
+  .stop p{margin:0;font-size:14.5px;color:var(--paper-dim);line-height:1.55;}
+  .stop.final-stop{border-color:rgba(224,154,82,.55);background:linear-gradient(135deg,rgba(224,154,82,.16),var(--ink) 70%);}
+  @media(min-width:760px){
+    .timeline{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .stop{grid-template-columns:132px minmax(0,1fr);}
+    .stop img{width:132px;height:132px;}
+  }
+  @media(min-width:1100px){.timeline{grid-template-columns:repeat(3,minmax(0,1fr));}}
+  .note{font-family:var(--font-th);font-size:13px;color:var(--muted);margin:14px 0 0;}
+
+  /* ---------- meet Saen ---------- */
+  .saen{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;align-items:center;}
+  .saen-photo{position:relative;border-radius:var(--radius);overflow:hidden;aspect-ratio:4/5;max-height:560px;}
+  .saen-photo img{width:100%;height:100%;object-fit:cover;object-position:60% center;display:block;}
+  .saen-tag{position:absolute;left:14px;bottom:14px;padding:8px 12px;border-radius:999px;background:rgba(15,17,13,.7);backdrop-filter:blur(8px);font-family:var(--font-mono);font-size:11px;color:var(--paper-dim);}
+  .saen blockquote{margin:18px 0 22px;padding-left:16px;border-left:3px solid var(--amber);font-family:var(--font-th);font-weight:600;font-size:20px;line-height:1.5;}
+  .saen blockquote small{display:block;font-family:var(--font-en);font-weight:500;font-size:14px;color:var(--muted);margin-top:6px;}
+  .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+  .stat{border:1px solid var(--line);border-radius:14px;padding:14px 8px;text-align:center;}
+  .stat b{display:block;font-family:var(--font-en);font-weight:800;font-size:28px;letter-spacing:-.03em;color:var(--amber-soft);font-variant-numeric:tabular-nums;line-height:1.1;}
+  .stat span{font-family:var(--font-th);font-size:13px;color:var(--paper-dim);}
+  @media(min-width:900px){.saen{grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:64px;}}
+
+  /* ---------- gallery ---------- */
+  .gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-flow:dense;gap:8px;margin-top:28px;}
+  .gallery figure{margin:0;position:relative;border-radius:12px;overflow:hidden;aspect-ratio:1/1;background:var(--ink-2);}
+  .gallery figure.tall{grid-row:span 2;aspect-ratio:auto;}
+  .gallery figure.wide{grid-column:span 2;aspect-ratio:16/9;}
+  .gallery img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease;}
+  .gallery figure:hover img{transform:scale(1.04);}
+  .gallery figcaption{position:absolute;left:8px;bottom:8px;padding:3px 9px;border-radius:999px;background:rgba(15,17,13,.66);font-family:var(--font-th);font-size:12px;color:var(--paper-dim);}
+  @media(min-width:900px){.gallery{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;}}
+
+  /* ---------- reels ---------- */
+  .reel{border-radius:var(--radius);overflow:hidden;background:var(--ink-2);border:1px solid var(--line);}
+  .reel video{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:#000;}
+  .reel-meta{padding:12px 16px 16px;display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+  .reel-meta b{font-family:var(--font-th);font-weight:700;font-size:17px;}
+  .reel-meta span{display:block;font-size:13.5px;color:var(--paper-dim);}
+  .reel-meta code{font-family:var(--font-mono);font-size:11px;color:var(--amber-soft);}
+  .yt-more{display:flex;margin-top:18px;}
+
+  /* ---------- trips ---------- */
+  .trip{display:flex;flex-direction:column;border-radius:var(--radius);overflow:hidden;background:var(--ink-2);border:1px solid var(--line);text-decoration:none;}
+  .trip-img{position:relative;aspect-ratio:4/3;}
+  .trip-img img{width:100%;height:100%;object-fit:cover;display:block;}
+  .trip-badge{position:absolute;top:12px;left:12px;padding:5px 11px;border-radius:999px;background:rgba(15,17,13,.72);font-family:var(--font-mono);font-size:11px;color:var(--amber-soft);}
+  .trip-body{padding:16px 18px 18px;display:flex;flex-direction:column;gap:4px;flex:1;}
+  .trip-body h3{font-family:var(--font-th);font-weight:700;font-size:20px;line-height:1.35;margin:0;}
+  .trip-body .t-en{font-family:var(--font-en);font-weight:600;font-size:14px;color:var(--muted);}
+  .trip-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px;}
+  .trip-chips span{font-family:var(--font-th);font-size:12.5px;padding:4px 10px;border-radius:999px;background:rgba(245,240,228,.07);color:var(--paper-dim);}
+  .trip-go{margin-top:auto;display:flex;justify-content:space-between;align-items:center;min-height:48px;padding:0 16px;border-radius:12px;background:rgba(224,154,82,.14);color:var(--amber-soft);font-family:var(--font-th);font-weight:600;}
+
+  /* ---------- follow ---------- */
+  .follow{background:linear-gradient(160deg,rgba(224,154,82,.18),rgba(15,17,13,0) 60%),var(--ink-2);border:1px solid var(--line-strong);border-radius:24px;padding:28px 20px;display:grid;gap:22px;}
+  .follow h2{font-family:var(--font-th);font-weight:700;font-size:clamp(26px,6.6vw,38px);line-height:1.25;margin:6px 0 6px;text-wrap:balance;}
+  .follow p{margin:0;color:var(--paper-dim);}
+  .social-row{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;}
+  .social{display:flex;align-items:center;gap:14px;min-height:64px;padding:12px 14px 12px 18px;border-radius:16px;background:var(--ink);border:1px solid var(--line-strong);text-decoration:none;transition:border-color .2s,transform .18s;}
+  .social:hover{border-color:var(--amber-soft);}
+  .social:active{transform:scale(.99);}
+  .social svg{width:28px;height:28px;flex:none;}
+  .social.yt svg{fill:#ff3b30;}
+  .social.fb svg{fill:#3d8bff;}
+  .social > span:not(.go){min-width:0;}
+  .social b{display:block;font-family:var(--font-th);font-weight:700;font-size:16px;line-height:1.3;}
+  .social small{display:block;font-size:13px;color:var(--muted);}
+  .social .go{margin-left:auto;font-family:var(--font-th);font-weight:600;font-size:13.5px;color:var(--ink);background:var(--amber);padding:7px 14px;border-radius:999px;white-space:nowrap;}
+  @media(min-width:900px){.follow{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:center;padding:48px;}}
+
+  /* ---------- final + footer ---------- */
+  .final{text-align:center;}
+  .final h2{font-family:var(--font-th);font-weight:700;font-size:clamp(30px,8vw,52px);line-height:1.2;margin:0 auto 10px;max-width:16ch;text-wrap:balance;}
+  .final h2 span{color:var(--amber-soft);}
+  .final p{color:var(--paper-dim);margin:0 auto 24px;max-width:46ch;}
+  .final .hero-ctas{margin:0 auto;}
+  footer{border-top:1px solid var(--line);padding-block:40px 28px;font-size:14px;color:var(--muted);}
+  .foot{display:grid;gap:22px;}
+  .foot-links{display:flex;flex-wrap:wrap;gap:6px 22px;}
+  .foot-links a{text-decoration:none;color:var(--paper-dim);min-height:40px;display:inline-flex;align-items:center;}
+  .foot small{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;}
+
+  /* ---------- sticky bottom bar (thumb zone, phones only) ---------- */
+  .bar{position:fixed;left:0;right:0;bottom:0;z-index:55;background:rgba(15,17,13,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid var(--line-strong);padding:10px var(--gr) calc(10px + env(safe-area-inset-bottom,0px)) var(--gl);}
+  .bar-inner{max-width:560px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:10px;}
+  .bar .btn{min-height:50px;font-size:15px;padding:0 14px;}
+  @media(min-width:900px){.bar{display:none;}body{padding-bottom:0;}}
+
+  .devnote{background:var(--ink-3);border-bottom:1px solid var(--line);font-family:var(--font-th);font-size:12.5px;color:var(--muted);padding-block:8px;text-align:center;}
+  .devnote b{color:var(--amber-soft);font-weight:600;}
+  /* ---------- light theme surfaces ---------- */
+  .hero,.promise,.day,.follow,.trip-badge,.saen-tag,.gallery figcaption{
+    --ink:#122f2a;--ink-2:#16262b;--paper:#f7f5f0;--paper-dim:#d6ddd9;--muted:#a9b8b3;
+    --amber-soft:#f4b476;--line:rgba(247,245,240,.14);--line-strong:rgba(247,245,240,.3);color:var(--paper);
+  }
+  .day{background:var(--green);}
+  .follow{background:linear-gradient(160deg,rgba(230,147,90,.22),rgba(22,38,43,0) 60%),var(--green);border-color:transparent;}
+  .hero-shade{background:linear-gradient(180deg,rgba(18,47,42,.15) 0%,rgba(18,47,42,.25) 35%,rgba(18,47,42,.8) 75%,rgba(18,47,42,.95) 100%);}
+  .top{background:rgba(255,255,255,.92);}
+  .logo .mark{background:var(--green);color:#f7f5f0;}
+  .logo em{color:var(--amber);}
+  .btn-primary,.social .go{color:var(--green);}
+  .btn-primary{box-shadow:0 12px 28px -14px rgba(196,110,55,.65);}
+  .btn-ghost{background:#ffffff;border-color:var(--line-strong);color:var(--paper);}
+  .hero .btn-ghost{background:rgba(255,255,255,.12);}
+  .bar{background:rgba(255,255,255,.95);}
+  .trip,.reel{box-shadow:0 20px 45px -28px rgba(15,28,30,.35);border-color:var(--line);}
+  .stat{background:#ffffff;}
+  .devnote{background:var(--green);color:#d6ddd9;}
+  .devnote b{color:#f4b476;}
+  .trip-chips span{background:var(--ink-3);}
+  /* Thai display: light Kanit, one highlighted phrase per headline, smaller scale */
+  .hero h1{font-weight:300;font-size:clamp(32px,8.4vw,62px);line-height:1.22;letter-spacing:0;}
+  .hero h1 span{font-weight:500;}
+  h2.sec{font-weight:300;font-size:clamp(24px,6.2vw,40px);line-height:1.3;}
+  h2.sec em{font-style:normal;font-weight:500;color:var(--amber-soft);}
+  .promise h3,.stop h3,.trip-body h3{font-weight:500;}
+  .promise h3{font-size:21px;}
+  .stop h3{font-size:17px;}
+  .trip-body h3{font-size:18px;}
+  .follow h2{font-weight:300;font-size:clamp(22px,5.6vw,34px);}
+  .final h2{font-weight:300;font-size:clamp(26px,7vw,46px);}
+  .final h2 span{font-weight:500;}
+  .saen blockquote{font-weight:300;font-size:19px;}
+  .reel-meta b,.social b{font-weight:500;}
+  .btn{font-weight:500;}
+  .kicker{font-weight:400;}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important;}}
+</style>
+
+<div class="devnote"><div class="wrap"><b>MOCKUP v5 · Mobile-first</b> · ใช้รีวิวดีไซน์ · รูปและวิดีโอจากทริปจริงในเว็บ trip2talk.com.au</div></div>
+
+<header class="top">
+  <div class="wrap top-row">
+    <a class="logo" href="#"><span class="mark">T2</span>Trip<em>2</em>Talk</a>
+    <div class="top-actions">
+      <a class="icon-btn" href="https://www.youtube.com/@trip2talksyd960" target="_blank" rel="noopener" aria-label="ดูช่อง YouTube Trip2talk SYD"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg></a>
+      <a class="icon-btn" href="https://www.facebook.com/TriptoTalk" target="_blank" rel="noopener" aria-label="เพจ Facebook TriptoTalk"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg></a>
+      <a class="btn btn-primary top-cta" href="#trips">จองทริป</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <video autoplay muted loop playsinline preload="metadata" poster="img/hero-poster.jpg" aria-label="คลิปไฮไลต์จากทริป Trip2Talk"><source src="../../../public/hero/Hero_cover01_web.mp4" type="video/mp4"></video>
+  <div class="hero-shade"></div>
+  <div class="hero-inner wrap">
+    <span class="hero-pill"><span class="rec"></span>ทริปถ่ายภาพกลุ่มเล็ก · ไม่เกิน 6 คน</span>
+    <h1>ออกทริปกับ<br><span>ช่างภาพตัวจริง</span></h1>
+    <p class="h1-en">Travel with a real photographer.</p>
+    <p class="sub">พี่แสนพาไปเก็บแสงที่สวยที่สุดของแต่ละที่ และถ่ายให้คุณเป็นตัวเอกของทุกเฟรม เที่ยวให้เต็มที่ แล้วกลับบ้านพร้อมรูปที่อยากเก็บไว้จริง ๆ</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" href="#trips">ดูทริปที่เปิดรับ</a>
+      <a class="btn btn-ghost" href="#reel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>ดูคลิปทริปจริง</a>
+    </div>
+    <div class="pillars">
+      <span><b>กลุ่มเล็ก</b> ดูแลทั่วถึง</span>
+      <span><b>เก็บแสง</b> จังหวะที่ใช่</span>
+      <span><b>รูปพรีเมียม</b> ที่เก็บไว้จริง</span>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <span class="kicker">ทำไมต้อง Trip2Talk</span>
+    <h2 class="sec">ทริปที่<em>เติมเต็ม</em><br>ทั้งใจและกล้อง</h2>
+    <p class="sec-en">More than a tour. A trip that fills you up.</p>
+    <p class="lead">เราไม่ใช่ทัวร์ชะโงกทัวร์ที่จอดถ่ายห้านาทีแล้วไปต่อ เราเดินทางช้าลง รอแสง และใส่ใจทุกคนในกลุ่ม</p>
+    <div class="snap" style="margin-top:28px">
+      <article class="promise">
+        <img src="img/love-lightpaint.jpg" alt="เพื่อนร่วมทริปเขียนคำว่า LOVE ด้วยไฟฉายตอนกลางคืน" loading="lazy">
+        <div class="promise-body">
+          <span class="promise-num">01 · SMALL GROUP</span>
+          <h3>กลุ่มเล็ก เหมือนเที่ยวกับเพื่อน</h3>
+          <p class="p-en">Never more than 6</p>
+          <p>ไม่เกิน 6 คนต่อทริป ทุกคนได้เวลากับช่างภาพ ไม่ต้องแย่งมุม ไม่ต้องรีบ</p>
+        </div>
+      </article>
+      <article class="promise">
+        <img src="img/tas-aurora-cradle.jpg" alt="ออโรร่าเหนือเครเดิลเมาน์เทน แทสเมเนีย" loading="lazy">
+        <div class="promise-body">
+          <span class="promise-num">02 · REAL LIGHT</span>
+          <h3>พาไปเก็บแสง ในจังหวะที่ใช่</h3>
+          <p class="p-en">We wait for the light</p>
+          <p>แสงเช้า golden hour ทางช้างเผือก ออโรร่า เราวางแผนทริปตามแสง ไม่ใช่ตามรถทัวร์</p>
+        </div>
+      </article>
+      <article class="promise">
+        <img src="img/night-portrait.jpg" alt="พอร์ตเทรตตอนกลางคืนใต้ท้องฟ้าเต็มไปด้วยดาว" loading="lazy">
+        <div class="promise-body">
+          <span class="promise-num">03 · PREMIUM PHOTOS</span>
+          <h3>รูปพรีเมียม ที่คุณจะเก็บไว้จริง</h3>
+          <p class="p-en">Photos you'll actually keep</p>
+          <p>ช่างภาพถ่ายคุณตลอดทริป ทั้งพอร์ตเทรตและวิว แต่งเสร็จส่งให้หลังจบทริป</p>
+        </div>
+      </article>
+    </div>
+    <p class="swipe-hint">ปัดดูต่อ →</p>
+  </div>
+</section>
+
+<section class="day" id="day">
+  <div class="wrap">
+    <span class="kicker">ประสบการณ์จริงบนทริป</span>
+    <h2 class="sec">หนึ่งวัน <em>กับพี่แสน</em></h2>
+    <p class="sec-en">A day on the road, from first light to the last star.</p>
+    <ol class="timeline">
+      <li class="stop"><img src="img/dawn-boathouse.jpg" alt="โรงเรือที่ Dove Lake ตอนแสงแรก" loading="lazy"><div><time>05:30</time><h3>ออกไปรับแสงแรก</h3><p>ตั้งกล้องริมทะเลสาบก่อนพระอาทิตย์ขึ้น พี่แสนช่วยตั้งค่าให้ทุกคน</p></div></li>
+      <li class="stop"><img src="img/beach-fun.jpg" alt="ตีลังกาบนชายหาด" loading="lazy"><div><time>10:00</time><h3>เที่ยวไป ถ่ายไป</h3><p>แวะจุดสวยระหว่างทาง ถ่ายพอร์ตเทรตแบบสนุก ไม่เกร็ง</p></div></li>
+      <li class="stop"><img src="img/local-tasting.jpg" alt="ชิมเครื่องดื่มและอาหารท้องถิ่น" loading="lazy"><div><time>13:00</time><h3>ชิมของดีท้องถิ่น</h3><p>พักกินของอร่อยที่คนท้องถิ่นไปจริง ๆ เติมพลังก่อนช่วงเย็น</p></div></li>
+      <li class="stop"><img src="img/sunset-trio.jpg" alt="เงาคนสามคนตัดกับฟ้าตอนพระอาทิตย์ตก" loading="lazy"><div><time>18:30</time><h3>Golden hour</h3><p>ช่วงแสงที่สวยที่สุดของวัน เราไปรอที่จุดที่ดีที่สุดก่อนแสงมา</p></div></li>
+      <li class="stop"><img src="img/aurora-lightpaint.jpg" alt="วาดไฟใต้แสงออโรร่า" loading="lazy"><div><time>21:30</time><h3>ล่าดาวและออโรร่า</h3><p>สอนถ่ายกลางคืนและวาดไฟ ได้รูปที่ถ่ายเองคนเดียวยาก</p></div></li>
+      <li class="stop final-stop"><img src="img/couple-portrait.jpg" alt="คู่รักกอดกันตอนแสงเย็น" loading="lazy"><div><time>หลังทริป</time><h3>รูปพรีเมียมถึงมือคุณ</h3><p>รูปแต่งเสร็จพร้อมเก็บ พร้อมโพสต์ เป็นความทรงจำที่เปิดดูได้อีกนาน</p></div></li>
+    </ol>
+    <p class="note">ตัวอย่างหนึ่งวันจากทริปแทสเมเนีย ตารางจริงปรับตามแสงและสภาพอากาศ</p>
+  </div>
+</section>
+
+<section id="saen">
+  <div class="wrap saen">
+    <div class="saen-photo">
+      <img src="img/kata-tjuta-saen.jpg" alt="พี่แสนถือขาตั้งกล้องที่กาตาจูตา" loading="lazy">
+      <span class="saen-tag">KATA TJUTA · NT</span>
+    </div>
+    <div>
+      <span class="kicker">คนที่ถือกล้องให้คุณ</span>
+      <h2 class="sec">รู้จัก<em>พี่แสน</em></h2>
+      <p class="sec-en">Saen · travel photographer, 10 years</p>
+      <p class="lead">ช่างภาพเดินทางชาวไทยในซิดนีย์ ถ่ายภาพมา 10 ปี พาคนไทยออกเก็บแสงทั่วออสเตรเลียและนิวซีแลนด์ ไม่ใช่ไกด์ถือธง แต่เป็นพี่ชายที่ถือกล้องไปด้วยกัน</p>
+      <blockquote>เราไม่ได้ไล่ถ่ายทุกจุด เรารอแสงที่ใช่ แล้วค่อยกดชัตเตอร์<small>"We wait for the light, then we shoot."</small></blockquote>
+      <div class="stats">
+        <div class="stat"><b>13</b><span>ทริป</span></div>
+        <div class="stat"><b>10+</b><span>ช่างภาพ</span></div>
+        <div class="stat"><b>500+</b><span>นักเดินทาง</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="gallery" style="padding-top:0">
+  <div class="wrap">
+    <span class="kicker">รูปจริงจากทริป ไม่ใช่ภาพสต็อก</span>
+    <h2 class="sec"><em>แสง</em>ที่เราเก็บมาแล้ว</h2>
+    <p class="sec-en">Light we've already caught.</p>
+    <div class="gallery">
+      <figure class="tall"><img src="img/uluru-walk.jpg" alt="เดินสู่อุลูรู" loading="lazy"><figcaption>อุลูรู</figcaption></figure>
+      <figure><img src="img/wallaby.jpg" alt="วอลลาบีในแทสเมเนีย" loading="lazy"><figcaption>แทสเมเนีย</figcaption></figure>
+      <figure><img src="img/hobart-night.jpg" alt="ไฟเมืองโฮบาร์ตยามค่ำ" loading="lazy"><figcaption>โฮบาร์ต</figcaption></figure>
+      <figure class="wide"><img src="img/lavender.jpg" alt="ทุ่งลาเวนเดอร์" loading="lazy"><figcaption>ทุ่งลาเวนเดอร์</figcaption></figure>
+      <figure><img src="img/nz-above-clouds.jpg" alt="เหนือทะเลหมอก นิวซีแลนด์" loading="lazy"><figcaption>นิวซีแลนด์</figcaption></figure>
+      <figure><img src="img/bay-of-fires.jpg" alt="ชายฝั่งหินสีส้ม แทสเมเนีย" loading="lazy"><figcaption>Bay of Fires</figcaption></figure>
+      <figure class="wide"><img src="img/uluru-sunset.jpg" alt="อุลูรูใต้ฟ้าสีแดง" loading="lazy"><figcaption>อุลูรู ฟ้าแดง</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="reel" style="padding-top:0">
+  <div class="wrap">
+    <span class="kicker">ดูก่อนตัดสินใจ</span>
+    <h2 class="sec">คลิปจาก<em>ทริปจริง</em></h2>
+    <p class="sec-en">Watch the reel.</p>
+    <div class="snap" style="margin-top:24px">
+      <div class="reel"><video controls playsinline preload="none" poster="img/uluru-sunset.jpg"><source src="../../../public/trip-videos/Uluru_web.mp4" type="video/mp4"></video><div class="reel-meta"><div><b>อุลูรู</b><span>Uluru · Field of Light</span></div><code>0:17</code></div></div>
+      <div class="reel"><video controls playsinline preload="none" poster="img/tasmania-poster.jpg"><source src="../../../public/trip-videos/Tasmania_cover_web.mp4" type="video/mp4"></video><div class="reel-meta"><div><b>แทสเมเนีย</b><span>Cradle Mountain to Hobart</span></div><code>0:47</code></div></div>
+      <div class="reel"><video controls playsinline preload="none" poster="img/nz-cliffs.jpg"><source src="../../../public/trip-videos/NZ02_web.mp4" type="video/mp4"></video><div class="reel-meta"><div><b>นิวซีแลนด์</b><span>South Island coast</span></div><code>0:19</code></div></div>
+    </div>
+    <div class="yt-more"><a class="btn btn-ghost" href="https://www.youtube.com/@trip2talksyd960/videos" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>ดูคลิปทั้งหมด 25 คลิปบน YouTube</a></div>
+  </div>
+</section>
+
+<section id="trips" style="padding-top:0">
+  <div class="wrap">
+    <span class="kicker">ทริปที่เปิดรับ</span>
+    <h2 class="sec">เลือก<em>ทริปของคุณ</em></h2>
+    <p class="sec-en">Small groups, a pro photographer on every trip.</p>
+    <div class="snap" style="margin-top:24px">
+      <a class="trip" href="https://www.trip2talk.com.au/trips" target="_blank" rel="noopener">
+        <div class="trip-img"><img src="img/uluru-walk.jpg" alt="อุลูรู" loading="lazy"><span class="trip-badge">NT · 4D3N</span></div>
+        <div class="trip-body"><h3>อุลูรู-กาตาจูตา</h3><span class="t-en">Uluru-Kata Tjuta National Park</span><div class="trip-chips"><span>4 วัน 3 คืน</span><span>ไม่เกิน 6 คน</span><span>Field of Light</span></div><span class="trip-go">ดูวันว่างและราคา <span>→</span></span></div>
+      </a>
+      <a class="trip" href="https://www.trip2talk.com.au/trips" target="_blank" rel="noopener">
+        <div class="trip-img"><img src="img/tas-aurora-cradle.jpg" alt="แทสเมเนีย ออโรร่า" loading="lazy"><span class="trip-badge">TAS · 3D2N</span></div>
+        <div class="trip-body"><h3>แทสเมเนีย เฮอริเทจ &amp; ออโรร่า</h3><span class="t-en">Tasmania Heritage &amp; Aurora (Hobart)</span><div class="trip-chips"><span>3 วัน 2 คืน</span><span>ไม่เกิน 6 คน</span><span>ล่าออโรร่า</span></div><span class="trip-go">ดูวันว่างและราคา <span>→</span></span></div>
+      </a>
+      <a class="trip" href="https://www.trip2talk.com.au/trips" target="_blank" rel="noopener">
+        <div class="trip-img"><img src="img/nz-lake-view.jpg" alt="นิวซีแลนด์เกาะใต้" loading="lazy"><span class="trip-badge">NZ · 6D5N</span></div>
+        <div class="trip-body"><h3>นิวซีแลนด์เกาะใต้ 6 วัน 5 คืน</h3><span class="t-en">New Zealand South Island Photo Road Trip</span><div class="trip-chips"><span>6 วัน 5 คืน</span><span>ไม่เกิน 6 คน</span><span>Road trip</span></div><span class="trip-go">ดูวันว่างและราคา <span>→</span></span></div>
+      </a>
+    </div>
+    <p class="swipe-hint">ปัดดูทริปอื่น →</p>
+  </div>
+</section>
+
+<section id="follow" style="padding-top:0">
+  <div class="wrap">
+    <div class="follow">
+      <div>
+        <span class="kicker">ติดตามผลงาน</span>
+        <h2>ดูทริปใหม่และเบื้องหลังการเก็บแสงก่อนใคร</h2>
+        <p>รอบทริปใหม่ คลิปเต็มทุกทริป และเทคนิคถ่ายรูปจากพี่แสน</p>
+      </div>
+      <div class="social-row">
+        <a class="social yt" href="https://www.youtube.com/@trip2talksyd960?sub_confirmation=1" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/></svg><span><b>YouTube</b><small>Trip2talk SYD · 25 คลิป</small></span><span class="go">ติดตาม</span></a>
+        <a class="social fb" href="https://www.facebook.com/TriptoTalk" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M24 12a12 12 0 1 0-13.9 11.9v-8.4H7.1V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12z"/></svg><span><b>Facebook</b><small>เพจ TriptoTalk · ทักแชทได้</small></span><span class="go">กดติดตาม</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="final" style="padding-top:0">
+  <div class="wrap">
+    <h2>ทริปหน้า ให้พี่แสน<br><span>ถือกล้องให้คุณ</span></h2>
+    <p>ที่นั่งมีจำกัดเพราะเราไปกลุ่มเล็กเสมอ ทักมาถามรอบที่ว่างได้เลย</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary" href="#trips">ดูทริปที่เปิดรับ</a>
+      <a class="btn btn-ghost" href="https://m.me/TriptoTalk" target="_blank" rel="noopener">ทักแชท Messenger</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <a class="logo" href="#"><span class="mark">T2</span>Trip<em>2</em>Talk</a>
+    <div class="foot-links">
+      <a href="#trips">ทริปทั้งหมด</a><a href="#gallery">แกลเลอรี</a><a href="#saen">เกี่ยวกับพี่แสน</a><a href="https://www.youtube.com/@trip2talksyd960" target="_blank" rel="noopener">YouTube</a><a href="https://www.facebook.com/TriptoTalk" target="_blank" rel="noopener">Facebook</a>
+    </div>
+    <small>© 2026 TRIP2TALK — TRADING AS CHAPTER99 · SYDNEY, AUSTRALIA</small>
+  </div>
+</footer>
+
+<nav class="bar" aria-label="ทางลัดจองทริป">
+  <div class="bar-inner">
+    <a class="btn btn-ghost" href="https://m.me/TriptoTalk" target="_blank" rel="noopener">ทักแชท</a>
+    <a class="btn btn-primary" href="#trips">ดูทริปที่เปิดรับ</a>
+  </div>
+</nav>
+
+<script>
+  // reduced motion: don't autoplay the hero video
+  try{ if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){ var v=document.querySelector('.hero video'); if(v){ v.removeAttribute('autoplay'); v.pause(); } } }catch(e){}
+</script>
