@@ -470,7 +470,19 @@ export default function TripDetailPage() {
                 src={routeMapUrl}
                 title={`Route map ${tour.trip_code}`}
                 loading="lazy"
+                scrolling="no"
                 className="h-[720px] w-full rounded-2xl border border-line bg-white"
+                onLoad={(e) => {
+                  // Same-origin page: grow the frame to fit its content (no inner scrollbar).
+                  const frame = e.currentTarget
+                  const fit = () => {
+                    const h = frame.contentDocument?.documentElement?.scrollHeight
+                    if (h) frame.style.height = `${h}px`
+                  }
+                  fit()
+                  const body = frame.contentDocument?.body
+                  if (body && 'ResizeObserver' in window) new ResizeObserver(fit).observe(body)
+                }}
               />
             </section>
           )}
