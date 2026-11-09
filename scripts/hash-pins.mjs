@@ -1,21 +1,30 @@
 #!/usr/bin/env node
-// Generates bcrypt hashes for staff PINs and prints ready-to-paste SQL.
-// Usage: node scripts/hash-pins.mjs 1111 4444 9999
+// One PIN from a hidden prompt. Prints a bcrypt hash and an UPDATE. Never prints the PIN.
 
+import readline from 'node:readline'
 import bcrypt from 'bcryptjs'
 
-const pins = process.argv.slice(2)
+const prompt = 'PIN: '
+const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 
-if (pins.length === 0) {
-  console.log('Usage: node scripts/hash-pins.mjs <pin1> <pin2> ...')
+// Mute echoed keystrokes. The prompt itself still prints.
+rl._writeToOutput = function writeMuted(stringToWrite) {
+  if (stringToWrite.startsWith(prompt)) rl.output.write(stringToWrite)
+}
+
+const pin = await new Promise((resolve) => {
+  rl.question(prompt, (answer) => {
+    rl.output.write('\n')
+    rl.close()
+    resolve(answer)
+  })
+})
+
+if (!/^\d{4}$/.test(pin)) {
+  console.error('PIN must be exactly 4 digits')
   process.exit(1)
 }
 
-for (const pin of pins) {
-  if (!/^\d{4}$/.test(pin)) {
-    console.error(`Skipping "${pin}" — PIN must be exactly 4 digits`)
-    continue
-  }
-  const hash = bcrypt.hashSync(pin, 10)
-  console.log(`update public.staff_profiles set pin_hash = '${hash}' where pin_code = '${pin}';`)
-}
+const hash = bcrypt.hashSync(pin, 10)
+console.log(hash)
+console.log(`update public.staff_profiles set pin_hash = '${hash}' where id = '<OWNER_ID>';`)
