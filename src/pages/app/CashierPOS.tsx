@@ -30,7 +30,7 @@ import {
   flagPendingBooking,
   tourTotalForTier,
 } from '../../lib/toursApi'
-import { isSelectableBookableTour } from '../../lib/tourSelectability'
+import { isSelectableBookableTour, isStaffDepartureOpen } from '../../lib/tourSelectability'
 import { isInPersonCardMethod, isSquareGatewayMethod, paymentMethodBadge, remainingTripBalanceAud } from '../../lib/paymentCredit'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import type { Tour, TourBooking } from '../../types/tour'
@@ -296,7 +296,8 @@ export default function CashierPOS() {
       tours.filter(
         (tr) =>
           ['published', 'confirmed', 'active', 'draft'].includes(tr.status.toLowerCase()) &&
-          isSelectableBookableTour(tr),
+          isSelectableBookableTour(tr) &&
+          isStaffDepartureOpen(tr),
       ),
     [tours],
   )

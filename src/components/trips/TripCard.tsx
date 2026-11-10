@@ -13,6 +13,8 @@ import {
 } from '../../lib/tourDisplay'
 import { seatsRemaining, isListedPriceHidden } from '../../lib/toursApi'
 import { getPreviewPhotoForTrip, photoThumbSrc } from '../../data/galleryPhotos'
+import DepartureCountdown from './DepartureCountdown'
+import SeatPeople from './SeatPeople'
 import TripCoverImage from './TripCoverImage'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
 import type { TranslationKey } from '../../i18n/translations'
@@ -43,7 +45,7 @@ function categoryPill(tour: Tour): CatPill {
 
 /** Mockup `.trip-card` — bilingual EN+TH name, category tag, meta + price. */
 export default function TripCard({ tour }: Props) {
-  const { tt } = useLang()
+  const { tt, lang } = useLang()
   const seats = seatsRemaining(tour)
   const lowSeats = seats > 0 && seats <= 3
   const category = categoryPill(tour)
@@ -120,7 +122,8 @@ export default function TripCard({ tour }: Props) {
             />
           )}
         </div>
-        <p className="mt-0.5 text-[9px] font-bold text-coral">
+        <div className="mt-0.5 flex items-center justify-between gap-2">
+          <p className="text-[9px] font-bold text-coral">
           {comingSoonListing
             ? `${comingSoon.en} / ${comingSoon.th}`
             : seats === 0
@@ -129,7 +132,12 @@ export default function TripCard({ tour }: Props) {
           {!comingSoonListing && lowSeats && seats > 0 && (
             <Flame className="ml-0.5 inline h-2.5 w-2.5" />
           )}
-        </p>
+          </p>
+          {!comingSoonListing && (
+            <SeatPeople maxSeats={tour.max_seats} bookedSeats={tour.booked_seats} className="h-3.5 w-3.5" />
+          )}
+        </div>
+        <DepartureCountdown date={tour.departure_date} lang={lang} compact className="mt-0.5" />
       </div>
 
       <button

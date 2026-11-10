@@ -15,6 +15,7 @@ import {
   Users,
   XCircle,
 } from 'lucide-react'
+import { countdownFinished } from '../../lib/departureCountdown'
 import { useLang } from '../../hooks/useLang'
 import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites'
 import {
@@ -74,7 +75,7 @@ const TAB_KEYS: { id: DetailTab; key: TranslationKey }[] = [
 
 export default function TripDetailPage() {
   const { tripCode } = useParams<{ tripCode: string }>()
-  const { tt } = useLang()
+  const { tt, lang } = useLang()
   const [tour, setTour] = useState<Tour | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -135,6 +136,18 @@ export default function TripDetailPage() {
 
   if (error || !tour) {
     return <PageError message={error || errorBi.en} />
+  }
+
+  if (countdownFinished(tour.departure_date)) {
+    return (
+      <PageError
+        message={
+          lang === 'th'
+            ? 'ทริปรอบนี้ออกเดินทางแล้ว รายการจองและบัญชียังอยู่ในหลังบ้าน'
+            : 'This departure has already left. Bookings and accounts stay in the back office.'
+        }
+      />
+    )
   }
 
   const details = getTripDetails(tour.trip_code)
