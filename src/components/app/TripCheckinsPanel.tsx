@@ -33,8 +33,10 @@ export default function TripCheckinsPanel({ tripCode, onSessionExpired }: Props)
   const [rows, setRows] = useState<TripCheckin[] | null>(null)
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [waiverCopied, setWaiverCopied] = useState(false)
 
   const link = `${PUBLIC_ORIGIN}/checkin/${encodeURIComponent(tripCode)}`
+  const waiverLink = `${PUBLIC_ORIGIN}/waiver?trip=${encodeURIComponent(tripCode)}`
 
   const fetchRows = useCallback(
     () =>
@@ -70,6 +72,17 @@ export default function TripCheckinsPanel({ tripCode, onSessionExpired }: Props)
     }
   }
 
+  async function copyWaiver() {
+    try {
+      await navigator.clipboard.writeText(waiverLink)
+      setWaiverCopied(true)
+      toast('คัดลอกลิงก์ waiver แล้ว — วางในกลุ่ม FB ได้เลย', 'success')
+      window.setTimeout(() => setWaiverCopied(false), 2000)
+    } catch {
+      toast('คัดลอกไม่สำเร็จ', 'error')
+    }
+  }
+
   return (
     <div className="space-y-2.5">
       <div className="flex flex-wrap items-end justify-between gap-2">
@@ -78,10 +91,18 @@ export default function TripCheckinsPanel({ tripCode, onSessionExpired }: Props)
             Group check-in ({rows?.length ?? 0})
           </h3>
           <p lang="th" className="mt-0.5 font-serif text-[10px] font-medium text-cream-muted">
-            ลิงก์เดียวส่งทั้งกลุ่ม · ลูกค้ากรอกเอง
+            ลิงก์เดียวของทริปนี้ · ส่งทั้งกลุ่มให้ลูกค้ากรอกเอง
           </p>
         </div>
         <div className="flex gap-1.5">
+          <button
+            type="button"
+            onClick={() => void copyWaiver()}
+            className="inline-flex items-center gap-1.5 rounded-full border border-gold/50 bg-gold/15 px-3 py-1.5 text-[11px] font-semibold text-gold"
+          >
+            {waiverCopied ? <Copy className="h-3.5 w-3.5" /> : <Link2 className="h-3.5 w-3.5" />}
+            {waiverCopied ? 'Copied' : 'Copy waiver link'}
+          </button>
           <button
             type="button"
             onClick={() => void copy()}
@@ -101,6 +122,7 @@ export default function TripCheckinsPanel({ tripCode, onSessionExpired }: Props)
           </button>
         </div>
       </div>
+      <p className="break-all text-[10px] text-cream-muted">{waiverLink}</p>
       <p className="break-all text-[10px] text-cream-muted">{link}</p>
 
       {rows === null ? (

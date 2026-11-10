@@ -17,6 +17,7 @@ import type { Tour, TourBooking, WaiverSignature } from '../../types/tour'
 import { ListRowSkeleton } from '../../components/ui/Skeleton'
 import { PageError } from '../../components/ui/PageError'
 import { useToast } from '../../components/ui/Toast'
+import CopyWaiverLinkButton from '../../components/app/CopyWaiverLinkButton'
 import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
 import StaffWaiverConfirmActions from '../../components/app/StaffWaiverConfirmActions'
 import WaiverRecordActions from '../../components/app/WaiverRecordActions'
@@ -246,7 +247,7 @@ export default function StaffWaiverAssistPage() {
         title="Staff-assisted waiver"
         subtitle={
           <>
-            <span className="font-thai">กรอก waiver แทนลูกค้า — ต้องมีคำขอชัดเจนจากลูกค้า (audit trail)</span>
+            <span className="font-thai">เลือกทริปและลูกค้า แล้วคัดลอกลิงก์ส่งให้ลูกค้ากรอกเอง</span>
             <p className="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] leading-relaxed text-amber-100/90">
               Same waiver terms as the public page. Do not skip clauses. Public /waiver is
               unchanged — this screen is staff-only.
@@ -261,6 +262,64 @@ export default function StaffWaiverAssistPage() {
 
         {!loading && !error && (
           <form onSubmit={handleSubmit} className="space-y-4">
+            <StaffField label="Trip / ทริป">
+              <StaffSelect
+                value={tripCode}
+                onChange={(e) => {
+                  setTripCode(e.target.value)
+                  setBookingId('')
+                }}
+                required={assistOn}
+              >
+                <option value="">Select trip…</option>
+                {tours.map((t) => (
+                  <option key={t.id} value={t.trip_code}>
+                    {t.trip_code} — {t.name_en}
+                  </option>
+                ))}
+              </StaffSelect>
+            </StaffField>
+
+            {tripCode && (
+              <StaffCard>
+                <p className="text-sm font-medium text-cream">
+                  Copy a link for each customer / คัดลอกลิงก์ของลูกค้าแต่ละคน
+                </p>
+                {bookings.length === 0 ? (
+                  <p className="mt-2 text-xs text-cream-muted">No bookings on this trip yet.</p>
+                ) : (
+                  <ul className="mt-3 space-y-2">
+                    {bookings.map((b) => (
+                      <li key={b.id} className="flex items-center justify-between gap-2">
+                        <span className="min-w-0 text-sm text-cream">
+                          {b.first_name_en} {b.last_name_en}
+                          {b.waiver_signed ? ' · waiver ✓' : ''}
+                        </span>
+                        <CopyWaiverLinkButton
+                          bookingId={b.id}
+                          onSessionExpired={() => navigate('/app')}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </StaffCard>
+            )}
+
+            {assistOn && tripCode && (
+              <StaffField label="Customer / ลูกค้า">
+                <StaffSelect value={bookingId} onChange={(e) => setBookingId(e.target.value)}>
+                  <option value="">Select customer…</option>
+                  {bookings.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.first_name_en} {b.last_name_en}
+                      {b.waiver_signed ? ' (waiver ✓)' : ''}
+                    </option>
+                  ))}
+                </StaffSelect>
+              </StaffField>
+            )}
+
             <StaffCheckRow checked={assistOn} onChange={setAssistOn}>
               <span className="block text-sm font-medium text-cream">
                 Fill on customer&apos;s behalf
@@ -270,41 +329,6 @@ export default function StaffWaiverAssistPage() {
 
             {assistOn && (
               <>
-                <StaffField label="Trip / ทริป">
-                  <StaffSelect
-                    value={tripCode}
-                    onChange={(e) => {
-                      setTripCode(e.target.value)
-                      setBookingId('')
-                    }}
-                    required
-                  >
-                    <option value="">Select trip…</option>
-                    {tours.map((t) => (
-                      <option key={t.id} value={t.trip_code}>
-                        {t.trip_code} — {t.name_en}
-                      </option>
-                    ))}
-                  </StaffSelect>
-                </StaffField>
-
-                {tripCode && (
-                  <StaffField label="Link booking (optional) / ผูกกับการจอง">
-                    <StaffSelect
-                      value={bookingId}
-                      onChange={(e) => setBookingId(e.target.value)}
-                    >
-                      <option value="">— No booking link —</option>
-                      {bookings.map((b) => (
-                        <option key={b.id} value={b.id}>
-                          {b.first_name_en} {b.last_name_en}
-                          {b.waiver_signed ? ' (waiver ✓)' : ''}
-                        </option>
-                      ))}
-                    </StaffSelect>
-                  </StaffField>
-                )}
-
                 <StaffField label="Customer full name (signature) / ชื่อลูกค้า">
                   <StaffInput
                     value={signedName}
