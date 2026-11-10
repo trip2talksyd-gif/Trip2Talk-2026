@@ -12,6 +12,8 @@ import { getPreviewPhotoForTrip, photoThumbSrc } from '../../data/galleryPhotos'
 import { storageImageSrc, STORAGE_IMG } from '../../lib/storageImage'
 import BiDisplayHeading from '../ui/BiDisplayHeading'
 import BiText from '../ui/BiText'
+import DepartureCountdown from './DepartureCountdown'
+import SeatPeople from './SeatPeople'
 import TripCoverImage from './TripCoverImage'
 
 type Props = {
@@ -50,7 +52,7 @@ function tripThumbSrc(tour: Tour): string {
  * Book Now → `/trips/:tripCode`. Autoplay + pause-on-hover/touch (gallery pattern).
  */
 export default function TripPickerHero({ tours }: Props) {
-  const { tt } = useLang()
+  const { tt, lang } = useLang()
   const [activeIndex, setActiveIndex] = useState(0)
   const [paused, setPaused] = useState(false)
   const activeCodeRef = useRef<string | null>(null)
@@ -391,6 +393,10 @@ export default function TripPickerHero({ tours }: Props) {
                     className="mt-0.5 block truncate text-[11px] text-ink-soft"
                     thClassName="truncate font-thai text-[10px] text-ink-soft/80"
                   />
+                  <span className="mt-1 flex items-center justify-between gap-2">
+                    <DepartureCountdown date={tour.departure_date} lang={lang} compact />
+                    <SeatPeople maxSeats={tour.max_seats} bookedSeats={tour.booked_seats} className="h-4 w-4" />
+                  </span>
                 </span>
                 <ChevronRight className="h-4 w-4 shrink-0 text-ink-soft" aria-hidden />
               </button>

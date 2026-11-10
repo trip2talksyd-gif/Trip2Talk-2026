@@ -1,3 +1,4 @@
+import { countdownFinished } from './departureCountdown'
 import { occurrencesInYear } from './expenseRecurrence'
 import { compressUploadImage } from './compressUploadImage'
 import { supabase, supabaseConfig } from './supabase'
@@ -1009,6 +1010,7 @@ export function getUnbookableReason(tour: Tour): UnbookableReason {
   if (status === 'completed') return 'completed'
   if (status !== 'confirmed' && status !== 'published' && status !== 'active') return 'draft'
   if (!tour.departure_date) return 'no_date'
+  if (countdownFinished(tour.departure_date)) return 'completed'
   if (!isSelectableBookableTour(tour)) return 'template'
   if (tour.max_seats <= 0 || tour.booked_seats >= tour.max_seats) return 'full'
   return null

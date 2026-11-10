@@ -9,7 +9,7 @@ import {
   listWaiversForTour,
   uploadWaiverAuthEvidence,
 } from '../../lib/toursApi'
-import { isSelectableBookableTour } from '../../lib/tourSelectability'
+import { isSelectableBookableTour, isStaffDepartureOpen } from '../../lib/tourSelectability'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
 import { visibleWaiverClauses } from '../../data/risks'
 import { tripRequiresDormAck } from '../../data/tripDetails'
@@ -79,7 +79,8 @@ export default function StaffWaiverAssistPage() {
             (t) =>
               t.status.toLowerCase() !== 'cancelled' &&
               t.status.toLowerCase() !== 'archived' &&
-              isSelectableBookableTour(t),
+              isSelectableBookableTour(t) &&
+              isStaffDepartureOpen(t),
           ),
         ),
       )

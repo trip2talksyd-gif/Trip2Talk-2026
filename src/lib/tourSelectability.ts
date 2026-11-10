@@ -1,4 +1,5 @@
 import { listItineraryTemplateCodes } from '../data/itineraries'
+import { countdownFinished, sydneyToday } from './departureCountdown'
 
 const MONTH_ABBRS = [
   'JAN',
@@ -87,6 +88,13 @@ export function isSelectableBookableTour(tour: {
   return true
 }
 
+/** Staff waiver/cashier: keep today and later. Earlier departures stay in tax records only. */
+export function isStaffDepartureOpen(tour: { departure_date?: string | null }): boolean {
+  if (!tour.departure_date) return true
+  const day = tour.departure_date.slice(0, 10)
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) && day >= sydneyToday()
+}
+
 function publicStatusOk(status: string | null | undefined): boolean {
   const s = (status ?? '').toLowerCase()
   return s === 'confirmed' || s === 'published' || s === 'active'
@@ -110,6 +118,7 @@ function selectableFamilySiblings(tour: CatalogTour, catalog: ReadonlyArray<Cata
  */
 export function isPublicCatalogTour(tour: CatalogTour, catalog: ReadonlyArray<CatalogTour>): boolean {
   if (!publicStatusOk(tour.status)) return false
+  if (countdownFinished(tour.departure_date)) return false
 
   const siblings = selectableFamilySiblings(tour, catalog)
   const hasSuffixedClone = siblings.some((other) => isSuffixedDatedCode(other.trip_code))

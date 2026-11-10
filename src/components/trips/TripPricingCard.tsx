@@ -5,6 +5,8 @@ import { isOneDayTrip, tourDestination, tourDurationLabel } from '../../lib/tour
 import { formatAud, formatDate, getUnbookableReason, isListedPriceHidden, seatsRemaining } from '../../lib/toursApi'
 import { isPremiumTrip } from '../../data/tripTiers'
 import SplitFlapPrice from '../ui/SplitFlapPrice'
+import DepartureCountdown from './DepartureCountdown'
+import SeatPeople from './SeatPeople'
 import TripBookButton from './TripBookButton'
 import AfterpayAcceptedBadge from './AfterpayAcceptedBadge'
 import LuxuryUpgradeCard from './LuxuryUpgradeCard'
@@ -15,18 +17,18 @@ type Props = {
   displayPriceAud: number
 }
 
-const AVATAR_COLORS = ['bg-teal-600', 'bg-teal-700', 'bg-coral', 'bg-teal-800']
+const TILE = 'group rounded-[10px] px-1 py-2 text-center transition duration-200 hover:-translate-y-0.5 hover:shadow-md active:translate-y-0 active:scale-95'
 
 const ONE_DAY_FEATURE_ICONS = [
-  { icon: Car, en: 'Route pickup', th: 'รถรับ–ส่งตามเส้นทาง' },
-  { icon: MapPin, en: 'Thai Town / Starbucks', th: 'นัดพบ Thai Town / Starbucks' },
-  { icon: Camera, en: 'Photographer', th: 'ช่างภาพ' },
+  { icon: Car, en: 'Route pickup', th: 'รถรับ–ส่งตามเส้นทาง', tone: 'bg-teal-800 text-cream hover:bg-teal-700' },
+  { icon: MapPin, en: 'Thai Town / Starbucks', th: 'นัดพบ Thai Town / Starbucks', tone: 'bg-coral text-cream hover:bg-coral/90' },
+  { icon: Camera, en: 'Photographer', th: 'ช่างภาพ', tone: 'bg-mint-100 text-teal-800 hover:bg-teal-800 hover:text-cream' },
 ] as const
 
 const TRAVEL_FEATURE_ICONS = [
-  { icon: Plane, en: 'Flight help', th: 'ช่วยจองบิน' },
-  { icon: BedDouble, en: 'Stay included', th: 'รวมที่พัก' },
-  { icon: Camera, en: 'Photographer', th: 'ช่างภาพ' },
+  { icon: Plane, en: 'Flight help', th: 'ช่วยจองบิน', tone: 'bg-teal-800 text-cream hover:bg-teal-700' },
+  { icon: BedDouble, en: 'Stay included', th: 'รวมที่พัก', tone: 'bg-coral text-cream hover:bg-coral/90' },
+  { icon: Camera, en: 'Photographer', th: 'ช่างภาพ', tone: 'bg-mint-100 text-teal-800 hover:bg-teal-800 hover:text-cream' },
 ] as const
 
 export default function TripPricingCard({
@@ -37,8 +39,6 @@ export default function TripPricingCard({
   const { lang } = useLang()
   const seats = seatsRemaining(tour)
   const oneDay = isOneDayTrip(tour.trip_code)
-  const booked = Math.min(tour.booked_seats, 4)
-  const more = Math.max(0, tour.booked_seats - 4)
   const icons = oneDay ? ONE_DAY_FEATURE_ICONS : TRAVEL_FEATURE_ICONS
   const cancelled = getUnbookableReason(tour) === 'cancelled'
   const priceHidden = isListedPriceHidden(tour)
@@ -102,10 +102,10 @@ export default function TripPricingCard({
       </div>
 
       <div className="mt-4 grid grid-cols-3 gap-2">
-        {icons.map(({ icon: Icon, en, th }) => (
-          <div key={en} className="rounded-[10px] bg-mint-100 px-1 py-2 text-center">
-            <Icon className="mx-auto h-4 w-4 text-teal-800" strokeWidth={2} />
-            <span className="mt-1 block text-[9px] font-bold leading-snug text-teal-800">
+        {icons.map(({ icon: Icon, en, th, tone }) => (
+          <div key={en} className={`${TILE} ${tone}`}>
+            <Icon className="mx-auto h-4 w-4 transition duration-200 group-hover:scale-110" strokeWidth={2} />
+            <span className="mt-1 block text-[9px] font-bold leading-snug">
               {lang === 'th' ? th : en}
             </span>
           </div>
@@ -127,6 +127,7 @@ export default function TripPricingCard({
                 ? ' — สอบถามวันเดินทาง'
                 : ' — inquire for dates'}
           </p>
+          <DepartureCountdown date={tour.departure_date} lang={lang} className="mt-2" />
           <p>
             📍{' '}
             {oneDay
@@ -153,21 +154,7 @@ export default function TripPricingCard({
               </span>
             )}
           </span>
-          <div className="flex -space-x-2">
-            {Array.from({ length: Math.max(booked, 1) }).map((_, i) => (
-              <span
-                key={i}
-                className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold text-cream ring-2 ring-cream ${AVATAR_COLORS[i % AVATAR_COLORS.length]}`}
-              >
-                {String.fromCharCode(65 + i)}
-              </span>
-            ))}
-            {more > 0 && (
-              <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-900 text-[10px] font-bold text-cream ring-2 ring-cream">
-                +{more}
-              </span>
-            )}
-          </div>
+          <SeatPeople maxSeats={tour.max_seats} bookedSeats={tour.booked_seats} />
         </div>
         {oneDay && (
           <p className="mt-2 flex items-center gap-1.5 text-[10px] font-semibold text-teal-800">
