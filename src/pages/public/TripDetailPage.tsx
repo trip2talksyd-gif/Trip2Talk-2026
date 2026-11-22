@@ -16,6 +16,7 @@ import {
   XCircle,
 } from 'lucide-react'
 import { countdownFinished } from '../../lib/departureCountdown'
+import PhotoScopeCard from '../../components/public/PhotoScopeCard'
 import { useLang } from '../../hooks/useLang'
 import { useIsFavorite, useToggleFavorite } from '../../hooks/useFavorites'
 import {
@@ -209,6 +210,8 @@ export default function TripDetailPage() {
           {favorited ? `${favRemove.en} / ${favRemove.th}` : `${favAdd.en} / ${favAdd.th}`}
         </button>
       </div>
+
+      <PhotoScopeCard />
 
       <div className="-mx-4 overflow-hidden sm:-mx-6 md:mx-0 md:rounded-2xl">
         <div className="relative">

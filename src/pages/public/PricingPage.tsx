@@ -13,6 +13,7 @@ import SquareAcceptedPaymentIcons, {
 } from '../../components/booking/SquareAcceptedPaymentIcons'
 import { BUSINESS_ENTITY, PAYID_OPTIONS } from '../../data/paymentDetails'
 import { preferSquareCardCheckout } from '../../lib/preferredPayment'
+import { photoDeliveryLine } from '../../data/photoScopePolicy'
 
 const TIERS = [
   {
@@ -415,6 +416,24 @@ export default function PricingPage() {
                   <Link to="/terms#missed-flight" className="mt-1 block text-teal-700 underline">
                     See Missed Flight Policy
                     <span className="mt-0.5 block font-thai text-[12px]">อ่านนโยบาย</span>
+                  </Link>
+                </td>
+              </tr>
+              <tr className="border-t border-line">
+                <td className="px-3 py-2 font-medium text-ink">
+                  Photography scope
+                  <span className="mt-0.5 block font-thai text-[12px] font-normal text-ink-soft">
+                    ขอบเขตการถ่ายภาพในทริป
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-ink-soft">
+                  {photoDeliveryLine('en')}
+                  <span className="mt-0.5 block font-thai text-[12px] text-ink-soft/90">
+                    {photoDeliveryLine('th')}
+                  </span>
+                  <Link to="/terms#photo-scope" className="mt-1 block text-teal-700 underline">
+                    See Photography Scope
+                    <span className="mt-0.5 block font-thai text-[12px]">อ่านขอบเขต</span>
                   </Link>
                 </td>
               </tr>
