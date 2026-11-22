@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   createBookingFlight,
@@ -21,6 +21,9 @@ import { useToast } from '../ui/Toast'
 import { StaffButton, StaffField, StaffInput } from './staffUi'
 
 const TZ_OPTIONS = ['Australia/Sydney', 'Australia/Melbourne', 'Pacific/Auckland', 'UTC']
+
+const flightActionClass =
+  '!border !border-solid !border-white/55 !bg-white/10 !text-cream hover:!bg-white/20'
 
 type Draft = {
   leg: FlightLeg
@@ -52,6 +55,10 @@ const EMPTY: Draft = {
   arrive_tz: 'Pacific/Auckland',
   pnr: '',
   staff_note: '',
+}
+
+function iataCode(raw: string): string {
+  return raw.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3)
 }
 
 function draftFromFlight(row: BookingFlight): Draft {
@@ -92,13 +99,25 @@ export default function BookingFlightsPanel({
   const [targetId, setTargetId] = useState<string | null>(null)
   const [draft, setDraft] = useState<Draft>(EMPTY)
   const [busy, setBusy] = useState(false)
+  const [loadError, setLoadError] = useState(false)
   const [feeOffer, setFeeOffer] = useState<'' | 'customer' | 'trip2talk'>('')
+  const formRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const node = formRef.current
+    if (!node) return
+    node.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    node.querySelector<HTMLElement>('select:not([disabled]), input:not([disabled])')?.focus()
+  }, [open, draft.leg, mode])
 
   const load = useCallback(async () => {
     try {
       setRows(await listBookingFlights(bookingId))
+      setLoadError(false)
     } catch (err) {
       if (err instanceof StaffSessionExpiredError) onSessionExpired?.()
+      else setLoadError(true)
     }
   }, [bookingId, onSessionExpired])
 
@@ -129,8 +148,8 @@ export default function BookingFlightsPanel({
         booked_by: draft.booked_by,
         airline: draft.airline.trim(),
         flight_no: draft.flight_no.toUpperCase().replace(/\s+/g, ''),
-        from_airport: draft.from_airport.trim(),
-        to_airport: draft.to_airport.trim(),
+        from_airport: iataCode(draft.from_airport),
+        to_airport: iataCode(draft.to_airport),
         depart_at: zonedLocalToIso(draft.depart_local, draft.depart_tz),
         arrive_at: zonedLocalToIso(draft.arrive_local, draft.arrive_tz),
         depart_tz: draft.depart_tz,
@@ -163,19 +182,6 @@ export default function BookingFlightsPanel({
     }
   }
 
-  async function markMissed(row: BookingFlight) {
-    setBusy(true)
-    try {
-      await updateBookingFlight(row.id, { status: 'missed' })
-      await load()
-    } catch (err) {
-      if (err instanceof StaffSessionExpiredError) onSessionExpired?.()
-      else toast('Could not mark missed', 'error')
-    } finally {
-      setBusy(false)
-    }
-  }
-
   const feeHref = `/app/payments?q=${encodeURIComponent(bookingReference || bookingId.slice(0, 8))}&fee=1`
 
   return (
@@ -183,6 +189,14 @@ export default function BookingFlightsPanel({
       <p className="text-[10px] font-semibold uppercase tracking-wider text-gold">
         Flights <span className="font-thai normal-case tracking-normal">/ เที่ยวบิน</span>
       </p>
+      {loadError && (
+        <div className="rounded-lg border border-coral/40 px-2 py-1.5 text-[11px] text-cream">
+          <p>Could not load flights / โหลดเที่ยวบินไม่สำเร็จ</p>
+          <StaffButton type="button" variant="ghost" className={flightActionClass} onClick={() => void load()}>
+            Retry / ลองอีกครั้ง
+          </StaffButton>
+        </div>
+      )}
       {feeOffer === 'customer' && canEdit && (
         <Link to={feeHref} className="block text-[11px] text-gold underline">
           Add change fee / เพิ่มค่าเปลี่ยนตั๋ว
@@ -208,12 +222,17 @@ export default function BookingFlightsPanel({
             <div className="flex items-center justify-between gap-2">
               <p className="text-cream-muted">{leg === 'outbound' ? 'Outbound / ขาไป' : 'Return / ขากลับ'}</p>
               {canEdit && (
-                <StaffButton type="button" variant="ghost" onClick={() => { setDraft({ ...EMPTY, leg }); setMode('add'); setTargetId(null); setOpen(true) }}>
+                <StaffButton
+                  type="button"
+                  variant="ghost"
+                  className={flightActionClass}
+                  onClick={() => { setDraft({ ...EMPTY, leg }); setMode('add'); setTargetId(null); setOpen(true) }}
+                >
                   Add flight / เพิ่มเที่ยวบิน
                 </StaffButton>
               )}
             </div>
-            {!current && history.length === 0 && (
+            {!loadError && !current && history.length === 0 && (
               <p className="mt-1 text-cream-muted">No flight / ยังไม่มีเที่ยวบิน</p>
             )}
             {current?.status === 'rebooked' && (
@@ -239,11 +258,8 @@ export default function BookingFlightsPanel({
             )}
             {canEdit && current && (
               <div className="mt-1 flex flex-wrap gap-1">
-                <StaffButton type="button" variant="ghost" onClick={() => startEdit(current)}>Edit / แก้ไข</StaffButton>
-                <StaffButton type="button" variant="ghost" disabled={busy} onClick={() => void markMissed(current)}>
-                  Mark missed / ตกเครื่อง
-                </StaffButton>
-                <StaffButton type="button" variant="ghost" onClick={() => startRebook(current)}>
+                <StaffButton type="button" variant="ghost" className={flightActionClass} onClick={() => startEdit(current)}>Edit / แก้ไข</StaffButton>
+                <StaffButton type="button" variant="ghost" className={flightActionClass} onClick={() => startRebook(current)}>
                   Rebook / จองเที่ยวใหม่
                 </StaffButton>
               </div>
@@ -260,11 +276,8 @@ export default function BookingFlightsPanel({
                 </ul>
               </details>
             )}
-          </div>
-        )
-      })}
-      {open && (
-        <div className="grid gap-2 rounded-lg border border-white/10 p-2">
+            {open && draft.leg === leg && (
+        <div ref={formRef} className="mt-2 grid gap-2 rounded-lg border border-white/10 p-2">
           <StaffField label="Leg / ขา">
             <select
               value={draft.leg}
@@ -313,10 +326,18 @@ export default function BookingFlightsPanel({
             />
           </StaffField>
           <StaffField label="From / ต้นทาง">
-            <StaffInput value={draft.from_airport} onChange={(e) => setDraft({ ...draft, from_airport: e.target.value })} />
+            <StaffInput
+              value={draft.from_airport}
+              onChange={(e) => setDraft({ ...draft, from_airport: iataCode(e.target.value) })}
+            />
+            <span className="mt-0.5 block text-[10px] text-cream-muted">IATA 3 letters e.g. SYD / ZQN</span>
           </StaffField>
           <StaffField label="To / ปลายทาง">
-            <StaffInput value={draft.to_airport} onChange={(e) => setDraft({ ...draft, to_airport: e.target.value })} />
+            <StaffInput
+              value={draft.to_airport}
+              onChange={(e) => setDraft({ ...draft, to_airport: iataCode(e.target.value) })}
+            />
+            <span className="mt-0.5 block text-[10px] text-cream-muted">IATA 3 letters e.g. SYD / ZQN</span>
           </StaffField>
           <StaffField label="Depart local / เวลาออก">
             <StaffInput type="datetime-local" value={draft.depart_local} onChange={(e) => setDraft({ ...draft, depart_local: e.target.value })} />
@@ -356,12 +377,15 @@ export default function BookingFlightsPanel({
             <StaffButton type="button" disabled={busy} onClick={() => void save()}>
               {mode === 'rebook' ? 'Save rebook' : 'Save'}
             </StaffButton>
-            <StaffButton type="button" variant="ghost" onClick={() => setOpen(false)}>
+            <StaffButton type="button" variant="ghost" className={flightActionClass} onClick={() => setOpen(false)}>
               Cancel
             </StaffButton>
           </div>
         </div>
-      )}
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
