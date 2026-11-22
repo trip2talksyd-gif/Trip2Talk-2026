@@ -18,6 +18,7 @@ import {
   deleteTour,
   fetchConfirmedTours,
   fetchBookingsForTour,
+  listFlightsForTour,
   fetchToursAdmin,
   listWaiversForTour,
   markAttendance,
@@ -36,6 +37,8 @@ import CancelBookingDialog from '../../components/app/CancelBookingDialog'
 import ArchiveTourDialog from '../../components/app/ArchiveTourDialog'
 import StaffFilledWaiverBadge from '../../components/app/StaffFilledWaiverBadge'
 import TripDaySafetyQuickView from '../../components/app/TripDaySafetyQuickView'
+import BookingFlightsPanel from '../../components/app/BookingFlightsPanel'
+import type { BookingFlight } from '../../lib/bookingFlights'
 import TripCheckinsPanel from '../../components/app/TripCheckinsPanel'
 import PaymentReconciliationBanner from '../../components/app/PaymentReconciliationBanner'
 import StaffOpsSummary from '../../components/app/StaffOpsSummary'
@@ -116,6 +119,7 @@ export default function StaffDashboard() {
   const [tours, setTours] = useState<Tour[]>([])
   const [selected, setSelected] = useState<Tour | null>(null)
   const [manifest, setManifest] = useState<TourBooking[]>([])
+  const [flights, setFlights] = useState<BookingFlight[]>([])
   const [waivers, setWaivers] = useState<WaiverSignature[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -268,10 +272,15 @@ export default function StaffDashboard() {
       setWaivers([])
       return
     }
-    Promise.all([fetchBookingsForTour(selected.id), listWaiversForTour(selected.trip_code)])
-      .then(([bookings, w]) => {
+    Promise.all([
+      fetchBookingsForTour(selected.id),
+      listWaiversForTour(selected.trip_code),
+      listFlightsForTour(selected.id).catch(() => [] as BookingFlight[]),
+    ])
+      .then(([bookings, w, flightRows]) => {
         setManifest(bookings)
         setWaivers(w)
+        setFlights(flightRows)
       })
       .catch((err) => {
         if (err instanceof StaffSessionExpiredError) {
@@ -501,7 +510,10 @@ export default function StaffDashboard() {
               </div>
             </div>
             <div className="mt-4 rounded-2xl border border-amber/30 bg-amber/5 p-3">
-              <TripDaySafetyQuickView bookings={manifest.filter((b) => !isBookingCancelled(b))} />
+              <TripDaySafetyQuickView
+                bookings={manifest.filter((b) => !isBookingCancelled(b))}
+                flights={flights}
+              />
             </div>
             <div className="mt-3 rounded-2xl border border-gold/30 bg-gold/5 p-3">
               <TripCheckinsPanel
@@ -669,6 +681,13 @@ export default function StaffDashboard() {
                       </div>
                       {!cancelled ? (
                         <div className="mt-2 border-t border-white/8 pt-2">
+                          <BookingFlightsPanel
+                            bookingId={b.id}
+                            bookingReference={b.booking_reference}
+                            canEdit={canCancel}
+                            onSessionExpired={() => navigate('/app')}
+                          />
+                          <div className="mt-2">
                           <BookingExtensionQuotes
                             bookingId={b.id}
                             travelDate={b.travel_date}
@@ -683,6 +702,7 @@ export default function StaffDashboard() {
                               void fetchBookingsForTour(selected.id).then(setManifest).catch(() => {})
                             }}
                           />
+                          </div>
                         </div>
                       ) : null}
                     </li>

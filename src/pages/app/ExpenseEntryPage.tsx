@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import { fetchToursAdmin, formatAud, insertExpense } from '../../lib/toursApi'
 import { StaffSessionExpiredError } from '../../lib/supabaseStaff'
@@ -67,11 +67,12 @@ function gstFromAmount(amount: string): string {
 
 export default function ExpenseEntryPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { toast } = useToast()
 
   const [mode, setMode] = useState<EntryMode>('single')
   const [amount, setAmount] = useState('')
-  const [vendorName, setVendorName] = useState('')
+  const [vendorName, setVendorName] = useState(searchParams.get('vendor') ?? '')
   const [atoCategory, setAtoCategory] = useState<string>(ATO_CATEGORIES[0])
   const [hasGst, setHasGst] = useState(true)
   const [gstAmount, setGstAmount] = useState('')

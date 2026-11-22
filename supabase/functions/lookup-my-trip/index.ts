@@ -22,6 +22,47 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+type CustomerFlightRow = {
+  id: string
+  leg: string
+  airline: string
+  flight_no: string
+  from_airport: string
+  to_airport: string
+  depart_at: string
+  arrive_at: string
+  depart_tz: string
+  arrive_tz: string
+  status: string
+  created_at: string
+}
+
+function currentCustomerFlights(rows: CustomerFlightRow[]) {
+  const current: CustomerFlightRow[] = []
+  for (const leg of ['outbound', 'return'] as const) {
+    const live = rows
+      .filter((row) => row.leg === leg && row.status !== 'missed' && row.status !== 'cancelled')
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+    const pick = live[live.length - 1]
+    if (!pick) continue
+    current.push({
+      id: pick.id,
+      leg: pick.leg,
+      airline: pick.airline,
+      flight_no: pick.flight_no,
+      from_airport: pick.from_airport,
+      to_airport: pick.to_airport,
+      depart_at: pick.depart_at,
+      arrive_at: pick.arrive_at,
+      depart_tz: pick.depart_tz,
+      arrive_tz: pick.arrive_tz,
+      status: pick.status,
+      created_at: pick.created_at,
+    })
+  }
+  return current
+}
+
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
@@ -72,7 +113,7 @@ Deno.serve(async (req) => {
     const { data: byReference, error: refError } = await admin
       .from('tour_bookings')
       .select(
-        'booking_reference, trip_code, booking_status, payment_method, amount_paid_aud, booked_at, first_name_en, last_name_en, email, phone, tour_id',
+        'id, booking_reference, trip_code, booking_status, payment_method, amount_paid_aud, booked_at, first_name_en, last_name_en, email, phone, tour_id, flight_booking_requested',
       )
       .ilike('booking_reference', refNorm)
       .limit(5)
@@ -85,7 +126,7 @@ Deno.serve(async (req) => {
       const { data: byCode, error: codeError } = await admin
         .from('tour_bookings')
         .select(
-          'booking_reference, trip_code, booking_status, payment_method, amount_paid_aud, booked_at, first_name_en, last_name_en, email, phone, tour_id',
+          'id, booking_reference, trip_code, booking_status, payment_method, amount_paid_aud, booked_at, first_name_en, last_name_en, email, phone, tour_id, flight_booking_requested',
         )
         .ilike('trip_code', refNorm)
         .order('booked_at', { ascending: false })
@@ -121,6 +162,20 @@ Deno.serve(async (req) => {
     if (tourError) throw tourError
     if (!tour) return json({ found: false })
 
+    const { data: flightRows, error: flightError } = await admin
+      .from('booking_flights_customer')
+      .select(
+        'id, leg, airline, flight_no, from_airport, to_airport, depart_at, arrive_at, depart_tz, arrive_tz, status, created_at',
+      )
+      .eq('booking_id', booking.id)
+      .order('created_at', { ascending: true })
+    if (flightError) {
+      const code = (flightError as { code?: string }).code
+      if (code !== '42P01' && code !== 'PGRST205') throw flightError
+    }
+
+    const flights = currentCustomerFlights(flightRows ?? [])
+
     const t = tour as Record<string, unknown>
     const departure =
       (typeof t.departure_date === 'string' ? t.departure_date : null) ??
@@ -144,6 +199,8 @@ Deno.serve(async (req) => {
         departure_date: departure,
         price_aud: price,
         deposit_aud: deposit,
+        flight_booking_requested: Boolean(booking.flight_booking_requested),
+        flights,
       },
     })
   } catch (err) {

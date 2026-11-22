@@ -1,11 +1,20 @@
 import { useMemo, useState } from 'react'
 import { Phone } from 'lucide-react'
 import type { TourBooking } from '../../types/tour'
+import { tripIncludesFlights } from '../../data/missedFlightPolicy'
+import {
+  flightSheetLine,
+  flightsForBooking,
+  formatFlightLocal,
+  legPairs,
+  type BookingFlight,
+} from '../../lib/bookingFlights'
 import { hasHealthInfo } from '../../lib/healthText'
 import { useLang } from '../../hooks/useLang'
 
 type Props = {
   bookings: TourBooking[]
+  flights?: BookingFlight[]
   /** Optional trip filter — when empty, show all (caller usually pre-filters by tour). */
   tripFilter?: string
   onTripFilterChange?: (tripCode: string) => void
@@ -39,6 +48,7 @@ function insuranceLine(b: TourBooking): string {
 /** Compact trip-day cards: tap-to-call emergency + color-coded warnings. */
 export default function TripDaySafetyQuickView({
   bookings,
+  flights = [],
   tripFilter = '',
   onTripFilterChange,
   tripOptions,
@@ -125,6 +135,15 @@ export default function TripDaySafetyQuickView({
                       {b.first_name_en} {b.last_name_en}
                     </p>
                     <p className="text-[10px] text-cream-muted">{b.trip_code}</p>
+                    {tripIncludesFlights(b.trip_code) && (
+                      <p className="text-[10px] text-cream">
+                        {b.flight_policy_ack_at ? '✅' : '❌'} Policy
+                        <span className="font-thai">
+                          {' '}
+                          {b.flight_policy_ack_at ? 'ยอมรับนโยบายแล้ว' : 'ยังไม่ยอมรับนโยบาย'}
+                        </span>
+                      </p>
+                    )}
                   </div>
                   {(hasAllergy || hasMedical) && (
                     <span className="shrink-0 rounded-full bg-coral px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-cream">
@@ -173,6 +192,34 @@ export default function TripDaySafetyQuickView({
                       {b.other_notes}
                     </p>
                   )}
+                  {legPairs(flightsForBooking(flights, b.id)).map(({ leg, current, previous }) => (
+                    <div key={leg}>
+                      <p>
+                        <span className="text-cream-muted">
+                          {leg === 'outbound' ? 'Outbound · ขาไป: ' : 'Return · ขากลับ: '}
+                        </span>
+                        {current ? flightSheetLine(current) : '—'}
+                      </p>
+                      {current && (
+                        <p className="text-[10px] text-cream-muted">
+                          {formatFlightLocal(current.depart_at, current.depart_tz)} {current.from_airport} →{' '}
+                          {formatFlightLocal(current.arrive_at, current.arrive_tz)} {current.to_airport}
+                        </p>
+                      )}
+                      {current?.status === 'rebooked' && (
+                        <p>
+                          <span className="rounded-full bg-amber px-2 py-0.5 text-[9px] font-bold uppercase text-near-black-green">
+                            Rebooked / เปลี่ยนเที่ยวบิน
+                          </span>
+                        </p>
+                      )}
+                      {previous && (
+                        <p className="text-[10px] text-cream-muted line-through">
+                          {flightSheetLine(previous)}
+                        </p>
+                      )}
+                    </div>
+                  ))}
                   {b.flight_booking_requested && (
                     <p className="text-gold">
                       Flight assist requested · ขอให้จองตั๋วบิน

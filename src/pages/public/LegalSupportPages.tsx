@@ -6,6 +6,7 @@ import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
 import BiText from '../../components/ui/BiText'
 import { FACEBOOK_MESSENGER_URL, FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import { CANCELLATION_POLICY } from '../../data/risks'
+import { MISSED_FLIGHT_POLICY } from '../../data/missedFlightPolicy'
 import { useState } from 'react'
 
 export function TermsPage() {
@@ -58,6 +59,19 @@ export function TermsPage() {
         <Link to="/cancellation" className="inline-block text-teal-700 underline">
           {lang === 'th' ? 'นโยบายยกเลิก →' : 'Cancellation policy →'}
         </Link>
+      </section>
+
+      <section id="missed-flight" className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">{MISSED_FLIGHT_POLICY.en.title}</h2>
+        {MISSED_FLIGHT_POLICY.en.paragraphs.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
+        <h3 className="font-thai text-base text-ink">{MISSED_FLIGHT_POLICY.th.title}</h3>
+        {MISSED_FLIGHT_POLICY.th.paragraphs.map((paragraph) => (
+          <p key={paragraph} className="font-thai text-ink-soft">
+            {paragraph}
+          </p>
+        ))}
       </section>
 
       <section className="space-y-3">

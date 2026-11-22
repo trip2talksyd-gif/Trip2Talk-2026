@@ -13,6 +13,7 @@ import SafetyTravelFields, {
 import SquareCardElement from '../../components/booking/SquareCardElement'
 import StandardLuxuryToggle from '../../components/trips/StandardLuxuryToggle'
 import type { StayTier } from '../../data/luxuryStay'
+import { POLICY_VERSION, tripIncludesFlights } from '../../data/missedFlightPolicy'
 import {
   fetchTourByCode,
   formatAud,
@@ -108,6 +109,8 @@ export default function BookingPage() {
   const [payIdAmountKind, setPayIdAmountKind] = useState<'deposit' | 'custom'>('deposit')
   const [payIdCustomRaw, setPayIdCustomRaw] = useState('')
   const [stayTier, setStayTier] = useState<StayTier>('standard')
+  const [policyAck, setPolicyAck] = useState(false)
+  const [policyError, setPolicyError] = useState('')
 
   const [form, setForm] = useState<FormState>({
     first_name_en: '',
@@ -216,6 +219,16 @@ export default function BookingPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setTouched(true)
+    const needsPolicy = tour ? tripIncludesFlights(tour.trip_code, tour.trip_type) : false
+    if (needsPolicy && !policyAck) {
+      setPolicyError(
+        lang === 'th'
+          ? 'กรุณายอมรับนโยบายกรณีตกเครื่องก่อนจอง'
+          : 'Please accept the Missed Flight Policy before booking.',
+      )
+      return
+    }
+    setPolicyError('')
     if (!tour || !isValid) {
       toast(
         lang === 'th'
@@ -289,6 +302,8 @@ export default function BookingPage() {
         flight_frequent_flyer_number: form.flight_booking_requested
           ? form.flight_frequent_flyer_number.trim() || null
           : null,
+        flight_policy_ack_at: needsPolicy ? new Date().toISOString() : null,
+        flight_policy_version: needsPolicy ? POLICY_VERSION : null,
         waiver_signed: false,
         waiver_signed_at: null,
         booking_status: 'pending_payment',
@@ -784,6 +799,28 @@ export default function BookingPage() {
           }}
         />
       )}
+
+      {tour && tripIncludesFlights(tour.trip_code, tour.trip_type) && (
+        <label className="flex items-start gap-2 rounded-xl border border-line bg-white p-3 text-sm text-ink">
+          <input
+            type="checkbox"
+            checked={policyAck}
+            onChange={(e) => {
+              setPolicyAck(e.target.checked)
+              if (e.target.checked) setPolicyError('')
+            }}
+            className="mt-1"
+          />
+          <span>
+            <span className="font-thai">ฉันอ่านและยอมรับนโยบายกรณีตกเครื่องแล้ว</span>
+            {' / I have read and accept the '}
+            <Link to="/terms#missed-flight" className="text-teal-700 underline" target="_blank">
+              Missed Flight Policy
+            </Link>
+          </span>
+        </label>
+      )}
+      {policyError && <p className="text-sm text-coral">{policyError}</p>}
 
       {/* Sticky Pay Deposit bar — mockup's white bar with top hairline above the CTA */}
       {!squareCardReady && (
