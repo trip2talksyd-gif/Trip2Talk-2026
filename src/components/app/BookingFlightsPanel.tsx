@@ -12,6 +12,7 @@ import {
   formatFlightLocal,
   historyFlights,
   isoToZonedLocal,
+  iataCode,
   zonedLocalToIso,
   type BookingFlight,
   type FlightLeg,
@@ -55,10 +56,6 @@ const EMPTY: Draft = {
   arrive_tz: 'Pacific/Auckland',
   pnr: '',
   staff_note: '',
-}
-
-function iataCode(raw: string): string {
-  return raw.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3)
 }
 
 function draftFromFlight(row: BookingFlight): Draft {
@@ -122,8 +119,22 @@ export default function BookingFlightsPanel({
   }, [bookingId, onSessionExpired])
 
   useEffect(() => {
-    void load()
-  }, [load])
+    let cancelled = false
+    listBookingFlights(bookingId)
+      .then((next) => {
+        if (cancelled) return
+        setRows(next)
+        setLoadError(false)
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return
+        if (err instanceof StaffSessionExpiredError) onSessionExpired?.()
+        else setLoadError(true)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [bookingId, onSessionExpired])
 
   function startEdit(row: BookingFlight) {
     setMode('edit')

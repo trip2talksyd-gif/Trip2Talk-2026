@@ -1,0 +1,42 @@
+-- DRAFT TEMPLATE. Do not run until every [PLACEHOLDER] is replaced.
+-- Prod only: bljhnelgmkulxwuhedbi. One customer, one old flight id.
+
+-- select id, status, leg, flight_no
+-- from public.booking_flights
+-- where booking_id = '[BOOKING_ID]';
+
+-- select public.rebook_booking_flight(
+--   '[OLD_FLIGHT_ID]'::uuid,
+--   '[MISSED_REASON]',          -- customer | airline | trip2talk | other
+--   '[AIRLINE]',
+--   '[NEW_FLIGHT_NO]',
+--   '[FROM_AIRPORT]',           -- IATA, e.g. SYD
+--   '[TO_AIRPORT]',             -- IATA, e.g. ZQN
+--   '[DEPART_AT]'::timestamptz,
+--   '[ARRIVE_AT]'::timestamptz, -- must be after DEPART_AT
+--   '[DEPART_TZ]',              -- e.g. Australia/Sydney
+--   '[ARRIVE_TZ]',              -- e.g. Pacific/Auckland
+--   '[PNR]',
+--   '[STAFF_NOTE]',
+--   '[STAFF_ID]'::uuid,
+--   '[BOOKED_BY]'               -- customer | trip2talk
+-- );
+
+-- If the customer pays the change fee, record it on booking_payments
+-- (not on booking_flights). Fill installment_no with the next number for that booking.
+--
+-- insert into public.booking_payments (
+--   booking_id, installment_no, amount_aud, label, status, paid_at, recorded_by_staff_id
+-- ) values (
+--   '[BOOKING_ID]'::uuid,
+--   [NEXT_INSTALLMENT_NO],
+--   [FEE_AUD],
+--   'Flight change fee / ค่าเปลี่ยนเที่ยวบิน',
+--   'paid',
+--   now(),
+--   '[STAFF_ID]'::uuid
+-- );
+
+-- If Trip2Talk is at fault, do not insert a customer payment.
+-- Record an expense in the staff expense screen instead, vendor:
+-- Flight change fee (Trip2Talk error)
