@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Trash2 } from 'lucide-react'
 import {
   addPendingInstallment,
@@ -54,17 +54,20 @@ export default function StaffPaymentsPage() {
   const { tt } = useLang()
   const { toast } = useToast()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const staffRole = sessionStorage.getItem('staff_role') ?? ''
   const canDeleteInstallment = CAN_DELETE_INSTALLMENT.has(staffRole)
 
-  const [query, setQuery] = useState('')
+  const [query, setQuery] = useState(searchParams.get('q') ?? '')
   const [rows, setRows] = useState<CustomerPaymentSearchRow[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const [addAmount, setAddAmount] = useState('')
-  const [addLabel, setAddLabel] = useState('')
+  const [addLabel, setAddLabel] = useState(
+    searchParams.get('fee') === '1' ? 'Flight change fee / ค่าเปลี่ยนเที่ยวบิน' : '',
+  )
   const [addDue, setAddDue] = useState('')
   const [busyId, setBusyId] = useState<string | null>(null)
   const [pendingDelete, setPendingDelete] = useState<{

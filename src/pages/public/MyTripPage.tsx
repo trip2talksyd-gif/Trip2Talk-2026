@@ -5,6 +5,8 @@ import { useLang } from '../../hooks/useLang'
 import { FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import BookingJourneyTimeline from '../../components/booking/BookingJourneyTimeline'
 import { lookupMyTrip, type MyTripLookupResult } from '../../lib/toursApi'
+import { airportCity, flightSheetLine, formatFlightLocal } from '../../lib/bookingFlights'
+import { AIRPORT_ARRIVAL_REMINDER } from '../../data/missedFlightPolicy'
 import { isValidEmail } from '../../lib/validation'
 import type { BookingStatus } from '../../types/tour'
 import SplitFlapPrice from '../../components/ui/SplitFlapPrice'
@@ -213,6 +215,47 @@ export default function MyTripPage() {
                 </dd>
               </div>
             </dl>
+
+            {(booking.flights?.length ?? 0) > 0 ? (
+              <div className="mt-4">
+                <p className="text-[10px] font-medium uppercase tracking-wider text-ink-soft">
+                  Flights
+                  <span lang="th" className="ml-2 font-thai normal-case tracking-normal">
+                    เที่ยวบิน
+                  </span>
+                </p>
+                <ul className="mt-2 space-y-2 text-sm text-ink">
+                  {booking.flights?.map((flight) => (
+                    <li key={flight.id}>
+                      <span className="text-ink-soft">
+                        {flight.leg === 'outbound' ? 'Outbound / ขาไป' : 'Return / ขากลับ'}
+                      </span>
+                      <span className="mt-0.5 block">{flightSheetLine(flight)}</span>
+                      <span className="block text-xs text-ink-soft">
+                        {formatFlightLocal(flight.depart_at, flight.depart_tz)} {airportCity(flight.from_airport)}
+                        {' → '}
+                        {formatFlightLocal(flight.arrive_at, flight.arrive_tz)} {airportCity(flight.to_airport)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : booking.flight_booking_requested ? (
+              <p className="mt-4 text-sm text-ink">
+                We&apos;re booking your flights
+                <span lang="th" className="mt-0.5 block font-thai text-ink-soft">
+                  ทีมกำลังจองตั๋วให้
+                </span>
+              </p>
+            ) : null}
+            {(booking.flights?.length || booking.flight_booking_requested) && (
+              <p className="mt-3 text-sm text-ink">
+                {AIRPORT_ARRIVAL_REMINDER.en}
+                <span lang="th" className="mt-1 block font-thai text-ink-soft">
+                  {AIRPORT_ARRIVAL_REMINDER.th}
+                </span>
+              </p>
+            )}
 
             <Link
               to={`/trips/${booking.trip_code}`}

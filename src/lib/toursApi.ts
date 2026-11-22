@@ -1,3 +1,4 @@
+import type { BookingFlight, BookingFlightWrite, CustomerFlight, FlightStatus } from './bookingFlights'
 import { countdownFinished } from './departureCountdown'
 import { occurrencesInYear } from './expenseRecurrence'
 import { compressUploadImage } from './compressUploadImage'
@@ -748,6 +749,8 @@ export type MyTripBookingSummary = {
   departure_date: string | null
   price_aud: number
   deposit_aud: number
+  flight_booking_requested?: boolean
+  flights?: CustomerFlight[]
 }
 
 export type MyTripLookupResult = {
@@ -1439,6 +1442,32 @@ export async function fetchInsuranceAlerts(): Promise<InsuranceAlert[]> {
 
 /** Fixes a typo'd name/phone/email on an existing booking. Does not touch
  * payment amounts, status, or seat counts. Pass only the fields to change. */
+export async function listBookingFlights(bookingId: string): Promise<BookingFlight[]> {
+  return callStaffApi<BookingFlight[]>('list_booking_flights', { booking_id: bookingId })
+}
+
+export async function listFlightsForTour(tourId: string): Promise<BookingFlight[]> {
+  return callStaffApi<BookingFlight[]>('list_flights_for_tour', { tour_id: tourId })
+}
+
+export async function createBookingFlight(input: BookingFlightWrite): Promise<BookingFlight> {
+  return callStaffApi<BookingFlight>('create_booking_flight', input)
+}
+
+export async function updateBookingFlight(
+  id: string,
+  patch: Partial<BookingFlightWrite> & { status?: FlightStatus },
+): Promise<BookingFlight> {
+  return callStaffApi<BookingFlight>('update_booking_flight', { id, ...patch })
+}
+
+export async function rebookBookingFlight(
+  id: string,
+  input: BookingFlightWrite & { missed_reason: 'customer' | 'airline' | 'trip2talk' | 'other' },
+): Promise<BookingFlight> {
+  return callStaffApi<BookingFlight>('rebook_booking_flight', { id, ...input })
+}
+
 export async function updateBookingDetails(
   id: string,
   fields: {

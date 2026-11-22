@@ -400,6 +400,24 @@ export default function PricingPage() {
                   </tr>
                 )
               })}
+              <tr className="border-t border-line">
+                <td className="px-3 py-2 font-medium text-ink">
+                  Missed flight
+                  <span className="mt-0.5 block font-thai text-[12px] font-normal text-ink-soft">
+                    ตกเครื่อง
+                  </span>
+                </td>
+                <td className="px-3 py-2 text-ink-soft">
+                  Customer pays change fee / new ticket — no refund for missed days
+                  <span className="mt-0.5 block font-thai text-[12px] text-ink-soft/90">
+                    ลูกค้ารับผิดชอบค่าเปลี่ยนตั๋ว ไม่คืนเงินวันที่พลาด
+                  </span>
+                  <Link to="/terms#missed-flight" className="mt-1 block text-teal-700 underline">
+                    See Missed Flight Policy
+                    <span className="mt-0.5 block font-thai text-[12px]">อ่านนโยบาย</span>
+                  </Link>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>

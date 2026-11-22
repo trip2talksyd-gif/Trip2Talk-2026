@@ -1124,6 +1124,91 @@ export type Database = {
           },
         ]
       }
+      booking_flights: {
+        Row: {
+          airline: string
+          arrive_at: string
+          arrive_tz: string
+          booking_id: string
+          created_at: string
+          depart_at: string
+          depart_tz: string
+          flight_no: string
+          from_airport: string
+          id: string
+          leg: string
+          pnr: string | null
+          replaces_flight_id: string | null
+          staff_note: string | null
+          status: string
+          to_airport: string
+          updated_at: string
+          updated_by_staff_id: string | null
+        }
+        Insert: {
+          airline: string
+          arrive_at: string
+          arrive_tz: string
+          booking_id: string
+          created_at?: string
+          depart_at: string
+          depart_tz: string
+          flight_no: string
+          from_airport: string
+          id?: string
+          leg: string
+          pnr?: string | null
+          replaces_flight_id?: string | null
+          staff_note?: string | null
+          status?: string
+          to_airport: string
+          updated_at?: string
+          updated_by_staff_id?: string | null
+        }
+        Update: {
+          airline?: string
+          arrive_at?: string
+          arrive_tz?: string
+          booking_id?: string
+          created_at?: string
+          depart_at?: string
+          depart_tz?: string
+          flight_no?: string
+          from_airport?: string
+          id?: string
+          leg?: string
+          pnr?: string | null
+          replaces_flight_id?: string | null
+          staff_note?: string | null
+          status?: string
+          to_airport?: string
+          updated_at?: string
+          updated_by_staff_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_flights_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "tour_bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_flights_replaces_flight_id_fkey"
+            columns: ["replaces_flight_id"]
+            isOneToOne: false
+            referencedRelation: "booking_flights"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "booking_flights_updated_by_staff_id_fkey"
+            columns: ["updated_by_staff_id"]
+            isOneToOne: false
+            referencedRelation: "staff_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trip_extension_quotes: {
         Row: {
           booking_id: string
@@ -1416,6 +1501,25 @@ export type Database = {
       }
     }
     Views: {
+      booking_flights_customer: {
+        Row: {
+          airline: string | null
+          arrive_at: string | null
+          arrive_tz: string | null
+          booking_id: string | null
+          created_at: string | null
+          depart_at: string | null
+          depart_tz: string | null
+          flight_no: string | null
+          from_airport: string | null
+          id: string | null
+          leg: string | null
+          replaces_flight_id: string | null
+          status: string | null
+          to_airport: string | null
+        }
+        Relationships: []
+      }
       trip_waitlist: {
         Row: {
           contacted: boolean | null
@@ -1465,6 +1569,44 @@ export type Database = {
       }
     }
     Functions: {
+      rebook_booking_flight: {
+        Args: {
+          p_missed_reason: string
+          p_booked_by: string
+          p_airline: string
+          p_arrive_at: string
+          p_arrive_tz: string
+          p_depart_at: string
+          p_depart_tz: string
+          p_flight_no: string
+          p_from_airport: string
+          p_old_id: string
+          p_pnr: string | null
+          p_staff_id: string | null
+          p_staff_note: string | null
+          p_to_airport: string
+        }
+        Returns: {
+          airline: string
+          arrive_at: string
+          arrive_tz: string
+          booking_id: string
+          created_at: string
+          depart_at: string
+          depart_tz: string
+          flight_no: string
+          from_airport: string
+          id: string
+          leg: string
+          pnr: string | null
+          replaces_flight_id: string | null
+          staff_note: string | null
+          status: string
+          to_airport: string
+          updated_at: string
+          updated_by_staff_id: string | null
+        }
+      }
       apply_extension_quote_payment: {
         Args: {
           p_amount_cents: number

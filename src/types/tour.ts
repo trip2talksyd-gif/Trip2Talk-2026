@@ -92,6 +92,8 @@ export interface TourBooking {
   flight_passport_number?: string | null
   flight_nationality?: string | null
   flight_frequent_flyer_number?: string | null
+  flight_policy_ack_at?: string | null
+  flight_policy_version?: string | null
   waiver_signed: boolean
   waiver_signed_at: string | null
   /** Day-of check-in, separate from payment status. null/undefined = not checked yet. */

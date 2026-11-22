@@ -518,6 +518,11 @@ const ACTION_ROLES: Record<string, Role[]> = {
   delete_payment_installment: ['OWNER', 'MANAGER'],
   installment_income_summary: ['OWNER'],
   update_booking_details: ['OWNER', 'MANAGER', 'CASHIER'],
+  list_booking_flights: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  list_flights_for_tour: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
+  create_booking_flight: ['OWNER', 'MANAGER', 'CASHIER'],
+  update_booking_flight: ['OWNER', 'MANAGER', 'CASHIER'],
+  rebook_booking_flight: ['OWNER', 'MANAGER', 'CASHIER'],
   cancel_booking: ['OWNER', 'MANAGER', 'CASHIER'],
   create_waiver_staff_assisted: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
   list_waivers_for_tour: ['OWNER', 'MANAGER', 'GUIDE', 'CASHIER'],
@@ -606,6 +611,120 @@ function buildTourInsert(
   }
 
   return row
+}
+
+type FlightWrite = {
+  booking_id: string
+  leg: 'outbound' | 'return'
+  booked_by: 'customer' | 'trip2talk'
+  airline: string
+  flight_no: string
+  from_airport: string
+  to_airport: string
+  depart_at: string
+  arrive_at: string
+  depart_tz: string
+  arrive_tz: string
+  pnr: string | null
+  staff_note: string | null
+}
+
+function staffIdFromSession(session: { staff_id?: string | null }): string | null {
+  return typeof session.staff_id === 'string' && session.staff_id ? session.staff_id : null
+}
+
+function parseFlightFields(
+  params: Record<string, unknown>,
+  required: boolean,
+): { ok: true; value: Partial<FlightWrite> } | { ok: false; error: string; message: string } {
+  const value: Partial<FlightWrite> = {}
+  const text = (key: keyof FlightWrite, max: number) => {
+    if (params[key] === undefined) return
+    value[key] = String(params[key] ?? '').trim().slice(0, max) as never
+  }
+  if (params.leg !== undefined || required) {
+    const leg = String(params.leg ?? '')
+    if (leg !== 'outbound' && leg !== 'return') {
+      return { ok: false, error: 'invalid_leg', message: 'Leg must be outbound or return. / ขาต้องเป็นขาไปหรือขากลับ' }
+    }
+    value.leg = leg
+  }
+  if (params.booked_by !== undefined || required) {
+    const bookedBy = String(params.booked_by ?? '')
+    if (bookedBy !== 'customer' && bookedBy !== 'trip2talk') {
+      return { ok: false, error: 'invalid_booked_by', message: 'Choose who booked the flight. / เลือกว่าใครจองตั๋ว' }
+    }
+    value.booked_by = bookedBy
+  }
+  if (params.booking_id !== undefined || required) {
+    const bookingId = String(params.booking_id ?? '').trim()
+    if (!bookingId) return { ok: false, error: 'invalid_params', message: 'Missing booking. / ไม่พบการจอง' }
+    value.booking_id = bookingId
+  }
+  text('airline', 80)
+  text('flight_no', 12)
+  text('from_airport', 8)
+  text('to_airport', 8)
+  text('depart_tz', 64)
+  text('arrive_tz', 64)
+  if (params.depart_at !== undefined || required) {
+    const depart = String(params.depart_at ?? '')
+    if (!depart || Number.isNaN(Date.parse(depart))) {
+      return { ok: false, error: 'invalid_depart', message: 'Departure time is invalid. / เวลาออกไม่ถูกต้อง' }
+    }
+    value.depart_at = new Date(depart).toISOString()
+  }
+  if (params.arrive_at !== undefined || required) {
+    const arrive = String(params.arrive_at ?? '')
+    if (!arrive || Number.isNaN(Date.parse(arrive))) {
+      return { ok: false, error: 'invalid_arrive', message: 'Arrival time is invalid. / เวลาถึงไม่ถูกต้อง' }
+    }
+    value.arrive_at = new Date(arrive).toISOString()
+  }
+  if (params.pnr !== undefined) {
+    const pnr = String(params.pnr ?? '').trim()
+    value.pnr = pnr ? pnr.toUpperCase().slice(0, 12) : null
+  }
+  if (params.staff_note !== undefined) {
+    const note = String(params.staff_note ?? '').trim()
+    value.staff_note = note ? note.slice(0, 500) : null
+  }
+  if (value.flight_no) value.flight_no = value.flight_no.toUpperCase().replace(/\s+/g, '')
+  if (value.from_airport) value.from_airport = value.from_airport.toUpperCase()
+  if (value.to_airport) value.to_airport = value.to_airport.toUpperCase()
+  if (value.from_airport && !/^[A-Z]{3}$/.test(value.from_airport)) {
+    return { ok: false, error: 'invalid_iata', message: 'Airport code must be 3 letters (e.g. SYD). / รหัสสนามบินต้องเป็น 3 ตัวอักษร (เช่น SYD)' }
+  }
+  if (value.to_airport && !/^[A-Z]{3}$/.test(value.to_airport)) {
+    return { ok: false, error: 'invalid_iata', message: 'Airport code must be 3 letters (e.g. SYD). / รหัสสนามบินต้องเป็น 3 ตัวอักษร (เช่น SYD)' }
+  }
+  if (value.flight_no && !/^[A-Z0-9]{2,10}$/.test(value.flight_no)) {
+    return { ok: false, error: 'invalid_flight_no', message: 'Flight number must be letters and digits with no spaces. / เลขเที่ยวบินต้องเป็นตัวอักษรและตัวเลข ไม่มีช่องว่าง' }
+  }
+  if (value.depart_at && value.arrive_at && Date.parse(value.arrive_at) <= Date.parse(value.depart_at)) {
+    return {
+      ok: false,
+      error: 'arrive_before_depart',
+      message: 'Arrival must be after departure. / เวลาถึงต้องหลังเวลาออก',
+    }
+  }
+  if (required) {
+    if (!value.airline || !value.flight_no || !value.from_airport || !value.to_airport) {
+      return { ok: false, error: 'invalid_params', message: 'Airline, flight number and airports are required. / ต้องมีสายการบิน เลขเที่ยว และสนามบิน' }
+    }
+    if (!value.depart_tz || !value.arrive_tz) {
+      return { ok: false, error: 'invalid_tz', message: 'Timezone is required. / ต้องระบุเขตเวลา' }
+    }
+  }
+  return { ok: true, value }
+}
+
+function parseFlightWrite(
+  params: Record<string, unknown>,
+): { ok: true; value: FlightWrite } | { ok: false; error: string; message: string } {
+  const parsed = parseFlightFields(params, true)
+  if (!parsed.ok) return parsed
+  return { ok: true, value: parsed.value as FlightWrite }
 }
 
 Deno.serve(async (req) => {
@@ -2525,6 +2644,133 @@ Deno.serve(async (req) => {
             range: { start: startIso, end: endIso, mode: mode ?? 'year', year: y, month },
           },
         })
+      }
+
+      case 'list_booking_flights': {
+        const bookingId = String((params as { booking_id?: string }).booking_id ?? '')
+        if (!bookingId) return json({ error: 'invalid_params' }, 400)
+        const { data, error } = await admin
+          .from('booking_flights')
+          .select('*')
+          .eq('booking_id', bookingId)
+          .order('created_at', { ascending: true })
+        if (error) throw error
+        return json({ data: data ?? [] })
+      }
+
+      case 'list_flights_for_tour': {
+        const tourId = String((params as { tour_id?: string }).tour_id ?? '')
+        if (!tourId) return json({ error: 'invalid_params' }, 400)
+        const { data: bookings, error: bookingErr } = await admin
+          .from('tour_bookings')
+          .select('id')
+          .eq('tour_id', tourId)
+        if (bookingErr) throw bookingErr
+        const ids = (bookings ?? []).map((row) => row.id)
+        if (ids.length === 0) return json({ data: [] })
+        const { data, error } = await admin
+          .from('booking_flights')
+          .select('*')
+          .in('booking_id', ids)
+          .order('created_at', { ascending: true })
+        if (error) throw error
+        return json({ data: data ?? [] })
+      }
+
+      case 'create_booking_flight': {
+        const parsed = parseFlightWrite(params)
+        if (!parsed.ok) return json({ error: parsed.error, message: parsed.message }, 400)
+        const staffId = staffIdFromSession(session)
+        const { data, error } = await admin
+          .from('booking_flights')
+          .insert({
+            ...parsed.value,
+            status: 'scheduled',
+            replaces_flight_id: null,
+            updated_by_staff_id: staffId,
+          })
+          .select('*')
+          .single()
+        if (error) throw error
+        return json({ data })
+      }
+
+      case 'update_booking_flight': {
+        const id = String((params as { id?: string }).id ?? '')
+        if (!id) return json({ error: 'invalid_params' }, 400)
+        const status = (params as { status?: string }).status
+        if (
+          status !== undefined &&
+          !['scheduled', 'missed', 'rebooked', 'cancelled'].includes(status)
+        ) {
+          return json({ error: 'invalid_status' }, 400)
+        }
+        const patch: Record<string, unknown> = {
+          updated_at: new Date().toISOString(),
+          updated_by_staff_id: staffIdFromSession(session),
+        }
+        if (status !== undefined) patch.status = status
+        const note = (params as { staff_note?: string | null }).staff_note
+        if (note !== undefined) patch.staff_note = note?.trim() ? note.trim().slice(0, 500) : null
+        const pnr = (params as { pnr?: string | null }).pnr
+        if (pnr !== undefined) patch.pnr = pnr?.trim() ? pnr.trim().toUpperCase().slice(0, 12) : null
+        const fields = parseFlightFields(params, false)
+        if (!fields.ok) return json({ error: fields.error, message: fields.message }, 400)
+        Object.assign(patch, fields.value)
+        if (Object.keys(patch).length <= 2 && status === undefined && note === undefined && pnr === undefined) {
+          return json({ error: 'invalid_params' }, 400)
+        }
+        const { data, error } = await admin
+          .from('booking_flights')
+          .update(patch)
+          .eq('id', id)
+          .select('*')
+          .maybeSingle()
+        if (error) throw error
+        if (!data) return json({ error: 'not_found' }, 404)
+        return json({ data })
+      }
+
+      case 'rebook_booking_flight': {
+        const id = String((params as { id?: string }).id ?? '')
+        if (!id) return json({ error: 'invalid_params' }, 400)
+        const parsed = parseFlightWrite(params)
+        if (!parsed.ok) return json({ error: parsed.error, message: parsed.message }, 400)
+        const staffId = staffIdFromSession(session)
+        const missedReason = String((params as { missed_reason?: string }).missed_reason ?? '')
+        if (!['customer', 'airline', 'trip2talk', 'other'].includes(missedReason)) {
+          return json({
+            error: 'invalid_missed_reason',
+            message: 'Choose why the flight was missed. / เลือกสาเหตุที่ตกเครื่อง',
+          }, 400)
+        }
+        const { data, error } = await admin.rpc('rebook_booking_flight', {
+          p_old_id: id,
+          p_missed_reason: missedReason,
+          p_booked_by: parsed.value.booked_by,
+          p_airline: parsed.value.airline,
+          p_flight_no: parsed.value.flight_no,
+          p_from_airport: parsed.value.from_airport,
+          p_to_airport: parsed.value.to_airport,
+          p_depart_at: parsed.value.depart_at,
+          p_arrive_at: parsed.value.arrive_at,
+          p_depart_tz: parsed.value.depart_tz,
+          p_arrive_tz: parsed.value.arrive_tz,
+          p_pnr: parsed.value.pnr,
+          p_staff_note: parsed.value.staff_note,
+          p_staff_id: staffId,
+        })
+        if (error) {
+          if (error.message?.includes('not_found')) return json({ error: 'not_found' }, 404)
+          if (error.message?.includes('flight_already_closed')) {
+            return json({
+              error: 'flight_already_closed',
+              message: 'เที่ยวบินนี้ถูกเปลี่ยนไปแล้ว / This flight was already rebooked or cancelled',
+            }, 400)
+          }
+          throw error
+        }
+        return json({ data })
       }
 
       case 'update_booking_details': {
