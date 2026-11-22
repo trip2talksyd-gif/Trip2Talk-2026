@@ -201,6 +201,46 @@ export function isoToZonedLocal(iso: string, timeZone: string): string {
   return `${bag.year}-${bag.month}-${bag.day}T${hour}:${bag.minute}`
 }
 
-export function flightRoute(row: Pick<BookingFlight, 'airline' | 'flight_no' | 'from_airport' | 'to_airport'>): string {
-  return `${row.airline} ${row.flight_no} ${row.from_airport}→${row.to_airport}`
+export function iataCode(raw: string): string {
+  return raw.toUpperCase().replace(/[^A-Z]/g, '').slice(0, 3)
 }
+
+export function arriveAfterDepart(departIso: string, arriveIso: string): boolean {
+  const depart = Date.parse(departIso)
+  const arrive = Date.parse(arriveIso)
+  return Number.isFinite(depart) && Number.isFinite(arrive) && arrive > depart
+}
+
+/** Matches rebook_booking_flight: only scheduled or rebooked rows can be replaced. */
+export function canRebookFlight(status: string): boolean {
+  return status === 'scheduled' || status === 'rebooked'
+}
+
+const CUSTOMER_FLIGHT_KEYS = [
+  'id',
+  'leg',
+  'airline',
+  'flight_no',
+  'from_airport',
+  'to_airport',
+  'depart_at',
+  'arrive_at',
+  'depart_tz',
+  'arrive_tz',
+  'status',
+  'created_at',
+] as const
+
+/** Shape lookup-my-trip may return. Drops staff-only columns. */
+export function customerFlightPayload(row: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {}
+  for (const key of CUSTOMER_FLIGHT_KEYS) {
+    if (key in row) out[key] = row[key]
+  }
+  return out
+}
+
+export function showNoFlightMessage(loadFailed: boolean, hasFlight: boolean): boolean {
+  return !loadFailed && !hasFlight
+}
+
