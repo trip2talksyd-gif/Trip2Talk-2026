@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Frown } from 'lucide-react'
 import { useParams } from 'react-router-dom'
 import { useLang } from '../../hooks/useLang'
 import { getTripCheckinInfo, submitTripCheckin, type TripCheckinInfo } from '../../lib/toursApi'
@@ -159,8 +160,11 @@ export default function TripCheckinPage() {
           : { en: 'Could not load this page. Please try again.', th: 'โหลดหน้านี้ไม่สำเร็จ กรุณาลองใหม่' }
     return (
       <div className="mx-auto max-w-md py-16 text-center">
-        <p className="text-ink">{msg.en}</p>
-        <p className="mt-1 font-thai text-sm text-ink-soft">{msg.th}</p>
+        {state === 'closed' ? (
+          <Frown className="mx-auto mb-4 h-16 w-16 text-orange" strokeWidth={1.5} aria-hidden />
+        ) : null}
+        <p className="text-lg font-medium text-ink">{msg.en}</p>
+        <p className="mt-1 font-thai text-base text-ink-soft">{msg.th}</p>
       </div>
     )
   }
