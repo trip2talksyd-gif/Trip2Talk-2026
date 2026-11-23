@@ -1,5 +1,16 @@
 import { Link } from 'react-router-dom'
-import { Check, CreditCard } from 'lucide-react'
+import {
+  ArrowLeftRight,
+  Ban,
+  CalendarCheck,
+  Camera,
+  Check,
+  CloudRain,
+  CreditCard,
+  Plane,
+  Users,
+  type LucideIcon,
+} from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
 import type { TranslationKey } from '../../i18n/translations'
 import BiDisplayHeading from '../../components/ui/BiDisplayHeading'
@@ -39,6 +50,17 @@ const TIERS = [
 const CHECK_SUFFIXES = ['check.1', 'check.2', 'check.3', 'check.4'] as const
 
 const CANCEL_RULES = [1, 2, 3, 4, 5] as const
+
+const CANCEL_RULE_MARK: Record<
+  (typeof CANCEL_RULES)[number],
+  { Icon: LucideIcon; className: string }
+> = {
+  1: { Icon: CalendarCheck, className: 'text-teal-700' },
+  2: { Icon: ArrowLeftRight, className: 'text-amber-700' },
+  3: { Icon: Ban, className: 'text-red-700' },
+  4: { Icon: CloudRain, className: 'text-sky-700' },
+  5: { Icon: Users, className: 'text-amber-700' },
+}
 
 /** Compressed Vercel copy only — never Storage VDO/NZ/NZ02.mp4. */
 const PRICING_HERO_VIDEO = getTripCoverVideoUrl('NZ') ?? '/trip-videos/NZ02_web.mp4'
@@ -384,12 +406,18 @@ export default function PricingPage() {
               {CANCEL_RULES.map((n) => {
                 const condition = tt(`pricing.cancel.rule.${n}.condition` as TranslationKey)
                 const outcome = tt(`pricing.cancel.rule.${n}.outcome` as TranslationKey)
+                const { Icon, className } = CANCEL_RULE_MARK[n]
                 return (
                   <tr key={n} className="border-t border-line">
                     <td className="px-3 py-2 font-medium text-ink">
-                      {condition.en}
-                      <span className="mt-0.5 block font-thai text-[12px] font-normal text-ink-soft">
-                        {condition.th}
+                      <span className="flex items-start gap-2">
+                        <Icon className={`mt-0.5 h-4 w-4 shrink-0 ${className}`} aria-hidden />
+                        <span>
+                          {condition.en}
+                          <span className="mt-0.5 block font-thai text-[12px] font-normal text-ink-soft">
+                            {condition.th}
+                          </span>
+                        </span>
                       </span>
                     </td>
                     <td className="px-3 py-2 text-ink-soft">
@@ -403,9 +431,14 @@ export default function PricingPage() {
               })}
               <tr className="border-t border-line">
                 <td className="px-3 py-2 font-medium text-ink">
-                  Missed flight
-                  <span className="mt-0.5 block font-thai text-[12px] font-normal text-ink-soft">
-                    ตกเครื่อง
+                  <span className="flex items-start gap-2">
+                    <Plane className="mt-0.5 h-4 w-4 shrink-0 text-red-700" aria-hidden />
+                    <span>
+                      Missed flight
+                      <span className="mt-0.5 block font-thai text-[12px] font-normal text-ink-soft">
+                        ตกเครื่อง
+                      </span>
+                    </span>
                   </span>
                 </td>
                 <td className="px-3 py-2 text-ink-soft">
@@ -421,9 +454,14 @@ export default function PricingPage() {
               </tr>
               <tr className="border-t border-line">
                 <td className="px-3 py-2 font-medium text-ink">
-                  Photography scope
-                  <span className="mt-0.5 block font-thai text-[12px] font-normal text-ink-soft">
-                    ขอบเขตการถ่ายภาพในทริป
+                  <span className="flex items-start gap-2">
+                    <Camera className="mt-0.5 h-4 w-4 shrink-0 text-teal-700" aria-hidden />
+                    <span>
+                      Photography scope
+                      <span className="mt-0.5 block font-thai text-[12px] font-normal text-ink-soft">
+                        ขอบเขตการถ่ายภาพในทริป
+                      </span>
+                    </span>
                   </span>
                 </td>
                 <td className="px-3 py-2 text-ink-soft">
