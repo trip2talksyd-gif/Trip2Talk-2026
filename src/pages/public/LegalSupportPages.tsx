@@ -7,6 +7,7 @@ import BiText from '../../components/ui/BiText'
 import { FACEBOOK_MESSENGER_URL, FACEBOOK_PAGE_URL } from '../../data/contactChannels'
 import { CANCELLATION_POLICY } from '../../data/risks'
 import { MISSED_FLIGHT_POLICY } from '../../data/missedFlightPolicy'
+import { PHOTO_SCOPE_POLICY, photoDeliveryLine } from '../../data/photoScopePolicy'
 import { useState } from 'react'
 
 export function TermsPage() {
@@ -72,6 +73,21 @@ export function TermsPage() {
             {paragraph}
           </p>
         ))}
+      </section>
+
+      <section id="photo-scope" className="space-y-3">
+        <h2 className="font-serif text-lg text-ink">{PHOTO_SCOPE_POLICY.en.title}</h2>
+        {PHOTO_SCOPE_POLICY.en.paragraphs.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
+        <p>{photoDeliveryLine('en')}</p>
+        <h3 className="font-thai text-base text-ink">{PHOTO_SCOPE_POLICY.th.title}</h3>
+        {PHOTO_SCOPE_POLICY.th.paragraphs.map((paragraph) => (
+          <p key={paragraph} className="font-thai text-ink-soft">
+            {paragraph}
+          </p>
+        ))}
+        <p className="font-thai text-ink-soft">{photoDeliveryLine('th')}</p>
       </section>
 
       <section className="space-y-3">

@@ -14,6 +14,7 @@ import SquareCardElement from '../../components/booking/SquareCardElement'
 import StandardLuxuryToggle from '../../components/trips/StandardLuxuryToggle'
 import type { StayTier } from '../../data/luxuryStay'
 import { POLICY_VERSION, tripIncludesFlights } from '../../data/missedFlightPolicy'
+import { PHOTO_SCOPE_VERSION } from '../../data/photoScopePolicy'
 import {
   fetchTourByCode,
   formatAud,
@@ -111,6 +112,8 @@ export default function BookingPage() {
   const [stayTier, setStayTier] = useState<StayTier>('standard')
   const [policyAck, setPolicyAck] = useState(false)
   const [policyError, setPolicyError] = useState('')
+  const [photoScopeAck, setPhotoScopeAck] = useState(false)
+  const [photoScopeError, setPhotoScopeError] = useState('')
 
   const [form, setForm] = useState<FormState>({
     first_name_en: '',
@@ -229,6 +232,15 @@ export default function BookingPage() {
       return
     }
     setPolicyError('')
+    if (!photoScopeAck) {
+      setPhotoScopeError(
+        lang === 'th'
+          ? 'กรุณายอมรับขอบเขตการถ่ายภาพในทริปก่อนจอง'
+          : 'Please accept the Photography Scope before booking.',
+      )
+      return
+    }
+    setPhotoScopeError('')
     if (!tour || !isValid) {
       toast(
         lang === 'th'
@@ -304,6 +316,8 @@ export default function BookingPage() {
           : null,
         flight_policy_ack_at: needsPolicy ? new Date().toISOString() : null,
         flight_policy_version: needsPolicy ? POLICY_VERSION : null,
+        photo_scope_ack_at: new Date().toISOString(),
+        photo_scope_version: PHOTO_SCOPE_VERSION,
         waiver_signed: false,
         waiver_signed_at: null,
         booking_status: 'pending_payment',
@@ -821,6 +835,27 @@ export default function BookingPage() {
         </label>
       )}
       {policyError && <p className="text-sm text-coral">{policyError}</p>}
+      <label className="flex items-start gap-2 rounded-xl border border-line bg-white p-3 text-sm text-ink">
+        <input
+          type="checkbox"
+          checked={photoScopeAck}
+          onChange={(e) => {
+            setPhotoScopeAck(e.target.checked)
+            if (e.target.checked) setPhotoScopeError('')
+          }}
+          className="mt-1"
+          required
+        />
+        <span>
+          <span className="font-thai">ฉันอ่านและยอมรับขอบเขตการถ่ายภาพในทริปแล้ว</span>
+          {' / I have read and accept the '}
+          <Link to="/terms#photo-scope" className="text-teal-700 underline" target="_blank">
+            Photography Scope
+          </Link>
+          <span className="mt-1 block text-[11px] text-ink-soft">v{PHOTO_SCOPE_VERSION}</span>
+        </span>
+      </label>
+      {photoScopeError && <p className="text-sm text-coral">{photoScopeError}</p>}
 
       {/* Sticky Pay Deposit bar — mockup's white bar with top hairline above the CTA */}
       {!squareCardReady && (

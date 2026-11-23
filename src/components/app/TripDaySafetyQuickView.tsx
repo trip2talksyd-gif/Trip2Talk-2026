@@ -144,6 +144,13 @@ export default function TripDaySafetyQuickView({
                         </span>
                       </p>
                     )}
+                    <p className="text-[10px] text-cream">
+                      {b.photo_scope_ack_at ? '✅' : '❌'} Photo scope
+                      <span className="font-thai">
+                        {' '}
+                        {b.photo_scope_ack_at ? 'ยอมรับขอบเขตภาพแล้ว' : 'ยังไม่ยอมรับขอบเขตภาพ'}
+                      </span>
+                    </p>
                   </div>
                   {(hasAllergy || hasMedical) && (
                     <span className="shrink-0 rounded-full bg-coral px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-cream">
