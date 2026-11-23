@@ -59,6 +59,25 @@ function str(v: unknown, max = 500): string {
   return v.trim().slice(0, max)
 }
 
+/**
+ * Staff links use hyphens (ULU-4D3N-SEP26_29). A pasted all-underscore
+ * code (ULU_4D3N_SEP26_29) keeps the date-window underscore and hyphenates the rest.
+ */
+export function canonicalTripCode(raw: string): string {
+  const code = raw.trim()
+  if (code.includes('-')) return code
+  const parts = code.split('_').filter(Boolean)
+  if (
+    parts.length >= 3 &&
+    /^[A-Za-z]{3}\d{1,2}$/.test(parts[parts.length - 2] ?? '') &&
+    /^\d{1,2}$/.test(parts[parts.length - 1] ?? '')
+  ) {
+    const date = `${parts[parts.length - 2]}_${parts[parts.length - 1]}`
+    return `${parts.slice(0, -2).join('-')}-${date}`
+  }
+  return parts.join('-')
+}
+
 function ymd(d: Date): string {
   return d.toISOString().slice(0, 10)
 }
@@ -95,7 +114,7 @@ Deno.serve(async (req) => {
   }
 
   const action = str(body.action, 20)
-  const tripCode = str(body.trip_code, 64)
+  const tripCode = canonicalTripCode(str(body.trip_code, 64))
   if ((action !== 'info' && action !== 'submit') || !TRIP_CODE_RE.test(tripCode)) {
     return json({ error: 'invalid_request' }, 400)
   }
@@ -114,7 +133,10 @@ Deno.serve(async (req) => {
       return json({ error: 'server_error' }, 500)
     }
     const status = String(tour?.status ?? '').toLowerCase()
-    if (!tour || !tour.departure_date || status === 'archived' || status === 'cancelled') {
+    // Cancelled trips were never a real departure. Archived trips stay in the
+    // database after they leave the public catalog, so the shared link can
+    // still say check-in has closed instead of "not valid".
+    if (!tour || !tour.departure_date || status === 'cancelled') {
       return await notFoundDelay()
     }
 
