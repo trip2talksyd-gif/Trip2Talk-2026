@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { Menu, User, X } from 'lucide-react'
 import { useState } from 'react'
@@ -8,6 +9,7 @@ import AppTabBar from './AppTabBar'
 import OfflineBanner from './OfflineBanner'
 import BrandLogo from '../brand/BrandLogo'
 import ShareButton from '../ui/ShareButton'
+import PublicRouteSeo from '../seo/PublicRouteSeo'
 
 const menuLinks = [
   { to: '/', key: 'nav.home' as const },
@@ -38,6 +40,8 @@ export default function PublicLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
+    <>
+      <PublicRouteSeo />
     <div className="flex h-full max-h-full flex-col overflow-hidden bg-cream pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       <OfflineBanner />
 
@@ -167,7 +171,9 @@ export default function PublicLayout() {
 
       <div className="app-scroll" data-app-scroll>
         <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-0 pt-4 text-ink sm:px-6 lg:px-10">
-          <Outlet />
+          <Suspense fallback={null}>
+            <Outlet />
+          </Suspense>
         </main>
 
         <PublicFooter />
@@ -177,5 +183,6 @@ export default function PublicLayout() {
 
       <InstallPrompt />
     </div>
+    </>
   )
 }

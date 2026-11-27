@@ -7,6 +7,15 @@
   ],
   "headers": [
     {
+      "source": "/llms.txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; charset=utf-8"
+        }
+      ]
+    },
+    {
       "source": "/hero/(.*)",
       "headers": [
         {
@@ -45,7 +54,7 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!api/|assets/|hero/|trip-videos/|icons/|icon-|apple-touch|favicon|manifest|registerSW|sw\\.js|workbox|brand/|team/|maps/).*)",
+      "source": "/((?!api/|assets/|hero/|trip-videos/|icons/|icon-|apple-touch|favicon|manifest|registerSW|sw\\.js|workbox|brand/|team/|maps/|llms\\.txt|sitemap\\.xml|robots\\.txt).*)",
       "destination": "/index.html"
     }
   ]

@@ -1,9 +1,9 @@
 /**
  * Protects the bilingual heading contract:
  *
- * - English display type is Fraunces (`.font-display`) on its own node.
- * - Thai display type is Noto Serif Thai (`.font-serif`) on a sibling with
- *   lang="th". Nesting Thai under Fraunces corrupts vowel/tone marks.
+ * - English display type is Bricolage Grotesque (`.font-display`) on its own node.
+ * - Thai display type is Kanit (`.font-serif`) on a sibling with
+ *   lang="th". Nesting Thai under the Latin display font corrupts vowel/tone marks.
  * - Both languages stay in the DOM and visible. The EN/TH nav pill only
  *   swaps which line is primary (order + emphasis), never hides a language.
  * - Chrome strings that use t() (e.g. Book Now / จองเลย) do switch fully.
@@ -17,8 +17,8 @@ const REPLACEMENT = /\uFFFD/
 
 const COPY = {
   home: {
-    en: 'Capture Moments Worth Showing Off',
-    th: 'ออกไปเก็บภาพ ที่ทุกคนอยากดู',
+    en: 'real photographer',
+    th: 'ช่างภาพตัวจริง',
   },
   discover: { en: '101 Frames', th: '101 มุมกล้อง' },
   spots: { en: 'Photo Spots', th: 'พิกัดถ่ายภาพ' },
@@ -66,33 +66,39 @@ async function assertBiDisplayHeading(page: Page, en: string, th: string) {
   await readyFonts(page)
   const thFont = await fontFamily(thLine)
   const enFont = await fontFamily(enLine)
-  expect(thFont, `Thai font-family was: ${thFont}`).toMatch(/Noto Serif Thai/i)
-  expect(thFont, `Thai must not inherit Fraunces: ${thFont}`).not.toMatch(/Fraunces/i)
-  expect(enFont, `English font-family was: ${enFont}`).toMatch(/Fraunces/i)
+  expect(thFont, `Thai font-family was: ${thFont}`).toMatch(/Kanit/i)
+  expect(thFont, `Thai must not inherit Bricolage: ${thFont}`).not.toMatch(/Bricolage/i)
+  expect(enFont, `English font-family was: ${enFont}`).toMatch(/Bricolage/i)
 }
 
 test.describe('bilingual headings', () => {
-  test('homepage Discover h1 uses BiDisplayHeading with Noto Serif Thai (not Fraunces)', async ({
-    page,
-  }) => {
+  test('homepage hero h1 is the v7 photographer headline', async ({ page }) => {
     await page.goto('/')
     expect(new URL(page.url()).pathname).toBe('/')
-    await assertBiDisplayHeading(page, COPY.discover.en, COPY.discover.th)
+    const h1 = page.locator('h1').first()
+    await expect(h1).toBeVisible()
+    await expect(h1).toContainText(COPY.home.en)
+    await expect(h1).toContainText(COPY.home.th)
+    await readyFonts(page)
+    const thFont = await fontFamily(h1.locator('[lang="th"]'))
+    const enFont = await fontFamily(h1.locator('[lang="en"]'))
+    expect(thFont).toMatch(/Kanit/i)
+    expect(enFont).toMatch(/Bricolage/i)
   })
 
-  test('homepage no longer renders Capture Moments video intro', async ({ page }) => {
+  test('homepage no longer renders Capture Moments or the old 101 Frames hero', async ({ page }) => {
     await page.goto('/')
-    await expect(page.getByRole('heading', { name: COPY.discover.en })).toBeVisible()
-    await expect(page.getByText("We're Not a")).toBeVisible()
-    await expect(page.locator('[data-bi-heading]').filter({ hasText: COPY.home.en })).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: /real photographer/i })).toBeVisible()
+    await expect(page.getByText('Capture Moments')).toHaveCount(0)
+    await expect(page.getByRole('heading', { name: '101 Frames' })).toHaveCount(0)
   })
 
-  test('home hero Thai stays Noto Serif Thai when TH is primary', async ({ page }) => {
+  test('home hero Thai stays Kanit when TH is primary', async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('trip2talk_lang', 'th')
     })
     await page.goto('/')
-    const root = biHeading(page, COPY.discover.en, COPY.discover.th)
+    const root = page.locator('h1').first()
     await expect(root).toBeVisible()
 
     async function order(): Promise<string[]> {
@@ -104,9 +110,8 @@ test.describe('bilingual headings', () => {
     await expect.poll(order).toEqual(['th', 'en'])
     await readyFonts(page)
     const thFont = await fontFamily(root.locator('[lang="th"]'))
-    expect(thFont, `Thai font-family was: ${thFont}`).toMatch(/Noto Serif Thai/i)
-    expect(thFont, `Thai must not inherit Fraunces: ${thFont}`).not.toMatch(/Fraunces/i)
-    expect(thFont, `Thai must not inherit Geist: ${thFont}`).not.toMatch(/Geist/i)
+    expect(thFont, `Thai font-family was: ${thFont}`).toMatch(/Kanit/i)
+    expect(thFont, `Thai must not inherit Bricolage: ${thFont}`).not.toMatch(/Bricolage/i)
   })
 
   test('/spots list page keeps bilingual heading fonts', async ({ page }) => {
@@ -115,9 +120,9 @@ test.describe('bilingual headings', () => {
     await assertBiDisplayHeading(page, COPY.spots.en, COPY.spots.th)
   })
 
-  test('/discover redirects to homepage Discover content', async ({ page }) => {
+  test('/discover is its own page with the photo-spot headline', async ({ page }) => {
     await page.goto('/discover')
-    expect(new URL(page.url()).pathname).toBe('/')
+    expect(new URL(page.url()).pathname).toBe('/discover')
     await assertBiDisplayHeading(page, COPY.discover.en, COPY.discover.th)
   })
 
@@ -155,8 +160,10 @@ test.describe('bilingual headings', () => {
     page,
   }) => {
     await page.goto('/')
-    const root = biHeading(page, COPY.discover.en, COPY.discover.th)
+    const root = page.locator('h1').first()
     await expect(root).toBeVisible()
+    await expect(root).toContainText(COPY.home.en)
+    await expect(root).toContainText(COPY.home.th)
 
     const group = page.getByRole('group', { name: 'Language' })
     await expect(group).toBeVisible()
@@ -175,8 +182,8 @@ test.describe('bilingual headings', () => {
     await expect.poll(order).toEqual(['th', 'en'])
     await expect(root.locator('[lang="en"]')).toBeVisible()
     await expect(root.locator('[lang="th"]')).toBeVisible()
-    await expect(root.locator('[lang="th"]')).toHaveText(COPY.discover.th)
-    await expect(root.locator('[lang="en"]')).toHaveText(COPY.discover.en)
+    await expect(root.locator('[lang="th"]')).toContainText(COPY.home.th)
+    await expect(root.locator('[lang="en"]')).toContainText(COPY.home.en)
 
     await group.getByRole('button', { name: 'EN', exact: true }).click()
     await expect.poll(order).toEqual(['en', 'th'])

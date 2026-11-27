@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /app/
 
-Sitemap: https://trip2talk.com.au/sitemap.xml
+Sitemap: https://www.trip2talk.com.au/sitemap.xml

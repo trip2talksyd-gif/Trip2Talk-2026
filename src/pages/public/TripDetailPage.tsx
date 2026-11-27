@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -64,6 +64,11 @@ import TripTimeline from '../../components/trips/TripTimeline'
 import PremiumTripCallout from '../../components/trips/PremiumTripCallout'
 import TestimonialSection from '../../components/trips/TestimonialSection'
 import type { TranslationKey } from '../../i18n/translations'
+import SeoHead from '../../components/seo/SeoHead'
+import JsonLd from '../../components/seo/JsonLd'
+import { tripStructuredData } from '../../components/seo/structuredData'
+import { tripSeoDescription, tripSeoTitle } from '../../components/seo/tripSeo'
+import { PrerenderToursContext } from '../../prerender/sink'
 
 /** Mobile-only tabs (mockup .tab-row). On md+ every pane is shown at once. */
 type DetailTab = 'details' | 'itinerary' | 'reviews'
@@ -77,8 +82,10 @@ const TAB_KEYS: { id: DetailTab; key: TranslationKey }[] = [
 export default function TripDetailPage() {
   const { tripCode } = useParams<{ tripCode: string }>()
   const { tt, lang } = useLang()
-  const [tour, setTour] = useState<Tour | null>(null)
-  const [loading, setLoading] = useState(true)
+  const seededTours = useContext(PrerenderToursContext)
+  const seeded = seededTours?.find((tour) => tour.trip_code === tripCode) ?? null
+  const [tour, setTour] = useState<Tour | null>(seeded)
+  const [loading, setLoading] = useState(seededTours == null)
   const [error, setError] = useState('')
   const favorited = useIsFavorite(tripCode ?? '')
   const toggleFavorite = useToggleFavorite()
@@ -128,6 +135,11 @@ export default function TripDetailPage() {
   if (loading) {
     return (
       <div className="space-y-4">
+        <SeoHead
+          title="Photo Trip | Trip2Talk"
+          description="A Trip2Talk small-group photo trip."
+          path={`/trips/${tripCode ?? ''}`}
+        />
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-8 w-full" />
         <Skeleton className="h-48 w-full rounded-editorial" />
@@ -135,19 +147,62 @@ export default function TripDetailPage() {
     )
   }
 
-  if (error || !tour) {
-    return <PageError message={error || errorBi.en} />
+  if (error) {
+    return (
+      <>
+        <SeoHead
+          title="Trip not found | Trip2Talk"
+          description="This Trip2Talk trip code is not an open departure."
+          path={`/trips/${tripCode ?? ''}`}
+          noindex
+        />
+        <PageError message={error} />
+      </>
+    )
+  }
+
+  if (!tour) {
+    return (
+      <>
+        <SeoHead
+          title="Trip not found | Trip2Talk"
+          description="This Trip2Talk trip code is not an open departure."
+          path={`/trips/${tripCode ?? ''}`}
+          noindex
+        />
+        <div className="mx-auto max-w-md py-16 text-center">
+          <h1 className="font-serif text-2xl text-ink">Trip not found</h1>
+          <p lang="th" className="mt-1 font-thai text-sm text-ink-soft">
+            ไม่พบทริปนี้
+          </p>
+          <p className="mt-3 text-sm text-ink-soft">
+            {tripCode} is not an open Trip2Talk departure.
+          </p>
+          <Link to="/trips" className="btn-embossed mt-6 inline-flex">
+            {lang === 'th' ? 'ดูทริปที่เปิดรับ' : 'See open trips'}
+          </Link>
+        </div>
+      </>
+    )
   }
 
   if (countdownFinished(tour.departure_date)) {
     return (
-      <PageError
-        message={
-          lang === 'th'
-            ? 'ทริปรอบนี้ออกเดินทางแล้ว รายการจองและบัญชียังอยู่ในหลังบ้าน'
-            : 'This departure has already left. Bookings and accounts stay in the back office.'
-        }
-      />
+      <>
+        <SeoHead
+          title={`${tripSeoTitle(tour)}`}
+          description="This Trip2Talk departure has already left."
+          path={`/trips/${tour.trip_code}`}
+          noindex
+        />
+        <PageError
+          message={
+            lang === 'th'
+              ? 'ทริปรอบนี้ออกเดินทางแล้ว รายการจองและบัญชียังอยู่ในหลังบ้าน'
+              : 'This departure has already left. Bookings and accounts stay in the back office.'
+          }
+        />
+      </>
     )
   }
 
@@ -189,6 +244,13 @@ export default function TripDetailPage() {
 
   return (
     <div className="space-y-6 pb-28 md:pb-4">
+      <SeoHead
+        title={tripSeoTitle(tour)}
+        description={tripSeoDescription(tour)}
+        path={`/trips/${tour.trip_code}`}
+        image={tour.cover_image_url ?? undefined}
+      />
+      <JsonLd id="jsonld-trip" data={tripStructuredData(tour, priceHidden)} />
       <div className="hidden items-center justify-between gap-3 md:flex">
         <Link to="/trips" className="inline-flex items-center gap-1 text-sm text-teal-700">
           <ArrowLeft className="h-4 w-4" />
@@ -284,10 +346,10 @@ export default function TripDetailPage() {
             {tourDestinationLabel(tour.trip_code, 'th')}
           </span>
         </p>
-        <h1 className="mt-[3px] font-thai text-[17px] font-bold leading-snug text-ink">
+        <p className="mt-[3px] font-thai text-[17px] font-bold leading-snug text-ink">
           {tour.name_en}
           <span className="mt-px block text-[11.5px] font-medium text-ink-soft">{tour.name_th}</span>
-        </h1>
+        </p>
       </div>
 
       <TripQuickFacts tour={tour} stayTier="standard" displayPriceAud={displayPriceAud} />
@@ -369,7 +431,7 @@ export default function TripDetailPage() {
               >
                 <img
                   src={photoThumbSrc(photo, { width: 480, quality: 68, format: 'webp' })}
-                  alt={tour.name_en}
+                  alt={`${photo.caption_en} / ${photo.caption_th}`}
                   className="h-full w-full object-cover"
                   loading="lazy"
                   decoding="async"
@@ -721,14 +783,14 @@ export default function TripDetailPage() {
                   {img ? (
                     <img
                       src={img}
-                      alt={rec.name_en}
+                      alt={`${rec.name_en} / ${rec.name_th}`}
                       className="aspect-[5/3.6] w-full object-cover"
                       loading="lazy"
                     />
                   ) : (
                     <TripPhotoHero
                       tripCode={rec.trip_code}
-                      alt={rec.name_en}
+                      alt={`${rec.name_en} / ${rec.name_th}`}
                       size="card"
                       className="aspect-[5/3.6] w-full object-cover"
                     />

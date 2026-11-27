@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react'
+import { type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { ClipboardList, ExternalLink, IdCard, Info, Video } from 'lucide-react'
 import { useLang } from '../../hooks/useLang'
@@ -33,13 +33,6 @@ export default function NzVisaGuidePage() {
   const videoTitleBi = tt('photoGuide.nzVisa.videoTitle')
   const videoCreditBi = tt('photoGuide.nzVisa.videoCredit')
   const videoNoteBi = tt('photoGuide.nzVisa.videoNote')
-
-  useEffect(() => {
-    document.title = `${titleBi.en} — Trip2Talk`
-    return () => {
-      document.title = 'Trip2Talk'
-    }
-  }, [titleBi.en])
 
   return (
     <div className="space-y-6 pb-4">

@@ -184,14 +184,6 @@ export default function DiscoverPage() {
   const [feedVisible, setFeedVisible] = useState(FEED_INITIAL)
   const feedRef = useRef<HTMLElement | null>(null)
 
-  useEffect(() => {
-    document.title = 'Trip2Talk — Photo Trips in Australia'
-    const canonical = document.querySelector("link[rel='canonical']")
-    if (canonical) canonical.setAttribute('href', 'https://trip2talk.com.au/')
-    const ogUrl = document.querySelector("meta[property='og:url']")
-    if (ogUrl) ogUrl.setAttribute('content', 'https://trip2talk.com.au/')
-  }, [])
-
   const helloGuest = tt('discover.hello')
   const helloNamed = tt('discover.helloNamed')
   const headlineBi = tt('discover.headline')

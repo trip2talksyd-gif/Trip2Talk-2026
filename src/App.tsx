@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import PublicLayout from './components/layout/PublicLayout'
 import ScrollToTop from './components/layout/ScrollToTop'
@@ -9,10 +10,10 @@ import CalendarPage from './pages/public/CalendarPage'
 import GalleryPage from './pages/public/GalleryPage'
 import PricingPage from './pages/public/PricingPage'
 import AboutPage from './pages/public/AboutPage'
-import DiscoverPage from './pages/public/DiscoverPage'
+const DiscoverPage = lazy(() => import('./pages/public/DiscoverPage'))
 import HomePage from './pages/public/HomePage'
-import SpotsPage from './pages/public/SpotsPage'
-import SpotDetailPage from './pages/public/SpotDetailPage'
+const SpotsPage = lazy(() => import('./pages/public/SpotsPage'))
+const SpotDetailPage = lazy(() => import('./pages/public/SpotDetailPage'))
 import ExperiencePage from './pages/public/ExperiencePage'
 import WaiverPage from './pages/public/WaiverPage'
 import CustomerWaiverPage from './pages/public/CustomerWaiverPage'
@@ -54,14 +55,14 @@ import PhotosDeliveryPage from './pages/app/PhotosDeliveryPage'
 import RecentLoginsPage from './pages/app/RecentLoginsPage'
 import StaffPinAdminPage from './pages/app/StaffPinAdminPage'
 import SystemCheckPage from './pages/app/SystemCheckPage'
-import PhotoSpotsAdminPage from './pages/app/PhotoSpotsAdminPage'
+const PhotoSpotsAdminPage = lazy(() => import('./pages/app/PhotoSpotsAdminPage'))
 import ConfirmationSummaryPage from './pages/public/ConfirmationSummaryPage'
 import ContentReview from './pages/admin/ContentReview'
 import RequireStaffRole from './components/app/RequireStaffRole'
 
-export default function App() {
+export function AppRoutes() {
   return (
-    <BrowserRouter>
+    <Suspense fallback={null}>
       <CanonicalPathRepair />
       <ScrollToTop />
       <Routes>
@@ -271,6 +272,14 @@ export default function App() {
           }
         />
       </Routes>
+    </Suspense>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
     </BrowserRouter>
   )
 }
