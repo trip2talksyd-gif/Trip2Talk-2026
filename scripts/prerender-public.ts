@@ -66,7 +66,7 @@ async function main() {
     const unique = [...new Set([...STATIC_PATHS.filter((p) => p !== '/'), ...tripPaths, '/'])]
     for (const routePath of unique) {
       await page.goto(`${origin}${routePath}`, { waitUntil: 'domcontentloaded', timeout: 45000 })
-      await page.waitForSelector('h1', { timeout: 25000 })
+      await page.waitForSelector('h1', { timeout: 25000, state: 'attached' })
       await page.waitForTimeout(400)
       const html = await page.content()
       if (!html.includes('<h1')) throw new Error(`prerender: no h1 for ${routePath}`)

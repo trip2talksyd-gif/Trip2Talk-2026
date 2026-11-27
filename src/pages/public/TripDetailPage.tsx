@@ -343,10 +343,10 @@ export default function TripDetailPage() {
             {tourDestinationLabel(tour.trip_code, 'th')}
           </span>
         </p>
-        <h1 className="mt-[3px] font-thai text-[17px] font-bold leading-snug text-ink">
+        <p className="mt-[3px] font-thai text-[17px] font-bold leading-snug text-ink">
           {tour.name_en}
           <span className="mt-px block text-[11.5px] font-medium text-ink-soft">{tour.name_th}</span>
-        </h1>
+        </p>
       </div>
 
       <TripQuickFacts tour={tour} stayTier="standard" displayPriceAud={displayPriceAud} />
@@ -428,7 +428,7 @@ export default function TripDetailPage() {
               >
                 <img
                   src={photoThumbSrc(photo, { width: 480, quality: 68, format: 'webp' })}
-                  alt={tour.name_en}
+                  alt={`${photo.caption_en} / ${photo.caption_th}`}
                   className="h-full w-full object-cover"
                   loading="lazy"
                   decoding="async"
@@ -780,14 +780,14 @@ export default function TripDetailPage() {
                   {img ? (
                     <img
                       src={img}
-                      alt={rec.name_en}
+                      alt={`${rec.name_en} / ${rec.name_th}`}
                       className="aspect-[5/3.6] w-full object-cover"
                       loading="lazy"
                     />
                   ) : (
                     <TripPhotoHero
                       tripCode={rec.trip_code}
-                      alt={rec.name_en}
+                      alt={`${rec.name_en} / ${rec.name_th}`}
                       size="card"
                       className="aspect-[5/3.6] w-full object-cover"
                     />

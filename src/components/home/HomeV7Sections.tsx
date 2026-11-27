@@ -208,7 +208,7 @@ export function DaySection() {
               s.final ? 'border-orange/60 bg-[linear-gradient(135deg,rgba(230,147,90,.18),#122f2a_70%)]' : 'border-cream/10 bg-teal-dark'
             }`}
           >
-            <img src={s.img} alt="" loading="lazy" decoding="async" className="h-24 w-24 rounded-xl object-cover md:h-32 md:w-32" />
+            <img src={s.img} alt={`${s.title.en} / ${s.title.th}`} loading="lazy" decoding="async" className="h-24 w-24 rounded-xl object-cover md:h-32 md:w-32" />
             <div className="min-w-0">
               <p lang={lang} className={`text-[12px] tracking-[0.04em] text-orange-soft ${lang === 'th' && s.final ? 'font-serif' : 'font-mono'}`}>
                 {pick(s.time)}

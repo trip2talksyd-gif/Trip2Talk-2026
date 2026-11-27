@@ -185,7 +185,7 @@ export default function TripPickerHero({ tours }: Props) {
           >
             <TripCoverImage
               src={src}
-              alt=""
+              alt={`${tour.name_en} / ${tour.name_th}`}
               size="hero"
               className="h-full w-full object-cover"
               loading={i === 0 ? 'eager' : 'lazy'}
@@ -267,7 +267,7 @@ export default function TripPickerHero({ tours }: Props) {
                     {thumb ? (
                       <img
                         src={thumb}
-                        alt=""
+                        alt={`${tour.name_en} / ${tour.name_th}`}
                         className="h-full w-full object-cover"
                         loading="lazy"
                         decoding="async"
@@ -367,7 +367,7 @@ export default function TripPickerHero({ tours }: Props) {
                   {thumb ? (
                     <img
                       src={thumb}
-                      alt=""
+                      alt={`${tour.name_en} / ${tour.name_th}`}
                       className="h-full w-full object-cover"
                       loading="lazy"
                       decoding="async"

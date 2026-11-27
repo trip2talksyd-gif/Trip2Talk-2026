@@ -42,7 +42,7 @@ function PolaroidStack() {
           <div className="rounded-[4px] bg-cream p-1.5 pb-4 shadow-[0_10px_28px_rgba(0,0,0,0.35)]">
             <img
               src={photoThumbSrc(photo, { width: 240, quality: 68, format: 'webp' })}
-              alt=""
+              alt={`${photo.caption_en} / ${photo.caption_th}`}
               className="aspect-square w-full object-cover"
               loading="lazy"
             />

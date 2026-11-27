@@ -378,7 +378,7 @@ const HeroVideo = forwardRef<HeroVideoHandle, Props>(function HeroVideo(
     >
       <img
         src={HERO_POSTER_SRC}
-        alt=""
+        alt="Guests on a Trip2Talk photo trip at golden hour / แขกทริป Trip2Talk ในแสงช่วงเย็น"
         className={`pointer-events-none absolute inset-0 h-full max-h-full w-full max-w-full object-cover object-center transition-opacity duration-700 ${
           showPoster ? 'opacity-100' : 'opacity-0'
         }`}

@@ -41,7 +41,7 @@ export default function DestinationBoardRow({
         {coverSrc ? (
           <img
             src={coverSrc}
-            alt=""
+            alt={label}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
             loading="lazy"
           />
