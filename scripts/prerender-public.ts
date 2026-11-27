@@ -5,7 +5,7 @@
  * still boots with createRoot.
  */
 import { spawn, type ChildProcess } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { chromium } from '@playwright/test'
@@ -17,17 +17,12 @@ const origin = `http://127.0.0.1:${port}`
 
 const STATIC_PATHS = ['/', '/trips', '/pricing', '/gallery', '/calendar', '/about']
 
-/** Trip links the public /trips page actually renders (same catalog as the site). */
-async function tripPathsFromListing(page: import('@playwright/test').Page): Promise<string[]> {
-  await page.goto(`${origin}/trips`, { waitUntil: 'domcontentloaded', timeout: 45000 })
-  await page.waitForSelector('h1', { timeout: 25000 })
-  await page.waitForTimeout(1200)
-  const hrefs = await page.$$eval('a[href^="/trips/"]', (els) =>
-    els
-      .map((el) => el.getAttribute('href') ?? '')
-      .filter((href) => /^\/trips\/[^/]+$/.test(href)),
+/** Trip URLs written by generate-public-seo.mjs (active dated departures). */
+function tripPathsFromSitemap(): string[] {
+  const xml = readFileSync(path.join(root, 'public', 'sitemap.xml'), 'utf8')
+  return [...xml.matchAll(/<loc>https:\/\/www\.trip2talk\.com\.au(\/trips\/[^<]+)<\/loc>/g)].map((m) =>
+    decodeURIComponent(m[1]),
   )
-  return [...new Set(hrefs)]
 }
 
 function outFile(routePath: string): string {
@@ -66,8 +61,8 @@ async function main() {
     const page = await browser.newPage()
     await page.route('**/sw.js', (route) => route.abort())
     await page.route('**/registerSW.js', (route) => route.abort())
-    const tripPaths = await tripPathsFromListing(page)
-    if (tripPaths.length === 0) throw new Error('prerender: /trips listed no trip links')
+    const tripPaths = tripPathsFromSitemap()
+    if (tripPaths.length === 0) throw new Error('prerender: sitemap listed no trip URLs')
     const unique = [...new Set([...STATIC_PATHS.filter((p) => p !== '/'), ...tripPaths, '/'])]
     for (const routePath of unique) {
       await page.goto(`${origin}${routePath}`, { waitUntil: 'domcontentloaded', timeout: 45000 })
