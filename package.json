@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node scripts/generate-public-seo.mjs && tsc -b && vite build && npx playwright install chromium && node --experimental-strip-types scripts/prerender-public.ts",
+    "build": "node scripts/generate-public-seo.mjs && tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist/server && node scripts/prerender-ssr.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "node --experimental-strip-types --test scripts/departureCountdown.test.ts scripts/photoScopePolicy.test.ts",

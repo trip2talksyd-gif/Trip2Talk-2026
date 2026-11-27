@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import {
   ArrowLeft,
@@ -68,6 +68,7 @@ import SeoHead from '../../components/seo/SeoHead'
 import JsonLd from '../../components/seo/JsonLd'
 import { tripStructuredData } from '../../components/seo/structuredData'
 import { tripSeoDescription, tripSeoTitle } from '../../components/seo/tripSeo'
+import { PrerenderToursContext } from '../../prerender/sink'
 
 /** Mobile-only tabs (mockup .tab-row). On md+ every pane is shown at once. */
 type DetailTab = 'details' | 'itinerary' | 'reviews'
@@ -81,8 +82,10 @@ const TAB_KEYS: { id: DetailTab; key: TranslationKey }[] = [
 export default function TripDetailPage() {
   const { tripCode } = useParams<{ tripCode: string }>()
   const { tt, lang } = useLang()
-  const [tour, setTour] = useState<Tour | null>(null)
-  const [loading, setLoading] = useState(true)
+  const seededTours = useContext(PrerenderToursContext)
+  const seeded = seededTours?.find((tour) => tour.trip_code === tripCode) ?? null
+  const [tour, setTour] = useState<Tour | null>(seeded)
+  const [loading, setLoading] = useState(seededTours == null)
   const [error, setError] = useState('')
   const favorited = useIsFavorite(tripCode ?? '')
   const toggleFavorite = useToggleFavorite()

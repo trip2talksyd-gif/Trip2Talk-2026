@@ -6,7 +6,7 @@ import { useLang } from '../../hooks/useLang'
 export default function OfflineBanner() {
   const { lang } = useLang()
   const [offline, setOffline] = useState(
-    typeof navigator !== 'undefined' ? !navigator.onLine : false,
+    () => typeof window !== 'undefined' && typeof navigator !== 'undefined' && navigator.onLine === false,
   )
 
   useEffect(() => {

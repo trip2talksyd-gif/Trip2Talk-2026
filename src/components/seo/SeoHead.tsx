@@ -1,4 +1,5 @@
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
+import { HeadSinkContext } from '../../prerender/sink'
 import { DEFAULT_OG_IMAGE, canonicalUrl } from './site'
 
 export type SeoHeadProps = {
@@ -36,6 +37,15 @@ function upsertCanonical(href: string) {
 
 /** Sets document head for the current public route. Safe to mount once per page. */
 export default function SeoHead({ title, description, path, image, noindex }: SeoHeadProps) {
+  const sink = useContext(HeadSinkContext)
+  if (sink) {
+    sink.title = title
+    sink.description = description
+    sink.canonical = canonicalUrl(path)
+    sink.image = image && image.startsWith('http') ? image : DEFAULT_OG_IMAGE
+    sink.noindex = Boolean(noindex)
+  }
+
   useEffect(() => {
     const url = canonicalUrl(path)
     const ogImage = image && image.startsWith('http') ? image : DEFAULT_OG_IMAGE

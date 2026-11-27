@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { Menu, User, X } from 'lucide-react'
 import { useState } from 'react'
@@ -170,7 +171,9 @@ export default function PublicLayout() {
 
       <div className="app-scroll" data-app-scroll>
         <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 pb-0 pt-4 text-ink sm:px-6 lg:px-10">
-          <Outlet />
+          <Suspense fallback={null}>
+            <Outlet />
+          </Suspense>
         </main>
 
         <PublicFooter />
