@@ -144,7 +144,7 @@ export default function TripDetailPage() {
     )
   }
 
-  if (error || !tour) {
+  if (error) {
     return (
       <>
         <SeoHead
@@ -153,7 +153,32 @@ export default function TripDetailPage() {
           path={`/trips/${tripCode ?? ''}`}
           noindex
         />
-        <PageError message={error || errorBi.en} />
+        <PageError message={error} />
+      </>
+    )
+  }
+
+  if (!tour) {
+    return (
+      <>
+        <SeoHead
+          title="Trip not found | Trip2Talk"
+          description="This Trip2Talk trip code is not an open departure."
+          path={`/trips/${tripCode ?? ''}`}
+          noindex
+        />
+        <div className="mx-auto max-w-md py-16 text-center">
+          <h1 className="font-serif text-2xl text-ink">Trip not found</h1>
+          <p lang="th" className="mt-1 font-thai text-sm text-ink-soft">
+            ไม่พบทริปนี้
+          </p>
+          <p className="mt-3 text-sm text-ink-soft">
+            {tripCode} is not an open Trip2Talk departure.
+          </p>
+          <Link to="/trips" className="btn-embossed mt-6 inline-flex">
+            {lang === 'th' ? 'ดูทริปที่เปิดรับ' : 'See open trips'}
+          </Link>
+        </div>
       </>
     )
   }
