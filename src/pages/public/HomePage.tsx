@@ -19,6 +19,8 @@ import {
 import { useBi, useHomeTours } from '../../components/home/homeV7Hooks'
 import { HOME_HERO } from '../../data/homeContent'
 import { useLang } from '../../hooks/useLang'
+import JsonLd from '../../components/seo/JsonLd'
+import { homeStructuredData } from '../../components/seo/structuredData'
 
 function HomeHero() {
   const pick = useBi()
@@ -96,6 +98,7 @@ export default function HomePage() {
 
   return (
     <div className="bg-cream-app text-ink">
+      <JsonLd id="jsonld-home" data={homeStructuredData()} />
       <HomeHero />
       <WhySection />
       <DaySection />

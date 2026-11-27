@@ -65,6 +65,8 @@ import PremiumTripCallout from '../../components/trips/PremiumTripCallout'
 import TestimonialSection from '../../components/trips/TestimonialSection'
 import type { TranslationKey } from '../../i18n/translations'
 import SeoHead from '../../components/seo/SeoHead'
+import JsonLd from '../../components/seo/JsonLd'
+import { tripStructuredData } from '../../components/seo/structuredData'
 import { tripSeoDescription, tripSeoTitle } from '../../components/seo/tripSeo'
 
 /** Mobile-only tabs (mockup .tab-row). On md+ every pane is shown at once. */
@@ -220,6 +222,7 @@ export default function TripDetailPage() {
         path={`/trips/${tour.trip_code}`}
         image={tour.cover_image_url ?? undefined}
       />
+      <JsonLd id="jsonld-trip" data={tripStructuredData(tour, priceHidden)} />
       <div className="hidden items-center justify-between gap-3 md:flex">
         <Link to="/trips" className="inline-flex items-center gap-1 text-sm text-teal-700">
           <ArrowLeft className="h-4 w-4" />

@@ -68,7 +68,7 @@ async function main() {
     await page.route('**/registerSW.js', (route) => route.abort())
     const tripPaths = await tripPathsFromListing(page)
     if (tripPaths.length === 0) throw new Error('prerender: /trips listed no trip links')
-    const unique = [...new Set([...STATIC_PATHS, ...tripPaths])]
+    const unique = [...new Set([...STATIC_PATHS.filter((p) => p !== '/'), ...tripPaths, '/'])]
     for (const routePath of unique) {
       await page.goto(`${origin}${routePath}`, { waitUntil: 'domcontentloaded', timeout: 45000 })
       await page.waitForSelector('h1', { timeout: 25000 })
