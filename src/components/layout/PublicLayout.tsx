@@ -8,6 +8,7 @@ import AppTabBar from './AppTabBar'
 import OfflineBanner from './OfflineBanner'
 import BrandLogo from '../brand/BrandLogo'
 import ShareButton from '../ui/ShareButton'
+import PublicRouteSeo from '../seo/PublicRouteSeo'
 
 const menuLinks = [
   { to: '/', key: 'nav.home' as const },
@@ -38,6 +39,8 @@ export default function PublicLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
+    <>
+      <PublicRouteSeo />
     <div className="flex h-full max-h-full flex-col overflow-hidden bg-cream pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
       <OfflineBanner />
 
@@ -177,5 +180,6 @@ export default function PublicLayout() {
 
       <InstallPrompt />
     </div>
+    </>
   )
 }

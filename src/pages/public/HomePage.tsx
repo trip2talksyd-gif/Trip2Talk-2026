@@ -3,7 +3,6 @@
  * Approved mockup: docs/mockups/homepage-v7 (cream + deep green, mobile-first).
  * The photo-spot discovery map that used to live here is now at /discover.
  */
-import { useEffect } from 'react'
 import { Play } from 'lucide-react'
 import HeroVideo from '../../components/home/HeroVideo'
 import {
@@ -94,14 +93,6 @@ function HomeHero() {
 
 export default function HomePage() {
   const { tours, failed } = useHomeTours()
-
-  useEffect(() => {
-    document.title = 'Trip2Talk — Photo Trips with a Real Photographer'
-    const canonical = document.querySelector("link[rel='canonical']")
-    if (canonical) canonical.setAttribute('href', 'https://trip2talk.com.au/')
-    const ogUrl = document.querySelector("meta[property='og:url']")
-    if (ogUrl) ogUrl.setAttribute('content', 'https://trip2talk.com.au/')
-  }, [])
 
   return (
     <div className="bg-cream-app text-ink">

@@ -64,6 +64,8 @@ import TripTimeline from '../../components/trips/TripTimeline'
 import PremiumTripCallout from '../../components/trips/PremiumTripCallout'
 import TestimonialSection from '../../components/trips/TestimonialSection'
 import type { TranslationKey } from '../../i18n/translations'
+import SeoHead from '../../components/seo/SeoHead'
+import { tripSeoDescription, tripSeoTitle } from '../../components/seo/tripSeo'
 
 /** Mobile-only tabs (mockup .tab-row). On md+ every pane is shown at once. */
 type DetailTab = 'details' | 'itinerary' | 'reviews'
@@ -128,6 +130,11 @@ export default function TripDetailPage() {
   if (loading) {
     return (
       <div className="space-y-4">
+        <SeoHead
+          title="Photo Trip | Trip2Talk"
+          description="A Trip2Talk small-group photo trip."
+          path={`/trips/${tripCode ?? ''}`}
+        />
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-8 w-full" />
         <Skeleton className="h-48 w-full rounded-editorial" />
@@ -136,18 +143,36 @@ export default function TripDetailPage() {
   }
 
   if (error || !tour) {
-    return <PageError message={error || errorBi.en} />
+    return (
+      <>
+        <SeoHead
+          title="Trip not found | Trip2Talk"
+          description="This Trip2Talk trip code is not an open departure."
+          path={`/trips/${tripCode ?? ''}`}
+          noindex
+        />
+        <PageError message={error || errorBi.en} />
+      </>
+    )
   }
 
   if (countdownFinished(tour.departure_date)) {
     return (
-      <PageError
-        message={
-          lang === 'th'
-            ? 'ทริปรอบนี้ออกเดินทางแล้ว รายการจองและบัญชียังอยู่ในหลังบ้าน'
-            : 'This departure has already left. Bookings and accounts stay in the back office.'
-        }
-      />
+      <>
+        <SeoHead
+          title={`${tripSeoTitle(tour)}`}
+          description="This Trip2Talk departure has already left."
+          path={`/trips/${tour.trip_code}`}
+          noindex
+        />
+        <PageError
+          message={
+            lang === 'th'
+              ? 'ทริปรอบนี้ออกเดินทางแล้ว รายการจองและบัญชียังอยู่ในหลังบ้าน'
+              : 'This departure has already left. Bookings and accounts stay in the back office.'
+          }
+        />
+      </>
     )
   }
 
@@ -189,6 +214,12 @@ export default function TripDetailPage() {
 
   return (
     <div className="space-y-6 pb-28 md:pb-4">
+      <SeoHead
+        title={tripSeoTitle(tour)}
+        description={tripSeoDescription(tour)}
+        path={`/trips/${tour.trip_code}`}
+        image={tour.cover_image_url ?? undefined}
+      />
       <div className="hidden items-center justify-between gap-3 md:flex">
         <Link to="/trips" className="inline-flex items-center gap-1 text-sm text-teal-700">
           <ArrowLeft className="h-4 w-4" />
