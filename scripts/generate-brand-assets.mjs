@@ -49,8 +49,23 @@ await sharp(master512)
   .toFile(path.join(brandDir, 'trip2talk-badge.png'))
 await sharp(master512).webp({ quality: 88 }).toFile(path.join(brandDir, 'trip2talk-badge.webp'))
 
-await sharp(src)
-  .resize(1200, 1200, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 1 } })
+await sharp({
+  create: {
+    width: 1200,
+    height: 630,
+    channels: 3,
+    background: { r: 244, g: 196, b: 24 },
+  },
+})
+  .composite([
+    {
+      input: await sharp(path.join(brandDir, 'trip2talk-logo-photo-circle.png'))
+        .resize(520, 520)
+        .png()
+        .toBuffer(),
+      gravity: 'centre',
+    },
+  ])
   .jpeg({ quality: 85, mozjpeg: true })
   .toFile(path.join(brandDir, 'trip2talk-og.jpg'))
 

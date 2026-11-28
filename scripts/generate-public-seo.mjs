@@ -19,6 +19,7 @@ const STATIC = [
   { path: '/about', priority: '0.6' },
   { path: '/discover', priority: '0.5' },
   { path: '/photo-guide', priority: '0.4' },
+  { path: '/line-guide', priority: '0.4' },
 ]
 
 function sydneyToday() {

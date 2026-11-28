@@ -47,6 +47,11 @@ export const STATIC_ROUTE_META: Record<string, RouteMeta> = {
     title: 'About Trip2Talk | Sydney Photo Trips',
     description: 'Trip2Talk is a Sydney photo-trip studio. Meet the photographer and how the trips are run.',
   },
+  '/line-guide': {
+    title: 'คู่มือดูและเก็บรูปทริป | Trip2Talk',
+    description:
+      'วิธีดูอัลบั้ม LINE ของ Trip2Talk เก็บรูปลงมือถือ และขอไฟล์ต้นฉบับสำหรับพิมพ์ครับ',
+  },
   '/photo-guide': {
     title: 'Photo Guide | Trip2Talk',
     description: 'Posing, camera, and phone photo guides for Trip2Talk guests.',

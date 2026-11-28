@@ -24,6 +24,7 @@ import WaitlistPage from './pages/public/WaitlistPage'
 import FavoritesPage from './pages/public/FavoritesPage'
 import MyTripPage from './pages/public/MyTripPage'
 import AccountPage from './pages/public/AccountPage'
+import LineGuidePage from './pages/public/LineGuidePage'
 import PhotoGuideHubPage from './pages/public/PhotoGuideHubPage'
 import PosingGuidePage from './pages/public/PosingGuidePage'
 import CameraGuidePage from './pages/public/CameraGuidePage'
@@ -92,6 +93,7 @@ export function AppRoutes() {
           <Route path="favorites" element={<FavoritesPage />} />
           <Route path="my-trip" element={<MyTripPage />} />
           <Route path="account" element={<AccountPage />} />
+          <Route path="line-guide" element={<LineGuidePage />} />
           <Route path="photo-guide" element={<PhotoGuideHubPage />} />
           <Route path="photo-guide/posing" element={<PosingGuidePage />} />
           <Route path="photo-guide/camera" element={<CameraGuidePage />} />

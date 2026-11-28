@@ -9,7 +9,7 @@ import { loadEnv } from 'vite'
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const dist = path.join(root, 'dist')
-const STATIC = ['/', '/trips', '/pricing', '/gallery', '/calendar', '/about']
+const STATIC = ['/', '/trips', '/pricing', '/gallery', '/calendar', '/about', '/line-guide']
 
 function escapeAttr(value) {
   return value
